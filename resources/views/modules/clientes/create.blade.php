@@ -1,0 +1,125 @@
+@extends('layouts.main')
+
+@section('titulo', 'Nuevo Cliente')
+
+@section('content')
+<main id="main" class="main">
+
+  <!-- HEADER -->
+  <div class="pagetitle mb-4">
+    <h1 class="fw-bold">Nuevo Cliente</h1>
+    <nav>
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('usuarios') }}">Clientes</a></li>
+        <li class="breadcrumb-item active">Nuevo</li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- CONTENIDO -->
+  <section class="section">
+    <div class="row">
+      <div class="col-12">
+
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+
+            <h5 class="card-title mb-4 fw-semibold">
+              Nuevo Cliente
+            </h5>
+
+            <form action="{{ route('clientes.store') }}" id="form_disciplina" method="post">
+              @csrf
+
+              <div class="row g-3">
+
+                <!-- NOMBRES -->
+                <div class="col-12 col-sm-6">
+                  <label for="nombres" class="form-label">Nombres</label>
+                  <input required
+                    class="form-control"
+                    placeholder="Ingrese los nombre del cliente"
+                    type="text" 
+                    name="nombres"
+                    id="nombres">
+                </div>
+
+                <!-- APELLIDOS -->
+                <div class="col-12 col-sm-6">
+                  <label for="apellidos" class="form-label">Apellidos</label>
+                  <input required
+                    class="form-control"
+                    placeholder="Ingrese los apellidos del cliente"
+                    type="text" 
+                    name="apellidos"
+                    id="apellidos">
+                </div>
+
+                <!-- EMAIL -->
+                <div class="col-12">
+                  <label for="email" class="form-label">Correo</label>
+                  <input required
+                    class="form-control"
+                    placeholder="ingrese el correo del cliente"
+                    type="email" 
+                    name="email"
+                    id="email">
+                </div>
+
+                <!-- TELEFONO -->
+                <div class="col-12 col-sm-6">
+                  <label for="telefono" class="form-label">Telefono</label>
+                  <input required
+                    class="form-control"
+                    placeholder="Ingrese el telefono del cliente"
+                    type="text" 
+                    name="telefono"
+                    id="telefono">
+                </div>
+
+                <!-- DOCUMENTO -->
+                <div class="col-12 col-sm-6">
+                  <label for="documento" class="form-label">Número Documento</label>
+                  <input required
+                    class="form-control"
+                    placeholder="Ingrese el documento del cliente"
+                    type="text" 
+                    name="documento"
+                    id="documento">
+                </div>
+
+                <!-- ROL -->
+                <div class="col-12 col-sm-6">
+                  <label for="estado" class="form-label">Estado</label>
+                  <select name="estado" id="rol" class="form-select" required>
+                    <option value="" disabled selected hidden>Seleccione un estado</option>
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <!-- BOTONES -->
+              <div class="d-flex flex-column flex-sm-row gap-2 mt-4 justify-content-end">
+                <a href="{{ route('clientes') }}" class="btn btn-secondary">
+                  Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-success">
+                  Guardar usuario
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+@endsection

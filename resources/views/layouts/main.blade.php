@@ -12,11 +12,15 @@
     <!-- filepond-->
     <!-- CSS -->
     <link href="https://unpkg.com/filepond/dist/filepond.min.css" rel="stylesheet">
+    <link href="{{ asset('css/cliente-modulo.css') }}" rel="stylesheet">
 
     <!-- JS -->
     <script src="https://unpkg.com/filepond/dist/filepond.min.js"></script>
+    <!-- sweet alert para mensajes  -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Plugin preview -->
     <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css" rel="stylesheet">
+
     <style>
 
         :root {
@@ -396,5 +400,30 @@
 @yield('scripts')
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Alerta de ÉXITO (Para cuando guardas, editas o eliminas)
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: '¡Operación Exitosa!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#0d6efd', /* Color azul que combina con tu botón */
+                timer: 3000, /* Se cierra solo en 3 segundos si el usuario no le da click */
+                timerProgressBar: true
+            });
+        @endif
+
+        // Alerta de ERROR (Por si salta alguna excepción en el try-catch)
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Ha ocurrido un problema',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#0d6efd'
+            });
+        @endif
+    });
+</script>
 </body>
 </html>

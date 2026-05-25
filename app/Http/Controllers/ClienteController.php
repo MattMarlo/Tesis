@@ -38,22 +38,25 @@ class ClienteController extends Controller
      */
     public function store(Request $request)
     {
-        try{
+        try {
             $datos = [
-                'nombres' => $request->nombres,
+                'nombres'   => $request->nombres,
                 'apellidos' => $request->apellidos,
-                'email' => $request->email,
-                'telefono' => $request->telefono,
+                'email'     => $request->email,
+                'telefono'  => $request->telefono,
                 'documento' => $request->documento,
-                'estado' => $request->estado,
+                'estado'    => $request->estado,
             ];
 
             $this->clienteService->guardarCliente($datos);
-            return to_route('clientes')->with('success','Cliente agregado éxitosamente');
-        }catch(InvalidArgumentException $e){
-            return to_route('clientes')->with('error',$e->getMessage());
-        }catch(Exception $e){
-            return to_route('clientes')->with('error','No se pudo agregar el cliente: '.$e->getMessage());
+
+            return to_route('clientes')->with('success', 'Su cliente fue guardado exitosamente.');
+
+        } catch (\InvalidArgumentException $e) {
+            return to_route('clientes')->with('error', $e->getMessage());
+
+        } catch (\Exception $e) {
+            return to_route('clientes')->with('error', 'No se pudo agregar el cliente: ' . $e->getMessage());
         }
     }
 
@@ -132,12 +135,19 @@ class ClienteController extends Controller
      */
     public function destroy(string $id)
     {
-        try{
-            $cliente=Cliente::find($id);
+        try {
+            $cliente = Cliente::find($id);
+            
+            if (!$cliente) {
+                return to_route('clientes')->with('error', 'El cliente no existe o ya fue eliminado.');
+            }
+
             $cliente->delete();
-            return to_route('clientes')->with('sucess','El cliente se ha eliminado correctamente');
-        }catch(Exception $e){
-            return to_route('clientes')->with('error','No se ha podido eliminar al cliente'.$e->getMessage());
+            
+            return to_route('clientes')->with('success', 'Su cliente fue eliminado exitosamente.');
+            
+        } catch (Exception $e) {
+            return to_route('clientes')->with('error', 'No se ha podido eliminar al cliente: ' . $e->getMessage());
         }
     }
 }

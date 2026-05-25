@@ -1,0 +1,51 @@
+.client-card {
+    border-radius: 12px;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+}
+.client-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Avatares Circulares con Iniciales */
+.avatar-circle {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-right: 15px;
+}
+
+/* Píldoras de Estado (Activo / Inactivo) */
+.client-status-pill {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+/* Menú de tres puntos y Dropdown */
+.card-action-menu {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+.dropdown-toggle.no-caret::after {
+    display: none !important;
+}
+.btn-three-dots {
+    padding: 0 5px;
+    font-size: 1.25rem;
+    color: #6c757d;
+    background: transparent;
+    border: none;
+}
+.btn-three-dots:hover {
+    color: #012970;
+}

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DestinoController;
+use App\Models\Destino;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReservaIndividualController;
@@ -13,7 +14,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PagoController;
 
 Route::get('/', function () {
-    return view('layouts.main');
+    $destinos = Destino::whereNotNull('imagen')->get(); 
+    
+    return view('loading', compact('destinos'));
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -22,6 +25,10 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function() {
+    Route::get('/main', function () {
+        return view('layouts.main');
+    })->name('main');
+
     Route::prefix('usuarios')->group(function() {
         Route::get('/', [UserController::class, 'index'])->name('usuarios');
         Route::get('/create', [UserController::class, 'create'])->name('usuarios.create');

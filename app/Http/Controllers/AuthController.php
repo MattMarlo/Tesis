@@ -23,7 +23,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/');
+            return redirect()->intended('/main')->with('success', '¡Bienvenido de nuevo!');
         }
 
         return back()->withErrors([
@@ -54,7 +54,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/layouts.main')->with('success', 'Cuenta creada exitosamente. Bienvenido!');
+        return redirect('/login')->with('success', 'Cuenta creada exitosamente. Bienvenido!');
     }
 
     public function logout(Request $request)

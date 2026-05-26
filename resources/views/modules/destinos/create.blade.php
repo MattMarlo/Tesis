@@ -49,7 +49,7 @@
 
               <div class="form-group mb-3">
                 <label for="imagen">Imagen</label>
-                <input  type="file" class="form-control"  name="imagen" id="imagen" >
+                <input  type="file" class="form-control"  name="imagen" id="imagen" accept="image/*">
               </div>
 
               <div class="d-flex gap-2">

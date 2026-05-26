@@ -91,9 +91,7 @@
 									<ul class="nav navbar-nav navbar-right">
 										<li class="smooth-menu"><a href="#home">Inicio</a></li>
 										<li class="smooth-menu"><a href="#gallery">Destinos</a></li>
-										<li class="smooth-menu"><a href="#pack">Tours </a></li>
 										<li class="smooth-menu"><a href="#spo">Ofertas Especiales</a></li>
-										<li class="smooth-menu"><a href="#blog">Blog</a></li>
 										<li class="smooth-menu"><a href="#subs">Subscripción</a></li>
                                         <li>
                                             <a href="{{ route('login') }}">
@@ -522,399 +520,137 @@
 		</section><!--/.service-->
 		<!--service end-->
 
-		<!--galley start-->
-		<section id="gallery" class="gallery">
-			<div class="container">
-				<div class="gallery-details">
-					<div class="gallary-header text-center">
-						<h2>
-							Destinos mas Populares
-						</h2>
-						<p>
-							¿Adónde quieres ir? ¿Cuánto quieres explorar?  
-						</p>
-					</div><!--/.gallery-header-->
-					<div class="gallery-box">
-						<div class="gallery-content">
-						  	<div class="filtr-container">
-						  		<div class="row">
-
-						  			<div class="col-md-6">
-						  				<div class="filtr-item">
-											<img src="{{ asset('assets/images/gallary/g1.jpg') }}" alt="portfolio image"/>
-											<div class="item-title">
-												<a href="#">
-													china
-												</a>
-												<p><span>20 tours</span><span>15 lugares</span></p>
-											</div><!-- /.item-title -->
-										</div><!-- /.filtr-item -->
-						  			</div><!-- /.col -->
-
-						  			<div class="col-md-6">
-						  				<div class="filtr-item">
-											<img src="{{ asset('assets/images/gallary/g2.jpg') }}" alt="portfolio image"/>
-											<div class="item-title">
-												<a href="#">
-													venuzuala
-												</a>
-												<p><span>12 tours</span><span>9 lugares</span></p>
-											</div> <!-- /.item-title-->
-										</div><!-- /.filtr-item -->
-						  			</div><!-- /.col -->
-
-						  			<div class="col-md-4">
-						  				<div class="filtr-item">
-											<img src="{{ asset('assets/images/gallary/g3.jpg') }}" alt="portfolio image"/>
-											<div class="item-title">
-												<a href="#">
-													brazil
-												</a>
-												<p><span>25 tours</span><span>10 lugares</span></p>
-											</div><!-- /.item-title -->
-										</div><!-- /.filtr-item -->
-						  			</div><!-- /.col -->
-
-						  			<div class="col-md-4">
-						  				<div class="filtr-item">
-											<img src="{{ asset('assets/images/gallary/g4.jpg') }}" alt="portfolio image"/>
-											<div class="item-title">
-												<a href="#">
-													australia 
-												</a>
-												<p><span>18 tours</span><span>9 lugares</span></p>
-											</div> <!-- /.item-title-->
-										</div><!-- /.filtr-item -->
-						  			</div><!-- /.col -->
-
-						  			<div class="col-md-4">
-						  				<div class="filtr-item">
-											<img src="{{ asset('assets/images/gallary/g5.jpg') }}" alt="portfolio image"/>
-											<div class="item-title">
-												<a href="#">
-													netharlands
-												</a>
-												<p><span>14 tours</span><span>12 lugares</span></p>
-											</div> <!-- /.item-title-->
-										</div><!-- /.filtr-item -->
-						  			</div><!-- /.col -->
-
-						  			<div class="col-md-8">
-						  				<div class="filtr-item">
-											<img src="{{ asset('assets/images/gallary/g6.jpg') }}" alt="portfolio image"/>
-											<div class="item-title">
-												<a href="#">
-													turkey
-												</a>
-												<p><span>14 tours</span><span>6 lugares</span></p>
-											</div> <!-- /.item-title-->
-										</div><!-- /.filtr-item -->
-						  			</div><!-- /.col -->
-
-						  		</div><!-- /.row -->
-
-						  	</div><!-- /.filtr-container-->
-						</div><!-- /.gallery-content -->
-					</div><!--/.galley-box-->
-				</div><!--/.gallery-details-->
-			</div><!--/.container-->
-
-		</section><!--/.gallery-->
-		<!--gallery end-->
-
-
-		<!--discount-offer start-->
-		<section class="discount-offer">
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-12">
-						<div class="dicount-offer-content text-center">
-							<h2>Únete a nosotros antes del 7 de marzo de 2019 y obtén un descuento de hasta el 40%</h2>
-							<div class="campaign-timer">
-								<div id="timer">
-									<div class="time time-after" id="days">
-										<span></span>
-									</div><!--/.time-->
-									<div class="time time-after" id="hours">
-
-									</div><!--/.time-->
-									<div class="time time-after" id="minutes">
-
-									</div><!--/.time-->
-									<div class="time" id="seconds">
-
-									</div><!--/.time-->
-								</div><!--/.timer-->
-							</div><!--/.campaign-timer-->
-							<div class="about-btn">
-								<button  class="about-view discount-offer-btn">
-									join now
-								</button>
-							</div><!--/.about-btn-->
-
-
-						</div><!-- /.dicount-offer-content-->
-					</div><!-- /.col-->
-				</div><!-- /.row-->
-			</div><!-- /.container-->
-
-		</section><!-- /.discount-offer-->
-		<!--discount-offer end-->
-
-		<!--packages start-->
-		<section id="pack" class="packages">
+		<section id="gallery" class="packages">
 			<div class="container">
 				<div class="gallary-header text-center">
-					<h2>
-						Paquetes especiales
-					</h2>
+					<h2>Destinos Populares</h2>
 					<p>
-						Descubre nuestros mejores paquetes de viajes especialmente diseñados para ti.  
+						Descubre nuestros mejores destinos de viaje especialmente diseñados para ti.  
 					</p>
-				</div><!--/.gallery-header-->
-				<div class="packages-content">
+				</div><div class="packages-content">
 					<div class="row">
 
-						<div class="col-md-4 col-sm-6">
-							<div class="single-package-item">
-								<img src="{{ asset('assets/images/packages/p1.jpg') }}" alt="package-place">
-								<div class="single-package-item-txt">
-									<h3>italy <span class="pull-right">$499</span></h3>
-									<div class="packages-para">
+						@forelse($destinos as $destino)
+							<div class="col-md-4 col-sm-6" style="margin-bottom: 30px;">
+								<div class="single-package-item">
+									<img src="{{ asset('storage/' . $destino->imagen) }}" alt="{{ $destino->pais }}" style="width: 100%; height: 250px; object-fit: cover;">
+									
+									<div class="single-package-item-txt">
+										<h3>{{ ucfirst($destino->pais) }} <span class="pull-right">${{ number_format($destino->precio, 0) }}</span></h3>
+										
+										<div class="packages-para">
+											<p>
+												<span>
+													<i class="fa fa-angle-right"></i> {{ $destino->dias }} Días
+												</span>
+												<i class="fa fa-angle-right"></i> {{ $destino->etiqueta }}
+											</p>
+											<p>
+												<span>
+													<i class="fa fa-angle-right"></i> Cupos: {{ $destino->capacidad }} libres
+												</span>
+												<i class="fa fa-angle-right"></i> Transporte incluido
+											</p>
+										</div><div class="packages-review">
+											<p>
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+												<span>5.0 rating</span>
+											</p>
+										</div><div class="about-btn">
+											<button class="about-view packages-btn">
+												book now
+											</button>
+										</div></div></div></div>@empty
+							<div class="col-12 text-center py-5">
+								<p class="text-muted">Próximamente estaremos publicando nuestros mejores destinos. ¡Mantente atento!</p>
+							</div>
+						@endforelse
+
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!--special-offer start-->
+		<section id="spo" class="special-offer">
+			<div class="container">
+				<div class="special-offer-content">
+					<div class="row">
+						<div class="col-sm-8">
+							<div class="single-special-offer">
+								<div class="single-special-offer-txt">
+									<h2>Tailandia</h2>
+									<div class="packages-review special-offer-review">
 										<p>
-											<span>
-												<i class="fa fa-angle-right"></i> 3 Days 2 nights
-											</span>
-											<i class="fa fa-angle-right"></i>  5 star accomodation
-										</p>
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i>  transportation
-											</span>
-											<i class="fa fa-angle-right"></i> food facilities
-										 </p>
-									</div><!--/.packages-para-->
-									<div class="packages-review">
-										<p>
 											<i class="fa fa-star"></i>
 											<i class="fa fa-star"></i>
 											<i class="fa fa-star"></i>
 											<i class="fa fa-star"></i>
 											<i class="fa fa-star"></i>
-											<span>254 opiniones</span>
+											<span>2544 review</span>
 										</p>
 									</div><!--/.packages-review-->
-									<div class="about-btn">
-										<button  class="about-view packages-btn">
-											book now
-										</button>
-									</div><!--/.about-btn-->
-								</div><!--/.single-package-item-txt-->
-							</div><!--/.single-package-item-->
-
-						</div><!--/.col-->
-
-						<div class="col-md-4 col-sm-6">
-							<div class="single-package-item">
-								<img src="{{ asset('assets/images/packages/p2.jpg') }}" alt="package-place">
-								<div class="single-package-item-txt">
-									<h3>england <span class="pull-right">$1499</span></h3>
-									<div class="packages-para">
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i> 6 Days 7 nights
-											</span>
-											<i class="fa fa-angle-right"></i>  5 star accomodation
-										</p>
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i>  transportation
-											</span>
-											<i class="fa fa-angle-right"></i>  Free food 
-										 </p>
-									</div><!--/.packages-para-->
-									<div class="packages-review">
-										<p>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<span>344 opiniones</span>
-										</p>
-									</div><!--/.packages-review-->
-									<div class="about-btn">
-										<button  class="about-view packages-btn">
-											book now
-										</button>
-									</div><!--/.about-btn-->
-								</div><!--/.single-package-item-txt-->
-							</div><!--/.single-package-item-->
-
-						</div><!--/.col-->
-						
-						<div class="col-md-4 col-sm-6">
-							<div class="single-package-item">
-								<img src="{{ asset('assets/images/packages/p3.jpg') }}" alt="package-place">
-								<div class="single-package-item-txt">
-									<h3>france <span class="pull-right">$1199</span></h3>
-									<div class="packages-para">
+									<div class="packages-para special-offer-para">
 										<p>
 											<span>
 												<i class="fa fa-angle-right"></i> 5 Days 6 nights
 											</span>
-											<i class="fa fa-angle-right"></i>  5 star accomodation
+											<span>
+												<i class="fa fa-angle-right"></i> 2 person
+											</span>
+											<span>
+												<i class="fa fa-angle-right"></i>  5 star accomodation
+											</span>
 										</p>
 										<p>
 											<span>
 												<i class="fa fa-angle-right"></i>  transportation
 											</span>
-											<i class="fa fa-angle-right"></i>  food facilities
-										 </p>
+											<span>
+												<i class="fa fa-angle-right"></i>  food facilities
+											</span>  
+										</p>
+										<p class="offer-para">
+											Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tem ut labore et dolore magna  aliqua. Ut enim ad minim veniam, quis nostrud exercitation una <br> ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+										</p>
 									</div><!--/.packages-para-->
-									<div class="packages-review">
-										<p>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<span>544 opiniones</span>
-										</p>
-									</div><!--/.packages-review-->
-									<div class="about-btn">
-										<button  class="about-view packages-btn">
-											book now
-										</button>
-									</div><!--/.about-btn-->
-								</div><!--/.single-package-item-txt-->
-							</div><!--/.single-package-item-->
-
+									<div class="offer-btn-group">
+										<div class="about-btn">
+											<button  class="about-view packages-btn offfer-btn">
+												make tour
+											</button>
+										</div><!--/.about-btn-->
+										<div class="about-btn">
+											<button  class="about-view packages-btn">
+												book now
+											</button>
+										</div><!--/.about-btn-->
+									</div><!--/.offer-btn-group-->
+								</div><!--/.single-special-offer-txt-->
+							</div><!--/.single-special-offer-->
 						</div><!--/.col-->
-						
-						<div class="col-md-4 col-sm-6">
-							<div class="single-package-item">
-								<img src="{{ asset('assets/images/packages/p4.jpg') }}" alt="package-place">
-								<div class="single-package-item-txt">
-									<h3>india <span class="pull-right">$799</span></h3>
-									<div class="packages-para">
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i> 4 Days 5 nights
-											</span>
-											<i class="fa fa-angle-right"></i>  5 star accomodation
-										</p>
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i>  transportation
-											</span>
-											<i class="fa fa-angle-right"></i>  food facilities
-										 </p>
-									</div><!--/.packages-para-->
-									<div class="packages-review">
-										<p>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<span>625 opiniones</span>
-										</p>
-									</div><!--/.packages-review-->
-									<div class="about-btn">
-										<button  class="about-view packages-btn">
-											book now
-										</button>
-									</div><!--/.about-btn-->
-								</div><!--/.single-package-item-txt-->
-							</div><!--/.single-package-item-->
-
+						<div class="col-sm-4">
+							<div class="single-special-offer">
+								<div class="single-special-offer-bg">
+									<img src="{{ asset('assets/images/offer/offer-shape.png') }}" alt="offer-shape">
+								</div><!--/.single-special-offer-bg-->
+								<div class="single-special-shape-txt">
+									<h3>special offer</h3>
+									<h4><span>40%</span><br>off</h4>
+									<p><span>$999</span><br>reguler $ 1450</p>
+								</div><!--/.single-special-shape-txt-->
+							</div><!--/.single-special-offer-->
 						</div><!--/.col-->
-						
-						<div class="col-md-4 col-sm-6">
-							<div class="single-package-item">
-								<img src="{{ asset('assets/images/packages/p5.jpg') }}" alt="package-place">
-								<div class="single-package-item-txt">
-									<h3>spain <span class="pull-right">$999</span></h3>
-									<div class="packages-para">
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i> 4 Days 4 nights
-											</span>
-											<i class="fa fa-angle-right"></i>  5 star accomodation
-										</p>
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i>  transportation
-											</span>
-											<i class="fa fa-angle-right"></i>  food facilities
-										 </p>
-									</div><!--/.packages-para-->
-									<div class="packages-review">
-										<p>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<span>379 opiniones</span>
-										</p>
-									</div><!--/.packages-review-->
-									<div class="about-btn">
-										<button  class="about-view packages-btn">
-											book now
-										</button>
-									</div><!--/.about-btn-->
-								</div><!--/.single-package-item-txt-->
-							</div><!--/.single-package-item-->
-
-						</div><!--/.col-->
-						
-						<div class="col-md-4 col-sm-6">
-							<div class="single-package-item">
-								<img src="{{ asset('assets/images/packages/p6.jpg') }}" alt="package-place">
-								<div class="single-package-item-txt">
-									<h3>thailand <span class="pull-right">$799</span></h3>
-									<div class="packages-para">
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i> 5 Days 6 nights
-											</span>
-											<i class="fa fa-angle-right"></i>  5 star accomodation
-										</p>
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i>  transportation
-											</span>
-											<i class="fa fa-angle-right"></i>  food facilities
-										 </p>
-									</div><!--/.packages-para-->
-									<div class="packages-review">
-										<p>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<span>447 opiniones</span>
-										</p>
-									</div><!--/.packages-review-->
-									<div class="about-btn">
-										<button  class="about-view packages-btn">
-											book now
-										</button>
-									</div><!--/.about-btn-->
-								</div><!--/.single-package-item-txt-->
-							</div><!--/.single-package-item-->
-
-						</div><!--/.col-->
-
 					</div><!--/.row-->
-				</div><!--/.packages-content-->
+				</div><!--/.special-offer-content-->
 			</div><!--/.container-->
 
-		</section><!--/.packages-->
-		<!--packages end-->
+		</section><!--/.special-offer end-->
+		<!--special-offer end-->
 
 		<!-- testemonial Start -->
 		<section   class="testemonial">
@@ -1144,180 +880,6 @@
 
 		</section><!--/.testimonial-->	
 		<!-- testemonial End -->
-
-
-		<!--special-offer start-->
-		<section id="spo" class="special-offer">
-			<div class="container">
-				<div class="special-offer-content">
-					<div class="row">
-						<div class="col-sm-8">
-							<div class="single-special-offer">
-								<div class="single-special-offer-txt">
-									<h2>Tailandia</h2>
-									<div class="packages-review special-offer-review">
-										<p>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<span>2544 review</span>
-										</p>
-									</div><!--/.packages-review-->
-									<div class="packages-para special-offer-para">
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i> 5 Days 6 nights
-											</span>
-											<span>
-												<i class="fa fa-angle-right"></i> 2 person
-											</span>
-											<span>
-												<i class="fa fa-angle-right"></i>  5 star accomodation
-											</span>
-										</p>
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i>  transportation
-											</span>
-											<span>
-												<i class="fa fa-angle-right"></i>  food facilities
-											</span>  
-										</p>
-										<p class="offer-para">
-											Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tem ut labore et dolore magna  aliqua. Ut enim ad minim veniam, quis nostrud exercitation una <br> ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-										</p>
-									</div><!--/.packages-para-->
-									<div class="offer-btn-group">
-										<div class="about-btn">
-											<button  class="about-view packages-btn offfer-btn">
-												make tour
-											</button>
-										</div><!--/.about-btn-->
-										<div class="about-btn">
-											<button  class="about-view packages-btn">
-												book now
-											</button>
-										</div><!--/.about-btn-->
-									</div><!--/.offer-btn-group-->
-								</div><!--/.single-special-offer-txt-->
-							</div><!--/.single-special-offer-->
-						</div><!--/.col-->
-						<div class="col-sm-4">
-							<div class="single-special-offer">
-								<div class="single-special-offer-bg">
-									<img src="{{ asset('assets/images/offer/offer-shape.png') }}" alt="offer-shape">
-								</div><!--/.single-special-offer-bg-->
-								<div class="single-special-shape-txt">
-									<h3>special offer</h3>
-									<h4><span>40%</span><br>off</h4>
-									<p><span>$999</span><br>reguler $ 1450</p>
-								</div><!--/.single-special-shape-txt-->
-							</div><!--/.single-special-offer-->
-						</div><!--/.col-->
-					</div><!--/.row-->
-				</div><!--/.special-offer-content-->
-			</div><!--/.container-->
-
-		</section><!--/.special-offer end-->
-		<!--special-offer end-->
-
-		<!--blog start-->
-		<section id="blog" class="blog">
-			<div class="container">
-				<div class="blog-details">
-						<div class="gallary-header text-center">
-							<h2>
-								latest news
-							</h2>
-							<p>
-								Travel News from all over the world 
-							</p>
-						</div><!--/.gallery-header-->
-						<div class="blog-content">
-							<div class="row">
-
-								<div class="col-sm-4 col-md-4">
-									<div class="thumbnail">
-										<h2>trending news <span>15 november 2017</span></h2>
-										<div class="thumbnail-img">
-											<img src="{{ asset('assets/images/blog/b1.jpg') }}" alt="blog-img">
-											<div class="thumbnail-img-overlay"></div><!--/.thumbnail-img-overlay-->
-										
-										</div><!--/.thumbnail-img-->
-									  
-										<div class="caption">
-											<div class="blog-txt">
-												<h3>
-													<a href="#">
-														Discover on beautiful weather, Fantastic foods and historical place in Prag
-													</a>
-												</h3>
-												<p>
-													Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam 
-												</p>
-												<a href="#">Read More</a>
-											</div><!--/.blog-txt-->
-										</div><!--/.caption-->
-									</div><!--/.thumbnail-->
-
-								</div><!--/.col-->
-
-								<div class="col-sm-4 col-md-4">
-									<div class="thumbnail">
-										<h2>trending news <span>15 november 2017</span></h2>
-										<div class="thumbnail-img">
-											<img src="{{ asset('assets/images/blog/b2.jpg') }}" alt="blog-img">
-											<div class="thumbnail-img-overlay"></div><!--/.thumbnail-img-overlay-->
-										
-										</div><!--/.thumbnail-img-->
-										<div class="caption">
-											<div class="blog-txt">
-												<h3>
-													<a href="#">
-														Discover on beautiful weather, Fantastic foods and historical place in india
-													</a>
-												</h3>
-												<p>
-													Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam 
-												</p>
-												<a href="#">Read More</a>
-											</div><!--/.blog-txt-->
-										</div><!--/.caption-->
-									</div><!--/.thumbnail-->
-
-								</div><!--/.col-->
-
-								<div class="col-sm-4 col-md-4">
-									<div class="thumbnail">
-										<h2>trending news <span>15 november 2017</span></h2>
-										<div class="thumbnail-img">
-											<img src="{{ asset('assets/images/blog/b3.jpg') }}" alt="blog-img">
-											<div class="thumbnail-img-overlay"></div><!--/.thumbnail-img-overlay-->
-										
-										</div><!--/.thumbnail-img-->
-										<div class="caption">
-											<div class="blog-txt">
-												<h3><a href="#">10 Lugares más naturales para descubrir</a></h3>
-												<p>
-													Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam 
-												</p>
-												<a href="#">Read More</a>
-											</div><!--/.blog-txt-->
-										</div><!--/.caption-->
-									</div><!--/.thumbnail-->
-
-								</div><!--/.col-->
-
-							</div><!--/.row-->
-						</div><!--/.blog-content-->
-					</div><!--/.blog-details-->
-				</div><!--/.container-->
-
-		</section><!--/.blog-->
-		<!--blog end-->
-
 		
 		<!--subscribe start-->
 		<section id="subs" class="subscribe">
@@ -1373,9 +935,7 @@
 								<div class="single-footer-txt">
 									<p><a href="#">Inicio</a></p>
 									<p><a href="#">Destinos</a></p>
-									<p><a href="#">Paquetes especiales</a></p>
 									<p><a href="#">Ofertas especiales</a></p>
-									<p><a href="#">Blog</a></p>
 									<p><a href="#">Contactos</a></p>
 								</div><!--/.single-footer-txt-->
 							</div><!--/.single-footer-item-->

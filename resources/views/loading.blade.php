@@ -127,7 +127,7 @@
 									</h2>
 									<div class="about-btn">
 										<button  class="about-view">
-											Reserva Ahora
+											Mas información
 										</button>
 									</div><!--/.about-btn-->
 								</div><!--/.about-us-txt-->
@@ -562,7 +562,7 @@
 											</p>
 										</div><div class="about-btn">
 											<button class="about-view packages-btn">
-												book now
+												Reservar Ahora
 											</button>
 										</div></div></div></div>@empty
 							<div class="col-12 text-center py-5">

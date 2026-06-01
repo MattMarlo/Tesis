@@ -561,9 +561,10 @@
 												<span>5.0 rating</span>
 											</p>
 										</div><div class="about-btn">
-											<button class="about-view packages-btn">
-												Reservar Ahora
-											</button>
+											<a href="https://t.me/PassionTravelBot?text={{ urlencode('Quiero reservar para ' . $destino->pais) }}" target="_blank" class="about-view packages-btn" 
+												style="display: inline-block; text-decoration: none;">
+													Reservar Ahora
+											</a>
 										</div></div></div></div>@empty
 							<div class="col-12 text-center py-5">
 								<p class="text-muted">Próximamente estaremos publicando nuestros mejores destinos. ¡Mantente atento!</p>

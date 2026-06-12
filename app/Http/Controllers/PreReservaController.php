@@ -3,8 +3,307 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\PreReserva;
+use App\Models\Cliente;
+use App\Models\Destino;
+use App\Services\ReservaService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class PreReservaController extends Controller
 {
-    //
+    protected ReservaService $reservaService;
+
+    public function __construct(ReservaService $reservaService)
+    {
+        $this->reservaService = $reservaService;
+    }
+
+    // Endpoint público para n8n
+    public function storeFromWebhook(Request $request)
+    {
+        $payload = array_merge($request->all(), [
+            'destino' => $request->input('destino')
+                ?? $request->input('lugar_reserva')
+                ?? $request->input('lugarReserva')
+                ?? $request->input('lugar')
+                ?? $request->input('destino_reserva'),
+            'cliente_nombre' => $request->input('cliente_nombre')
+                ?? $request->input('nombre_usuario')
+                ?? $request->input('nombreUsuario')
+                ?? $request->input('nombre'),
+            'cedula' => $request->input('cedula')
+                ?? $request->input('cedula_usuario')
+                ?? $request->input('documento')
+                ?? $request->input('dni'),
+            'fecha_viaje' => $request->input('fecha_viaje')
+                ?? $request->input('fecha_viaje_reserva')
+                ?? $request->input('text')
+                ?? $request->input('fecha'),
+            'telefono' => $request->input('telefono')
+                ?? $request->input('telefono_usuario')
+                ?? $request->input('telefonoUsuario'),
+            'email' => $request->input('email')
+                ?? $request->input('email_usuario')
+                ?? $request->input('emailUsuario'),
+        ]);
+
+        $data = Validator::make($payload, [
+            'destino' => 'required|string',
+            'cliente_nombre' => 'required|string',
+            'cedula' => 'required|string',
+            'fecha_viaje' => 'required|date',
+            'telefono' => 'nullable|string',
+            'email' => 'nullable|string',
+            'crear_reserva' => 'nullable|boolean',
+            'monto_depositado' => 'nullable|numeric'
+        ])->validate();
+
+        DB::beginTransaction();
+        try {
+            $destino = Destino::where('etiqueta', $data['destino'])->first();
+            if (!$destino) {
+                $destino = Destino::create([
+                    'etiqueta' => $data['destino'],
+                    'pais' => $request->input('pais', ''),
+                    'precio' => $request->input('precio', 0),
+                    'dias' => $request->input('dias', 0),
+                    'capacidad' => $request->input('capacidad', 0),
+                ]);
+            }
+
+            $cliente = Cliente::where('documento', $data['cedula'])->first();
+            if (!$cliente) {
+                $parts = preg_split('/\s+/', trim($data['cliente_nombre']), 2);
+                $nombres = $parts[0] ?? $data['cliente_nombre'];
+                $apellidos = $parts[1] ?? '';
+
+                $cliente = Cliente::create([
+                    'nombres' => $nombres,
+                    'apellidos' => $apellidos,
+                    'email' => $data['email'] ?? '',
+                    'telefono' => $data['telefono'] ?? '',
+                    'documento' => $data['cedula'],
+                    'estado' => 'activo'
+                ]);
+            }
+
+            $preReserva = PreReserva::create([
+                'cliente_nombre' => $data['cliente_nombre'],
+                'destino' => $data['destino'],
+                'telefono' => $data['telefono'] ?? '',
+                'cedula' => $data['cedula'],
+                'fecha_viaje' => $data['fecha_viaje'],
+                'fecha_reserva' => Carbon::now(),
+                'origen' => 'n8n',
+                'estado' => 'pendiente_contacto',
+                'user_id' => null,
+            ]);
+
+            $reservaCodigo = null;
+            if (!empty($data['crear_reserva'])) {
+                $datosReserva = [
+                    'cliente_id' => $cliente->id,
+                    'destino_id' => $destino->id,
+                    'user_id' => null,
+                    'fecha_reserva' => Carbon::now()->toDateTimeString(),
+                    'fecha_viaje' => $data['fecha_viaje'],
+                    'precio_total_viaje' => $destino->precio ?? 0,
+                    'monto_depositado' => $data['monto_depositado'] ?? 0,
+                ];
+
+                $reservaCodigo = $this->reservaService->guardarIndividual($datosReserva);
+                $reservaId = DB::table('reservas')->where('codigo_reserva', $reservaCodigo)->value('id');
+                if ($reservaId) {
+                    $preReserva->reserva_id = $reservaId;
+                    $preReserva->estado = 'convertida';
+                    $preReserva->save();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'pre_reserva' => $preReserva,
+                'reserva_codigo' => $reservaCodigo,
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function checkExistence(Request $request)
+    {
+        $data = $request->validate([
+            'cedula' => 'required|string',
+            'destino' => 'required|string',
+        ]);
+
+        $cliente = Cliente::where('documento', $data['cedula'])->first();
+        $destino = Destino::where('etiqueta', $data['destino'])->first();
+
+        return response()->json([
+            'cliente' => [
+                'exists' => (bool) $cliente,
+                'data' => $cliente ? [
+                    'nombres' => $cliente->nombres,
+                    'apellidos' => $cliente->apellidos,
+                    'email' => $cliente->email,
+                    'telefono' => $cliente->telefono,
+                ] : null,
+            ],
+            'destino' => [
+                'exists' => (bool) $destino,
+                'data' => $destino ? [
+                    'pais' => $destino->pais,
+                    'precio' => $destino->precio,
+                    'dias' => $destino->dias,
+                    'capacidad' => $destino->capacidad,
+                ] : null,
+            ],
+        ]);
+    }
+
+    // UI: listar pre-reservas
+    public function index()
+    {
+        $preReservas = PreReserva::orderBy('created_at','desc')->get();
+        return view('modules.pre_reservas.index', compact('preReservas'));
+    }
+
+    // UI: formulario crear
+    public function create()
+    {
+        $destinos = Destino::pluck('etiqueta','id');
+        return view('modules.pre_reservas.create', compact('destinos'));
+    }
+
+    // UI: almacenar desde formulario web
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'destino' => 'required|string',
+            'cliente_nombre' => 'required|string',
+            'cedula' => 'required|string',
+            'fecha_viaje' => 'nullable|date',
+            'telefono' => 'nullable|string',
+            'email' => 'nullable|string',
+            'pais' => 'nullable|string',
+            'precio' => 'nullable|numeric',
+            'dias' => 'nullable|integer',
+            'capacidad' => 'nullable|integer',
+            'crear_reserva' => 'nullable|boolean',
+            'monto_depositado' => 'nullable|numeric',
+        ]);
+
+        $cliente = Cliente::where('documento', $data['cedula'])->first();
+        if (!$cliente) {
+            $parts = preg_split('/\s+/', trim($data['cliente_nombre']), 2);
+            $nombres = $parts[0] ?? $data['cliente_nombre'];
+            $apellidos = $parts[1] ?? '';
+            $cliente = Cliente::create([
+                'nombres' => $nombres,
+                'apellidos' => $apellidos,
+                'email' => $data['email'] ?? '',
+                'telefono' => $data['telefono'] ?? '',
+                'documento' => $data['cedula'],
+                'estado' => 'activo'
+            ]);
+        }
+
+        $destino = Destino::where('etiqueta', $data['destino'])->first();
+        if (!$destino) {
+            $destino = Destino::create([
+                'etiqueta' => $data['destino'],
+                'pais' => $data['pais'] ?? '',
+                'precio' => $data['precio'] ?? 0,
+                'dias' => $data['dias'] ?? 0,
+                'capacidad' => $data['capacidad'] ?? 0,
+            ]);
+        }
+
+        $preReserva = PreReserva::create([
+            'cliente_nombre' => $data['cliente_nombre'],
+            'destino' => $data['destino'],
+            'telefono' => $data['telefono'] ?? '',
+            'cedula' => $data['cedula'],
+            'fecha_viaje' => $data['fecha_viaje'] ?? null,
+            'fecha_reserva' => Carbon::now(),
+            'origen' => 'web',
+            'estado' => 'pendiente_contacto',
+            'user_id' => Auth::id(),
+        ]);
+
+        if (!empty($data['crear_reserva'])) {
+            $datosReserva = [
+                'cliente_id' => $cliente->id,
+                'destino_id' => $destino->id,
+                'user_id' => Auth::id(),
+                'fecha_reserva' => Carbon::now()->toDateTimeString(),
+                'fecha_viaje' => $data['fecha_viaje'] ?? null,
+                'precio_total_viaje' => $destino->precio ?? 0,
+                'monto_depositado' => $data['monto_depositado'] ?? 0,
+            ];
+
+            $codigo = $this->reservaService->guardarIndividual($datosReserva);
+            $reservaId = DB::table('reservas')->where('codigo_reserva', $codigo)->value('id');
+            if ($reservaId) {
+                $preReserva->reserva_id = $reservaId;
+                $preReserva->estado = 'convertida';
+                $preReserva->save();
+            }
+        }
+
+        return to_route('prereservas.index')->with('success','Pre-reserva creada correctamente');
+    }
+
+    // Convertir pre-reserva a reserva (acción rápida desde UI)
+    public function convertToReserva($id)
+    {
+        $pre = PreReserva::findOrFail($id);
+        // intentar encontrar cliente por cedula
+        $cliente = Cliente::where('documento', $pre->cedula)->first();
+        if (!$cliente) {
+            return to_route('prereservas.index')->with('error','Cliente no encontrado para convertir');
+        }
+
+        $destino = Destino::where('etiqueta', $pre->destino)->first();
+        if (!$destino) {
+            return to_route('prereservas.index')->with('error','Destino no encontrado para convertir');
+        }
+
+        $datosReserva = [
+            'cliente_id' => $cliente->id,
+            'destino_id' => $destino->id,
+            'user_id' => Auth::id(),
+            'fecha_reserva' => Carbon::now()->toDateTimeString(),
+            'fecha_viaje' => $pre->fecha_viaje,
+            'precio_total_viaje' => $destino->precio ?? 0,
+            'monto_depositado' => 0,
+        ];
+
+        $codigo = $this->reservaService->guardarIndividual($datosReserva);
+        $reservaId = DB::table('reservas')->where('codigo_reserva', $codigo)->value('id');
+        if ($reservaId) {
+            $pre->reserva_id = $reservaId;
+            $pre->estado = 'convertida';
+            $pre->user_id = Auth::id();
+            $pre->save();
+        }
+
+        return to_route('prereservas.index')->with('success','Pre-reserva convertida: '.$codigo);
+    }
+
+    // Eliminar pre-reserva
+    public function destroy($id)
+    {
+        $preReserva = PreReserva::findOrFail($id);
+        $preReserva->delete();
+        return to_route('prereservas.index')->with('success', 'Pre-reserva eliminada correctamente');
+    }
 }

@@ -10,8 +10,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
+   // ->withMiddleware(function (Middleware $middleware): void {
         //
+   // })
+    ->withMiddleware(function (Middleware $middleware) {
+        // Añade esta regla para ignorar el token de seguridad en la ruta de n8n
+        $middleware->validateCsrfTokens(except: [
+            'prereservas/webhook'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

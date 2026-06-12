@@ -12,6 +12,7 @@ class PreReserva extends Model
         'cliente_nombre',
         'destino',           
         'telefono',
+        'cedula',
         'fecha_viaje',
         'fecha_reserva',
         'origen',

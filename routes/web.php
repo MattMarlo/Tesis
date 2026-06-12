@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DestinoController;
+use App\Http\Controllers\PreReservaController;
 use App\Models\Destino;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\ReservaController;
@@ -18,6 +19,9 @@ Route::get('/', function () {
     
     return view('loading', compact('destinos'));
 });
+
+// Endpoint público para recibir pre-reservas desde n8n (POST JSON)
+Route::post('/prereservas/webhook', [PreReservaController::class, 'storeFromWebhook']);
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -62,6 +66,8 @@ Route::middleware('auth')->group(function() {
         Route::get('/edit/{id}', [GrupoController::class, 'edit'])->name('grupos.edit');
         Route::put('/update/{id}', [GrupoController::class, 'update'])->name('grupos.update');
     });
+    
+    
     Route::prefix('reservas')->group(function () {
         Route::get('/', [ReservaController::class, 'index'])->name('reservas');
         Route::get('/{reserva}/detalle', [ReservaController::class, 'detalleJson'])->name('reservas.detalle');
@@ -93,6 +99,15 @@ Route::middleware('auth')->group(function() {
         Route::get('/create', [ReservaGrupalController::class, 'create'])->name('reservas_grupal.create');
         Route::post('/store', [ReservaGrupalController::class, 'store'])->name('reservas_grupal.store');
     });
+});
+// Pre-reservas (administración)
+Route::prefix('prereservas')->group(function() {
+    Route::get('/', [PreReservaController::class, 'index'])->name('prereservas.index');
+    Route::get('/create', [PreReservaController::class, 'create'])->name('prereservas.create');
+    Route::post('/store', [PreReservaController::class, 'store'])->name('prereservas.store');
+    Route::post('/{id}/convertir', [PreReservaController::class, 'convertToReserva'])->name('prereservas.convertir');
+    Route::delete('/{id}', [PreReservaController::class, 'destroy'])->name('prereservas.destroy');
+    Route::get('/check', [PreReservaController::class, 'checkExistence'])->name('prereservas.check');
 });
 
 

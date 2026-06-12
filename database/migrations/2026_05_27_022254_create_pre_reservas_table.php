@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('cliente_nombre', 100);
             $table->string('destino', 255);
             $table->string('telefono', 50);
+            $table->string('cedula', 100);
             $table->date('fecha_viaje')->nullable();
             $table->timestamp('fecha_reserva')->useCurrent();
             $table->enum('origen', ['telegram_bot', 'whatsapp_bot', 'landing_page'])->default('telegram_bot');

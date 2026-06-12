@@ -46,7 +46,15 @@ class ReservaIndividualController extends Controller
                 return back()->with('error', 'La fecha de viaje no debe ser antes de la fecha de reserva')->withInput();
             }
         }
-
+        //Validación para que no sea mayr a 5 años la reserva
+        $fechaLimite=Carbon::now()->addYears(1);
+        if($fechaViaje->gt($fechaLimite)){
+            return back()->with('error','La fecha de viaje no debe exceder el año ')->withInput();
+        }
+        //Validar que el precio de viaje sea mayor o igual al monto a cobrar 
+        if(isset($datos['monto_depositado'])&&$datos['monto_depositado']>$datos['precio_total_viaje']){
+            return back()->with('error','El monto depositado no debe ser mayor al precio total del viaje')->withInput();
+        }
         $usuario_id = Auth::id();
         if (!$usuario_id) {
             return back()->with('error', 'Debes estar autenticado para crear una reserva.')->withInput();

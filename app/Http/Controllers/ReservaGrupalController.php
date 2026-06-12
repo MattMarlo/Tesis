@@ -59,7 +59,11 @@ class ReservaGrupalController extends Controller
                 return back()->with('error', 'La fecha de viaje no debe ser antes de la fecha de reserva')->withInput();
             }
         }
-        
+        //Validación de que la fecha de viaje no sea mayor a un año
+        $fechaLimite=Carbon::now()->addYear(1);
+        if($fechaViaje->gt($fechaReserva)){
+            return back()->with('error','La fecha de viaje no debe exceder el año')->withInput();
+        }
         // Validate total amount matches the sum of assignments
         $sumaAsignada = 0;
         foreach ($datos['integrantes'] as $integrante) {

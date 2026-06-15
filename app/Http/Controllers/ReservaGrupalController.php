@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\ReservaService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 class ReservaGrupalController extends Controller
@@ -42,27 +43,43 @@ class ReservaGrupalController extends Controller
         ]);
 
         if (empty($datos['grupo_id']) && empty($datos['nombre_grupo'])) {
-            return back()->with('error', 'Debe seleccionar un grupo existente o ingresar el nombre para uno nuevo.')->withInput();
+            $msg = 'Debe seleccionar un grupo existente o ingresar el nombre para uno nuevo.';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('error', $msg)->withInput();
         }
 
         $usuario_id = Auth::id();
         if (!$usuario_id) {
-            return back()->with('error', 'Debes estar autenticado para crear una reserva.')->withInput();
+            $msg = 'Debes estar autenticado para crear una reserva.';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 401);
+            }
+            return back()->with('error', $msg)->withInput();
         }
 
         $datos['user_id'] = $usuario_id;
         // Validación: la fecha de viaje no debe ser anterior a la fecha de reserva
-        if (isset($datos['fecha_viaje']) && isset($datos['fecha_reserva'])) {
-            $fechaViaje = Carbon::parse($datos['fecha_viaje']);
-            $fechaReserva = Carbon::parse($datos['fecha_reserva']);
-            if ($fechaViaje->lt($fechaReserva)) {
-                return back()->with('error', 'La fecha de viaje no debe ser antes de la fecha de reserva')->withInput();
+        $fechaViaje = isset($datos['fecha_viaje']) ? Carbon::parse($datos['fecha_viaje']) : null;
+        $fechaReserva = isset($datos['fecha_reserva']) ? Carbon::parse($datos['fecha_reserva']) : Carbon::now();
+
+        if ($fechaViaje && $fechaReserva && $fechaViaje->lt($fechaReserva)) {
+            $msg = 'La fecha de viaje no debe ser antes de la fecha de reserva';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 422);
             }
+            return back()->with('error', $msg)->withInput();
         }
-        //Validación de que la fecha de viaje no sea mayor a un año
-        $fechaLimite=Carbon::now()->addYear(1);
-        if($fechaViaje->gt($fechaReserva)){
-            return back()->with('error','La fecha de viaje no debe exceder el año')->withInput();
+
+        // Validación de que la fecha de viaje no sea mayor a un año desde ahora
+        $fechaLimite = Carbon::now()->addYear(1);
+        if ($fechaViaje && $fechaViaje->gt($fechaLimite)) {
+            $msg = 'La fecha de viaje no debe exceder el año';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('error', $msg)->withInput();
         }
         // Validate total amount matches the sum of assignments
         $sumaAsignada = 0;
@@ -71,14 +88,25 @@ class ReservaGrupalController extends Controller
         }
 
         if (abs($sumaAsignada - $datos['precio_total_viaje']) > 0.01) {
-            return back()->with('error', 'La suma de los montos asignados debe ser igual al monto total del grupo.')->withInput();
+            $msg = 'La suma de los montos asignados debe ser igual al monto total del grupo.';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('error', $msg)->withInput();
         }
 
         try {
             $codigo = $this->reservaService->guardarGrupal($datos);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'redirect' => route('reservas'), 'codigo' => $codigo]);
+            }
             return to_route('reservas')->with('success', 'Reserva grupal creada. Código: ' . $codigo);
         } catch (\Exception $e) {
-            return back()->with('error', 'Error al crear reserva grupal: ' . $e->getMessage())->withInput();
+            $msg = 'Error al crear reserva grupal: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 500);
+            }
+            return back()->with('error', $msg)->withInput();
         }
     }
 }

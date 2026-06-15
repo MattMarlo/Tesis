@@ -92,7 +92,7 @@
 <div class="container-fluid py-4 min-vh-100" style="background-color: #F8FAFC;">
     <form action="{{ route('reservas_grupal.store') }}" method="POST" id="reservaForm">
         @csrf
-        
+        <div id="errores-generales" class="alert alert-danger d-none"></div>
         <!-- Header -->
         <div class="row mb-4">
             <div class="col-12 d-flex justify-content-between align-items-start">
@@ -133,26 +133,26 @@
                                 <select name="destino_id" class="form-select rounded-3" required>
                                     <option value="">Seleccionar...</option>
                                     @foreach($destinos as $destino)
-                                        <option value="{{ $destino->id }}">{{ $destino->pais }}</option>
+                                        <option value="{{ $destino->id }}" {{ old('destino_id') == $destino->id ? 'selected' : '' }}>{{ $destino->pais }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label text-secondary small fw-bold">FECHA DE VIAJE</label>
-                                <input type="date" name="fecha_viaje" class="form-control rounded-3" required>
+                                <input type="date" name="fecha_viaje" class="form-control rounded-3" value="{{ old('fecha_viaje') }}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-secondary small fw-bold">MONTO TOTAL GRUPO (€)</label>
-                                <input type="number" step="0.01" name="precio_total_viaje" id="monto_total_grupo" class="form-control rounded-3" value="3600" oninput="calcularDistribucion()" required>
+                                <input type="number" step="0.01" name="precio_total_viaje" id="monto_total_grupo" class="form-control rounded-3" value="{{ old('precio_total_viaje', 3600) }}" oninput="calcularDistribucion()" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-secondary small fw-bold">ESTADO</label>
                                 <select name="estado" class="form-select rounded-3">
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="confirmada">Confirmado</option>
+                                    <option value="pendiente" {{ old('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                                    <option value="confirmada" {{ old('estado') == 'confirmada' ? 'selected' : '' }}>Confirmado</option>
                                 </select>
                                 <!-- hidden date field for form validation -->
-                                <input type="hidden" name="fecha_reserva" value="{{ date('Y-m-d') }}">
+                                <input type="hidden" name="fecha_reserva" value="{{ old('fecha_reserva', date('Y-m-d')) }}">
                             </div>
                         </div>
                     </div>
@@ -239,6 +239,15 @@ let modoDist = 'iguales';
 const colores = ['#5b66d6', '#198754', '#fd7e14', '#dc3545', '#0dcaf0', '#6f42c1'];
 
 const gruposExistentes = @json($grupos);
+const clientesMap = {};
+@foreach($clientes as $c)
+    clientesMap['{{ $c->id }}'] = {
+        id: '{{ $c->id }}',
+        nombre: '{{ addslashes(trim(explode(' ', $c->nombres)[0] . " " . explode(' ', $c->apellidos)[0])) }}',
+        iniciales: '{{ strtoupper(substr($c->nombres,0,1) . substr($c->apellidos,0,1)) }}',
+        email: '{{ strtolower(trim(explode(' ', $c->nombres)[0])) }}@email.com'
+    };
+@endforeach
 const inputNombreGrupo = document.getElementById('nombre_grupo');
 const inputGrupoId = document.getElementById('grupo_id');
 const sugerenciasBox = document.getElementById('grupos-sugerencias');
@@ -276,6 +285,23 @@ inputNombreGrupo.addEventListener('input', function() {
         document.getElementById('grupo-status').innerHTML = '<span class="text-info fw-bold"><i class="bi bi-info-circle-fill"></i> Se creará un nuevo grupo</span>';
     }
 });
+
+// Reconstruir la lista de integrantes si hay datos previos (por ejemplo, after withInput)
+const oldIntegrantes = @json(old('integrantes', []));
+if (oldIntegrantes && oldIntegrantes.length > 0) {
+    oldIntegrantes.forEach((oi) => {
+        const clienteId = oi['cliente_id'];
+        const cliente = clientesMap[clienteId];
+        if (!cliente) return;
+        const isLider = oi['es_lider'] && (oi['es_lider'] == 1 || oi['es_lider'] === true || oi['es_lider'] === '1');
+        const monto = parseFloat(oi['monto_asignado']) || 0;
+        const color = colores[integrantes.length % colores.length];
+        integrantes.push({ idx: idxCounter, id: clienteId, nombre: cliente.nombre, iniciales: cliente.iniciales, email: cliente.email, color, monto: monto, isLider });
+        idxCounter++;
+    });
+    renderIntegrantes();
+    calcularDistribucion();
+}
 
 document.addEventListener('click', function(e) {
     if (e.target !== inputNombreGrupo && e.target !== sugerenciasBox) {
@@ -443,5 +469,80 @@ function renderDistribucion(total, onlyUpdateProgressAndTotals = false) {
         document.getElementById('dist-dif').innerText = (diff > 0 ? 'Faltan €' : 'Sobran €') + Math.abs(diff).toFixed(2);
     }
 }
+
+
+// <- cambio 3: capturo el formulario y evito su envío tradicional
+document.getElementById('reservaForm').addEventListener('submit', async function(e) {
+    // <- cambio 4: evita que la página se recargue
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+
+    // <- cambio 5: deshabilito el botón y muestro "Guardando..." mientras se envía
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Guardando...';
+
+    try {
+        // <- cambio 6: envío los datos con fetch (AJAX)
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'   // <- esperamos respuesta JSON
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        // <- cambio 7: si la respuesta es exitosa, redirijo a la lista de reservas
+        if (response.ok && data.success) {
+            window.location.href = data.redirect;
+        }
+        // <- cambio 8: si hay errores de validación (código 422)
+        else if (response.status === 422 && data.errors) {
+            // Limpio errores anteriores
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
+            // Recorro cada error
+            for (const [key, messages] of Object.entries(data.errors)) {
+                let input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    // Si el error pertenece a un campo específico, lo marco en rojo
+                    input.classList.add('is-invalid');
+                    let feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.innerText = messages[0];
+                    input.parentNode.appendChild(feedback);
+                } else {
+                    // Si el error no tiene campo asociado, lo muestro en el div general
+                    let errorDiv = document.getElementById('errores-generales');
+                    errorDiv.innerHTML = messages[0];
+                    errorDiv.classList.remove('d-none');
+                }
+            }
+        }
+        // <- cambio 9: otros errores (500, etc.)
+        else {
+            let errorDiv = document.getElementById('errores-generales');
+            errorDiv.innerHTML = data.message || 'Error inesperado. Intente de nuevo.';
+            errorDiv.classList.remove('d-none');
+        }
+    } catch (error) {
+        // <- cambio 10: error de red o conexión
+        console.error(error);
+        let errorDiv = document.getElementById('errores-generales');
+        errorDiv.innerHTML = 'Error de conexión. Revisa tu internet.';
+        errorDiv.classList.remove('d-none');
+    } finally {
+        // <- cambio 11: vuelvo a habilitar el botón con el texto original
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+});
 </script>
 @endsection

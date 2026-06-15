@@ -39,25 +39,42 @@ class ReservaIndividualController extends Controller
         ]);
 
         // Validación: la fecha de viaje no debe ser anterior a la fecha de reserva
-        if (isset($datos['fecha_viaje']) && isset($datos['fecha_reserva'])) {
-            $fechaViaje = Carbon::parse($datos['fecha_viaje']);
-            $fechaReserva = Carbon::parse($datos['fecha_reserva']);
-            if ($fechaViaje->lt($fechaReserva)) {
-                return back()->with('error', 'La fecha de viaje no debe ser antes de la fecha de reserva')->withInput();
+        $fechaViaje = isset($datos['fecha_viaje']) ? Carbon::parse($datos['fecha_viaje']) : null;
+        $fechaReserva = isset($datos['fecha_reserva']) ? Carbon::parse($datos['fecha_reserva']) : Carbon::now();
+
+        if ($fechaViaje && $fechaReserva && $fechaViaje->lt($fechaReserva)) {
+            $msg = 'La fecha de viaje no debe ser antes de la fecha de reserva';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 422);
             }
+            return back()->with('error', $msg)->withInput();
         }
-        //Validación para que no sea mayr a 5 años la reserva
-        $fechaLimite=Carbon::now()->addYears(1);
-        if($fechaViaje->gt($fechaLimite)){
-            return back()->with('error','La fecha de viaje no debe exceder el año ')->withInput();
+
+        // Validación de que la fecha de viaje no sea mayor a un año desde ahora
+        $fechaLimite = Carbon::now()->addYear(1);
+        if ($fechaViaje && $fechaViaje->gt($fechaLimite)) {
+            $msg = 'La fecha de viaje no debe exceder el año';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('error', $msg)->withInput();
         }
-        //Validar que el precio de viaje sea mayor o igual al monto a cobrar 
-        if(isset($datos['monto_depositado'])&&$datos['monto_depositado']>$datos['precio_total_viaje']){
-            return back()->with('error','El monto depositado no debe ser mayor al precio total del viaje')->withInput();
+
+        // Validar que el precio de viaje sea mayor o igual al monto a cobrar
+        if (isset($datos['monto_depositado']) && $datos['monto_depositado'] > $datos['precio_total_viaje']) {
+            $msg = 'El monto depositado no debe ser mayor al precio total del viaje';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('error', $msg)->withInput();
         }
         $usuario_id = Auth::id();
         if (!$usuario_id) {
-            return back()->with('error', 'Debes estar autenticado para crear una reserva.')->withInput();
+            $msg = 'Debes estar autenticado para crear una reserva.';
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 401);
+            }
+            return back()->with('error', $msg)->withInput();
         }
 
         $datos['user_id'] = $usuario_id;
@@ -65,9 +82,16 @@ class ReservaIndividualController extends Controller
 
         try {
             $codigo = $this->reservaService->guardarIndividual($datos);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'redirect' => route('reservas'), 'codigo' => $codigo]);
+            }
             return to_route('reservas')->with('success', 'Reserva creada. Código: ' . $codigo);
         } catch (\Exception $e) {
-            return back()->with('error', 'Error al crear reserva: ' . $e->getMessage())->withInput();
+            $msg = 'Error al crear reserva: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $msg], 500);
+            }
+            return back()->with('error', $msg)->withInput();
         }
     }
 }

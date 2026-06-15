@@ -31,7 +31,7 @@
 
             <form action="{{ route('reservas_individual.store') }}" id="form_reserva_individual" method="post">
               @csrf
-
+              <div id="errores-generales" class="alert alert-danger d-none"></div>
               <div class="row g-3">
 
                 <!-- DATOS DEL TITULAR -->
@@ -45,7 +45,7 @@
                   <select name="cliente_id" class="form-select" required>
                     <option value="">Seleccionar cliente...</option>
                     @foreach($clientes as $cliente)
-                      <option value="{{ $cliente->id }}">{{ $cliente->nombres }} {{ $cliente->apellidos }}</option>
+                      <option value="{{ $cliente->id }}" {{ old('cliente_id') == $cliente->id ? 'selected' : '' }}>{{ $cliente->nombres }} {{ $cliente->apellidos }}</option>
                     @endforeach
                   </select>
                 </div>
@@ -61,7 +61,7 @@
                   <select name="destino_id" class="form-select" required>
                     <option value="">Seleccionar destino...</option>
                     @foreach($destinos as $destino)
-                      <option value="{{ $destino->id }}">{{ $destino->pais }}</option>
+                      <option value="{{ $destino->id }}" {{ old('destino_id') == $destino->id ? 'selected' : '' }}>{{ $destino->pais }}</option>
                     @endforeach
                   </select>
                 </div>
@@ -69,19 +69,19 @@
                 <!-- FECHA RESERVA -->
                 <div class="col-12 col-md-6">
                   <label for="fecha_reserva" class="form-label">Fecha Reserva</label>
-                  <input type="date" name="fecha_reserva" class="form-control" value="{{ date('Y-m-d') }}" required>
+                  <input type="date" name="fecha_reserva" class="form-control" value="{{ old('fecha_reserva', date('Y-m-d')) }}" required>
                 </div>
 
                 <!-- FECHA DE VIAJE -->
                 <div class="col-12 col-md-6">
                   <label for="fecha_viaje" class="form-label">Fecha de Viaje</label>
-                  <input type="date" name="fecha_viaje" class="form-control" required>
+                  <input type="date" name="fecha_viaje" class="form-control" value="{{ old('fecha_viaje') }}" required>
                 </div>
 
                 <!-- MONTO TOTAL -->
                 <div class="col-12 col-md-6">
                   <label for="precio_total_viaje" class="form-label">Precio del viaje</label>
-                  <input type="number" step="0.01" name="precio_total_viaje" class="form-control" placeholder="0.00" required>
+                  <input type="number" step="0.01" name="precio_total_viaje" class="form-control" placeholder="0.00" value="{{ old('precio_total_viaje') }}" required>
                 </div>
                 
                 <!--Estado reserva
@@ -103,23 +103,23 @@
                 <!-- MONTO A COBRAR -->
                 <div class="col-12 col-md-4">
                   <label for="monto_depositado" class="form-label">Monto a Cobrar</label>
-                  <input type="number" step="0.01" name="monto_depositado" class="form-control" placeholder="0.00">
+                  <input type="number" step="0.01" name="monto_depositado" class="form-control" placeholder="0.00" value="{{ old('monto_depositado') }}">
                 </div>
 
                 <!-- MÉTODO -->
                 <div class="col-12 col-md-4">
                   <label for="metodo_pago" class="form-label">Método</label>
                   <select name="metodo_pago" class="form-select">
-                    <option value="efectivo">Efectivo</option>
-                    <option value="transferencia">Transferencia</option>
-                    <option value="tarjeta">Tarjeta</option>
+                    <option value="efectivo" {{ old('metodo_pago') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
+                    <option value="transferencia" {{ old('metodo_pago') == 'transferencia' ? 'selected' : '' }}>Transferencia</option>
+                    <option value="tarjeta" {{ old('metodo_pago') == 'tarjeta' ? 'selected' : '' }}>Tarjeta</option>
                   </select>
                 </div>
 
                 <!-- FECHA PAGO -->
                 <div class="col-12 col-md-4">
                   <label for="fecha_pago" class="form-label">Fecha Pago</label>
-                  <input type="date" name="fecha_pago" class="form-control" value="{{ date('Y-m-d') }}">
+                  <input type="date" name="fecha_pago" class="form-control" value="{{ old('fecha_pago', date('Y-m-d')) }}">
                 </div>
 
               </div>
@@ -147,4 +147,65 @@
   </section>
 
 </main>
+<script>
+document.getElementById('form_reserva_individual').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = 'Guardando...';
+
+  try {
+    const response = await fetch(form.action, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      window.location.href = data.redirect;
+    }
+    else if (response.status === 422 && data.errors) {
+      document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+      document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+      
+      for (const [key, messages] of Object.entries(data.errors)) {
+        let input = form.querySelector(`[name="${key}"]`);
+        if (input) {
+          input.classList.add('is-invalid');
+          let feedback = document.createElement('div');
+          feedback.className = 'invalid-feedback';
+          feedback.innerText = messages[0];
+          input.parentNode.appendChild(feedback);
+        } else {
+          let errorDiv = document.getElementById('errores-generales');
+          errorDiv.innerHTML = messages[0];
+          errorDiv.classList.remove('d-none');
+        }
+      }
+    }
+    else {
+      let errorDiv = document.getElementById('errores-generales');
+      errorDiv.innerHTML = data.message || 'Error inesperado. Intente de nuevo.';
+      errorDiv.classList.remove('d-none');
+    }
+  } catch (error) {
+    console.error(error);
+    let errorDiv = document.getElementById('errores-generales');
+    errorDiv.innerHTML = 'Error de conexión. Revisa tu internet.';
+    errorDiv.classList.remove('d-none');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
+});
+</script>
 @endsection

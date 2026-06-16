@@ -440,7 +440,7 @@ function renderDistribucion(total, onlyUpdateProgressAndTotals = false) {
                         </span>
                     </div>
                     <div class="col-3 px-4">
-                        <input type="number" step="0.01" name="integrantes[${i.idx}][monto_asignado]" class="form-control rounded-3 text-end" value="${i.monto.toFixed(2)}" oninput="manualInputMonto(${ind}, this)">
+                        <input type="number" step="0.00" name="integrantes[${i.idx}][monto_asignado]" class="form-control rounded-3 text-end" value="${i.monto.toFixed(2)}" oninput="manualInputMonto(${ind}, this)">
                     </div>
                     <div class="col-2 text-center text-secondary small" id="pct-${i.id}">
                         ${pct.toFixed(0)}%

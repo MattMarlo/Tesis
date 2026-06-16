@@ -61,6 +61,16 @@ class PagoController extends Controller
 
         $reserva = Reserva::findOrFail($request->reserva_id);
         
+        $montoDepositado = (float) $request->input('monto_depositado', 0); 
+        $totalPagado = $reserva->pago()->sum('monto_depositado');
+        $pendiente = max(0, (float) $reserva->precio_total_viaje - $totalPagado);
+        // cambio para validar que el monto a pagar no sea mayor al pago que se va a realizar
+        if ($montoDepositado > $pendiente) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'El  monto a cobrar no puede ser mayor a la deuda pendiente ($$' . number_format($pendiente, 2, '.', '') . ').');
+        }
+
         $datos = $request->only(['reserva_id', 'monto_depositado', 'metodo_pago', 'referencia', 'cliente_id']);
         $datos['user_id'] = Auth::id() ?? 1; // Fallback for dev
 

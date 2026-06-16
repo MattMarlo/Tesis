@@ -225,7 +225,7 @@
                     <h6 class="fw-bold mb-0 text-secondary text-uppercase small">Registrar pago</h6>
                     <span class="small text-muted">Saldo estimado: <strong id="detalle_saldo_pendiente" class="text-danger">—</strong></span>
                 </div>
-                <form action="{{ route('pagos.store') }}" method="POST" class="border rounded p-3 bg-light">
+                <form action="{{ route('pagos.store') }}" method="POST" class="border rounded p-3 bg-light" id="formRegistroPago" >
                     @csrf
                     <input type="hidden" name="redirect_after" value="reservas">
                     <input type="hidden" name="reserva_id" id="registro_reserva_id">
@@ -272,7 +272,7 @@
 {{-- Modal de Cobro de Reservas (atajo) --}}
 <div class="modal fade" id="modalCobrarReserva" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('pagos.store') }}" method="POST" class="modal-content">
+        <form action="{{ route('pagos.store') }}" method="POST" class="modal-content" id="formCobroRapido">
             @csrf
             <input type="hidden" name="redirect_after" value="reservas">
             <div class="modal-header">
@@ -286,6 +286,8 @@
                 </div>
 
                 <input type="hidden" name="cliente_id" id="cobrar_cliente_id">
+                <!--cambio aqui -->
+                <input type="hidden" id="cobrar_monto_maximo" value="">
 
                 <div class="mb-3">
                     <label class="form-label text-secondary fw-semibold">Cliente</label>
@@ -295,7 +297,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label text-secondary fw-semibold">Monto (€)</label>
-                        <input type="number" step="0.01" name="monto_depositado" id="cobrar_monto" class="form-control" required>
+                        <input type="number" step="0.01" min="0.01" name="monto_depositado" id="cobrar_monto" class="form-control" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label text-secondary fw-semibold">Método</label>
@@ -332,7 +334,7 @@
 
             <div class="modal-body">
 
-                <!-- 🔍 BUSCAR CLIENTE -->
+                <!-- BUSCAR CLIENTE -->
                 <label class="form-label small fw-bold text-secondary">
                     Buscar por cédula
                 </label>
@@ -713,10 +715,27 @@
         document.getElementById('cobrar_cliente_nombre').value = clienteNombre;
         document.getElementById('cobrar_monto').value = pendiente;
         document.getElementById('cobrar_cliente_id').value = '';
+        document.getElementById('cobrar_monto_maximo').value = pendiente; // <aqui cambios: guardar deuda pendiente como maximo de cobro
+        document.getElementById('cobrar_monto').max = pendiente; // <aqui cambios: establecer maximo en el input para validación del monto
 
         var modal = new bootstrap.Modal(document.getElementById('modalCobrarReserva'));
         modal.show();
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const formCobroRapido = document.getElementById('formCobroRapido');
+        if (formCobroRapido) {
+            formCobroRapido.addEventListener('submit', function (e) {
+                const monto = parseFloat(document.getElementById('cobrar_monto').value || '0');
+                const maximo = parseFloat(document.getElementById('cobrar_monto_maximo').value || '0');
+                if (monto > maximo) {
+                    e.preventDefault();
+                    alert('El monto no puede ser mayor a la deuda pendiente (€' + maximo.toFixed(2) + ').');
+                    document.getElementById('cobrar_monto').focus();
+                }
+            });
+        }
+    });
 
     @if(session('toast_sync') && session('success'))
     document.addEventListener('DOMContentLoaded', function () {

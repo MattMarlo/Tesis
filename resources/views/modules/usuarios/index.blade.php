@@ -39,7 +39,7 @@
                   <th class="text-start">Telefono</th>
                   <th class="text-start">Documento</th>
                   <th class="text-start">Rol</th>
-                  <th class="text-center">Acciones cambio</th>
+                  <th class="text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>

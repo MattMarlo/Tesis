@@ -247,6 +247,23 @@ class PagoService
         });
     }
 
+    public function anularPagos(array $pagoIds): void
+    {
+        $pagos = Pago::whereIn('id', $pagoIds)->get();
+        if ($pagos->isEmpty()) {
+            return;
+        }
+
+        $reservaIds = $pagos->pluck('reserva_id')->unique();
+
+        DB::transaction(function () use ($pagos, $reservaIds) {
+            DB::table('pagos')->whereIn('id', $pagos->pluck('id')->all())->delete();
+            foreach ($reservaIds as $reservaId) {
+                $this->sincronizarEstadoPagoReserva((int) $reservaId);
+            }
+        });
+    }
+
     public function actualizarIntegranteGrupal(int $reservaId, int $clienteId, array $datos): void
     {
         $reserva = Reserva::with('reservaGrupo')->findOrFail($reservaId);

@@ -192,6 +192,22 @@ class PagoController extends Controller
         return redirect()->route('pagos', $query)->with('success', 'Pago anulado. El estado de la reserva se ha recalculado.')->with('toast_sync', true);
     }
 
+    public function anularMultiple(Request $request)
+    {
+        $request->validate([
+            'pago_ids' => 'required|array|min:1',
+            'pago_ids.*' => 'integer|exists:pagos,id',
+        ]);
+
+        $this->pagoService->anularPagos($request->input('pago_ids', []));
+
+        $query = array_filter([
+            'reserva_id' => $request->input('reserva_id'),
+        ], fn ($v) => $v !== null && $v !== '');
+
+        return redirect()->route('pagos', $query)->with('success', 'Pagos eliminados. El estado de las reservas se ha recalculado.')->with('toast_sync', true);
+    }
+
     public function updateIntegrante(Request $request)
     {
         $request->validate([

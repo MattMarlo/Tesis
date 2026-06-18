@@ -42,6 +42,7 @@
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
+            overflow: hidden;
             position: fixed;
             background: #ffffff;
             border-right: 1px solid #e2e8f0;
@@ -78,7 +79,10 @@
 
         /* NAVEGACIÓN */
         .nav-list {
-            padding: 0 16px;
+            flex: 1 1 auto;
+            padding: 0 16px 16px 16px;
+            margin: 0;
+            overflow-y: auto;
             list-style: none;
         }
 
@@ -209,7 +213,9 @@
 
         /* User Section */
         .user-profile {
-            padding: 20px;
+            flex-shrink: 0;
+            margin-top:auto; 
+            padding: 16px 20px;
             border-top: 1px solid #e2e8f0;
             background: #fcfcfc;
         }

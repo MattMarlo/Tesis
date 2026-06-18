@@ -41,7 +41,10 @@
         /* SIDEBAR PRO */
         .sidebar {
             width: var(--sidebar-width);
-            height: 100vh;
+            /*height: 100vh; */ 
+            top: 0;
+            bottom: 0;
+            left: 0;
             overflow: hidden;
             position: fixed;
             background: #ffffff;
@@ -57,6 +60,7 @@
         }
 
         .sidebar .logo-container {
+            flex-shrink: 0;
             padding: 24px;
             display: flex;
             align-items: center;
@@ -79,11 +83,13 @@
 
         /* NAVEGACIÓN */
         .nav-list {
-            flex: 1 1 auto;
-            padding: 0 16px 16px 16px;
+            flex: 1 ;
+            padding: 0 16px ;
             margin: 0;
             overflow-y: auto;
+            
             list-style: none;
+            min-height: 0;
         }
 
         .nav-link {

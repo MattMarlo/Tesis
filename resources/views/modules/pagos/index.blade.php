@@ -4,18 +4,18 @@
 <style>
     /* Estilos específicos para replicar el diseño de "Pagos" basado en la imagen */
     body {
-        background-color: #12141d;
+        background-color: #FFFFFF;
         color: #e2e8f0;
     }
     
     .page-title {
-        color: #fff;
+        color: #2553EB;
         font-weight: 700;
         margin-bottom: 0.2rem;
     }
     
     .page-subtitle {
-        color: #94a3b8;
+        color: #26282a;
         font-size: 0.9rem;
     }
     
@@ -959,7 +959,7 @@
             return;
         }
 
-        if (!confirm('⚠️ Confirmación final: ¿Anular el registro contable?')) {
+        if (!confirm(' Confirmación final: ¿Anular el registro contable?')) {
             return;
         }
 

@@ -41,7 +41,7 @@
         /* SIDEBAR PRO */
         .sidebar {
             width: var(--sidebar-width);
-            /*height: 100vh; */ 
+            height: 100vh;
             top: 0;
             bottom: 0;
             left: 0;
@@ -83,13 +83,17 @@
 
         /* NAVEGACIÓN */
         .nav-list {
-            flex: 1 ;
-            padding: 0 16px ;
+            flex: 1;
+            padding: 0 16px;
             margin: 0;
             overflow-y: auto;
-            
             list-style: none;
             min-height: 0;
+        }
+
+        .sidebar .user-profile {
+            flex-shrink: 0;
+            overflow: hidden;
         }
 
         .nav-link {

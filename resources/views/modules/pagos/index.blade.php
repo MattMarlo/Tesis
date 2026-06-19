@@ -280,9 +280,9 @@
     @endif
 
     @if($reservaFiltroId ?? null)
-        <div class="alert border-0 mb-3" style="background:rgba(59,130,246,0.12);color:#93c5fd;border:1px solid rgba(59,130,246,0.35)!important;">
-            Filtrando por reserva #{{ $reservaFiltroId }}.
-            <a href="{{ route('pagos') }}" class="text-white text-decoration-underline ms-2">Quitar filtro</a>
+        <div class="alert border-0 mb-3" style="background:rgba(59,130,246,0.12);color:#2553EB;border:1px solid rgba(59,130,246,0.35)!important;">
+            <strong>Filtrando por reserva #{{ $reservaFiltroId }}.</strong> 
+            <a href="{{ route('pagos') }}" class="text-black text-decoration-underline ms-2">Quitar filtro</a>
         </div>
     @endif
 

@@ -596,7 +596,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content dark-modal">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Anular un pago diferente</h5>
+                <h5 class="modal-title fw-bold">Anular un pagos</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">

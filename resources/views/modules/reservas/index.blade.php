@@ -586,7 +586,8 @@
 
         // Botón gestionar pago siempre visible, actualizar enlace
         const btnPago = document.getElementById('btn_gestionar_pago');
-        btnPago.href = @json(url('/pagos')) + '?reserva_id=' + d.id + '&abrir_cobro=1';
+        //btnPago.href = @json(url('/pagos')) + '?reserva_id=' + d.id + '&abrir_cobro=1';
+        btnPago.href = @json(url('/pagos')) + '?reserva_id=' + d.id ;
 
         // Lógica de negocio para eliminar:
         // - NO se puede eliminar si tiene pagos

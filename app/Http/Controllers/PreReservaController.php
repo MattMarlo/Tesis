@@ -153,7 +153,7 @@ class PreReservaController extends Controller
             'estado' => 'required|in:pendiente_contacto,contactado,convertida,perdida',
         ]);
 
-        $destino = Destino::where('pais', $data['destino'])->first();
+        $destino = Destino::where('pais', 'LIKE', '%' . $data['destino'] . '%')->first();
         if (!$destino) {
             return to_route('prereservas.index')->with('error', 'Destino no encontrado. No se puede actualizar la pre-reserva.');
         }

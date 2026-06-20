@@ -216,7 +216,7 @@ class PreReservaController extends Controller
             return to_route('prereservas.index')->with('error','Cliente no encontrado para convertir');
         }
         
-        $destino = Destino::where('pais', $pre->destino)->first();
+        $destino = $this->findDestinoBySearch($pre->destino);
         if (!$destino) {
             return to_route('prereservas.index')->with('error','Destino no encontrado para convertir');
         }

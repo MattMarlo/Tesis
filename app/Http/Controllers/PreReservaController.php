@@ -49,7 +49,7 @@ class PreReservaController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Destino no encontrado. n8n debe enviar un destino existente.',
+                    'message' => 'Destino no encontrado. n8n debe enviar un destino existente.error aqui',
                 ], 422);
             }
 

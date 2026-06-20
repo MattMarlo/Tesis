@@ -223,7 +223,7 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="fw-bold mb-0 text-secondary text-uppercase small">Registrar pago</h6>
-                    <span class="small text-muted">Saldo estimado: <strong id="detalle_saldo_pendiente" class="text-danger">—</strong></span>
+                    <span class="small text-muted">Deuda: <strong id="detalle_saldo_pendiente" class="text-danger">—</strong></span>
                 </div>
                 <form action="{{ route('pagos.store') }}" method="POST" class="border rounded p-3 bg-light" id="formRegistroPago" >
                     @csrf
@@ -562,7 +562,7 @@
         document.getElementById('registro_cliente_id').value = d.cliente_id || '';
 
         const pend = Math.max(0, Number(d.precio_total_viaje) - Number(d.total_depositado || 0));
-        document.getElementById('detalle_saldo_pendiente').textContent = '€' + pend.toFixed(2);
+        document.getElementById('detalle_saldo_pendiente').textContent = '$' + pend.toFixed(2);
         document.getElementById('registro_monto').value = pend > 0 ? pend.toFixed(2) : '';
 
         const sel = document.getElementById('edit_destino_id');

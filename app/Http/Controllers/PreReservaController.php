@@ -21,6 +21,24 @@ class PreReservaController extends Controller
         $this->reservaService = $reservaService;
     }
 
+    private function normalizeSearchPattern(string $value): string
+    {
+        $value = mb_strtolower(trim($value));
+        $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value);
+        $value = preg_replace('/\s+/u', ' ', $value);
+
+        return '%'.str_replace(' ', '%', $value).'%';
+    }
+
+    private function findDestinoBySearch(string $value)
+    {
+        $pattern = $this->normalizeSearchPattern($value);
+
+        return Destino::whereRaw('LOWER(pais) LIKE ?', [$pattern])
+            ->orWhereRaw('LOWER(etiqueta) LIKE ?', [$pattern])
+            ->first();
+    }
+
     // Endpoint público para n8n
     public function storeFromWebhook(Request $request)
     {
@@ -44,12 +62,12 @@ class PreReservaController extends Controller
 
         DB::beginTransaction();
         try {
-            $destino = Destino::where('pais', 'LIKE', '%' . $data['destino'] . '%')->first();
+            $destino = $this->findDestinoBySearch($data['destino']);
             if (!$destino) {
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Destino no encontrado. n8n debe enviar un destino existente.error aqui',
+                    'message' => 'Destino no encontrado. n8n debe enviar un destino existente.',
                 ], 422);
             }
 
@@ -102,7 +120,7 @@ class PreReservaController extends Controller
         ]);
 
         $cliente = Cliente::where('documento', $data['cedula'])->first();
-        $destino = Destino::where('pais', $data['destino'])->first();
+        $destino = $this->findDestinoBySearch($data['destino']);
 
         return response()->json([
             'cliente' => [

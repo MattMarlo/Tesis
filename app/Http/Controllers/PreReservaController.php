@@ -49,7 +49,7 @@ class PreReservaController extends Controller
             if (!$destino) {
                 $destino = Destino::create([
                     'pais' => $data['destino'],
-                    'pais' => $request->input('pais', ''),
+                    'etiqueta' => $request->input('pais', ''),
                     'precio' => $request->input('precio', 0),
                     'dias' => $request->input('dias', 0),
                     'capacidad' => $request->input('capacidad', 0),

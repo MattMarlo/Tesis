@@ -44,7 +44,7 @@ class PreReservaController extends Controller
 
         DB::beginTransaction();
         try {
-            $destino = Destino::where('pais', $data['destino'])->first();
+            $destino = Destino::where('pais', 'LIKE', '%' . $data['destino'] . '%')->first();
             if (!$destino) {
                 DB::rollBack();
                 return response()->json([
@@ -155,7 +155,7 @@ class PreReservaController extends Controller
 
         $destino = Destino::where('pais', 'LIKE', '%' . $data['destino'] . '%')->first();
         if (!$destino) {
-            return to_route('prereservas.index')->with('error', 'Destino no encontrado. No se puede actualizar la pre-reserva.');
+            return to_route('prereservas.index')->with('error', 'Destino no encontrado. No se puede actualizar la pre-reserva. error aqui');
         }
 
         $cliente = Cliente::where('documento', $data['cedula'])->first();

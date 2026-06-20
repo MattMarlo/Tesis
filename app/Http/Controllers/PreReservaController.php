@@ -24,30 +24,12 @@ class PreReservaController extends Controller
     // Endpoint público para n8n
     public function storeFromWebhook(Request $request)
     {
-        $payload = array_merge($request->all(), [
-            'destino' => $request->input('destino')
-                ?? $request->input('lugar_reserva')
-                ?? $request->input('lugarReserva')
-                ?? $request->input('lugar')
-                ?? $request->input('destino_reserva'),
-            'cliente_nombre' => $request->input('cliente_nombre')
-                ?? $request->input('nombre_usuario')
-                ?? $request->input('nombreUsuario')
-                ?? $request->input('nombre'),
-            'cedula' => $request->input('cedula')
-                ?? $request->input('cedula_usuario')
-                ?? $request->input('documento')
-                ?? $request->input('dni'),
-            'fecha_viaje' => $request->input('fecha_viaje')
-                ?? $request->input('fecha_viaje_reserva')
-                ?? $request->input('text')
-                ?? $request->input('fecha'),
-            'telefono' => $request->input('telefono')
-                ?? $request->input('telefono_usuario')
-                ?? $request->input('telefonoUsuario'),
-            'email' => $request->input('email')
-                ?? $request->input('email_usuario')
-                ?? $request->input('emailUsuario'),
+        $payload = $request->only([
+            'destino', 
+            'cliente_nombre', 
+            'cedula', 
+            'telefono' ,
+            'fecha_viaje'
         ]);
 
         $data = Validator::make($payload, [

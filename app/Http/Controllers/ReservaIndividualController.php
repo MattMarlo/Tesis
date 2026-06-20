@@ -37,7 +37,8 @@ class ReservaIndividualController extends Controller
             'metodo_pago'        => 'nullable|string',
             'fecha_pago'         => 'nullable|date',
         ]);
-
+         
+        
         // Validación: la fecha de viaje no debe ser anterior a la fecha de reserva
         $fechaViaje = isset($datos['fecha_viaje']) ? Carbon::parse($datos['fecha_viaje']) : null;
         $fechaReserva = isset($datos['fecha_reserva']) ? Carbon::parse($datos['fecha_reserva']) : Carbon::now();
@@ -67,6 +68,22 @@ class ReservaIndividualController extends Controller
                 return response()->json(['message' => $msg], 422);
             }
             return back()->with('error', $msg)->withInput();
+        }
+        // validar que no exista una reserva activa para el mismo cliente , detino y fecha de viaje 
+        $duplicada = DB::table('reservas')
+            ->where('cliente_id',$datos['cliente_id'])
+            ->where('destino_id',$datos['destino_id'])
+            ->where('fecha_viaje',$datos['fecha_viaje'])
+            ->whereIn('estado',['pendiente','confirmada'])
+            ->first();
+        if($duplicada){
+            $msg="Ya existe una reserva activa (código:{$duplicada->codigo_reserva}) para este cliente
+            en el mismo destino,fecha.No se puede crear una nueva ";
+            if($request->expectsJson()){
+                return response()->json(['message'=>$msg],422);
+            }
+            return back()->with('error',$msg)->withInput();
+
         }
         $usuario_id = Auth::id();
         if (!$usuario_id) {

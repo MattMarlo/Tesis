@@ -104,8 +104,8 @@ Route::middleware('auth')->group(function() {
 // Pre-reservas (administración)
 Route::prefix('prereservas')->group(function() {
     Route::get('/', [PreReservaController::class, 'index'])->name('prereservas.index');
-    Route::get('/create', [PreReservaController::class, 'create'])->name('prereservas.create');
-    Route::post('/store', [PreReservaController::class, 'store'])->name('prereservas.store');
+    Route::get('/{id}/editar', [PreReservaController::class, 'edit'])->name('prereservas.edit');
+    Route::patch('/{id}', [PreReservaController::class, 'update'])->name('prereservas.update');
     Route::post('/{id}/convertir', [PreReservaController::class, 'convertToReserva'])->name('prereservas.convertir');
     Route::delete('/{id}', [PreReservaController::class, 'destroy'])->name('prereservas.destroy');
     Route::get('/check', [PreReservaController::class, 'checkExistence'])->name('prereservas.check');

@@ -39,7 +39,6 @@ class PreReservaController extends Controller
             'fecha_viaje' => 'required|date',
             'telefono' => 'nullable|string',
             'email' => 'nullable|string',
-            'crear_reserva' => 'nullable|boolean',
             'monto_depositado' => 'nullable|numeric'
         ])->validate();
 
@@ -47,13 +46,11 @@ class PreReservaController extends Controller
         try {
             $destino = Destino::where('pais', $data['destino'])->first();
             if (!$destino) {
-                $destino = Destino::create([
-                    'pais' => $data['destino'],
-                    'etiqueta' => $request->input('pais', ''),
-                    'precio' => $request->input('precio', 0),
-                    'dias' => $request->input('dias', 0),
-                    'capacidad' => $request->input('capacidad', 0),
-                ]);
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Destino no encontrado. n8n debe enviar un destino existente.',
+                ], 422);
             }
 
             $cliente = Cliente::where('documento', $data['cedula'])->first();
@@ -84,33 +81,11 @@ class PreReservaController extends Controller
                 'user_id' => null,
             ]);
 
-            $reservaCodigo = null;
-            if (!empty($data['crear_reserva'])) {
-                $datosReserva = [
-                    'cliente_id' => $cliente->id,
-                    'destino_id' => $destino->id,
-                    'user_id' => null,
-                    'fecha_reserva' => Carbon::now()->toDateTimeString(),
-                    'fecha_viaje' => $data['fecha_viaje'],
-                    'precio_total_viaje' => $destino->precio ?? 0,
-                    'monto_depositado' => $data['monto_depositado'] ?? 0,
-                ];
-
-                $reservaCodigo = $this->reservaService->guardarIndividual($datosReserva);
-                $reservaId = DB::table('reservas')->where('codigo_reserva', $reservaCodigo)->value('id');
-                if ($reservaId) {
-                    $preReserva->reserva_id = $reservaId;
-                    $preReserva->estado = 'convertida';
-                    $preReserva->save();
-                }
-            }
-
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'pre_reserva' => $preReserva,
-                'reserva_codigo' => $reservaCodigo,
             ], 201);
 
         } catch (\Exception $e) {
@@ -159,89 +134,58 @@ class PreReservaController extends Controller
     }
 
     // UI: formulario crear
-    public function create()
+    public function edit($id)
     {
-        $destinos = Destino::pluck('pais','id');
-        return view('modules.pre_reservas.create', compact('destinos'));
+        $preReserva = PreReserva::findOrFail($id);
+        return view('modules.pre_reservas.edit', compact('preReserva'));
     }
 
-    // UI: almacenar desde formulario web
-    public function store(Request $request)
+    public function update(Request $request, $id)
     {
+        $preReserva = PreReserva::findOrFail($id);
+
         $data = $request->validate([
             'destino' => 'required|string',
             'cliente_nombre' => 'required|string',
             'cedula' => 'required|string',
             'fecha_viaje' => 'nullable|date',
             'telefono' => 'nullable|string',
-            'email' => 'nullable|string',
-            'pais' => 'nullable|string',
-            'precio' => 'nullable|numeric',
-            'dias' => 'nullable|integer',
-            'capacidad' => 'nullable|integer',
-            'crear_reserva' => 'nullable|boolean',
-            'monto_depositado' => 'nullable|numeric',
+            'estado' => 'required|in:pendiente_contacto,contactado,convertida,perdida',
         ]);
+
+        $destino = Destino::where('pais', $data['destino'])->first();
+        if (!$destino) {
+            return to_route('prereservas.index')->with('error', 'Destino no encontrado. No se puede actualizar la pre-reserva.');
+        }
 
         $cliente = Cliente::where('documento', $data['cedula'])->first();
         if (!$cliente) {
             $parts = preg_split('/\s+/', trim($data['cliente_nombre']), 2);
             $nombres = $parts[0] ?? $data['cliente_nombre'];
             $apellidos = $parts[1] ?? '';
-            $cliente = Cliente::create([
+
+            Cliente::create([
                 'nombres' => $nombres,
                 'apellidos' => $apellidos,
-                'email' => $data['email'] ?? '',
+                'email' => '',
                 'telefono' => $data['telefono'] ?? '',
                 'documento' => $data['cedula'],
-                'estado' => 'activo'
-            ]);
-        }
-        //NOTA:AQUI VA A IR UN CAMBIOS 
-        $destino = Destino::where('pais', $data['destino'])->first();
-        if (!$destino) {
-            $destino = Destino::create([
-                'etiqueta' => $data['etiqueta'] ?? '',
-                'pais' => $data['destino'],
-                'precio' => $data['precio'] ?? 0,
-                'dias' => $data['dias'] ?? 0,
-                'capacidad' => $data['capacidad'] ?? 0,
+                'estado' => 'activo',
             ]);
         }
 
-        $preReserva = PreReserva::create([
+        $preReserva->fill([
             'cliente_nombre' => $data['cliente_nombre'],
             'destino' => $data['destino'],
             'telefono' => $data['telefono'] ?? '',
             'cedula' => $data['cedula'],
             'fecha_viaje' => $data['fecha_viaje'] ?? null,
-            'fecha_reserva' => Carbon::now(),
-            'origen' => 'web',
-            'estado' => 'pendiente_contacto',
-            'user_id' => Auth::id(),
+            'estado' => $data['estado'],
         ]);
 
-        if (!empty($data['crear_reserva'])) {
-            $datosReserva = [
-                'cliente_id' => $cliente->id,
-                'destino_id' => $destino->id,
-                'user_id' => Auth::id(),
-                'fecha_reserva' => Carbon::now()->toDateTimeString(),
-                'fecha_viaje' => $data['fecha_viaje'] ?? null,
-                'precio_total_viaje' => $destino->precio ?? 0,
-                'monto_depositado' => $data['monto_depositado'] ?? 0,
-            ];
+        $preReserva->save();
 
-            $codigo = $this->reservaService->guardarIndividual($datosReserva);
-            $reservaId = DB::table('reservas')->where('codigo_reserva', $codigo)->value('id');
-            if ($reservaId) {
-                $preReserva->reserva_id = $reservaId;
-                $preReserva->estado = 'convertida';
-                $preReserva->save();
-            }
-        }
-
-        return to_route('prereservas.index')->with('success','Pre-reserva creada correctamente');
+        return to_route('prereservas.index')->with('success', 'Pre-reserva actualizada correctamente');
     }
 
     // Convertir pre-reserva a reserva (acción rápida desde UI)

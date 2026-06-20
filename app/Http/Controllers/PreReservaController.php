@@ -45,10 +45,10 @@ class PreReservaController extends Controller
 
         DB::beginTransaction();
         try {
-            $destino = Destino::where('etiqueta', $data['destino'])->first();
+            $destino = Destino::where('pais', $data['destino'])->first();
             if (!$destino) {
                 $destino = Destino::create([
-                    'etiqueta' => $data['destino'],
+                    'pais' => $data['destino'],
                     'pais' => $request->input('pais', ''),
                     'precio' => $request->input('precio', 0),
                     'dias' => $request->input('dias', 0),
@@ -127,7 +127,7 @@ class PreReservaController extends Controller
         ]);
 
         $cliente = Cliente::where('documento', $data['cedula'])->first();
-        $destino = Destino::where('etiqueta', $data['destino'])->first();
+        $destino = Destino::where('pais', $data['destino'])->first();
 
         return response()->json([
             'cliente' => [
@@ -161,7 +161,7 @@ class PreReservaController extends Controller
     // UI: formulario crear
     public function create()
     {
-        $destinos = Destino::pluck('etiqueta','id');
+        $destinos = Destino::pluck('pais','id');
         return view('modules.pre_reservas.create', compact('destinos'));
     }
 
@@ -197,12 +197,12 @@ class PreReservaController extends Controller
                 'estado' => 'activo'
             ]);
         }
-
-        $destino = Destino::where('etiqueta', $data['destino'])->first();
+        //NOTA:AQUI VA A IR UN CAMBIOS 
+        $destino = Destino::where('pais', $data['destino'])->first();
         if (!$destino) {
             $destino = Destino::create([
-                'etiqueta' => $data['destino'],
-                'pais' => $data['pais'] ?? '',
+                'etiqueta' => $data['etiqueta'] ?? '',
+                'pais' => $data['destino'],
                 'precio' => $data['precio'] ?? 0,
                 'dias' => $data['dias'] ?? 0,
                 'capacidad' => $data['capacidad'] ?? 0,
@@ -253,8 +253,8 @@ class PreReservaController extends Controller
         if (!$cliente) {
             return to_route('prereservas.index')->with('error','Cliente no encontrado para convertir');
         }
-
-        $destino = Destino::where('etiqueta', $pre->destino)->first();
+        
+        $destino = Destino::where('pais', $pre->destino)->first();
         if (!$destino) {
             return to_route('prereservas.index')->with('error','Destino no encontrado para convertir');
         }

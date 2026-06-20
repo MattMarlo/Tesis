@@ -173,7 +173,7 @@
                                 </div>
                             </div>
                             <div class="mb-2">
-                                <label class="form-label small fw-semibold">Precio total (€)</label>
+                                <label class="form-label small fw-semibold">Precio total($)</label>
                                 <input type="number" step="0.01" id="edit_precio_total" class="form-control form-control-sm">
                             </div>
                             <div class="mb-2">
@@ -238,7 +238,7 @@
                     </div>
                     <div class="row g-2 align-items-end">
                         <div class="col-md-3">
-                            <label class="form-label small mb-0">Monto (€)</label>
+                            <label class="form-label small mb-0">Monto($)</label>
                             <input type="number" step="0.01" name="monto_depositado" id="registro_monto" class="form-control form-control-sm" required min="1">
                         </div>
                         <div class="col-md-3">
@@ -296,7 +296,7 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label text-secondary fw-semibold">Monto (€)</label>
+                        <label class="form-label text-secondary fw-semibold">Monto($)</label>
                         <input type="number" step="0.01" min="0.01" name="monto_depositado" id="cobrar_monto" class="form-control" required>
                     </div>
                     <div class="col-md-6 mb-3">
@@ -789,7 +789,7 @@
                         </button>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label small fw-semibold">Monto asignado (€)</label>
+                        <label class="form-label small fw-semibold">Monto asignado($)</label>
                         <input id="monto_asignado_nuevo" type="number" step="0.01" min="0" class="form-control form-control-sm" value="0.00">
                     </div>
                     ${textoExistente}

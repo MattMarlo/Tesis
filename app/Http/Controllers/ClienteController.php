@@ -17,12 +17,20 @@ class ClienteController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $titulo = "clientes";
-        $clientes=Cliente::all();
-        return view('modules.clientes.index',compact('titulo','clientes'));
-    }
+        $query = Cliente::query();
+    
+        // Si hay un documento en la URL, filtrar
+        if ($request->filled('documento')) {
+            $documento = $request->documento;
+            $query->where('documento', 'LIKE', "%$documento%");
+        }
+        
+        $clientes = $query->get(); // o paginate(10)
+            return view('modules.clientes.index',compact('titulo','clientes'));
+        }
 
     /**
      * Show the form for creating a new resource.

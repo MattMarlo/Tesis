@@ -22,12 +22,23 @@
                     <div class="card-body p-2">
                         <div class="row g-2 align-items-center">
                             <div class="col-md-8 col-sm-12">
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text bg-light border-0 text-muted ps-3">
-                                        <i class="bi bi-search"></i>
-                                    </span>
-                                    <input type="text" class="form-control bg-light border-0 py-2" placeholder="Buscar por nombre, email o teléfono..." style="border-radius: 0 8px 8px 0;">
-                                </div>
+                                <form action="{{ route('clientes') }}" method="GET" class="d-flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        name="documento" 
+                                        class="form-control " 
+                                        placeholder="Buscar cliente por cédula..."
+                                        value="{{ request('documento') }}"
+                                    >
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-search"></i> Buscar Cliente
+                                    </button>
+                                    @if(request('documento'))
+                                        <a href="{{ route('clientes') }}" class="btn btn-outline-secondary btn-sm ">
+                                            <i class="bi bi-x-circle"></i> Limpiar
+                                        </a>
+                                    @endif
+                                </form>
                             </div>
                             
                             <div class="col-md-4 col-sm-12 text-md-end text-start">

@@ -30,7 +30,7 @@ class ReservaGrupalController extends Controller
     public function store(Request $request)
     {
         $datos = $request->validate([
-            'grupo_id'                       => 'nullable|exists:grupos,id',
+            //'grupo_id'                       => 'nullable|exists:grupos,id',
             'nombre_grupo'                   => 'nullable|string|max:255',
             'destino_id'                     => 'required|exists:destinos,id',
             'fecha_reserva'                  => 'required|date',
@@ -42,13 +42,13 @@ class ReservaGrupalController extends Controller
             'integrantes.*.es_lider'         => 'nullable|boolean'
         ]);
 
-        if (empty($datos['grupo_id']) && empty($datos['nombre_grupo'])) {
+        /*if (empty($datos['grupo_id']) && empty($datos['nombre_grupo'])) {
             $msg = 'Debe seleccionar un grupo existente o ingresar el nombre para uno nuevo.';
             if ($request->expectsJson()) {
                 return response()->json(['message' => $msg], 422);
             }
             return back()->with('error', $msg)->withInput();
-        }
+        }*/
 
         $usuario_id = Auth::id();
         if (!$usuario_id) {

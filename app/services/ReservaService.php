@@ -92,7 +92,8 @@ class ReservaService
             }
 
             // 2. Usar grupo existente o Insertar Nuevo Grupo
-            if (!empty($datos['grupo_id'])) {
+            
+            /* if (!empty($datos['grupo_id'])) {
                 $grupo_id = $datos['grupo_id'];
             } else {
                 $grupo_id = DB::table('grupos')->insertGetId([
@@ -101,8 +102,15 @@ class ReservaService
                     'created_at'   => $fecha_actual,
                     'updated_at'   => $fecha_actual
                 ]);
-            }
-
+            }*/
+            // 2. Siempre crear un nuevo grupo (ignorar cualquier grupo_id)
+            $grupo_id = DB::table('grupos')->insertGetId([
+                'nombre_grupo' => $datos['nombre_grupo'],
+                'descripcion'  => 'Reserva grupal - ' . $datos['nombre_grupo'],
+                'created_at'   => $fecha_actual,
+                'updated_at'   => $fecha_actual
+            ]);
+            
             // 3. Insertar Reserva Principal (Reservas)
             $reserva_id = DB::table('reservas')->insertGetId([
                 'codigo_reserva'     => $codigo_reserva,

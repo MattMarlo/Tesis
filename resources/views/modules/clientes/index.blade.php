@@ -27,7 +27,7 @@
                                         type="text" 
                                         name="documento" 
                                         class="form-control " 
-                                        placeholder="Buscar cliente por cédula..."
+                                        placeholder="Buscar cliente por cédula"
                                         value="{{ request('documento') }}"
                                     >
                                     <button type="submit" class="btn btn-primary btn-sm">

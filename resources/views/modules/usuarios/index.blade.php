@@ -57,10 +57,10 @@
                         <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-outline-warning btn-sm">
                           <i class="bi bi-pencil-square"></i>
                         </a>
-                        <form action="{{ route('usuarios.destroy', $usuario->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('usuarios.destroy', $usuario->id) }}" method="POST" class="d-inline delete-usuario-form">
                           @csrf
                           @method('DELETE')
-                          <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este país?')">
+                          <button type="button" class="btn btn-outline-danger btn-sm btn-delete-usuario">
                             <i class="bi bi-trash3-fill"></i>
                           </button>
                         </form>
@@ -76,4 +76,47 @@
     </div>
   </section>
 </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      // Flash messages
+      @if(session('success'))
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: '{{ session('success') }}',
+          timer: 2500,
+          showConfirmButton: false
+        });
+      @endif
+
+      @if(session('error'))
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: '{{ session('error') }}'
+        });
+      @endif
+
+      // Delete confirmation (delegated handler for dynamic tables)
+      document.addEventListener('click', function(e){
+        const btn = e.target.closest('.btn-delete-usuario');
+        if (!btn) return;
+        e.preventDefault();
+        const form = btn.closest('form');
+        Swal.fire({
+          title: '¿Estás seguro?',
+          text: 'Esta acción eliminará el usuario permanentemente.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      });
+    });
+  </script>
 @endsection

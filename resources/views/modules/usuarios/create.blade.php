@@ -29,6 +29,16 @@
               Nuevo Usuario
             </h5>
 
+            @if ($errors->any())
+              <div class="alert alert-danger">
+                <ul class="mb-0">
+                  @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                  @endforeach
+                </ul>
+              </div>
+            @endif
+
             <form action="{{ route('usuarios.store') }}" id="form_disciplina" method="post">
               @csrf
 
@@ -134,3 +144,14 @@
 
 </main>
 @endsection
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    @if(session('success'))
+      Swal.fire({icon: 'success', title: 'Éxito', text: '{{ session('success') }}', timer:2500, showConfirmButton:false});
+    @endif
+    @if(session('error'))
+      Swal.fire({icon: 'error', title: 'Error', text: '{{ session('error') }}'});
+    @endif
+  });
+</script>

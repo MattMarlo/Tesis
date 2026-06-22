@@ -488,7 +488,7 @@
                 
                 <div class="mb-3">
                     <label class="form-label text-secondary">Cliente</label>
-                    <input type="text" id="modal_cliente_nombre" class="form-control dark-input" disabled>
+                    <input type="text" id="modal_cliente_nombre" class="form-control dark-input" readonly>
                 </div>
 
                 <div class="row">
@@ -559,7 +559,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3 small text-muted">
+                <div class="mb-3 small text-light">
                     <div><span class="text-secondary">ID pago:</span> <strong id="edit_info_id">—</strong></div>
                     <div><span class="text-secondary">Reserva:</span> <strong id="edit_info_reserva">—</strong></div>
                     <div><span class="text-secondary">Cliente:</span> <span id="edit_info_cliente">—</span></div>
@@ -617,7 +617,7 @@
                 <input type="hidden" id="pago_seleccionado_ids" value="">
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary text-white" style="background:#553333;border:none;" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary text-white" style="background:#334155;" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn text-white" style="background:#3b82f6;" id="btn_editar_seleccionado" onclick="abrirEditarPagoSeleccionado()" disabled>Editar pago seleccionado</button>
                 <button type="button" class="btn text-white" style="background:#ef4444;" id="btn_confirmar_anular" onclick="confirmarAnularPagosSeleccionados()" disabled>Anular pagos seleccionados</button>
             </div>
@@ -974,7 +974,7 @@
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <strong class="text-white d-block">${pago.cliente}</strong>
-                                        <small class="text-muted">ID: #${pago.id} • ${pago.metodo_pago} • ${pago.fecha_pago_fmt}</small>
+                                        <small class="text-light">ID: #${pago.id} • ${pago.metodo_pago} • ${pago.fecha_pago_fmt}</small>
                                     </div>
                                     <span class="text-cobrado fw-bold" style="font-size:1.1rem;">€${Number(pago.monto).toFixed(2)}</span>
                                 </div>

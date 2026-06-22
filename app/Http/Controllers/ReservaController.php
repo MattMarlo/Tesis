@@ -289,7 +289,7 @@ class ReservaController extends Controller
             $fechaReserva = Carbon::parse($request->input('fecha_reserva'));
             if ($fechaViaje->lt($fechaReserva)) {
                 if ($request->wantsJson()) {
-                    return response()->json(['success' => false, 'message' => 'La fecha de viaje no debe ser antes de la fecha de reserva'], 422);
+                    return response()->json(['success' => false, 'message' => 'La fecha de viaje no debe ser antes de la fecha de reserva!!'], 422);
                 }
                 return back()->with('error', 'La fecha de viaje no debe ser antes de la fecha de reserva')->withInput();
             }

@@ -206,6 +206,20 @@ class PagoService
         $totalPagado = (float) DB::table('pagos')->where('reserva_id', $reserva->id)->sum('monto_depositado');
         $precio = (float) $reserva->precio_total_viaje;
 
+        //oe ponte pilas este cCambios es critico Si la reserva está cancelada, no modificar su estado (solo actualizar estado_pago si procede)
+        if ($reserva->estado === 'cancelada') {
+            $totalPagado = DB::table('pagos')->where('reserva_id', $reserva->id)->sum('monto_depositado');
+            
+            if ($totalPagado <= 0) {
+                $reserva->estado_pago = 'pendiente';  // Sin pagos, sin deuda
+            } else {
+                $reserva->estado_pago = 'parcial';    // Con pagos, requiere revisión
+            }
+            
+            $reserva->save();
+            return;
+        }
+
         if ($totalPagado <= 0) {
             $reserva->estado_pago = 'pendiente';
             $reserva->estado = 'pendiente';

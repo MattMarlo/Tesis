@@ -218,7 +218,7 @@
     /* Desglose Grupal Panel */
     .desglose-panel {
         background-color: #161821;
-        border-top: 1px solid #2d313f;
+        border-top: 1px solid #3f332d;
         display: none;
     }
     .desglose-panel.active {
@@ -422,7 +422,7 @@
                     </td>
                     <td class="text-end text-nowrap">
                         @if(!empty($reserva['id_ultimo_pago']))
-                            <button type="button" class="btn btn-action" onclick="abrirModalAuditoria({{ $reserva['id_ultimo_pago'] }}, {{ $reserva['reserva_id'] }})">Ver</button>
+                            <button type="button" class="btn btn-action" data-reserva-id="{{ $reserva['reserva_id'] }}" data-pendiente="{{ $reserva['pendiente'] }}" onclick="abrirModalAuditoria({{ $reserva['id_ultimo_pago'] }}, {{ $reserva['reserva_id'] }})">Ver</button>
                         @else
                             <button type="button" class="btn btn-action" disabled title="Sin transacciones">Ver</button>
                         @endif
@@ -539,6 +539,7 @@
             <div class="modal-footer border-0 flex-wrap gap-2">
                 <button type="button" class="btn btn-secondary text-white" style="background:#334155;border:none;" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn text-white" style="background:#3b82f6;" id="btn_abrir_editar_pago" onclick="abrirModalEditarDesdeAuditoria()">Editar pago</button>
+                <button type="button" class="btn text-white" style="background:#3b82f6;" id="btn_abrir_editar_otro_pago" onclick="abrirModalAnularOtroPago()">Editar otro pago</button>
                 <button type="button" class="btn text-white" style="background:#ef4444;" id="btn_anular_este_pago" onclick="confirmarAnularPago()">Anular este pago</button>
                 <button type="button" class="btn text-white" style="background:#ec4899;" id="btn_anular_otro_pago" onclick="abrirModalAnularOtroPago()">Anular otro pago</button>
             </div>
@@ -558,9 +559,18 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <div class="mb-3 small text-muted">
+                    <div><span class="text-secondary">ID pago:</span> <strong id="edit_info_id">—</strong></div>
+                    <div><span class="text-secondary">Reserva:</span> <strong id="edit_info_reserva">—</strong></div>
+                    <div><span class="text-secondary">Cliente:</span> <span id="edit_info_cliente">—</span></div>
+                    <div><span class="text-secondary">Cobró:</span> <span id="edit_info_cobrador">—</span></div>
+                    <div><span class="text-secondary">Fecha pago:</span> <span id="edit_info_fecha">—</span></div>
+                    <div><span class="text-secondary">Disponible para asignar:</span> <strong id="edit_info_disponible">—</strong></div>
+                </div>
+                <div id="edit_error" class="alert alert-danger d-none" role="alert"></div>
                 <div class="mb-3">
                     <label class="form-label text-secondary">Monto (€)</label>
-                    <input type="number" step="0.01" name="monto_depositado" id="edit_pago_monto" class="form-control dark-input" required min="1">
+                    <input type="number" step="0.01" name="monto_depositado" id="edit_pago_monto" class="form-control dark-input" required min="0.01">
                 </div>
                 <div class="mb-3">
                     <label class="form-label text-secondary">Método</label>
@@ -607,7 +617,8 @@
                 <input type="hidden" id="pago_seleccionado_ids" value="">
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary text-white" style="background:#334155;border:none;" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary text-white" style="background:#553333;border:none;" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn text-white" style="background:#3b82f6;" id="btn_editar_seleccionado" onclick="abrirEditarPagoSeleccionado()" disabled>Editar pago seleccionado</button>
                 <button type="button" class="btn text-white" style="background:#ef4444;" id="btn_confirmar_anular" onclick="confirmarAnularPagosSeleccionados()" disabled>Anular pagos seleccionados</button>
             </div>
         </div>
@@ -681,7 +692,34 @@
         const mv = (pagoAuditoriaActual.metodo_pago_val || '').toLowerCase();
         document.getElementById('edit_pago_metodo').value = mv || 'efectivo';
         document.getElementById('edit_pago_ref').value = pagoAuditoriaActual.referencia || '';
+        // Mostrar información adicional en el modal de edición
+        document.getElementById('edit_info_id').textContent = '#' + pagoAuditoriaActual.id;
+        document.getElementById('edit_info_reserva').textContent = '#' + (pagoAuditoriaActual.reserva_id || '—');
+        document.getElementById('edit_info_cliente').textContent = pagoAuditoriaActual.cliente || '—';
+        document.getElementById('edit_info_cobrador').textContent = pagoAuditoriaActual.cobrador || '—';
+        document.getElementById('edit_info_fecha').textContent = pagoAuditoriaActual.fecha_pago_fmt || '—';
+
+        // Calcular monto máximo permitido: pendiente actual + monto del pago
+        const reservaId = pagoAuditoriaActual.reserva_id;
+        const pendienteTabla = obtenerPendienteDesdeTabla(reservaId);
+        const montoActualPago = Number(pagoAuditoriaActual.monto) || 0;
+        const disponible = pendienteTabla !== null ? pendienteTabla + montoActualPago : null;
+        document.getElementById('edit_info_disponible').textContent = disponible !== null
+            ? '€' + disponible.toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:2})
+            : '—';
+
+        document.getElementById('formEditarPago').dataset.maxAllowed = disponible !== null ? String(disponible) : '';
+
         new bootstrap.Modal(document.getElementById('modalEditarPago')).show();
+    }
+
+    function obtenerPendienteDesdeTabla(reservaId) {
+        const button = document.querySelector(`#tablaPagos button[data-reserva-id="${reservaId}"]`);
+        if (!button) return null;
+        const pendiente = button.dataset.pendiente;
+        if (!pendiente) return null;
+        const num = Number(pendiente);
+        return Number.isFinite(num) ? num : null;
     }
 
     function confirmarAnularPago() {
@@ -738,6 +776,33 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('formEditarPago');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const errBox = document.getElementById('edit_error');
+                errBox.classList.add('d-none');
+                errBox.textContent = '';
+
+                const montoVal = Number(document.getElementById('edit_pago_monto').value) || 0;
+                if (montoVal <= 0) {
+                    e.preventDefault();
+                    errBox.textContent = 'El monto debe ser un número mayor que 0.';
+                    errBox.classList.remove('d-none');
+                    return false;
+                }
+
+                const maxAllowed = Number(this.dataset.maxAllowed || '');
+                if (maxAllowed > 0 && montoVal > maxAllowed) {
+                    e.preventDefault();
+                    errBox.textContent = 'El monto no puede ser mayor a lo que debe la reserva. Máximo permitido: €' + maxAllowed.toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:2});
+                    errBox.classList.remove('d-none');
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
         @if(session('toast_sync'))
         const tp = document.getElementById('toastSyncPagos');
         if (tp && typeof bootstrap !== 'undefined' && bootstrap.Toast) {
@@ -857,7 +922,6 @@
             });
         });
     });
-
     function abrirModalCobrar(reservaId, clienteNombre, pendiente, clienteId = '') {
         document.getElementById('modal_reserva_id').value = reservaId;
         document.getElementById('modal_cliente_nombre').value = clienteNombre;
@@ -948,6 +1012,9 @@
 
         document.getElementById('pago_seleccionado_ids').value = selectedIds.join(',');
         document.getElementById('btn_confirmar_anular').disabled = selectedIds.length === 0;
+        // Habilitar el botón de editar solo si hay exactamente un pago seleccionado
+        const btnEditar = document.getElementById('btn_editar_seleccionado');
+        if (btnEditar) btnEditar.disabled = selectedIds.length !== 1;
     }
 
     /**
@@ -989,6 +1056,34 @@
         document.getElementById('btn_confirmar_anular').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Anulando...';
 
         f.submit();
+    }
+
+    /**
+     * Abre el modal de edición para el pago seleccionado en la lista (debe ser 1)
+     */
+    function abrirEditarPagoSeleccionado() {
+        const rawValue = document.getElementById('pago_seleccionado_ids').value || '';
+        const pagoIds = rawValue.split(',').filter(v => v !== '').map(v => Number(v));
+        if (pagoIds.length !== 1) {
+            alert('Por favor seleccione exactamente un pago para editar.');
+            return;
+        }
+        const pagoId = pagoIds[0];
+
+        // Cerrar modal de selección
+        bootstrap.Modal.getInstance(document.getElementById('modalAnularOtroPago'))?.hide();
+
+        // Obtener auditoría/detalle del pago y abrir modal de edición
+        fetch(pagosBase + '/' + pagoId + '/auditoria', { headers: { 'Accept': 'application/json' } })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) throw new Error();
+                pagoAuditoriaActual = data.data;
+                reservaCtxAuditoria = data.data.reserva_id || reservaCtxAuditoria;
+                // Reusar la función que abre el modal de editar desde auditoría
+                abrirModalEditarDesdeAuditoria();
+            })
+            .catch(() => alert('No se pudo cargar la información del pago seleccionado.'));
     }
 </script>
 @endsection

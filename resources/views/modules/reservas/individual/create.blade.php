@@ -129,9 +129,7 @@
                 <a href="{{ route('reservas') }}" class="btn btn-secondary me-2">
                   <i class="bi bi-arrow-left me-1"></i> Cancelar
                 </a>
-                <button type="button" class="btn btn-outline-secondary me-2">
-                  <i class="bi bi-save me-1"></i> Guardar Borrador
-                </button>
+                
                 <button type="submit" class="btn btn-primary">
                   <i class="bi bi-check-circle me-1"></i> Crear Reserva
                 </button>

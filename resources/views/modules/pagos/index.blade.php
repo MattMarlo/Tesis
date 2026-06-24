@@ -314,7 +314,7 @@
             <div class="stat-card stat-card-cobrado">
                 <div class="stat-title">COBRADO</div>
                 <div class="stat-value cobrado">€{{ number_format($metricas['cobrado'], 0, ',', '.') }}</div>
-                <div class="stat-desc">Tasa de cobro {{ $metricas['tasa_cobro'] }}%</div>
+                <!--<div class="stat-desc">Tasa de cobro {{ $metricas['tasa_cobro'] }}%</div>-->
             </div>
         </div>
         <!-- Card: Pendiente -->

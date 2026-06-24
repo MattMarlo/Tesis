@@ -58,7 +58,7 @@
 
               <div class="d-flex justify-content-between align-items-start">
                 <h5 class="fw-bold mb-1">
-                  {{ $destino->etiqueta }}, {{ $destino->pais }}
+                   {{ $destino->pais }}
                 </h5>
 
                 <a href="{{ route('destinos.edit', $destino->id) }}" class="text-dark">
@@ -67,7 +67,7 @@
               </div>
 
               <p class="text-muted mb-2">
-                <i class="bi bi-geo-alt"></i> Destino turístico
+                <i class="bi bi-geo-alt"></i> {{ $destino->etiqueta }}
               </p>
 
               <p class="text-muted small">

@@ -80,9 +80,9 @@
             <input type="password" name="password" class="form-control" required>
           </div>
           <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
-          <div class="mt-3 text-center">
+          <!-- <div class="mt-3 text-center">
             <small class="text-muted">¿No tienes cuenta? <a href="{{ route('register') }}">Regístrate</a></small>
-          </div>
+          </div>-->
         </form>
       </div>
     </div>

@@ -143,7 +143,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-secondary small fw-bold">MONTO TOTAL GRUPO (€)</label>
-                                <input type="number" step="0.01" name="precio_total_viaje" id="monto_total_grupo" class="form-control rounded-3" value="{{ old('precio_total_viaje', 3600) }}" oninput="calcularDistribucion()" required>
+                                <input type="number" step="0.01" name="precio_total_viaje" id="monto_total_grupo" class="form-control rounded-3" value="{{ old('precio_total_viaje', 0) }}" readonly>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-secondary small fw-bold">ESTADO</label>
@@ -191,11 +191,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h6 class="fw-bold mb-1 text-black">Distribución de pagos</h6>
-                                <p class="text-secondary small mb-0">Total: €<span id="dist-total">3600</span> · <span id="dist-count">0</span> integrantes</p>
-                            </div>
-                            <div class="d-flex bg-white rounded-pill p-1 border" style="border-color: #2c303e !important;">
-                                <button type="button" onclick="setModoDistribucion('iguales')" id="btn-dist-iguales" class="btn btn-sm btn-primary rounded-pill px-3">Iguales</button>
-                                <button type="button" onclick="setModoDistribucion('personalizado')" id="btn-dist-personalizado" class="btn btn-sm text-secondary rounded-pill px-3">Personalizado</button>
+                                <p class="text-secondary small mb-0">Total: €<span id="dist-total">0</span> · <span id="dist-count">0</span> integrantes</p>
                             </div>
                         </div>
                         
@@ -235,7 +231,6 @@
 <script>
 let integrantes = [];
 let idxCounter = 0;
-let modoDist = 'iguales';
 const colores = ['#5b66d6', '#198754', '#fd7e14', '#dc3545', '#0dcaf0', '#6f42c1'];
 
 const gruposExistentes = @json($grupos);
@@ -372,20 +367,21 @@ function renderIntegrantes() {
 }
 
 function setModoDistribucion(modo) {
-    modoDist = modo;
-    if(modo === 'iguales') {
-        document.getElementById('btn-dist-iguales').className = "btn btn-sm btn-primary rounded-pill px-3";
-        document.getElementById('btn-dist-personalizado').className = "btn btn-sm text-secondary rounded-pill px-3";
-    } else {
-        document.getElementById('btn-dist-personalizado').className = "btn btn-sm btn-secondary rounded-pill px-3";
-        document.getElementById('btn-dist-iguales').className = "btn btn-sm text-secondary rounded-pill px-3";
-    }
-    calcularDistribucion();
+    // Modo personalizado es el único disponible ahora
 }
 
 function calcularDistribucion() {
-    const total = parseFloat(document.getElementById('monto_total_grupo').value) || 0;
-    document.getElementById('dist-total').innerText = total;
+    // Calcular el total basado en los montos asignados a cada integrante
+    let sumAsignado = 0;
+    integrantes.forEach((i) => {
+        sumAsignado += i.monto;
+    });
+    
+    const total = parseFloat(sumAsignado.toFixed(2));
+    
+    // Actualizar el campo de monto total grupo
+    document.getElementById('monto_total_grupo').value = total.toFixed(2);
+    document.getElementById('dist-total').innerText = total.toFixed(2);
     
     if(integrantes.length === 0) {
         document.getElementById('distribucion-lista').innerHTML = '';
@@ -395,24 +391,14 @@ function calcularDistribucion() {
         return;
     }
 
-    if(modoDist === 'iguales') {
-        const montoBase = parseFloat((total / integrantes.length).toFixed(2));
-        let diff = total - (montoBase * integrantes.length);
-        
-        integrantes.forEach((i, index) => {
-            i.monto = (index === 0) ? montoBase + diff : montoBase;
-        });
-    } else {
-        // En modo personalizado, la funcion solo lee los inputs (se actualizan oninput)
-    }
-
     renderDistribucion(total);
 }
 
 function manualInputMonto(idxList, elem) {
-    if(modoDist === 'iguales') setModoDistribucion('personalizado');
     integrantes[idxList].monto = parseFloat(elem.value) || 0;
-    renderDistribucion(parseFloat(document.getElementById('monto_total_grupo').value) || 0, true);
+    calcularDistribucion();
+    const total = parseFloat(document.getElementById('monto_total_grupo').value) || 0;
+    renderDistribucion(total, true);
 }
 
 function renderDistribucion(total, onlyUpdateProgressAndTotals = false) {

@@ -396,8 +396,14 @@ function calcularDistribucion() {
 
 function manualInputMonto(idxList, elem) {
     integrantes[idxList].monto = parseFloat(elem.value) || 0;
-    calcularDistribucion();
-    const total = parseFloat(document.getElementById('monto_total_grupo').value) || 0;
+   // calcularDistribucion();
+    let sumAsignado = 0;
+    integrantes.forEach(i => sumAsignado += i.monto);
+    //const total = parseFloat(document.getElementById('monto_total_grupo').value) || 0;
+    const total = parseFloat(sumAsignado.toFixed(2));
+    document.getElementById('monto_total_grupo').value = total.toFixed(2);
+    document.getElementById('dist-total').innerText=toFixed(2);
+
     renderDistribucion(total, true);
 }
 

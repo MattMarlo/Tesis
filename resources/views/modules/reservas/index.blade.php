@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="container mt-4">
+<div class="container-fluid mt-4 px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold">Gestión de Reservas</h2>
         <div class="d-flex gap-2">

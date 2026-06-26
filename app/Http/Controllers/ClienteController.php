@@ -56,15 +56,39 @@ class ClienteController extends Controller
                 'estado'    => $request->estado,
             ];
 
-            $this->clienteService->guardarCliente($datos);
+            //$this->clienteService->guardarCliente($datos);
+            $cliente=$this->clienteService->guardarCliente($datos);
+            //Si la petición espera json (desde el modal principal)
+            if($request->expectsJson()){
+                return response()->json([
+                    'success'=>true,
+                    'message'=>'Cliente creado exitosamente.',
+                    'cliente'=> [
+                        'id' => $cliente->id,
+                        'nombres' => $cliente->nombres,
+                        'apellidos' =>$cliente->apellidos,
+                        'email'=>$cliente->email,
+                        'telefono'=>$cliente->telefono,
+                        'documento'=>$cliente->documento,
+                    ]
+                ]);
+            };
 
             return to_route('clientes')->with('success', 'Su cliente fue guardado exitosamente.');
 
         } catch (\InvalidArgumentException $e) {
+            //return to_route('clientes')->with('error', $e->getMessage());
+            if($request->expectsJson()){
+                return response()->json(['success'=>false,'message'=>$e->getMessage()],422);
+            }
             return to_route('clientes')->with('error', $e->getMessage());
 
         } catch (\Exception $e) {
-            return to_route('clientes')->with('error', 'No se pudo agregar el cliente: ' . $e->getMessage());
+            //return to_route('clientes')->with('error', 'No se pudo agregar el cliente: ' . $e->getMessage());
+            if($request->expectsJson()){
+                return response()->json(['success'=>false,'message'=>'No se pudo agregar el cliente: '.$e->getMessage()],500);
+            };
+            return to_route('clientes')->with('error','No se pudo agregar al cliente: ' . $e->getMessage());
         }
     }
 

@@ -42,12 +42,18 @@
                 <!-- CLIENTE -->
                 <div class="col-12 col-md-6">
                   <label for="cliente_id" class="form-label">Cliente</label>
-                  <select name="cliente_id" class="form-select" required>
-                    <option value="">Seleccionar cliente...</option>
-                    @foreach($clientes as $cliente)
-                      <option value="{{ $cliente->id }}" {{ old('cliente_id') == $cliente->id ? 'selected' : '' }}>{{ $cliente->nombres }} {{ $cliente->apellidos }}</option>
-                    @endforeach
-                  </select>
+                  <div class="d-flex gap-2">
+                    <select name="cliente_id" id="cliente_id" class="form-select" required>
+                      <option value="">Seleccionar cliente...</option>
+                      @foreach($clientes as $cliente)
+                        <option value="{{ $cliente->id }}" {{ old('cliente_id') == $cliente->id ? 'selected' : '' }}>{{ $cliente->nombres }} {{ $cliente->apellidos }}</option>
+                      @endforeach
+                    </select>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalCrearClienteRapido">
+                      <i class="bi bi-plus-circle"></i> Nuevo
+                    </button>
+                  </div>
+                  
                 </div>
 
                 <!-- DATOS DEL VIAJE -->
@@ -143,7 +149,47 @@
       </div>
     </div>
   </section>
-
+  <!-- Modal Crear Cliente Rápido -->
+<div class="modal fade" id="modalCrearClienteRapido" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Cliente Rápido</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formClienteRapido">
+                    @csrf
+                    <div id="errores-cliente-rapido" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombres</label>
+                        <input type="text" name="nombres" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Apellidos</label>
+                        <input type="text" name="apellidos" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" name="telefono" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Documento (Cédula)</label>
+                        <input type="text" name="documento" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarClienteRapido">Guardar Cliente</button>
+            </div>
+        </div>
+    </div>
+</div>
 </main>
 <script>
 document.getElementById('form_reserva_individual').addEventListener('submit', async function (e) {
@@ -205,5 +251,84 @@ document.getElementById('form_reserva_individual').addEventListener('submit', as
     submitBtn.innerHTML = originalText;
   }
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('modalCrearClienteRapido');
+    const form = document.getElementById('formClienteRapido');
+    const btnGuardar = document.getElementById('btnGuardarClienteRapido');
+    const errorDiv = document.getElementById('errores-cliente-rapido');
+
+    // Cuando se abre el modal, limpiar errores y campos
+    modal.addEventListener('hidden.bs.modal', function () {
+        form.reset();
+        errorDiv.classList.add('d-none');
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+    });
+
+    btnGuardar.addEventListener('click', function () {
+        // Limpiar errores anteriores
+        errorDiv.classList.add('d-none');
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
+        const formData = new FormData(form);
+
+        fetch('{{ route('clientes.store') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok || !data.success) {
+                // Errores de validación (422) o mensaje de error
+                if (data.errors) {
+                    // Mostrar errores en cada campo
+                    for (const [key, messages] of Object.entries(data.errors)) {
+                        let input = form.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            input.classList.add('is-invalid');
+                            let feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            feedback.innerText = messages[0];
+                            input.parentNode.appendChild(feedback);
+                        }
+                    }
+                } else {
+                    errorDiv.innerText = data.message || 'Error al crear el cliente.';
+                    errorDiv.classList.remove('d-none');
+                }
+                return;
+            }
+
+            // Éxito: agregar el cliente al select y cerrar modal
+            const cliente = data.cliente;
+            const select = document.getElementById('cliente_id');
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.nombres + ' ' + cliente.apellidos;
+            option.selected = true;
+            select.appendChild(option);
+
+            // Cerrar modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            modalInstance.hide();
+
+            // Opcional: mensaje de éxito (puedes usar SweetAlert o toast)
+            alert('Cliente creado y seleccionado exitosamente.');
+        })
+        .catch(error => {
+            console.error(error);
+            errorDiv.innerText = 'Error de conexión. Intente de nuevo.';
+            errorDiv.classList.remove('d-none');
+        });
+    });
+});
+
 </script>
 @endsection

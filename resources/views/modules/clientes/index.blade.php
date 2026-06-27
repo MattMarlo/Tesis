@@ -169,7 +169,7 @@
             </div>
 
             <div class="modal-body p-4">
-                <form action="{{ route('clientes.store') }}" id="form_nuevo_cliente" method="post">
+                <form action="{{ route('clientes.store') }}" id="form_nuevo_cliente" method="post" enctype="multipart/form-data">
                     @csrf
 
                     <div class="row g-3">

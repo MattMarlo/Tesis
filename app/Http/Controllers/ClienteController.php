@@ -155,15 +155,16 @@ class ClienteController extends Controller
             ];
               // Buscar el cliente
              $cliente = Cliente::findOrFail($id);
-            // Si se sube un nuevo archivo
-            if ($request->hasFile('archivo')) {
-                // Eliminar archivo anterior si existe
+            // Si se sube un nuevo archivo, validar y guardar
+            if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
                 if ($cliente->archivo && Storage::disk('public')->exists($cliente->archivo)) {
                     Storage::disk('public')->delete($cliente->archivo);
                 }
-                // Guardar nuevo archivo
+
                 $ruta = $request->file('archivo')->store('clientes', 'public');
-                $datos['archivo'] = $ruta;
+                if ($ruta) {
+                    $datos['archivo'] = $ruta;
+                }
             }
 
             $this->clienteService->actualizarCliente($id, $datos);

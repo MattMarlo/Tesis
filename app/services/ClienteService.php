@@ -6,6 +6,7 @@ use App\Models\Cliente;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ClienteService
 {
@@ -94,33 +95,33 @@ class ClienteService
     public function actualizarCliente($cliente_id, $datos)
     {
         // ============================================================
-        // 1. LOG DE ENTRADA
+        // LOG DE ENTRADA (para depurar)
         // ============================================================
-        \Log::info('🔍 SERVICIO - Inicio actualizarCliente', [
+        Log::info('🔍 SERVICIO - Inicio actualizarCliente', [
             'cliente_id' => $cliente_id,
             'datos'      => $datos
         ]);
 
         // ============================================================
-        // 2. VALIDAR DUPLICADOS (documento y email)
+        // VALIDAR DUPLICADOS (documento y email)
         // ============================================================
         $this->validarClienteDuplicado($datos, $cliente_id);
 
         // ============================================================
-        // 3. BUSCAR EL CLIENTE
+        // BUSCAR EL CLIENTE
         // ============================================================
         $cliente = Cliente::find($cliente_id);
         if (!$cliente) {
             throw new InvalidArgumentException('El cliente no existe.');
         }
 
-        \Log::info('🔍 SERVICIO - Cliente encontrado', [
+        Log::info('🔍 SERVICIO - Cliente encontrado', [
             'id'            => $cliente->id,
             'archivo_actual' => $cliente->archivo
         ]);
 
         // ============================================================
-        // 4. ASIGNAR CAMPOS BÁSICOS (siempre se actualizan)
+        // ASIGNAR CAMPOS BÁSICOS (siempre se actualizan)
         // ============================================================
         $cliente->nombres   = $datos['nombres'];
         $cliente->apellidos = $datos['apellidos'];
@@ -130,34 +131,34 @@ class ClienteService
         $cliente->estado    = $datos['estado'] ?? 'activo';
 
         // ============================================================
-        // 5. ACTUALIZAR ARCHIVO (SOLO si la clave existe en $datos)
+        // ACTUALIZAR ARCHIVO (SOLO si la clave existe en $datos)
         // ============================================================
         // ✅ Siempre que exista la clave 'archivo', la asignamos (puede ser null o ruta)
         if (array_key_exists('archivo', $datos)) {
             $cliente->archivo = $datos['archivo'];
-            \Log::info('✅ SERVICIO - Archivo asignado', [
+            Log::info('✅ SERVICIO - Archivo asignado', [
                 'archivo' => $cliente->archivo
             ]);
         } else {
-            \Log::info('ℹ️ SERVICIO - No se pasó la clave archivo, se mantiene el valor actual');
+            Log::info('ℹ️ SERVICIO - No se pasó la clave archivo, se mantiene el valor actual');
         }
 
         // ============================================================
-        // 6. GUARDAR EN BASE DE DATOS
+        // GUARDAR EN BASE DE DATOS
         // ============================================================
-        \Log::info('🔍 SERVICIO - Antes de save()', [
+        Log::info('🔍 SERVICIO - Antes de save()', [
             'archivo' => $cliente->archivo
         ]);
 
         $cliente->save();
 
-        \Log::info('✅ SERVICIO - Después de save()', [
+        Log::info('✅ SERVICIO - Después de save()', [
             'id'      => $cliente->id,
             'archivo' => $cliente->archivo
         ]);
 
         // ============================================================
-        // 7. DEVOLVER EL CLIENTE ACTUALIZADO
+        // DEVOLVER EL CLIENTE ACTUALIZADO
         // ============================================================
         return $cliente;
     }

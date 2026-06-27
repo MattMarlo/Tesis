@@ -58,11 +58,7 @@ class ClienteController extends Controller
                 'estado'    => 'required|in:activo,inactivo',
                 'archivo'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 👈 VALIDACIÓN AQUÍ
             ]);*/
-            Log::info('Subida de archivo - inicio', [
-                'hasFile' => $request->hasFile('archivo'),
-                'file' => $request->file('archivo') ? $request->file('archivo')->getClientOriginalName() : null,
-                'size' => $request->file('archivo') ? $request->file('archivo')->getSize() : null,
-            ]);
+           
             $datos = [
                 'nombres'   => $request->nombres,
                 'apellidos' => $request->apellidos,
@@ -83,7 +79,7 @@ class ClienteController extends Controller
             if (isset($datos['archivo'])) {
                 $cliente->archivo = $datos['archivo'];
                 $cliente->save();
-                Log::info('Forzado guardado de archivo en BD:', ['archivo' => $datos['archivo']]);
+                
             }
             //Si la petición espera json (desde el modal principal)
             if($request->expectsJson()){

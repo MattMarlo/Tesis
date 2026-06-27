@@ -141,7 +141,7 @@ class ClienteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    /*public function update(Request $request, string $id)
     {
         try{
             $datos = [
@@ -173,6 +173,96 @@ class ClienteController extends Controller
             return to_route('clientes')->with('error',$e->getMessage());
         }catch(Exception $e){
             return to_route('clientes')->with('error','No se pudo editar: '.$e->getMessage());
+        }
+    }*/
+    public function update(Request $request, string $id)
+    {
+        try {
+            Log::info('🔍 INICIO UPDATE - Cliente ID: ' . $id);
+
+            // Buscar cliente
+            $cliente = Cliente::findOrFail($id);
+
+            // Datos base (sin archivo)
+            $datos = [
+                'nombres'   => $request->nombres,
+                'apellidos' => $request->apellidos,
+                'email'     => $request->email,
+                'telefono'  => $request->telefono,
+                'documento' => $request->documento,
+                'estado'    => $request->estado,
+            ];
+
+            // --------------------------------------------
+            // PROCESAR ARCHIVO (SOLO SI SE SUBE)
+            // --------------------------------------------
+            $tieneArchivo = $request->hasFile('archivo');
+
+            if ($tieneArchivo) {
+                $file = $request->file('archivo');
+
+                Log::info('📎 Archivo recibido en edición:', [
+                    'nombre' => $file->getClientOriginalName(),
+                    'tamaño' => $file->getSize() . ' bytes',
+                    'mime'   => $file->getMimeType(),
+                    'valid'  => $file->isValid() ? 'SÍ' : 'NO',
+                ]);
+
+                // Si el archivo no es válido, lanzar excepción
+                if (!$file->isValid()) {
+                    throw new Exception('El archivo subido no es válido o está corrupto.');
+                }
+
+                // Eliminar archivo anterior si existe
+                if ($cliente->archivo && Storage::disk('public')->exists($cliente->archivo)) {
+                    Storage::disk('public')->delete($cliente->archivo);
+                    Log::info('🗑️ Archivo anterior eliminado: ' . $cliente->archivo);
+                }
+
+                // Intentar guardar el nuevo archivo
+                try {
+                    $ruta = $file->store('clientes', 'public');
+                    Log::info('🔍 Ruta devuelta por store(): ' . ($ruta ?: 'null'));
+
+                    if ($ruta) {
+                        // Verificar que realmente exista en el disco
+                        if (Storage::disk('public')->exists($ruta)) {
+                            Log::info('✅ El archivo existe físicamente en el disco.');
+                            $datos['archivo'] = $ruta;
+                        } else {
+                            Log::error('❌ La ruta fue devuelta pero el archivo NO existe en el disco.');
+                            throw new Exception('El archivo no se guardó correctamente en el servidor.');
+                        }
+                    } else {
+                        Log::error('❌ store() devolvió false o null.');
+                        throw new Exception('Error al guardar el archivo en el servidor.');
+                    }
+                } catch (\Exception $e) {
+                    Log::error('❌ Excepción al guardar archivo: ' . $e->getMessage());
+                    throw $e;
+                }
+            } else {
+                Log::info('📭 No se recibió archivo en la edición (se mantiene el actual)');
+            }
+
+            // --------------------------------------------
+            // ACTUALIZAR CLIENTE
+            // --------------------------------------------
+            Log::info('📤 Datos a enviar al servicio:', $datos);
+
+            $this->clienteService->actualizarCliente($id, $datos);
+
+            Log::info('✅ Cliente actualizado correctamente en la base de datos');
+
+            return to_route('clientes')->with('success', 'Cliente actualizado correctamente');
+
+        } catch (InvalidArgumentException $e) {
+            Log::error('❌ Error de validación (InvalidArgumentException): ' . $e->getMessage());
+            return to_route('clientes')->with('error', $e->getMessage());
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error general en update: ' . $e->getMessage());
+            return to_route('clientes')->with('error', 'No se pudo editar: ' . $e->getMessage());
         }
     }
 

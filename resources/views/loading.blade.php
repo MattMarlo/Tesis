@@ -89,7 +89,7 @@
 								</div><!-- /.navbar-header-->
 								<div class="collapse navbar-collapse">		  
 									<ul class="nav navbar-nav navbar-right">
-										<li class="smooth-menu"><a href="#home">Inicio </a></li>
+										<li class="smooth-menu"><a href="#home">Inicioasas </a></li>
 										<li class="smooth-menu"><a href="#gallery">Destinos</a></li>
 										<li class="smooth-menu"><a href="#spo">Ofertas Especiales</a></li>
 										<li class="smooth-menu"><a href="#subs">Subscripción</a></li>

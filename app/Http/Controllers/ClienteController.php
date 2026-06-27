@@ -151,7 +151,7 @@ class ClienteController extends Controller
                 'telefono' => $request->telefono,
                 'documento' => $request->documento,
                 'estado' => $request->estado,
-                'archivo'=>$request->archivo,
+                
             ];
               // Buscar el cliente
              $cliente = Cliente::findOrFail($id);

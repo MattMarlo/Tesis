@@ -6,7 +6,6 @@ use App\Models\Cliente;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 class ClienteService
 {
@@ -57,14 +56,9 @@ class ClienteService
         $cliente->estado = $datos['estado'] ?? 'activo';
         $cliente->archivo   = $datos['archivo'] ?? null;
         $cliente->save();
-        Log::info('Datos recibidos en ClienteService:', $datos);
-        $this->validarClienteDuplicado($datos);
-        // ... asignación
-        Log::info('Valor de archivo a guardar:', ['archivo' => $datos['archivo'] ?? 'null']);
-        $cliente->save();
+        
         return $cliente;
-            return $cliente;
-        }
+    }
 
     /**
      * Actualizar un cliente con validaciones

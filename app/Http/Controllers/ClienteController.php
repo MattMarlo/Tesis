@@ -76,12 +76,15 @@ class ClienteController extends Controller
             if ($request->hasFile('archivo')) {
                 $ruta = $request->file('archivo')->store('clientes', 'public');
                 $datos['archivo'] = $ruta;
-                Log::info('Ruta asignada en controlador:', ['ruta' => $ruta, 'datos_archivo' => $datos['archivo']]);
-            } else {
-                Log::warning('No se subió archivo');
-            }
+                
+            } 
             //$this->clienteService->guardarCliente($datos);
             $cliente=$this->clienteService->guardarCliente($datos);
+            if (isset($datos['archivo'])) {
+                $cliente->archivo = $datos['archivo'];
+                $cliente->save();
+                Log::info('Forzado guardado de archivo en BD:', ['archivo' => $datos['archivo']]);
+            }
             //Si la petición espera json (desde el modal principal)
             if($request->expectsJson()){
                 return response()->json([

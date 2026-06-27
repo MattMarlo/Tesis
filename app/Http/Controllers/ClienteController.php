@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Exception;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ClienteController extends Controller
 {
@@ -57,6 +58,11 @@ class ClienteController extends Controller
                 'estado'    => 'required|in:activo,inactivo',
                 'archivo'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 👈 VALIDACIÓN AQUÍ
             ]);*/
+            Log::info('Subida de archivo - inicio', [
+                'hasFile' => $request->hasFile('archivo'),
+                'file' => $request->file('archivo') ? $request->file('archivo')->getClientOriginalName() : null,
+                'size' => $request->file('archivo') ? $request->file('archivo')->getSize() : null,
+            ]);
             $datos = [
                 'nombres'   => $request->nombres,
                 'apellidos' => $request->apellidos,

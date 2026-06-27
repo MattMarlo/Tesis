@@ -79,9 +79,9 @@ class ClienteService
         $cliente->telefono = $datos['telefono'];
         $cliente->documento = $datos['documento'];
         $cliente->estado = $datos['estado'] ?? 'activo';
-        if (array_key_exists('archivo', $datos) && $datos['archivo']) {
-            $cliente->archivo = $datos['archivo'];
-        }
+        
+        $cliente->archivo = $datos['archivo'];
+        
         $cliente->save();
 
         return $cliente;

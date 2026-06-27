@@ -133,7 +133,7 @@ class ClienteService
         // ============================================================
         // ACTUALIZAR ARCHIVO (SOLO si la clave existe en $datos)
         // ============================================================
-        // ✅ Siempre que exista la clave 'archivo', la asignamos (puede ser null o ruta)
+        //  Siempre que exista la clave 'archivo', la asignamos (puede ser null o ruta)
         if (array_key_exists('archivo', $datos)) {
             $cliente->archivo = $datos['archivo'];
             Log::info('✅ SERVICIO - Archivo asignado', [

@@ -64,7 +64,7 @@ class ClienteController extends Controller
                 'telefono'  => $request->telefono,
                 'documento' => $request->documento,
                 'estado'    => $request->estado,
-                'archivo'  => $request->archivo,
+                //'archivo'  => $request->archivo,
             ];
              // 3️ Subir archivo correctamente
             if ($request->hasFile('archivo')) {

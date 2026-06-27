@@ -141,7 +141,7 @@ class ClienteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    /*public function update(Request $request, string $id)
+    public function update(Request $request, string $id)
     {
         try{
             $datos = [
@@ -174,8 +174,8 @@ class ClienteController extends Controller
         }catch(Exception $e){
             return to_route('clientes')->with('error','No se pudo editar: '.$e->getMessage());
         }
-    }*/
-    public function update(Request $request, string $id)
+    }
+    /*public function update(Request $request, string $id)
     {
         try {
             Log::info('🔍 INICIO UPDATE - Cliente ID: ' . $id);
@@ -264,7 +264,7 @@ class ClienteController extends Controller
             Log::error('❌ Error general en update: ' . $e->getMessage());
             return to_route('clientes')->with('error', 'No se pudo editar: ' . $e->getMessage());
         }
-    }
+    }*/
 
     public function buscarPorDocumento(Request $request)
     {

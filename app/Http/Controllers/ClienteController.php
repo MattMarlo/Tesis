@@ -77,9 +77,7 @@ class ClienteController extends Controller
                 //  Guarda en storage/app/public/clientes/
                 $ruta = $request->file('archivo')->store('clientes', 'public');
                 $datos['archivo'] = $ruta; //  Asignar ruta relativa
-                Log::info('Archivo subido correctamente', ['ruta' => $ruta]); // LOG 2
-            }else{
-                Log::warning('No se recibió ningún archivo en la petición'); // LOG 3
+                
             }
             //$this->clienteService->guardarCliente($datos);
             $cliente=$this->clienteService->guardarCliente($datos);

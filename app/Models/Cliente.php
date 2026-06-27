@@ -16,6 +16,7 @@ class Cliente extends Model
         'telefono',
         'documento',
         'estado',
+        'archivo',
     ];
     // Relación: un cliente tiene muchas reservas
     public function reservas(){

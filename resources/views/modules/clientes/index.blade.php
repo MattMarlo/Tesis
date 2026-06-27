@@ -114,10 +114,30 @@
                                     <i class="bi bi-telephone text-muted me-2"></i>
                                     <span>{{ $cliente->telefono }}</span>
                                 </div>
+                                
+                                <!-- BOTÓN SUBIÓ AQUÍ (justo después del teléfono) -->
+                                @if($cliente->archivo)
+                                    <div class="mb-2 d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-text text-muted me-2"></i>
+                                            <span class="text-muted">Documento:</span>
+                                        </div>
+                                        <a href="{{ Storage::url($cliente->archivo) }}" 
+                                        target="_blank" 
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold" 
+                                        style="border-color: #0d6efd; background-color: #f0f7ff; transition: all 0.2s; font-size: 0.75rem;"
+                                        onmouseover="this.style.backgroundColor='#0d6efd'; this.style.color='white';" 
+                                        onmouseout="this.style.backgroundColor='#f0f7ff'; this.style.color='#0d6efd';">
+                                            <i class="bi bi-file-earmark-text me-1"></i> Ver documento
+                                        </a>
+                                    </div>
+                                @endif
                                 <div class="mb-2 d-flex align-items-center">
                                     <i class="bi bi-geo-alt text-muted me-2"></i>
                                     <span>viajes (X viajes realizados)</span>
                                 </div>
+                                
+
                             </div>
 
                             <div class="text-end text-muted small mt-a pt-2 border-top" style="font-size: 0.8rem; margin-top: auto;">
@@ -178,6 +198,8 @@
                             <input required class="form-control py-2 bg-light border-0" placeholder="1700000000" type="text" name="documento" id="documento" style="border-radius: 8px;">
                         </div>
 
+            
+
                         <div class="col-12 col-sm-6">
                             <label for="estado" class="form-label text-secondary small fw-semibold">Estado</label>
                             <select name="estado" id="estado" class="form-select py-2 bg-light border-0" required style="border-radius: 8px;">
@@ -186,6 +208,12 @@
                                 <option value="inactivo">Inactivo</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="col-12 col-sm-12">
+                        <label for="archivo" class="form-label text-secondary small fw-semibold">Visa (PDF o Imagen) opcional</label>
+                        <input  class="form-control py-2 bg-light border-0"  type="file" name="archivo" id="archivo" style="border-radius: 8px;"
+                        accept=".pdf,.jpg,.jpeg,.png" style="border-radius: 8px;">
                     </div>
 
                     <div class="d-flex gap-2 mt-4 pt-2 justify-content-end">

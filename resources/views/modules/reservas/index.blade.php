@@ -147,6 +147,7 @@
                             <p class="mb-1"><strong id="detalle_titular_nombre">—</strong></p>
                             <p class="mb-1 small text-muted" id="detalle_titular_email">—</p>
                             <p class="mb-0 small text-muted" id="detalle_titular_tel">—</p>
+                            <div class="mt-2" id="detalle_titular_arch"></div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -450,6 +451,21 @@
         document.getElementById('detalle_titular_nombre').textContent = d.titular.nombre_completo || '—';
         document.getElementById('detalle_titular_email').textContent = d.titular.email || '';
         document.getElementById('detalle_titular_tel').textContent = d.titular.telefono || '';
+        // Mostrar archivo (con botón)
+        const archContainer = document.getElementById('detalle_titular_arch');
+        if (d.titular.archivo) {
+            const url = '/storage/' + d.titular.archivo;
+            archContainer.innerHTML = `
+                <a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold" 
+                style="border-color: #0d6efd; background-color: #f0f7ff; transition: all 0.2s;"
+                onmouseover="this.style.backgroundColor='#0d6efd'; this.style.color='white';" 
+                onmouseout="this.style.backgroundColor='#f0f7ff'; this.style.color='#0d6efd';">
+                    <i class="bi bi-file-earmark-text me-1"></i> Ver documento
+                </a>
+            `;
+        } else {
+            archContainer.innerHTML = `<span class="text-muted small">Sin documento</span>`;
+        }
 
         document.getElementById('detalle_destino_badge').textContent = d.destino.pais || '—';
         function fmtFecha(v) {

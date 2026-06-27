@@ -257,6 +257,7 @@ class ReservaController extends Controller
                     'email'     => $reserva->cliente->email ?? '',
                     'telefono'  => $reserva->cliente->telefono ?? '',
                     'nombre_completo' => $titularNombre,
+                    'archivo'   => $reserva->cliente->archivo ?? null,
                 ],
                 'destino'            => [
                     'id'   => $reserva->destino->id ?? null,

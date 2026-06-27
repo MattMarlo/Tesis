@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Exception;
 use InvalidArgumentException;
+use Illuminate\Support\Facades\Storage;
 
 class ClienteController extends Controller
 {
@@ -47,6 +48,15 @@ class ClienteController extends Controller
     public function store(Request $request)
     {
         try {
+            /*$request->validate([
+                'nombres'   => 'required|string|max:250',
+                'apellidos' => 'required|string|max:250',
+                'email'     => 'required|email|max:50|unique:clientes,email',
+                'telefono'  => 'required|string|max:20',
+                'documento' => 'required|string|max:50|unique:clientes,documento',
+                'estado'    => 'required|in:activo,inactivo',
+                'archivo'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 👈 VALIDACIÓN AQUÍ
+            ]);*/
             $datos = [
                 'nombres'   => $request->nombres,
                 'apellidos' => $request->apellidos,
@@ -54,8 +64,14 @@ class ClienteController extends Controller
                 'telefono'  => $request->telefono,
                 'documento' => $request->documento,
                 'estado'    => $request->estado,
+                'archivo'  => $request->archivo,
             ];
-
+             // 3️ Subir archivo correctamente
+            if ($request->hasFile('archivo')) {
+                //  Guarda en storage/app/public/clientes/
+                $ruta = $request->file('archivo')->store('clientes', 'public');
+                $datos['archivo'] = $ruta; //  Asignar ruta relativa
+            }
             //$this->clienteService->guardarCliente($datos);
             $cliente=$this->clienteService->guardarCliente($datos);
             //Si la petición espera json (desde el modal principal)
@@ -70,6 +86,7 @@ class ClienteController extends Controller
                         'email'=>$cliente->email,
                         'telefono'=>$cliente->telefono,
                         'documento'=>$cliente->documento,
+                        'archivo'   => $cliente->archivo ? Storage::url($cliente->archivo) : null,
                     ]
                 ]);
             };
@@ -124,6 +141,18 @@ class ClienteController extends Controller
                 'documento' => $request->documento,
                 'estado' => $request->estado,
             ];
+              // Buscar el cliente
+             $cliente = Cliente::findOrFail($id);
+            // Si se sube un nuevo archivo
+            if ($request->hasFile('archivo')) {
+                // Eliminar archivo anterior si existe
+                if ($cliente->archivo && Storage::disk('public')->exists($cliente->archivo)) {
+                    Storage::disk('public')->delete($cliente->archivo);
+                }
+                // Guardar nuevo archivo
+                $ruta = $request->file('archivo')->store('clientes', 'public');
+                $datos['archivo'] = $ruta;
+            }
 
             $this->clienteService->actualizarCliente($id, $datos);
             return to_route('clientes')->with('success','Cliente actualizado correctamente');
@@ -172,6 +201,10 @@ class ClienteController extends Controller
             
             if (!$cliente) {
                 return to_route('clientes')->with('error', 'El cliente no existe o ya fue eliminado.');
+            }
+            // Eliminar archivo asociado si existe
+            if ($cliente->archivo && Storage::disk('public')->exists($cliente->archivo)) {
+                Storage::disk('public')->delete($cliente->archivo);
             }
 
             $cliente->delete();

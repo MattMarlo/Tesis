@@ -158,7 +158,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="formClienteRapido">
+                <form id="formClienteRapido" enctype="multipart/form-data">
                     @csrf
                     <div id="errores-cliente-rapido" class="alert alert-danger d-none"></div>
                     <div class="mb-3">
@@ -181,8 +181,14 @@
                         <label class="form-label">Documento (Cédula)</label>
                         <input type="text" name="documento" class="form-control" required>
                     </div>
+                    <div class="col-12 col-sm-12">
+                      <label for="archivo" class="form-label text-secondary small fw-semibold">Visa (PDF o Imagen) opcional</label>
+                      <input  class="form-control py-2 bg-light border-0"  type="file" name="archivo" id="archivo" style="border-radius: 8px;"
+                      accept=".pdf,.jpg,.jpeg,.png" style="border-radius: 8px;">
+                  </div>
                 </form>
             </div>
+            
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="btnGuardarClienteRapido">Guardar Cliente</button>

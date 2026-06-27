@@ -24,7 +24,7 @@
         <div class="card shadow-sm border-0">
           <div class="card-body p-4">
 
-            <form action="{{ route('clientes.update',$clientes->id) }}" id="form_disciplina" method="post">
+            <form action="{{ route('clientes.update',$clientes->id) }}" id="form_disciplina" method="post" enctype="multipart/form-data">
               @csrf
               @method('PUT')
               <div class="row g-3">
@@ -90,7 +90,7 @@
                 </div>
 
                 <!-- ESTADO -->
-                <div class="col-12 col-sm-6">
+                <div class="col-6 col-sm-6">
                   <label for="estado" class="form-label">Estado</label>
                   <select name="estado" id="estado" class="form-select" required>
                     <option value="" disabled>Seleccione un estado</option>
@@ -100,7 +100,37 @@
                 </div>
 
               </div>
+              <!-- ARCHIVO (PDF o Imagen) -->
+              <div class="col-6 col-sm-6">
+                  <label for="archivo" class="form-label">Archivo (PDF o Imagen)</label>
+                  <input 
+                      class="form-control" 
+                      type="file" 
+                      name="archivo" 
+                      id="archivo" 
+                      accept=".pdf,.jpg,.jpeg,.png"
+                  >
+                  <small class="text-muted">Formatos permitidos: PDF, JPG, JPEG, PNG (máx. 5MB)</small>
+                  
+                  <!-- Mostrar archivo actual si existe -->
+                  @if($clientes->archivo)
+                      <div class="mt-2">
+                          <span class="text-muted">Archivo actual:</span>
+                          @php
+                              $extension = pathinfo($clientes->archivo, PATHINFO_EXTENSION);
+                          @endphp
+                          @if(in_array($extension, ['jpg', 'jpeg', 'png', 'gif']))
+                              <img src="{{ Storage::url($clientes->archivo) }}" width="80" class="rounded border">
+                          @else
+                              <a href="{{ Storage::url($clientes->archivo) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                  <i class="bi bi-file-pdf"></i> Ver PDF
+                              </a>
+                          @endif
+                      </div>
+                  @endif
+              </div>
 
+             
               <!-- BOTONES -->
               <div class="d-flex flex-column flex-sm-row gap-2 mt-4 justify-content-end">
                 <a href="{{ route('clientes') }}" class="btn btn-secondary">

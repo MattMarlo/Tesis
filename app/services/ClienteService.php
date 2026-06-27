@@ -54,6 +54,7 @@ class ClienteService
         $cliente->telefono = $datos['telefono'];
         $cliente->documento = $datos['documento'];
         $cliente->estado = $datos['estado'] ?? 'activo';
+        $cliente->archivo   = $datos['archivo'] ?? null;
         $cliente->save();
 
         return $cliente;
@@ -78,6 +79,7 @@ class ClienteService
         $cliente->telefono = $datos['telefono'];
         $cliente->documento = $datos['documento'];
         $cliente->estado = $datos['estado'] ?? 'activo';
+        $cliente->archivo   = $datos['archivo'] ?? null;
         $cliente->save();
 
         return $cliente;

@@ -212,6 +212,7 @@
                                     <th>Apellidos</th>
                                     <th>Email</th>
                                     <th>Teléfono</th>
+                                    <th class="text-center">Archivo</th>
                                     <th class="text-end">Asignado</th>
                                     <th class="text-end">Pagado</th>
                                     <th class="text-end">Deuda</th>
@@ -544,6 +545,9 @@
                         <input type="text" class="form-control form-control-sm d-none input-edit" 
                             value="${integrante.telefono}" 
                             onblur="finalizarEdicionRapida(this, 'telefono', ${integrante.id})">
+                    </td>
+                    <td class="text-center">${integrante.archivo ?`<a href="/storage/${integrante.archivo}" target="_blank" class="btn
+                        btn-sm btn-outline-primary rounded-pill px-2 py-0"><i class = "bi bi-file-earmark-text"></i> Ver </a>`:'<span class="text-muted small">-</span>'}
                     </td>
                     <td class="editable-cell align-middle" onclick="activarEdicionRapida(this)">
                         <div class="d-flex align-items-center">

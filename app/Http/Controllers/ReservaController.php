@@ -210,6 +210,7 @@ class ReservaController extends Controller
                     'clientes.apellidos',
                     'clientes.email',
                     'clientes.telefono',
+                    'clientes.archivo',
                     'grupos_clientes.monto_asignado',
                     'grupos_clientes.es_lider'
                 )
@@ -226,6 +227,7 @@ class ReservaController extends Controller
                     'apellidos' => $integrante->apellidos,
                     'email' => $integrante->email,
                     'telefono' => $integrante->telefono,
+                    'archivo'=>$integrante->archivo,
                     'monto_asignado' => (float) $integrante->monto_asignado,
                     'pagado' => (float) $pagosIntegrante,
                     'deuda' => (float) $deuda,

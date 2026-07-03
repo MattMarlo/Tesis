@@ -78,7 +78,7 @@
         width: 100%;
         color: #cbd5e1;
         border-collapse: collapse;
-        table-layout: fixed;/*nuevo*/
+        
     }
     
     .table-dark-custom th {

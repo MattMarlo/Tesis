@@ -13,6 +13,7 @@ use App\Http\Controllers\ReservaIndividualController;
 use App\Http\Controllers\ReservaGrupalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\ReporteController;
 
 Route::get('/', function () {
     $destinos = Destino::whereNotNull('imagen')->get(); 
@@ -99,6 +100,9 @@ Route::middleware('auth')->group(function() {
     Route::prefix('reservas_grupal')->group(function () {
         Route::get('/create', [ReservaGrupalController::class, 'create'])->name('reservas_grupal.create');
         Route::post('/store', [ReservaGrupalController::class, 'store'])->name('reservas_grupal.store');
+    });
+    Route::prefix('reportes')->group(function(){
+        Route::get('/reportes/ingresos',[ReporteController::class,'ingresosMensuales'])->name('reportes.ingresos');
     });
 });
 // Pre-reservas (administración)

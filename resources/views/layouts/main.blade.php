@@ -285,7 +285,8 @@
     </div>
 
     <ul class="nav-list flex-column mb-auto">
-        <li><a href="#" class="nav-link "><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></li>
+        <!-- <li><a href="#" class="nav-link "><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></li>-->
+        <li><a href="{{route('reportes.ingresos')}}" class="nav-link {{ request()->routeIs('reportes.ingresos*') ? 'active' : '' }}"><i class="bi bi-clipboard2"></i><span>Reportes</span></a></li>
         <li><a href="{{route('usuarios')}}" class="nav-link {{ request()->routeIs('usuarios*') ? 'active' : '' }}"><i class="bi bi-people-fill"></i><span>Usuarios</span></a></li>
         <li><a href="{{route('clientes')}}" class="nav-link {{ request()->routeIs('clientes*') ? 'active' : '' }}"><i class="bi bi-person-circle"></i><span>Clientes</span></a></li>
         <li><a href="{{route('destinos')}}" class="nav-link {{ request()->routeIs('destinos*') ? 'active' : '' }}"><i class="bi bi-airplane"></i><span>Destinos</span></a></li>

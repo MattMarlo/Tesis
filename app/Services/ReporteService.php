@@ -77,10 +77,16 @@ class ReporteService
         $datosConIngresos = array_filter($data);
         $ingresoMinimo = !empty($datosConIngresos) ? min($datosConIngresos) : 0.0;
 
+        // Ingresos acumulados hasta la fecha actual (hasta hoy)
+        $ingresosHastaHoy = (float) DB::table('pagos')
+            ->whereDate('fecha_pago', '<=', Carbon::now()->toDateString())
+            ->sum('monto_depositado');
+
         return [
             'labels'                => $labels,
             'data'                  => $data,
             'total_ingresos'        => round($totalIngresos, 2),
+            'ingresos_hasta_hoy'    => round($ingresosHastaHoy, 2),
             'total_pagos'           => $totalPagos,
             'ingresos_mes_actual'   => $ingresosMesActual,
             'promedio_diario'       => $promedioDiario,
@@ -149,6 +155,10 @@ class ReporteService
             'labels'                 => $labels,
             'data'                   => $data,
             'total_ingresos'         => round($totalIngresos, 2),
+            // Ingresos acumulados hasta la fecha actual (hasta hoy)
+            'ingresos_hasta_hoy'     => round((float) DB::table('pagos')
+                                            ->whereDate('fecha_pago', '<=', Carbon::now()->toDateString())
+                                            ->sum('monto_depositado'), 2),
             'total_pagos'            => $totalPagos,
             'promedio_diario'        => $promedioDiario,
             'ingreso_maximo'         => $ingresoMaximo,

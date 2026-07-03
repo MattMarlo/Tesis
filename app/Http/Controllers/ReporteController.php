@@ -20,6 +20,9 @@ class ReporteController extends Controller
         // Obtener parámetros
         $anio = $request->input('anio', now()->year);
         $mes = $request->input('mes', null); // null = vista mensual, si es número = vista diaria
+       //$nombreMes = $mes ? \Carbon\Carbon::create($anio, $mes, 1)->translatedFormat('F') : null;
+        $nombreMes = $mes ? \Carbon\Carbon::create($anio, $mes, 1)->locale('es')->translatedFormat('F') : null;
+
 
         // Obtener años disponibles
         $years = $this->reporteService->obtenerAñosDisponibles();
@@ -32,16 +35,18 @@ class ReporteController extends Controller
                 return back()->with('error', 'Parámetros inválidos');
             }
 
-            return view('modules.reportes.ingresosMensuales', [
+                return view('modules.reportes.ingresosMensuales', [
                 'labels'            => $reporte['labels'],
                 'data'              => $reporte['data'],
-                'totalIngresos'     => $reporte['total_ingresos'],
+                // Mostrar ingresos acumulados hasta hoy como principal
+                'totalIngresos'     => $reporte['ingresos_hasta_hoy'],
                 'totalPagos'        => $reporte['total_pagos'],
                 'promedioDiario'    => $reporte['promedio_diario'],
                 'ingresosMesActual' => $reporte['total_ingresos'], // Para compatibilidad con vista
                 'years'             => $years,
                 'anio'              => $anio,
                 'mes'               => $mes,
+                'nombreMes' => $nombreMes,
                 'tipo'              => 'diaria'
             ]);
         }
@@ -52,13 +57,15 @@ class ReporteController extends Controller
         return view('modules.reportes.ingresosMensuales', [
             'labels'            => $reporte['labels'],
             'data'              => $reporte['data'],
-            'totalIngresos'     => $reporte['total_ingresos'],
+            // Mostrar ingresos acumulados hasta hoy como principal
+            'totalIngresos'     => $reporte['ingresos_hasta_hoy'],
             'totalPagos'        => $reporte['total_pagos'],
             'promedioDiario'    => $reporte['promedio_diario'],
             'ingresosMesActual' => $reporte['ingresos_mes_actual'],
             'years'             => $years,
             'anio'              => $anio,
             'mes'               => null,
+            'nombreMes' => $nombreMes,
             'tipo'              => 'mensual'
         ]);
     }

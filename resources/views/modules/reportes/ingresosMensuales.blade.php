@@ -11,8 +11,10 @@
                 <i class="bi bi-bar-chart-line-fill text-primary"></i>
                 Ingresos Mensuales
             </h1>
+            
             @if($mes)
-                <p class="text-muted small">Ingresos diarios de {{ date('F Y', mktime(0,0,0,$mes,1,$anio)) }}</p>
+                <p class="text-muted small">Ingresos diarios de {{ \Carbon\Carbon::create($anio, $mes, 1)->locale('es')->translatedFormat('F Y') }}</p>
+                
             @else
                 <p class="text-muted small">Análisis de ingresos por mes</p>
             @endif
@@ -33,7 +35,7 @@
                     <option value="">-- Todos los meses --</option>
                     @foreach(range(1, 12) as $m)
                         <option value="{{ $m }}" {{ $mes == $m ? 'selected' : '' }}>
-                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                            {{ \Carbon\Carbon::create($anio, $m, 1)->locale('es')->translatedFormat('F') }}
                         </option>
                     @endforeach
                 </select>
@@ -56,7 +58,7 @@
                     <i class="bi bi-cash-stack text-success display-5"></i>
                     <h3 class="mt-3">${{ number_format($totalIngresos, 2) }}</h3>
                     @if($mes)
-                        <p class="text-muted mb-0">Ingresos del mes</p>
+                        <p class="text-muted mb-0">Total de Ingresos en el año</p>
                     @else
                         <p class="text-muted mb-0">Ingresos del año {{ $anio }}</p>
                     @endif
@@ -81,7 +83,7 @@
                 <div class="card-body">
                     <i class="bi bi-calendar-week text-warning display-5"></i>
                     <h3 class="mt-3">${{ number_format($ingresosMesActual ?? 0, 2) }}</h3>
-                    <p class="text-muted mb-0">Ingresos del Mes Actual</p>
+                    <p class="text-muted mb-0">Ingresos del Mes de {{$nombreMes}}</p>
                 </div>
             </div>
         </div>

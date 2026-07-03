@@ -78,23 +78,25 @@
         width: 100%;
         color: #cbd5e1;
         border-collapse: collapse;
+        table-layout: fixed;/*nuevo*/
     }
     
     .table-dark-custom th {
         background-color: #1e212b;
         color: #64748b;
-        font-size: 0.75rem;
+        font-size: 0.6rem 0.8rem;
         font-weight: 600;
+        white-space: nowrap;
         text-transform: uppercase;
-        padding: 1rem 1.25rem;
+        padding: 0.6rem 0.8rem;
         border-bottom: 1px solid #2d313f;
     }
     
     .table-dark-custom td {
-        padding: 1rem 1.25rem;
+        padding: 0.6rem 0.8rem;
         border-bottom: 1px solid #2d313f;
         vertical-align: middle;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
     
     .table-dark-custom tr:hover {

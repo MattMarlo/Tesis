@@ -71,7 +71,7 @@
         background-color: #1e212b;
         border-radius: 12px;
         border: 1px solid #2d313f;
-        overflow: hidden;
+        overflow-x: auto;
     }
     
     .table-dark-custom {

@@ -45,7 +45,6 @@ class PreReservaController extends Controller
         $payload = $request->only([
             'destino', 
             'cliente_nombre', 
-            'cedula', 
             'telefono' ,
             'fecha_viaje'
         ]);
@@ -53,9 +52,8 @@ class PreReservaController extends Controller
         $data = Validator::make($payload, [
             'destino' => 'required|string',
             'cliente_nombre' => 'required|string',
-            'cedula' => 'required|string',
             'fecha_viaje' => 'required|date',
-            'telefono' => 'nullable|string',
+            'telefono' => 'required|string',
             'email' => 'nullable|string',
             'monto_depositado' => 'nullable|numeric'
         ])->validate();
@@ -71,27 +69,11 @@ class PreReservaController extends Controller
                 ], 422);
             }
 
-            $cliente = Cliente::where('documento', $data['cedula'])->first();
-            if (!$cliente) {
-                $parts = preg_split('/\s+/', trim($data['cliente_nombre']), 2);
-                $nombres = $parts[0] ?? $data['cliente_nombre'];
-                $apellidos = $parts[1] ?? '';
-
-                $cliente = Cliente::create([
-                    'nombres' => $nombres,
-                    'apellidos' => $apellidos,
-                    'email' => $data['email'] ?? '',
-                    'telefono' => $data['telefono'] ?? '',
-                    'documento' => $data['cedula'],
-                    'estado' => 'activo'
-                ]);
-            }
-
             $preReserva = PreReserva::create([
                 'cliente_nombre' => $data['cliente_nombre'],
                 'destino' => $data['destino'],
                 'telefono' => $data['telefono'] ?? '',
-                'cedula' => $data['cedula'],
+                'cedula' => '',
                 'fecha_viaje' => $data['fecha_viaje'],
                 'fecha_reserva' => Carbon::now(),
                 'origen' => 'n8n',
@@ -165,7 +147,7 @@ class PreReservaController extends Controller
         $data = $request->validate([
             'destino' => 'required|string',
             'cliente_nombre' => 'required|string',
-            'cedula' => 'required|string',
+            'cedula' => 'nullable|string',
             'fecha_viaje' => 'nullable|date',
             'telefono' => 'nullable|string',
             'estado' => 'required|in:pendiente_contacto,contactado,convertida,perdida',
@@ -176,27 +158,30 @@ class PreReservaController extends Controller
             return to_route('prereservas.index')->with('error', 'Destino no encontrado. No se puede actualizar la pre-reserva. error aqui');
         }
 
-        $cliente = Cliente::where('documento', $data['cedula'])->first();
-        if (!$cliente) {
-            $parts = preg_split('/\s+/', trim($data['cliente_nombre']), 2);
-            $nombres = $parts[0] ?? $data['cliente_nombre'];
-            $apellidos = $parts[1] ?? '';
+        // Sólo crear cliente automáticamente si se proporciona cédula
+        if (!empty($data['cedula'])) {
+            $cliente = Cliente::where('documento', $data['cedula'])->first();
+            if (!$cliente) {
+                $parts = preg_split('/\s+/', trim($data['cliente_nombre']), 2);
+                $nombres = $parts[0] ?? $data['cliente_nombre'];
+                $apellidos = $parts[1] ?? '';
 
-            Cliente::create([
-                'nombres' => $nombres,
-                'apellidos' => $apellidos,
-                'email' => '',
-                'telefono' => $data['telefono'] ?? '',
-                'documento' => $data['cedula'],
-                'estado' => 'activo',
-            ]);
+                Cliente::create([
+                    'nombres' => $nombres,
+                    'apellidos' => $apellidos,
+                    'email' => '',
+                    'telefono' => $data['telefono'] ?? '',
+                    'documento' => $data['cedula'],
+                    'estado' => 'activo',
+                ]);
+            }
         }
 
         $preReserva->fill([
             'cliente_nombre' => $data['cliente_nombre'],
             'destino' => $data['destino'],
             'telefono' => $data['telefono'] ?? '',
-            'cedula' => $data['cedula'],
+            'cedula' => $data['cedula'] ?? '',
             'fecha_viaje' => $data['fecha_viaje'] ?? null,
             'estado' => $data['estado'],
         ]);
@@ -210,10 +195,29 @@ class PreReservaController extends Controller
     public function convertToReserva($id)
     {
         $pre = PreReserva::findOrFail($id);
-        // intentar encontrar cliente por cedula
-        $cliente = Cliente::where('documento', $pre->cedula)->first();
+        // intentar encontrar cliente por cédula si existe, sino por teléfono
+        $cliente = null;
+        if (!empty($pre->cedula)) {
+            $cliente = Cliente::where('documento', $pre->cedula)->first();
+        }
+        if (!$cliente && !empty($pre->telefono)) {
+            $cliente = Cliente::where('telefono', $pre->telefono)->first();
+        }
+
+        // si no existe cliente, crearlo en estado inactivo (faltan datos como cédula)
         if (!$cliente) {
-            return to_route('prereservas.index')->with('error','Cliente no encontrado para convertir');
+            $parts = preg_split('/\s+/', trim($pre->cliente_nombre), 2);
+            $nombres = $parts[0] ?? $pre->cliente_nombre;
+            $apellidos = $parts[1] ?? '';
+
+            $cliente = Cliente::create([
+                'nombres' => $nombres,
+                'apellidos' => $apellidos,
+                'email' => '',
+                'telefono' => $pre->telefono ?? '',
+                'documento' => $pre->cedula ?? '',
+                'estado' => 'inactivo',
+            ]);
         }
         
         $destino = $this->findDestinoBySearch($pre->destino);

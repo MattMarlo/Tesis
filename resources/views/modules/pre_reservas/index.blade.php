@@ -15,7 +15,7 @@
             <tr>
                 <th>ID</th>
                 <th>Cliente</th>
-                <th>Cédula</th>
+                <th>Teléfono</th>
                 <th>Destino</th>
                 <th>Fecha viaje</th>
                 <th>Origen</th>
@@ -28,7 +28,7 @@
             <tr>
                 <td>{{ $pre->id }}</td>
                 <td>{{ $pre->cliente_nombre }}</td>
-                <td>{{ $pre->cedula }}</td>
+                <td>{{ $pre->telefono }}</td>
                 <td>{{ $pre->destino }}</td>
                 <td>{{ $pre->fecha_viaje }}</td>
                 <td>{{ $pre->origen }}</td>

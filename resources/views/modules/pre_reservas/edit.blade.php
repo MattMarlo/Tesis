@@ -20,7 +20,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Cédula</label>
-                    <input type="text" name="cedula" class="form-control" value="{{ old('cedula', $preReserva->cedula) }}" required>
+                    <input type="text" name="cedula" class="form-control" value="{{ old('cedula', $preReserva->cedula) }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Destino</label>

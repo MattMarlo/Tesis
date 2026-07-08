@@ -15,6 +15,7 @@
             <tr>
                 <th>ID</th>
                 <th>Cliente</th>
+                <th>Email</th>
                 <th>Teléfono</th>
                 <th>Destino</th>
                 <th>Fecha viaje</th>
@@ -28,6 +29,7 @@
             <tr>
                 <td>{{ $pre->id }}</td>
                 <td>{{ $pre->cliente_nombre }}</td>
+                <td>{{ $pre->email }}</td>
                 <td>{{ $pre->telefono }}</td>
                 <td>{{ $pre->destino }}</td>
                 <td>{{ $pre->fecha_viaje }}</td>

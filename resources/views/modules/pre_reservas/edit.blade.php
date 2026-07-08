@@ -19,6 +19,10 @@
                     <input type="text" name="cliente_nombre" class="form-control" value="{{ old('cliente_nombre', $preReserva->cliente_nombre) }}" required>
                 </div>
                 <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ old('email', $preReserva->email) }}" required>
+                </div>
+                <div class="col-md-6">
                     <label class="form-label">Cédula</label>
                     <input type="text" name="cedula" class="form-control" value="{{ old('cedula', $preReserva->cedula) }}">
                 </div>

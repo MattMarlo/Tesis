@@ -10,6 +10,7 @@ class PreReserva extends Model
 
     protected $fillable = [
         'cliente_nombre',
+        'email',
         'destino',           
         'telefono',
         'cedula',
@@ -20,6 +21,11 @@ class PreReserva extends Model
         'user_id',
         'reserva_id',
     ];
+
+    protected $casts = [
+        'fecha_viaje' => 'date',
+    ];
+
     // Relación con el usuario (agente que convirtió la pre-reserva)
     public function user()
     {

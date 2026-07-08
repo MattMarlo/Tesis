@@ -255,7 +255,7 @@ class PreReservaController extends Controller
             'user_id' => Auth::id(),
             'fecha_reserva' => Carbon::now()->toDateTimeString(),
             'fecha_viaje' => $pre->fecha_viaje,
-            'precio_total_viaje' => $destino->precio ?? 0,
+            'precio_total_viaje' => 0,
             'monto_depositado' => 0,
         ];
 

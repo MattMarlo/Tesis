@@ -132,6 +132,7 @@ class PreReservaController extends Controller
                 ],
             ];
             Http::timeout(3)->post($webhookUrl,$payload);
+            Log::info('Enviando a n8n', ['url' => $webhookUrl, 'payload' => $payload]);
 
         }catch(\Exception $e){
             Log::error('Error al notificar a n8n '.$e->getMessage());

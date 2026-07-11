@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'n8n_prereserva' => 'https://passiontravelviajes.de:5678/webhook/notificar-prereserva',
+    'n8n_prereserva' => 'http://passiontravelviajes.de:5678/webhook/notificar-prereserva',
 ];

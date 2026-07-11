@@ -131,7 +131,7 @@ class PreReservaController extends Controller
                     'created_at'=>$preReserva->created_at?->toIso8601String(),
                 ],
             ];
-            Http::timeout(3)->post($webhookUrl,$payload);
+            Http::timeout(10)->post($webhookUrl,$payload);
             Log::info('Enviando a n8n', ['url' => $webhookUrl, 'payload' => $payload]);
 
         }catch(\Exception $e){

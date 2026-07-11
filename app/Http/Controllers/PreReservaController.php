@@ -11,6 +11,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class PreReservaController extends Controller
 {
@@ -95,7 +97,7 @@ class PreReservaController extends Controller
                 'estado' => 'pendiente_contacto',
                 'user_id' => null,
             ]);
-
+            $this->notificarN8n($preReserva);
             DB::commit();
 
             return response()->json([
@@ -108,7 +110,34 @@ class PreReservaController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+    public function notificarN8n(PreReserva $preReserva){
+        $webhookUrl=config('webhooks.n8n_prereserva');
+        if(empty($webhookUrl)){
+            Log::warning("la url del webhook de n8n no esta configurada ");
+            return;
+        }
+        try{
+            $payload=[
+                'event'=>'prereserva.creada',
+                'data'=>[
+                    'id'=>$preReserva->id,
+                    'cliente_nombre'=>$preReserva->cliente_nombre,
+                    'email'=>$preReserva->email,
+                    'telefono'=>$preReserva->telefono,
+                    'destino'=>$preReserva->destino,
+                    'fecha_viaje'=>$preReserva->fecha_viaje?->format('Y-m-d'),
+                    'origen'=>$preReserva->origen,
+                    'estado'=>$preReserva->estado,
+                    'created_at'=>$preReserva->created_at?->toIso8601String(),
+                ],
+            ];
+            Http::timeout(3)->post($webhookUrl,$payload);
 
+        }catch(\Exception $e){
+            Log::error('Error al notificar a n8n '.$e->getMessage());
+        }
+
+    }
     public function checkExistence(Request $request)
     {
         $data = $request->validate([

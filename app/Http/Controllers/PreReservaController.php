@@ -112,10 +112,10 @@ class PreReservaController extends Controller
     }
     public function notificarN8n(PreReserva $preReserva){
         $webhookUrl = 'http://passiontravelviajes.de:5678/webhook/notificar-prereserva';
-        if(empty($webhookUrl)){
+        /*if(empty($webhookUrl)){
             Log::warning("la url del webhook de n8n no esta configurada ");
             return;
-        }
+        }*/
         try{
             $payload=[
                 'event'=>'prereserva.creada',

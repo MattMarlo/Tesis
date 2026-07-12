@@ -129,7 +129,8 @@ class PreReservaController extends Controller
                     'fecha_viaje'=>$preReserva->fecha_viaje?->format('Y-m-d'),
                     'origen'=>$preReserva->origen,
                     'estado'=>$preReserva->estado,
-                    'created_at'=>$preReserva->created_at?->toIso8601String(),
+                    //'created_at'=>$preReserva->created_at?->toIso8601String(),
+                    'created_at' => $preReserva->created_at?->format('d/m/Y H:i'),
                 ],
             ];
             Http::timeout(10)->post($webhookUrl,$payload);

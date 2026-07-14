@@ -32,9 +32,10 @@
       padding: 2rem;
     }
     .login-logo {
-      width: 65px;
-      height: 65px;
-      background: #1F4068;
+      width: 130px;
+      height: 130px;
+      background: transparent;
+      /*background: #1F4068;*/
       color: #fff;
       border-radius: 0.75rem;
       display: inline-flex;
@@ -43,6 +44,8 @@
       font-weight: 700;
       margin-bottom: 0.85rem;
       font-size: 1.25rem;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0,0,0.1);
     }
   </style>
 </head>
@@ -51,8 +54,11 @@
     <div class="card login-card">
       <div class="card-body">
         <div class="text-center mb-4">
-          <div class="login-logo">TM</div>
-          <h3 class="fw-bold">TravelManager</h3>
+          <div class="login-logo">
+            <img src="{{Storage::url('login/passionTravelLogo.jpeg')}}" alt=""  
+            style="width: 100%; height: 100%; object-fit: contain; display: block;">
+          </div>
+          <h3 class="fw-bold">Passion Travel</h3>
           <p class="text-muted">Inicia sesión para continuar</p>
         </div>
 

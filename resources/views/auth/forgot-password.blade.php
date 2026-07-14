@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - TravelManager</title>
+  <title>Recuperar Contraseña</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -28,22 +28,7 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       color: #111;
     }
-    .login-card .card-body {
-      padding: 2rem;
-    }
-    .login-logo {
-      width: 65px;
-      height: 65px;
-      background: #1F4068;
-      color: #fff;
-      border-radius: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      margin-bottom: 0.85rem;
-      font-size: 1.25rem;
-    }
+    .login-card .card-body { padding: 2rem; }
   </style>
 </head>
 <body>
@@ -51,17 +36,14 @@
     <div class="card login-card">
       <div class="card-body">
         <div class="text-center mb-4">
-          <div class="login-logo">TM</div>
-          <h3 class="fw-bold">TravelManager</h3>
-          <p class="text-muted">Inicia sesión para continuar</p>
+          <h3 class="fw-bold">Recuperar Contraseña</h3>
+          <p class="text-muted">Ingresa tu correo y te enviaremos un enlace para restablecerla.</p>
         </div>
 
-        @if (session('error'))
-          <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
         @if (session('status'))
           <div class="alert alert-success">{{ session('status') }}</div>
         @endif
+
         @if ($errors->any())
           <div class="alert alert-danger" role="alert">
             <ul class="mb-0">
@@ -72,28 +54,19 @@
           </div>
         @endif
 
-        <form action="{{ route('login') }}" method="post" novalidate>
+        <form action="{{ route('password.email') }}" method="post">
           @csrf
           <div class="mb-3">
             <label class="form-label">Correo Electrónico</label>
             <input type="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Contraseña</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+          <button type="submit" class="btn btn-primary w-100">Enviar enlace</button>
           <div class="mt-3 text-center">
-            <a href="{{ route('password.request') }}" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
+            <a href="{{ route('login') }}" class="text-decoration-none">Volver al login</a>
           </div>
-          <!-- <div class="mt-3 text-center">
-            <small class="text-muted">¿No tienes cuenta? <a href="{{ route('register') }}">Regístrate</a></small>
-          </div>-->
         </form>
       </div>
     </div>
   </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

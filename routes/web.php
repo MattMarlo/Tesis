@@ -14,6 +14,7 @@ use App\Http\Controllers\ReservaGrupalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Middleware\CheckUserPermission;
 
 Route::get('/', function () {
     $destinos = Destino::whereNotNull('imagen')->get(); 
@@ -39,12 +40,12 @@ Route::middleware('auth')->group(function() {
     })->name('main');
 
     Route::prefix('usuarios')->group(function() {
-        Route::get('/', [UserController::class, 'index'])->name('usuarios');
-        Route::get('/create', [UserController::class, 'create'])->name('usuarios.create');
-        Route::post('/store', [UserController::class, 'store'])->name('usuarios.store');
-        Route::delete('/destroy/{id}', [UserController::class, 'destroy'])->name('usuarios.destroy');
-        Route::get('/edit/{id}', [UserController::class, 'edit'])->name('usuarios.edit');
-        Route::put('/update/{id}', [UserController::class, 'update'])->name('usuarios.update');
+        Route::get('/', [UserController::class, 'index'])->middleware('check.permission:usuarios.ver')->name('usuarios');
+        Route::get('/create', [UserController::class, 'create'])->middleware('check.permission:usuarios.crear')->name('usuarios.create');
+        Route::post('/store', [UserController::class, 'store'])->middleware('check.permission:usuarios.crear')->name('usuarios.store');
+        Route::delete('/destroy/{id}', [UserController::class, 'destroy'])->middleware('check.permission:usuarios.crear')->name('usuarios.destroy');
+        Route::get('/edit/{id}', [UserController::class, 'edit'])->middleware('check.permission:usuarios.crear')->name('usuarios.edit');
+        Route::put('/update/{id}', [UserController::class, 'update'])->middleware('check.permission:usuarios.crear')->name('usuarios.update');
     });
     Route::prefix('clientes')->group(function() {
         Route::get('/', [ClienteController::class, 'index'])->name('clientes');

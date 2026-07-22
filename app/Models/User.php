@@ -16,6 +16,29 @@ class User extends Authenticatable
 
     protected $table = 'users';
 
+    public function isAdmin(): bool
+    {
+        return $this->rol === self::ROL_ADMIN;
+    }
+
+    public function isAgente(): bool
+    {
+        return $this->rol === self::ROL_AGENTE;
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if ($permission === 'usuarios.ver' || $permission === 'usuarios.crear') {
+            return false;
+        }
+
+        return true;
+    }
+
     protected $fillable = [
         'nombres',
         'apellidos',

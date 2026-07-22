@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Exception;
 
@@ -52,7 +53,7 @@ class UserController extends Controller
             $usuario->telefono = $datos['telefono'];
             $usuario->documento = $datos['documento'];
             $usuario->rol = $datos['rol'];
-            $usuario->password = $datos['password'];
+            $usuario->password = Hash::make($datos['password']);
             $usuario->save();
 
             return to_route('usuarios')->with('success', 'Usuario agregado éxitosamente');
@@ -107,7 +108,7 @@ class UserController extends Controller
             $usuario->rol = $datos['rol'];
 
             if (!empty($datos['password'])) {
-                $usuario->password = $datos['password'];
+                $usuario->password = Hash::make($datos['password']);
             }
 
             $usuario->save();

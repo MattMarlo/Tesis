@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'prereservas/webhook'
         ]);
+
+        $middleware->alias([
+            'check.permission' => \App\Http\Middleware\CheckUserPermission::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

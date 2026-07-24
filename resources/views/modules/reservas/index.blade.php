@@ -1188,8 +1188,9 @@
       language: {
         url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
       },
-      responsive: true,
+      responsive: false,
       autoWidth: false,
+      scrollX: true,
       processing: true,
       columnDefs: [
         { targets: 0, searchable: true }

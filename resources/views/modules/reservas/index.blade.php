@@ -49,8 +49,65 @@
     @endif
 
     <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
+        <div class="card-body p-4">
+            <style>
+                .dataTables_wrapper .dataTables_filter input {
+                    border-radius: 8px;
+                    border: 1px solid #dee2e6;
+                    padding: 8px 12px;
+                    font-size: 14px;
+                }
+                .dataTables_wrapper .dataTables_length select {
+                    border-radius: 8px;
+                    border: 1px solid #dee2e6;
+                    padding: 6px 10px;
+                }
+                .dataTables_wrapper .dataTables_paginate .paginate_button {
+                    border-radius: 6px;
+                    border: 1px solid #dee2e6;
+                    padding: 8px 12px;
+                    margin-left: 4px;
+                    transition: all 0.2s;
+                }
+                .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+                    background-color: #3b82f6;
+                    border-color: #3b82f6;
+                    color: white !important;
+                }
+                .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+                    background-color: #3b82f6;
+                    border-color: #3b82f6;
+                    color: white !important;
+                }
+                .dataTables_wrapper .dataTables_info {
+                    color: #64748b;
+                    font-size: 13px;
+                    margin-top: 1rem;
+                }
+                .table.datatable thead th {
+                    background-color: #f1f5f9;
+                    color: #1e293b;
+                    font-weight: 600;
+                    border: 1px solid #e2e8f0;
+                    padding: 14px 12px;
+                    text-transform: uppercase;
+                    font-size: 12px;
+                    letter-spacing: 0.5px;
+                }
+                .table.datatable tbody td {
+                    padding: 12px;
+                    border-color: #e2e8f0;
+                    vertical-align: middle;
+                }
+                .table.datatable tbody tr {
+                    transition: all 0.2s ease;
+                }
+                .table.datatable tbody tr:hover {
+                    background-color: #f0f7ff;
+                    box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.08);
+                }
+            </style>
+            <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
                 <table class="table datatable table-hover mb-0">
                     <thead class="table-light">
                         <tr>
@@ -126,12 +183,7 @@
                     </tbody>
                 </table>
             </div>
-            
         </div>
-    </div>
-
-    <div class="mt-3">
-        {{ $reservas->links('pagination::bootstrap-5') }}
     </div>
 </div>
 
@@ -1127,7 +1179,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function(){
-    // Inicializar DataTables
+    // Inicializar DataTables con estilo mejorado
     if ($.fn.DataTable.isDataTable('.table.datatable')) {
       $('.table.datatable').DataTable().destroy();
     }
@@ -1138,12 +1190,27 @@
       },
       responsive: true,
       autoWidth: false,
+      processing: true,
       columnDefs: [
         { targets: 0, searchable: true }
       ],
       order: [[0, 'asc']],
       pageLength: 10,
-      dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rtip'
+      lengthMenu: [10, 25, 50, 100],
+      dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+      initComplete: function() {
+        // Mejorar estilos de los controles
+        const filterRow = $('.dataTables_wrapper .dataTables_filter');
+        filterRow.find('label').css({
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '8px',
+          'margin': '0'
+        });
+        filterRow.find('input').css({
+          'min-width': '250px'
+        });
+      }
     });
   });
 </script>

@@ -36,17 +36,18 @@
               </a>
             </div>
 
-            <table class="table datatable table-striped table-hover">
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <table class="table datatable table-striped table-hover" style="min-width: 900px;">
               <thead class="table-light">
                 <tr>
-                  <th class="text-center">#</th>
-                  <th class="text-start">Nombres</th>
-                  <th class="text-start">Apellidos</th>
-                  <th class="text-start">Email</th>
-                  <th class="text-start">Telefono</th>
-                  <th class="text-start">Documento</th>
-                  <th class="text-start">Rol</th>
-                  <th class="text-center">Acciones </th>
+                  <th class="text-center" style="white-space: nowrap;">#</th>
+                  <th class="text-start" style="white-space: nowrap;">Nombres</th>
+                  <th class="text-start" style="white-space: nowrap;">Apellidos</th>
+                  <th class="text-start" style="white-space: nowrap;">Email</th>
+                  <th class="text-start" style="white-space: nowrap;">Telefono</th>
+                  <th class="text-start" style="white-space: nowrap;">Documento</th>
+                  <th class="text-start" style="white-space: nowrap;">Rol</th>
+                  <th class="text-center" style="white-space: nowrap;">Acciones </th>
                 </tr>
               </thead>
               <tbody>
@@ -77,6 +78,7 @@
                   @endforeach
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>

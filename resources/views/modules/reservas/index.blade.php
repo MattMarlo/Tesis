@@ -1,6 +1,14 @@
 @extends('layouts.main')
 
 @section('content')
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
+<!-- jQuery (requerido para DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <div class="container-fluid mt-4 px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold">Gestión de Reservas</h2>
@@ -43,7 +51,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table datatable table-hover mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -1109,6 +1117,35 @@
             if(icon) icon.classList.remove('d-none');
         });
     }
+</script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    // Inicializar DataTables
+    if ($.fn.DataTable.isDataTable('.table.datatable')) {
+      $('.table.datatable').DataTable().destroy();
+    }
+    
+    const table = $('.table.datatable').DataTable({
+      language: {
+        url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+      },
+      responsive: true,
+      autoWidth: false,
+      columnDefs: [
+        { targets: 0, searchable: true }
+      ],
+      order: [[0, 'asc']],
+      pageLength: 10,
+      dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rtip'
+    });
+  });
 </script>
 
 @endsection

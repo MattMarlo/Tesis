@@ -9,8 +9,8 @@
 <!-- jQuery (requerido para DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<div class="container-fluid mt-4 px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid mt-4 px-0 mx-n4 mx-md-n5">
+    <div class="d-flex justify-content-between align-items-center mb-4 px-3">
         <h2 class="fw-bold">Gestión de Reservas</h2>
         <div class="d-flex gap-2">
             <a href="{{ route('reservas_individual.create') }}" class="btn fw-bold text-white" style="background-color:#3b82f6;border:none;">
@@ -23,13 +23,13 @@
     </div>
 
     @if (session('success') && !session('toast_sync'))
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show mx-3">
             <i class="bi bi-check-circle"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
     @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show mx-3">
             <i class="bi bi-exclamation-triangle"></i> {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -49,8 +49,22 @@
     @endif
 
     <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
+        <div class="card-body px-0 py-4">
             <style>
+                .dataTables_wrapper {
+                    padding: 0 1rem;
+                    width: 100%;
+                }
+                .reservas-table-scroll {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                    width: 100%;
+                }
+                .reservas-table-scroll .table.datatable {
+                    width: 100% !important;
+                    min-width: 1100px;
+                    margin-bottom: 0;
+                }
                 .dataTables_wrapper .dataTables_filter input {
                     border-radius: 8px;
                     border: 1px solid #dee2e6;
@@ -107,8 +121,7 @@
                     box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.08);
                 }
             </style>
-            <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                <table class="table datatable table-hover mb-0">
+            <table class="table datatable table-hover mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -182,7 +195,6 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
         </div>
     </div>
 </div>
@@ -1189,8 +1201,7 @@
         url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
       },
       responsive: false,
-      autoWidth: false,
-      scrollX: true,
+      autoWidth: true,
       processing: true,
       columnDefs: [
         { targets: 0, searchable: true }
@@ -1200,7 +1211,11 @@
       lengthMenu: [10, 25, 50, 100],
       dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
       initComplete: function() {
-        // Mejorar estilos de los controles
+        const $table = $(this.api().table().node());
+        if (!$table.parent().hasClass('reservas-table-scroll')) {
+          $table.wrap('<div class="reservas-table-scroll"></div>');
+        }
+
         const filterRow = $('.dataTables_wrapper .dataTables_filter');
         filterRow.find('label').css({
           'display': 'flex',

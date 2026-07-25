@@ -2,23 +2,34 @@
 
 @section('content')
 <style>
-    /* Estilos específicos para replicar el diseño de "Pagos" basado en la imagen */
-    body {
-        background-color: #FFFFFF;
-        color: #e2e8f0;
+    /*  VARIABLES DE COLOR  */
+    :root {
+        --bg-body: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-table: #ffffff;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --hover-bg: rgba(0,0,0,0.02);
     }
-    
+
+    body {
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+
     .page-title {
         color: #2553EB;
         font-weight: 700;
         margin-bottom: 0.2rem;
     }
-    
+
     .page-subtitle {
-        color: #26282a;
+        color: var(--text-secondary);
         font-size: 0.9rem;
     }
-    
+
     .btn-registrar {
         background-color: #3b82f6;
         color: white;
@@ -27,13 +38,13 @@
         padding: 0.5rem 1rem;
         border: none;
     }
-    
+
     /* Stats Cards */
     .stat-card {
-        background-color: #1e212b;
+        background-color: var(--bg-card);
         border-radius: 12px;
         padding: 1.25rem;
-        border: 1px solid #2d313f;
+        border: 1px solid var(--border-color);
         border-top: 3px solid transparent;
         height: 100%;
     }
@@ -41,16 +52,16 @@
     .stat-card-cobrado { border-top-color: #10b981; }
     .stat-card-pendiente { border-top-color: #f59e0b; }
     .stat-card-sin-iniciar { border-top-color: #ef4444; }
-    
+
     .stat-title {
-        color: #94a3b8;
+        color: var(--text-muted);
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-bottom: 0.5rem;
     }
-    
+
     .stat-value {
         font-size: 1.75rem;
         font-weight: 700;
@@ -60,54 +71,53 @@
     .stat-value.cobrado { color: #10b981; }
     .stat-value.pendiente { color: #f59e0b; }
     .stat-value.sin-iniciar { color: #ef4444; }
-    
+
     .stat-desc {
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 0.8rem;
     }
-    
+
     /* Table Area */
     .table-container {
-        background-color: #1e212b;
+        background-color: var(--bg-table);
         border-radius: 12px;
-        border: 1px solid #2d313f;
+        border: 1px solid var(--border-color);
         overflow-x: auto;
     }
-    
+
     .table-dark-custom {
         width: 100%;
-        color: #cbd5e1;
+        color: var(--text-primary);
         border-collapse: collapse;
-        
     }
-    
+
     .table-dark-custom th {
-        background-color: #1e212b;
-        color: #64748b;
-        font-size: 0.6rem 0.8rem;
+        background-color: var(--bg-table);
+        color: var(--text-secondary);
+        font-size: 0.7rem;
         font-weight: 600;
         white-space: nowrap;
         text-transform: uppercase;
         padding: 0.6rem 0.8rem;
-        border-bottom: 1px solid #2d313f;
+        border-bottom: 1px solid var(--border-color);
     }
-    
+
     .table-dark-custom td {
         padding: 0.6rem 0.8rem;
-        border-bottom: 1px solid #2d313f;
+        border-bottom: 1px solid var(--border-color);
         vertical-align: middle;
         font-size: 0.8rem;
     }
-    
+
     .table-dark-custom tr:hover {
-        background-color: rgba(255, 255, 255, 0.02);
+        background-color: var(--hover-bg);
     }
-    
-    /* Badges & Text Colors */
+
+    /* Badges & Text Colors (NO CAMBIAR, son colores de estado) */
     .text-cobrado { color: #10b981 !important; font-weight: 600; }
     .text-pendiente { color: #ef4444 !important; font-weight: 600; }
     .text-parcial { color: #f59e0b !important; font-weight: 600; }
-    
+
     .badge-status {
         padding: 0.35rem 0.75rem;
         border-radius: 50px;
@@ -118,11 +128,11 @@
         gap: 0.4rem;
     }
     .badge-status i { font-size: 0.5rem; }
-    
+
     .bg-status-completado { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
     .bg-status-sinpago { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
     .bg-status-parcial { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-    
+
     .badge-grupo {
         background-color: #4c1d95;
         color: #ddd6fe;
@@ -131,7 +141,7 @@
         border-radius: 4px;
         margin-right: 0.5rem;
     }
-    
+
     .badge-lider {
         background-color: #5b21b6;
         color: #c4b5fd;
@@ -140,7 +150,7 @@
         border-radius: 4px;
         margin-left: 0.5rem;
     }
-    
+
     .avatar-circle {
         width: 28px;
         height: 28px;
@@ -154,23 +164,32 @@
         font-weight: 600;
         margin-right: 0.5rem;
     }
-    
-    /* Acción Buttons */
+
+    /* Aciones de los botones */
+   
+    .btn-desglose-active {
+        background-color: #e2e8f0;
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    .btn-desglose-active:hover {
+        background-color: #cbd5e1;
+    }
     .btn-action {
         border-radius: 8px;
         padding: 0.35rem 0.75rem;
         font-size: 0.85rem;
         font-weight: 500;
         background: transparent;
-        border: 1px solid #334155;
-        color: #cbd5e1;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
         transition: all 0.2s;
     }
     .btn-action:hover {
-        background-color: #334155;
+        background-color: var(--border-color);
         color: white;
     }
-    
+
     .btn-action-cobrar {
         border-color: #047857;
         color: #10b981;
@@ -179,12 +198,12 @@
         background-color: rgba(16, 185, 129, 0.1);
         color: #34d399;
     }
-    
+
     /* Filters */
     .search-input {
-        background-color: #1e212b;
-        border: 1px solid #2d313f;
-        color: #cbd5e1;
+        background-color: var(--bg-table);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
         border-radius: 8px;
         padding: 0.5rem 1rem 0.5rem 2.5rem;
         width: 100%;
@@ -194,21 +213,21 @@
         border-color: #3b82f6;
         outline: none;
         box-shadow: none;
-        background-color: #1e212b;
-        color: #fff;
+        background-color: var(--bg-table);
+        color: var(--text-primary);
     }
     .search-icon {
         position: absolute;
         left: 10px;
         top: 50%;
         transform: translateY(-50%);
-        color: #64748b;
+        color: var(--text-muted);
     }
-    
+
     .filter-select {
-        background-color: #1e212b;
-        border: 1px solid #2d313f;
-        color: #cbd5e1;
+        background-color: var(--bg-table);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
         border-radius: 8px;
         padding: 0.5rem 2rem 0.5rem 1rem;
         appearance: none;
@@ -216,11 +235,11 @@
         background-repeat: no-repeat;
         background-position: right 0.5rem center;
     }
-    
+
     /* Desglose Grupal Panel */
     .desglose-panel {
-        background-color: #161821;
-        border-top: 1px solid #3f332d;
+        background-color: var(--bg-card);
+        border-top: 1px solid var(--border-color);
         display: none;
     }
     .desglose-panel.active {
@@ -231,33 +250,96 @@
     }
     .desglose-header {
         font-weight: 600;
-        color: #f8fafc;
+        color: var(--text-primary);
         margin-bottom: 1rem;
         font-size: 0.95rem;
     }
-    
-    /* Modal styles overrides for dark theme */
+
+    /* ===== MODALES (TEMA CLARO) ===== */
     .modal-content.dark-modal {
-        background-color: #1e212b;
-        color: #e2e8f0;
-        border: 1px solid #2d313f;
+        background-color: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
     }
     .modal-content.dark-modal .modal-header {
-        border-bottom: 1px solid #2d313f;
+        border-bottom: 1px solid var(--border-color);
     }
     .modal-content.dark-modal .modal-footer {
-        border-top: 1px solid #2d313f;
+        border-top: 1px solid var(--border-color);
     }
+    .modal-content.dark-modal .modal-title {
+        color: var(--text-primary);
+    }
+
+    .modal-content.dark-modal .text-secondary {
+        color: var(--text-secondary) !important;
+    }
+    .modal-content.dark-modal .text-muted {
+        color: var(--text-muted) !important;
+    }
+    .modal-content.dark-modal .text-light,
+    .modal-content.dark-modal .text-white {
+        color: var(--text-primary) !important;
+    }
+    .modal-content.dark-modal strong {
+        color: var(--text-primary);
+    }
+    .modal-content.dark-modal .text-cobrado {
+        color: #10b981 !important;
+    }
+    .modal-content.dark-modal .text-pendiente {
+        color: #ef4444 !important;
+    }
+    .modal-content.dark-modal .text-parcial {
+        color: #f59e0b !important;
+    }
+
+    /* Inputs del modal */
     .dark-input {
-        background-color: #12141d;
-        border: 1px solid #2d313f;
-        color: #e2e8f0;
+        background-color: #f1f5f9;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
     }
     .dark-input:focus {
-        background-color: #12141d;
-        color: white;
+        background-color: #ffffff;
+        color: var(--text-primary);
         border-color: #3b82f6;
         box-shadow: none;
+    }
+    .dark-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .desglose-panel .text-light {
+        color: var(--text-primary) !important;
+    }
+    .desglose-panel .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    /* ANULAR PAGO */
+    #lista_pagos_anular .text-white,
+    #lista_pagos_anular .text-light {
+        color: var(--text-primary) !important;
+    }
+    #lista_pagos_anular .text-muted {
+        color: var(--text-muted) !important;
+    }
+    #lista_pagos_anular .text-cobrado {
+        color: #10b981 !important;
+    }
+
+    .modal-body .text-white#aud_fecha {
+        color: var(--text-primary) !important;
+    }
+
+    .btn-desglose.bg-secondary.text-white {
+        background-color: #e2e8f0 !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+    }
+    .btn-desglose.bg-secondary.text-white:hover {
+        background-color: #cbd5e1 !important;
     }
 </style>
 
@@ -862,8 +944,8 @@
                 } else {
                     panel.classList.add('active');
                     this.textContent = 'Cerrar desglose';
-                    this.classList.add('bg-secondary');
-                    this.classList.add('text-white');
+                    this.classList.add('btn-desglose-active');
+                    this.textContent = 'Cerrar desglose';
                     
                     // Cargar datos por fetch
                     fetch(`/pagos/grupo/${reservaId}`)

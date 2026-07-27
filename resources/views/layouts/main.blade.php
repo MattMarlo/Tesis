@@ -346,12 +346,14 @@
 
         <div class="d-flex align-items-center gap-3">
             <div class="position-relative cursor-pointer me-3">
-                <i class="bi bi-bell fs-5"></i>
+                <a href="#">
+                    <i class="bi bi-bell fs-5"></i>
+                </a>
                 <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
             </div>
-            <button class="btn btn-primary rounded-pill px-4 btn-sm fw-bold">
-                <i class="bi bi-plus-lg me-2"></i>Nueva Reserva
-            </button>
+            <a class="btn btn-primary rounded-pill px-4 btn-sm fw-bold" href="{{route('reservas_individual.create')}}">
+                <i class="bi bi-plus-lg me-2" ></i>Nueva Reserva
+            </a>
         </div>
     </header>
 

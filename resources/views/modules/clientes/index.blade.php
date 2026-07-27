@@ -47,9 +47,24 @@
                                         <i class="bi bi-funnel me-1"></i> Todos los estados
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="filterStatus">
-                                        <li><a class="dropdown-item active" href="#"><i class="bi bi-circle-fill text-primary me-2" style="font-size: 0.6rem;"></i>Todos los estados</a></li>
-                                        <li><a class="dropdown-item" href="#"><i class="bi bi-circle-fill text-success me-2" style="font-size: 0.6rem;"></i>Activos</a></li>
-                                        <li><a class="dropdown-item" href="#"><i class="bi bi-circle-fill text-danger me-2" style="font-size: 0.6rem;"></i>Inactivos</a></li>
+                                        <li>
+                                            <a class="dropdown-item {{ !request('estado') || request('estado') == 'todos' ? 'active' : '' }}" 
+                                            href="{{ route('clientes', array_merge(request()->only('documento'), ['estado' => 'todos'])) }}">
+                                                <i class="bi bi-circle-fill text-primary me-2" style="font-size: 0.6rem;"></i>Todos los estados
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item {{ request('estado') == 'activo' ? 'active' : '' }}" 
+                                            href="{{ route('clientes', array_merge(request()->only('documento'), ['estado' => 'activo'])) }}">
+                                                <i class="bi bi-circle-fill text-success me-2" style="font-size: 0.6rem;"></i>Activos
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item {{ request('estado') == 'inactivo' ? 'active' : '' }}" 
+                                            href="{{ route('clientes', array_merge(request()->only('documento'), ['estado' => 'inactivo'])) }}">
+                                                <i class="bi bi-circle-fill text-danger me-2" style="font-size: 0.6rem;"></i>Inactivos
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

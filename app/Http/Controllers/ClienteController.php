@@ -29,7 +29,10 @@ class ClienteController extends Controller
             $documento = $request->documento;
             $query->where('documento', 'LIKE', "%$documento%");
         }
-        
+        // filtrar por estado
+        if ($request->filled('estado') && $request->estado != 'todos') {
+            $query->where('estado', $request->estado);
+        }
         $clientes = $query->get(); // o paginate(10)
             return view('modules.clientes.index',compact('titulo','clientes'));
         }

@@ -106,9 +106,9 @@ class DestinoController extends Controller
         try{
             $destino=Destino::find($id);
             $destino->delete();
-            return to_route('destinos')->with('sucess','Se ha eliminado exitosamente');
+            return to_route('destinos')->with('success','Se ha eliminado exitosamente');
         }catch(Exception $e){
-            return to_route('destinos')->with('error','no se ha podido eliminar el destino'.$e->getMessage());
+            return to_route('destinos')->with('error','no se ha podido eliminar el destino porque tiene una reserva activa');
         }
     }
 }

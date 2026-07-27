@@ -99,11 +99,10 @@
                   Ver detalles
                 </a>
 
-                <form action="{{ route('destinos.destroy', $destino->id) }}" method="POST">
+                <form action="{{ route('destinos.destroy', $destino->id) }}" method="POST" class="form-eliminar-destino">
                   @csrf
                   @method('DELETE')
-                  <button class="btn btn-outline-danger"
-                    onclick="return confirm('¿Eliminar destino?')">
+                  <button type="button" class="btn btn-outline-danger btn-eliminar-destino">
                     <i class="bi bi-trash"></i>
                   </button>
                 </form>
@@ -120,4 +119,35 @@
   </section>
 
 </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Seleccionar todos los botones de eliminar
+      const botonesEliminar = document.querySelectorAll('.btn-eliminar-destino');
+      
+      botonesEliminar.forEach(boton => {
+          boton.addEventListener('click', function(e) {
+              e.preventDefault(); // Evita el envío inmediato
+              
+              const form = this.closest('form'); // Obtener el formulario padre
+              
+              Swal.fire({
+                  title: '¿Estás seguro?',
+                  text: "Esta acción eliminará el destino y no se podrá deshacer.",
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#d33',
+                  cancelButtonColor: '#6c757d',
+                  confirmButtonText: 'Sí, eliminar',
+                  cancelButtonText: 'Cancelar'
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      form.submit(); // Envía el formulario
+                  }
+              });
+          });
+      });
+  });
+</script>
+
 @endsection

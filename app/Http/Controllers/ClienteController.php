@@ -174,7 +174,7 @@ class ClienteController extends Controller
     /*public function update(Request $request, string $id)
     {
         try {
-            Log::info('🔍 INICIO UPDATE - Cliente ID: ' . $id);
+            Log::info(' INICIO UPDATE - Cliente ID: ' . $id);
 
             // Buscar cliente
             $cliente = Cliente::findOrFail($id);
@@ -197,7 +197,7 @@ class ClienteController extends Controller
             if ($tieneArchivo) {
                 $file = $request->file('archivo');
 
-                Log::info('📎 Archivo recibido en edición:', [
+                Log::info(' Archivo recibido en edición:', [
                     'nombre' => $file->getClientOriginalName(),
                     'tamaño' => $file->getSize() . ' bytes',
                     'mime'   => $file->getMimeType(),
@@ -212,52 +212,48 @@ class ClienteController extends Controller
                 // Eliminar archivo anterior si existe
                 if ($cliente->archivo && Storage::disk('public')->exists($cliente->archivo)) {
                     Storage::disk('public')->delete($cliente->archivo);
-                    Log::info('🗑️ Archivo anterior eliminado: ' . $cliente->archivo);
+                    Log::info(' Archivo anterior eliminado: ' . $cliente->archivo);
                 }
 
                 // Intentar guardar el nuevo archivo
                 try {
                     $ruta = $file->store('clientes', 'public');
-                    Log::info('🔍 Ruta devuelta por store(): ' . ($ruta ?: 'null'));
+                    Log::info(' Ruta devuelta por store(): ' . ($ruta ?: 'null'));
 
                     if ($ruta) {
                         // Verificar que realmente exista en el disco
                         if (Storage::disk('public')->exists($ruta)) {
-                            Log::info('✅ El archivo existe físicamente en el disco.');
+                            Log::info(' El archivo existe físicamente en el disco.');
                             $datos['archivo'] = $ruta;
                         } else {
-                            Log::error('❌ La ruta fue devuelta pero el archivo NO existe en el disco.');
+                            Log::error(' La ruta fue devuelta pero el archivo NO existe en el disco.');
                             throw new Exception('El archivo no se guardó correctamente en el servidor.');
                         }
                     } else {
-                        Log::error('❌ store() devolvió false o null.');
+                        Log::error(' store() devolvió false o null.');
                         throw new Exception('Error al guardar el archivo en el servidor.');
                     }
                 } catch (\Exception $e) {
-                    Log::error('❌ Excepción al guardar archivo: ' . $e->getMessage());
+                    Log::error(' Excepción al guardar archivo: ' . $e->getMessage());
                     throw $e;
                 }
             } else {
-                Log::info('📭 No se recibió archivo en la edición (se mantiene el actual)');
+                Log::info(' No se recibió archivo en la edición (se mantiene el actual)');
             }
-
-            // --------------------------------------------
-            // ACTUALIZAR CLIENTE
-            // --------------------------------------------
-            Log::info('📤 Datos a enviar al servicio:', $datos);
+            Log::info(' Datos a enviar al servicio:', $datos);
 
             $this->clienteService->actualizarCliente($id, $datos);
 
-            Log::info('✅ Cliente actualizado correctamente en la base de datos');
+            Log::info(' Cliente actualizado correctamente en la base de datos');
 
             return to_route('clientes')->with('success', 'Cliente actualizado correctamente');
 
         } catch (InvalidArgumentException $e) {
-            Log::error('❌ Error de validación (InvalidArgumentException): ' . $e->getMessage());
+            Log::error(' Error de validación (InvalidArgumentException): ' . $e->getMessage());
             return to_route('clientes')->with('error', $e->getMessage());
 
         } catch (\Exception $e) {
-            Log::error('❌ Error general en update: ' . $e->getMessage());
+            Log::error(' Error general en update: ' . $e->getMessage());
             return to_route('clientes')->with('error', 'No se pudo editar: ' . $e->getMessage());
         }
     }*/
@@ -311,7 +307,7 @@ class ClienteController extends Controller
             return to_route('clientes')->with('success', 'Su cliente fue eliminado exitosamente.');
             
         } catch (Exception $e) {
-            return to_route('clientes')->with('error', 'No se ha podido eliminar al cliente: ' . $e->getMessage());
+            return to_route('clientes')->with('error', 'No se ha podido eliminar al cliente porque tiene una reserva o pago realizado: ' );
         }
     }
 }

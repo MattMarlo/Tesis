@@ -1,72 +1,136 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recuperar Contraseña</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: linear-gradient(150deg, #1F4068 0%, #183A67 50%, #0F2746 100%);
-      min-height: 100vh;
-      color: #fff;
-    }
-    .login-wrapper {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 430px;
-      background: rgba(255,255,255,0.85);
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      color: #111;
-    }
-    .login-card .card-body { padding: 2rem; }
-  </style>
-</head>
-<body>
-  <main class="login-wrapper">
-    <div class="card login-card">
-      <div class="card-body">
-        <div class="text-center mb-4">
-          <h3 class="fw-bold">Recuperar Contraseña</h3>
-          <p class="text-muted">Ingresa tu correo y te enviaremos un enlace para restablecerla.</p>
+@extends('layouts.auth')
+
+@section('title', 'Recuperar contraseña')
+
+@section('brand-eyebrow', 'Recuperación segura')
+
+@section('brand-title', 'Vuelve a tu cuenta en pocos pasos.')
+
+@section(
+    'brand-copy',
+    'Te enviaremos un enlace seguro al correo asociado a tu cuenta para que puedas establecer una nueva contraseña.'
+)
+
+@section('content')
+
+    <header class="form-header">
+        <h2>Recuperar contraseña</h2>
+
+        <p>
+            Escribe tu correo electrónico y recibirás las instrucciones
+            para restablecer el acceso.
+        </p>
+    </header>
+
+    <form
+        id="recoveryForm"
+        class="auth-form"
+        action="{{ route('password.email') }}"
+        method="POST"
+        novalidate
+    >
+        @csrf
+
+        <div class="form-group">
+            <label class="form-label" for="email">
+                Correo electrónico
+            </label>
+
+            <div class="input-shell">
+                <i class="bi bi-envelope"></i>
+
+                <input
+                    id="email"
+                    class="form-control"
+                    type="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    placeholder="nombre@correo.com"
+                    autocomplete="email"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <span id="emailError" class="field-error"></span>
         </div>
 
-        @if (session('status'))
-          <div class="alert alert-success">{{ session('status') }}</div>
-        @endif
+        <button
+            class="btn-primary"
+            type="submit"
+            data-loading-text="Enviando enlace..."
+        >
+            <span class="button-label">
+                Enviar enlace de recuperación
+            </span>
 
-        @if ($errors->any())
-          <div class="alert alert-danger" role="alert">
-            <ul class="mb-0">
-              @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-              @endforeach
-            </ul>
-          </div>
-        @endif
+            <i class="bi bi-send"></i>
+        </button>
 
-        <form action="{{ route('password.email') }}" method="post">
-          @csrf
-          <div class="mb-3">
-            <label class="form-label">Correo Electrónico</label>
-            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Enviar enlace</button>
-          <div class="mt-3 text-center">
-            <a href="{{ route('login') }}" class="text-decoration-none">Volver al login</a>
-          </div>
-        </form>
-      </div>
+        <div class="back-link">
+            <a class="text-link" href="{{ route('login') }}">
+                <i class="bi bi-arrow-left"></i>
+                Volver al inicio de sesión
+            </a>
+        </div>
+    </form>
+
+    <div class="security-note">
+        <i class="bi bi-clock-history"></i>
+
+        <span>
+            El enlace tendrá una duración limitada. Si no encuentras
+            el mensaje, revisa también la carpeta de correo no deseado.
+        </span>
     </div>
-  </main>
-</body>
-</html>
+
+@endsection
+
+@section('scripts')
+
+    <script>
+        $(function () {
+            const formulario = $('#recoveryForm');
+            const correo = $('#email');
+
+            function validarCorreo() {
+                const valor = $.trim(correo.val());
+                let mensaje = '';
+
+                if (!valor) {
+                    mensaje = 'Ingresa el correo asociado a tu cuenta.';
+                } else {
+                    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                    if (!formatoCorreo.test(valor)) {
+                        mensaje = 'Escribe un correo electrónico válido.';
+                    }
+                }
+
+                correo.toggleClass(
+                    'input-error',
+                    Boolean(mensaje)
+                );
+
+                $('#emailError')
+                    .text(mensaje)
+                    .toggle(Boolean(mensaje));
+
+                return !mensaje;
+            }
+
+            correo.on('blur input', validarCorreo);
+
+            formulario.on('submit', function (event) {
+                if (!validarCorreo()) {
+                    event.preventDefault();
+                    correo.trigger('focus');
+                    return;
+                }
+
+                activarCargaFormulario(this);
+            });
+        });
+    </script>
+
+@endsection

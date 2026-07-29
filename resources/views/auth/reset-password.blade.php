@@ -1,71 +1,219 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restablecer Contraseña</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: linear-gradient(150deg, #1F4068 0%, #183A67 50%, #0F2746 100%);
-      min-height: 100vh;
-      color: #fff;
-    }
-    .login-wrapper {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 430px;
-      background: rgba(255,255,255,0.85);
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      color: #111;
-    }
-    .login-card .card-body { padding: 2rem; }
-  </style>
-</head>
-<body>
-  <main class="login-wrapper">
-    <div class="card login-card">
-      <div class="card-body">
-        <div class="text-center mb-4">
-          <h3 class="fw-bold">Restablecer Contraseña</h3>
-          <p class="text-muted">Ingresa tu nueva contraseña para continuar.</p>
+@extends('layouts.auth')
+
+@section('title', 'Restablecer contraseña')
+
+@section('brand-eyebrow', 'Último paso')
+
+@section('brand-title', 'Protege nuevamente el acceso a tu cuenta.')
+
+@section(
+    'brand-copy',
+    'Crea una contraseña nueva que puedas recordar y que no utilices en otros servicios.'
+)
+
+@section('content')
+
+    <header class="form-header">
+        <h2>Nueva contraseña</h2>
+
+        <p>
+            La contraseña debe contener al menos 8 caracteres.
+            Escríbela nuevamente para confirmarla.
+        </p>
+    </header>
+
+    <form
+        id="resetForm"
+        class="auth-form"
+        action="{{ route('password.update') }}"
+        method="POST"
+        novalidate
+    >
+        @csrf
+
+        <input
+            type="hidden"
+            name="token"
+            value="{{ $token }}"
+        >
+
+        <input
+            type="hidden"
+            name="email"
+            value="{{ $email }}"
+        >
+
+        <div class="form-group">
+            <label class="form-label" for="password">
+                Nueva contraseña
+            </label>
+
+            <div class="input-shell">
+                <i class="bi bi-lock"></i>
+
+                <input
+                    id="password"
+                    class="form-control"
+                    type="password"
+                    name="password"
+                    placeholder="Mínimo 8 caracteres"
+                    autocomplete="new-password"
+                    required
+                    autofocus
+                >
+
+                <button
+                    class="password-toggle"
+                    type="button"
+                    data-target="#password"
+                    aria-label="Mostrar contraseña"
+                >
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+
+            <span id="passwordError" class="field-error"></span>
         </div>
 
-        @if ($errors->any())
-          <div class="alert alert-danger" role="alert">
-            <ul class="mb-0">
-              @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-              @endforeach
-            </ul>
-          </div>
-        @endif
+        <div class="form-group">
+            <label
+                class="form-label"
+                for="password_confirmation"
+            >
+                Confirmar contraseña
+            </label>
 
-        <form action="{{ route('password.update') }}" method="post">
-          @csrf
-          <input type="hidden" name="token" value="{{ $token }}">
-          <input type="hidden" name="email" value="{{ $email }}">
-          <div class="mb-3">
-            <label class="form-label">Nueva Contraseña</label>
-            <input type="password" name="password" class="form-control" required autofocus>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Confirmar Contraseña</label>
-            <input type="password" name="password_confirmation" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Guardar nueva contraseña</button>
-        </form>
-      </div>
-    </div>
-  </main>
-</body>
-</html>
+            <div class="input-shell">
+                <i class="bi bi-shield-lock"></i>
+
+                <input
+                    id="password_confirmation"
+                    class="form-control"
+                    type="password"
+                    name="password_confirmation"
+                    placeholder="Repite la nueva contraseña"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <button
+                    class="password-toggle"
+                    type="button"
+                    data-target="#password_confirmation"
+                    aria-label="Mostrar contraseña"
+                >
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+
+            <span
+                id="password_confirmationError"
+                class="field-error"
+            ></span>
+        </div>
+
+        <button
+            class="btn-primary"
+            type="submit"
+            data-loading-text="Guardando contraseña..."
+        >
+            <span class="button-label">
+                Guardar nueva contraseña
+            </span>
+
+            <i class="bi bi-check2"></i>
+        </button>
+
+        <div class="back-link">
+            <a class="text-link" href="{{ route('login') }}">
+                <i class="bi bi-arrow-left"></i>
+                Volver al inicio de sesión
+            </a>
+        </div>
+    </form>
+
+@endsection
+
+@section('scripts')
+
+    <script>
+        $(function () {
+            const formulario = $('#resetForm');
+            const password = $('#password');
+            const confirmacion = $('#password_confirmation');
+
+            function mostrarEstadoCampo(campo, mensaje) {
+                const error = $('#' + campo.attr('id') + 'Error');
+
+                campo.toggleClass(
+                    'input-error',
+                    Boolean(mensaje)
+                );
+
+                error
+                    .text(mensaje || '')
+                    .toggle(Boolean(mensaje));
+
+                return !mensaje;
+            }
+
+            function validarPassword() {
+                let mensaje = '';
+
+                if (!password.val()) {
+                    mensaje = 'Ingresa una contraseña nueva.';
+                } else if (password.val().length < 8) {
+                    mensaje = 'La contraseña debe tener al menos 8 caracteres.';
+                }
+
+                return mostrarEstadoCampo(password, mensaje);
+            }
+
+            function validarConfirmacion() {
+                let mensaje = '';
+
+                if (!confirmacion.val()) {
+                    mensaje = 'Confirma la nueva contraseña.';
+                } else if (confirmacion.val() !== password.val()) {
+                    mensaje = 'Las contraseñas no coinciden.';
+                }
+
+                return mostrarEstadoCampo(
+                    confirmacion,
+                    mensaje
+                );
+            }
+
+            password.on('blur input', function () {
+                validarPassword();
+
+                if (confirmacion.val()) {
+                    validarConfirmacion();
+                }
+            });
+
+            confirmacion.on(
+                'blur input',
+                validarConfirmacion
+            );
+
+            formulario.on('submit', function (event) {
+                const passwordValido = validarPassword();
+                const confirmacionValida = validarConfirmacion();
+
+                if (!passwordValido || !confirmacionValida) {
+                    event.preventDefault();
+
+                    $('.input-error')
+                        .first()
+                        .trigger('focus');
+
+                    return;
+                }
+
+                activarCargaFormulario(this);
+            });
+        });
+    </script>
+
+@endsection

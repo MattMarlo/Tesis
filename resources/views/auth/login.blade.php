@@ -1,105 +1,194 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - TravelManager</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: linear-gradient(150deg, #1F4068 0%, #183A67 50%, #0F2746 100%);
-      min-height: 100vh;
-      color: #fff;
-    }
-    .login-wrapper {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 430px;
-      background: rgba(255,255,255,0.85);
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      color: #111;
-    }
-    .login-card .card-body {
-      padding: 2rem;
-    }
-    .login-logo {
-      width: 130px;
-      height: 130px;
-      background: transparent;
-      /*background: #1F4068;*/
-      color: #fff;
-      border-radius: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      margin-bottom: 0.85rem;
-      font-size: 1.25rem;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0,0,0.1);
-    }
-  </style>
-</head>
-<body>
-  <main class="login-wrapper">
-    <div class="card login-card">
-      <div class="card-body">
-        <div class="text-center mb-4">
-          <div class="login-logo">
-            <img src="{{Storage::url('login/passionTravelLogo.jpeg')}}" alt=""  
-            style="width: 100%; height: 100%; object-fit: contain; display: block;">
-          </div>
-          <h3 class="fw-bold">Passion Travel</h3>
-          <p class="text-muted">Inicia sesión para continuar</p>
+@extends('layouts.auth')
+
+@section('title', 'Iniciar sesión')
+
+@section('brand-eyebrow', 'Bienvenido de vuelta')
+
+@section('brand-title', 'Cada viaje comienza con una buena gestión.')
+
+@section(
+    'brand-copy',
+    'Consulta tus reservas, registra pagos y realiza el seguimiento de tus clientes desde un espacio organizado.'
+)
+
+@section('content')
+
+    <header class="form-header">
+        <h2>Iniciar sesión</h2>
+
+        <p>
+            Ingresa con el correo electrónico y la contraseña
+            asignados a tu cuenta.
+        </p>
+    </header>
+
+    <form
+        id="loginForm"
+        class="auth-form"
+        action="{{ route('login') }}"
+        method="POST"
+        novalidate
+    >
+        @csrf
+
+        <div class="form-group">
+            <label class="form-label" for="email">
+                Correo electrónico
+            </label>
+
+            <div class="input-shell">
+                <i class="bi bi-envelope"></i>
+
+                <input
+                    id="email"
+                    class="form-control"
+                    type="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    placeholder="nombre@correo.com"
+                    autocomplete="email"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <span id="emailError" class="field-error"></span>
         </div>
 
-        @if (session('error'))
-          <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-        @if (session('status'))
-          <div class="alert alert-success">{{ session('status') }}</div>
-        @endif
-        @if ($errors->any())
-          <div class="alert alert-danger" role="alert">
-            <ul class="mb-0">
-              @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-              @endforeach
-            </ul>
-          </div>
-        @endif
+        <div class="form-group">
+            <label class="form-label" for="password">
+                Contraseña
+            </label>
 
-        <form action="{{ route('login') }}" method="post" novalidate>
-          @csrf
-          <div class="mb-3">
-            <label class="form-label">Correo Electrónico</label>
-            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Contraseña</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
-          <div class="mt-3 text-center">
-            <a href="{{ route('password.request') }}" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
-          </div>
-          <!-- <div class="mt-3 text-center">
-            <small class="text-muted">¿No tienes cuenta? <a href="{{ route('register') }}">Regístrate</a></small>
-          </div>-->
-        </form>
-      </div>
+            <div class="input-shell">
+                <i class="bi bi-lock"></i>
+
+                <input
+                    id="password"
+                    class="form-control"
+                    type="password"
+                    name="password"
+                    placeholder="Ingresa tu contraseña"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button
+                    class="password-toggle"
+                    type="button"
+                    data-target="#password"
+                    aria-label="Mostrar contraseña"
+                >
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+
+            <span id="passwordError" class="field-error"></span>
+        </div>
+
+        <div class="form-options">
+            <a
+                class="text-link"
+                href="{{ route('password.request') }}"
+            >
+                ¿Olvidaste tu contraseña?
+            </a>
+        </div>
+
+        <button
+            class="btn-primary"
+            type="submit"
+            data-loading-text="Iniciando sesión..."
+        >
+            <span class="button-label">Ingresar al sistema</span>
+            <i class="bi bi-arrow-right"></i>
+        </button>
+    </form>
+
+    <div class="security-note">
+        <i class="bi bi-info-circle"></i>
+
+        <span>
+            No compartas tus credenciales ni dejes la sesión abierta
+            en equipos de uso público.
+        </span>
     </div>
-  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@endsection
+
+@section('scripts')
+
+    <script>
+        $(function () {
+            const formulario = $('#loginForm');
+            const correo = $('#email');
+            const password = $('#password');
+
+            function mostrarEstadoCampo(campo, mensaje) {
+                const contenedorError = $('#' + campo.attr('id') + 'Error');
+
+                campo.toggleClass('input-error', Boolean(mensaje));
+
+                contenedorError
+                    .text(mensaje || '')
+                    .toggle(Boolean(mensaje));
+
+                return !mensaje;
+            }
+
+            function validarCorreo() {
+                const valor = $.trim(correo.val());
+
+                if (!valor) {
+                    return mostrarEstadoCampo(
+                        correo,
+                        'Ingresa tu correo electrónico.'
+                    );
+                }
+
+                const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (!formatoCorreo.test(valor)) {
+                    return mostrarEstadoCampo(
+                        correo,
+                        'Escribe un correo electrónico válido.'
+                    );
+                }
+
+                return mostrarEstadoCampo(correo, '');
+            }
+
+            function validarPassword() {
+                if (!password.val()) {
+                    return mostrarEstadoCampo(
+                        password,
+                        'Ingresa tu contraseña.'
+                    );
+                }
+
+                return mostrarEstadoCampo(password, '');
+            }
+
+            correo.on('blur input', validarCorreo);
+            password.on('blur input', validarPassword);
+
+            formulario.on('submit', function (event) {
+                const correoValido = validarCorreo();
+                const passwordValido = validarPassword();
+
+                if (!correoValido || !passwordValido) {
+                    event.preventDefault();
+
+                    $('.input-error')
+                        .first()
+                        .trigger('focus');
+
+                    return;
+                }
+
+                activarCargaFormulario(this);
+            });
+        });
+    </script>
+
+@endsection

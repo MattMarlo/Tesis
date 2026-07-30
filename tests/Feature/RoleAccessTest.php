@@ -4,9 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RoleAccessTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_el_admin_puede_acceder_al_modulo_de_usuarios(): void
     {
         $admin = new User([

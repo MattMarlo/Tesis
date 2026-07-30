@@ -11,6 +11,6 @@ class AuthPasswordResetTest extends TestCase
         $response = $this->get('/forgot-password');
 
         $response->assertStatus(200);
-        $response->assertSee('Recuperar Contraseña');
+        $response->assertSee('Recuperar contraseña');
     }
 }

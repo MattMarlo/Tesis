@@ -1,0 +1,498 @@
+:root {
+    --testimonio-azul: #093d77;
+    --testimonio-celeste: #3a7ca5;
+    --testimonio-fondo: #f8f9fa;
+    --testimonio-texto: #2b2b2b;
+    --testimonio-dorado: #daa520;
+    --testimonio-borde: #dce5ec;
+    --testimonio-error: #d93025;
+    --testimonio-blanco: #ffffff;
+}
+
+#formularioTestimonio {
+    max-width: 1050px;
+    margin: 0 auto;
+}
+
+.encabezado-formulario-testimonio {
+    position: relative;
+    margin-bottom: 25px;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    color: var(--testimonio-blanco);
+    background:
+        radial-gradient(
+            circle at 90% 15%,
+            rgba(218, 165, 32, 0.28),
+            transparent 25%
+        ),
+        linear-gradient(
+            135deg,
+            #062d59,
+            var(--testimonio-azul),
+            var(--testimonio-celeste)
+        );
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.encabezado-formulario-testimonio > div {
+    max-width: 730px;
+}
+
+.formulario-etiqueta {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #f0ca58;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.encabezado-formulario-testimonio h2 {
+    margin: 0 0 8px;
+    color: var(--testimonio-blanco);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.encabezado-formulario-testimonio p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.encabezado-icono-testimonio {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--testimonio-azul);
+    background: var(--testimonio-dorado);
+    border-radius: 20px;
+    font-size: 30px;
+    transform: rotate(-5deg);
+}
+
+.seccion-formulario-testimonio {
+    margin-bottom: 22px;
+    padding: 27px;
+    background: var(--testimonio-blanco);
+    border: 1px solid var(--testimonio-borde);
+    border-radius: 17px;
+    box-shadow: 0 8px 24px rgba(9, 61, 119, 0.06);
+}
+
+.titulo-seccion-formulario {
+    margin-bottom: 24px;
+    padding-bottom: 17px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    border-bottom: 1px solid #e9eef2;
+}
+
+.titulo-seccion-formulario > span {
+    width: 43px;
+    height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--testimonio-blanco);
+    background: var(--testimonio-azul);
+    border-radius: 12px;
+    font-size: 17px;
+}
+
+.titulo-seccion-formulario h3 {
+    margin: 0 0 3px;
+    color: var(--testimonio-azul);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.titulo-seccion-formulario p {
+    margin: 0;
+    color: #71808e;
+    font-size: 12px;
+}
+
+.rejilla-formulario-testimonio {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 21px;
+}
+
+.grupo-testimonio {
+    min-width: 0;
+}
+
+.grupo-completo {
+    grid-column: 1 / -1;
+}
+
+.grupo-testimonio > label {
+    margin-bottom: 8px;
+    display: block;
+    color: #334354;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.grupo-testimonio > label > span {
+    color: var(--testimonio-error);
+}
+
+.grupo-testimonio input[type='text'],
+.grupo-testimonio input[type='number'],
+.grupo-testimonio textarea,
+.grupo-testimonio select {
+    width: 100%;
+    padding: 12px 14px;
+    color: var(--testimonio-texto);
+    background: #fbfcfd;
+    border: 1px solid var(--testimonio-borde);
+    border-radius: 11px;
+    outline: none;
+    font-size: 13px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.grupo-testimonio input[type='text'],
+.grupo-testimonio input[type='number'],
+.grupo-testimonio select {
+    height: 47px;
+}
+
+.grupo-testimonio textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.grupo-testimonio input:focus,
+.grupo-testimonio textarea:focus,
+.grupo-testimonio select:focus {
+    background: var(--testimonio-blanco);
+    border-color: var(--testimonio-celeste);
+    box-shadow: 0 0 0 4px rgba(58, 124, 165, 0.12);
+}
+
+.grupo-testimonio.campo-error input,
+.grupo-testimonio.campo-error textarea,
+.grupo-testimonio.campo-error select {
+    border-color: var(--testimonio-error);
+    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.08);
+}
+
+.mensaje-error {
+    min-height: 17px;
+    margin-top: 5px;
+    display: block;
+    color: var(--testimonio-error);
+    font-size: 11px;
+}
+
+.contador-comentario {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.contador-comentario > small:last-child {
+    margin-top: 5px;
+    color: #7e8b97;
+    font-size: 10px;
+}
+
+/* Calificación */
+
+.selector-calificacion {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    gap: 7px;
+}
+
+.selector-calificacion input {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.selector-calificacion label {
+    margin: 0;
+    color: #d6dee4;
+    cursor: pointer;
+    font-size: 33px;
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.selector-calificacion label:hover,
+.selector-calificacion label:hover ~ label,
+.selector-calificacion input:checked ~ label {
+    color: var(--testimonio-dorado);
+}
+
+.selector-calificacion label:hover {
+    transform: scale(1.1);
+}
+
+.texto-calificacion {
+    margin: 7px 0 0;
+    color: var(--testimonio-azul);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Fotografía */
+
+.campo-fotografia-testimonio {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    align-items: center;
+    gap: 25px;
+}
+
+.vista-fotografia {
+    width: 190px;
+    height: 190px;
+    background: #edf3f6;
+    border: 2px dashed #bfd0db;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.vista-fotografia img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.imagen-sin-contenido {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    color: #80909d;
+    font-size: 12px;
+}
+
+.imagen-sin-contenido i {
+    color: var(--testimonio-celeste);
+    font-size: 32px;
+}
+
+.controles-fotografia input[type='file'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.boton-seleccionar-foto {
+    min-height: 45px;
+    padding: 0 17px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--testimonio-blanco);
+    background: var(--testimonio-azul);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.boton-seleccionar-foto:hover {
+    background: var(--testimonio-celeste);
+    transform: translateY(-2px);
+}
+
+.controles-fotografia p {
+    margin: 10px 0 0;
+    color: #748390;
+    font-size: 11px;
+}
+
+/* Destacado */
+
+.opcion-destacado {
+    margin: 0 !important;
+    padding: 16px;
+    display: flex !important;
+    align-items: center;
+    gap: 13px;
+    background: #f6f9fb;
+    border: 1px solid var(--testimonio-borde);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.opcion-destacado input {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.interruptor-testimonio {
+    position: relative;
+    width: 45px;
+    height: 25px;
+    flex-shrink: 0;
+    background: #becbd4;
+    border-radius: 20px;
+    transition: background 0.2s ease;
+}
+
+.interruptor-testimonio::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    background: var(--testimonio-blanco);
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    transition: transform 0.2s ease;
+}
+
+.opcion-destacado input:checked + .interruptor-testimonio {
+    background: var(--testimonio-dorado);
+}
+
+.opcion-destacado
+    input:checked
+    + .interruptor-testimonio::after {
+    transform: translateX(20px);
+}
+
+.opcion-destacado > span:last-child {
+    display: flex;
+    flex-direction: column;
+}
+
+.opcion-destacado strong {
+    color: var(--testimonio-azul);
+    font-size: 13px;
+}
+
+.opcion-destacado small {
+    color: #748390;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+/* Acciones */
+
+.acciones-formulario-testimonio {
+    padding: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 11px;
+}
+
+.boton-cancelar-testimonio,
+.boton-guardar-testimonio {
+    min-height: 47px;
+    padding: 0 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 11px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.boton-cancelar-testimonio {
+    color: var(--testimonio-azul);
+    background: var(--testimonio-blanco);
+    border: 1px solid var(--testimonio-borde);
+}
+
+.boton-cancelar-testimonio:hover {
+    color: var(--testimonio-azul);
+    background: #edf3f6;
+}
+
+.boton-guardar-testimonio {
+    color: var(--testimonio-blanco);
+    background: var(--testimonio-azul);
+    border: 0;
+    box-shadow: 0 8px 18px rgba(9, 61, 119, 0.18);
+}
+
+.boton-guardar-testimonio:hover {
+    background: var(--testimonio-celeste);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+    .encabezado-formulario-testimonio {
+        padding: 24px;
+    }
+
+    .encabezado-icono-testimonio {
+        display: none;
+    }
+
+    .seccion-formulario-testimonio {
+        padding: 21px 18px;
+    }
+
+    .rejilla-formulario-testimonio {
+        grid-template-columns: 1fr;
+    }
+
+    .grupo-completo {
+        grid-column: auto;
+    }
+
+    .campo-fotografia-testimonio {
+        grid-template-columns: 1fr;
+    }
+
+    .vista-fotografia {
+        width: 100%;
+        max-width: 260px;
+        height: 240px;
+    }
+
+    .acciones-formulario-testimonio {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .boton-cancelar-testimonio,
+    .boton-guardar-testimonio {
+        width: 100%;
+    }
+}

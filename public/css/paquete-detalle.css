@@ -1,0 +1,1003 @@
+/* =========================================================
+   NAVEGACIÓN SUPERIOR
+========================================================= */
+
+.migas-navegacion {
+    padding: 14px 0;
+    background: var(--blanco);
+    border-bottom: 1px solid var(--borde);
+}
+
+.migas-navegacion .contenedor {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+.migas-navegacion a {
+    color: var(--azul-secundario);
+    font-weight: 600;
+}
+
+.migas-navegacion a:hover {
+    color: var(--azul-principal);
+}
+
+.migas-navegacion span {
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   PORTADA
+========================================================= */
+
+.detalle-portada {
+    position: relative;
+    height: 570px;
+    color: var(--blanco);
+    background: var(--azul-oscuro);
+    overflow: hidden;
+}
+
+.detalle-portada-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detalle-portada-sombra {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(4, 25, 48, 0.95),
+            rgba(6, 45, 89, 0.72) 48%,
+            rgba(6, 45, 89, 0.16) 85%
+        ),
+        linear-gradient(
+            0deg,
+            rgba(2, 21, 41, 0.5),
+            transparent 45%
+        );
+}
+
+.detalle-portada-contenido {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.detalle-portada-contenido > * {
+    max-width: 760px;
+}
+
+.detalle-etiquetas {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.detalle-etiquetas span {
+    padding: 8px 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.etiqueta-categoria {
+    color: var(--blanco);
+    background: var(--azul-secundario);
+}
+
+.etiqueta-destacado {
+    color: var(--texto);
+    background: var(--dorado);
+}
+
+.etiqueta-oferta {
+    color: var(--blanco);
+    background: #d84949;
+}
+
+.detalle-portada h1 {
+    margin: 0 0 15px;
+    color: var(--blanco);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(43px, 6vw, 70px);
+    line-height: 1.05;
+    text-shadow: 0 5px 20px rgba(0, 0, 0, 0.24);
+}
+
+.detalle-ruta {
+    margin: 0 0 15px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+    color: var(--dorado-claro);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.detalle-ruta > i:first-child {
+    font-size: 19px;
+}
+
+.detalle-resumen {
+    margin: 0 0 23px;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.detalle-portada-datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+}
+
+.detalle-portada-datos span {
+    padding: 10px 14px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+    font-size: 13px;
+}
+
+.detalle-portada-datos i {
+    margin-right: 6px;
+    color: var(--dorado-claro);
+}
+
+/* =========================================================
+   NAVEGACIÓN INTERNA
+========================================================= */
+
+.detalle-navegacion-interna {
+    position: sticky;
+    z-index: 100;
+    top: 82px;
+    background: var(--blanco);
+    border-bottom: 1px solid var(--borde);
+    box-shadow: 0 7px 20px rgba(9, 61, 119, 0.06);
+}
+
+.detalle-navegacion-interna .contenedor {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.detalle-navegacion-interna .contenedor::-webkit-scrollbar {
+    display: none;
+}
+
+.enlace-detalle {
+    position: relative;
+    padding: 17px 18px;
+    color: var(--texto-suave);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.enlace-detalle::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 0;
+    height: 3px;
+    background: var(--dorado);
+    border-radius: 4px 4px 0 0;
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+}
+
+.enlace-detalle:hover,
+.enlace-detalle.activo {
+    color: var(--azul-principal);
+}
+
+.enlace-detalle.activo::after {
+    transform: scaleX(1);
+}
+
+/* =========================================================
+   ESTRUCTURA PRINCIPAL
+========================================================= */
+
+.detalle-contenido {
+    padding: 70px 0 100px;
+    background: var(--fondo);
+}
+
+.detalle-columnas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    align-items: start;
+    gap: 32px;
+}
+
+.detalle-columna-principal {
+    min-width: 0;
+    display: grid;
+    gap: 25px;
+}
+
+.detalle-columna-lateral {
+    min-width: 0;
+}
+
+.tarjeta-detalle {
+    padding: 32px;
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: 20px;
+    box-shadow: var(--sombra-suave);
+    scroll-margin-top: 165px;
+}
+
+.titulo-tarjeta {
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.titulo-icono {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--blanco);
+    background: linear-gradient(
+        135deg,
+        var(--azul-principal),
+        var(--azul-secundario)
+    );
+    border-radius: 13px;
+    box-shadow: 0 8px 19px rgba(9, 61, 119, 0.2);
+    font-size: 19px;
+}
+
+.titulo-tarjeta > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.titulo-tarjeta > div > span {
+    color: var(--dorado);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.titulo-tarjeta h2 {
+    margin: 2px 0 0;
+    color: var(--azul-principal);
+    font-family: 'Playfair Display', serif;
+    font-size: 27px;
+    line-height: 1.2;
+}
+
+.descripcion-destacada {
+    margin: 0 0 18px;
+    padding: 16px 18px;
+    color: var(--azul-principal);
+    background: #eef5f9;
+    border-left: 4px solid var(--dorado);
+    border-radius: 0 12px 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.7;
+}
+
+.texto-detalle {
+    color: #526171;
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+/* =========================================================
+   DATOS RÁPIDOS
+========================================================= */
+
+.rejilla-datos-viaje {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.dato-viaje {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: 15px;
+    box-shadow: var(--sombra-suave);
+}
+
+.dato-viaje-icono {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--azul-principal);
+    background: #eaf2f7;
+    border-radius: 12px;
+    font-size: 18px;
+}
+
+.dato-viaje div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.dato-viaje div span {
+    color: var(--texto-suave);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.dato-viaje strong {
+    color: var(--texto);
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   INCLUYE Y NO INCLUYE
+========================================================= */
+
+.columnas-servicios {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.lista-detalle {
+    padding: 22px;
+    border-radius: 15px;
+}
+
+.lista-incluye {
+    background: #f0f8f4;
+    border: 1px solid #cce8d9;
+}
+
+.lista-no-incluye {
+    background: #fff4f4;
+    border: 1px solid #f1d3d3;
+}
+
+.lista-detalle h3 {
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--texto);
+    font-size: 15px;
+}
+
+.lista-incluye h3 i {
+    color: #27965a;
+}
+
+.lista-no-incluye h3 i {
+    color: #d84a4a;
+}
+
+.lista-detalle ul {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 13px;
+    list-style: none;
+}
+
+.lista-detalle li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #526171;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.lista-detalle li i {
+    width: 21px;
+    height: 21px;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--blanco);
+    border-radius: 50%;
+    font-size: 9px;
+}
+
+.lista-incluye li i {
+    background: #27965a;
+}
+
+.lista-no-incluye li i {
+    background: #d84a4a;
+}
+
+/* =========================================================
+   ITINERARIO
+========================================================= */
+
+.linea-itinerario {
+    position: relative;
+    display: grid;
+    gap: 12px;
+}
+
+.dia-itinerario {
+    position: relative;
+    background: #f7f9fa;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.encabezado-dia {
+    width: 100%;
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: 45px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    color: var(--texto);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.numero-dia {
+    width: 43px;
+    height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blanco);
+    background: var(--azul-principal);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.nombre-dia {
+    display: flex;
+    flex-direction: column;
+}
+
+.nombre-dia small {
+    color: var(--dorado);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.nombre-dia strong {
+    color: var(--azul-principal);
+    font-size: 15px;
+}
+
+.encabezado-dia > i {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--azul-principal);
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: 50%;
+    transition: transform 0.25s ease;
+}
+
+.encabezado-dia.dia-abierto > i {
+    transform: rotate(180deg);
+}
+
+.contenido-dia {
+    padding: 0 22px 20px 77px;
+}
+
+.contenido-dia p {
+    margin: 0;
+    padding-top: 14px;
+    color: var(--texto-suave);
+    border-top: 1px solid var(--borde);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+/* =========================================================
+   TABLA DE INFORMACIÓN
+========================================================= */
+
+.tabla-informacion {
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.fila-informacion {
+    min-height: 55px;
+    padding: 13px 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    border-bottom: 1px solid var(--borde);
+}
+
+.fila-informacion:last-child {
+    border-bottom: 0;
+}
+
+.fila-informacion:nth-child(even) {
+    background: #f8fafb;
+}
+
+.fila-informacion span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--texto-suave);
+    font-size: 13px;
+}
+
+.fila-informacion span i {
+    width: 18px;
+    color: var(--azul-secundario);
+    text-align: center;
+}
+
+.fila-informacion strong {
+    color: var(--texto);
+    font-size: 13px;
+    text-align: right;
+}
+
+/* =========================================================
+   CONDICIONES
+========================================================= */
+
+.aviso-condiciones {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    color: #735c1a;
+    background: #fff9e7;
+    border: 1px solid #eedb9c;
+    border-radius: 12px;
+}
+
+.aviso-condiciones i {
+    margin-top: 3px;
+    color: var(--dorado);
+}
+
+.aviso-condiciones p {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* =========================================================
+   TARJETA DE RESERVA
+========================================================= */
+
+.tarjeta-reserva {
+    position: sticky;
+    top: 155px;
+    padding: 27px;
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-top: 5px solid var(--dorado);
+    border-radius: 18px;
+    box-shadow: var(--sombra);
+}
+
+.reserva-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--texto-suave);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.descuento-reserva {
+    padding: 5px 9px;
+    color: var(--blanco);
+    background: #d84949;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.precio-anterior {
+    margin-top: 10px;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+.precio-anterior del {
+    color: #a25a5a;
+}
+
+.precio-reserva {
+    margin-top: 3px;
+    display: flex;
+    align-items: flex-start;
+    color: var(--azul-principal);
+}
+
+.precio-reserva small {
+    margin: 9px 5px 0 0;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.precio-reserva strong {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    line-height: 1.1;
+}
+
+.precio-aclaracion {
+    color: var(--texto-suave);
+    font-size: 10px;
+}
+
+.separador-reserva {
+    height: 1px;
+    margin: 22px 0;
+    background: var(--borde);
+}
+
+.reserva-dato {
+    margin-bottom: 17px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reserva-dato > i {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--azul-principal);
+    background: #edf4f8;
+    border-radius: 10px;
+}
+
+.reserva-dato div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.reserva-dato span {
+    color: var(--texto-suave);
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.reserva-dato strong {
+    color: var(--texto);
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.boton-consultar-paquete {
+    width: 100%;
+    min-height: 58px;
+    margin-top: 7px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    color: var(--blanco);
+    background: var(--azul-principal);
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(9, 61, 119, 0.2);
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.boton-consultar-paquete:hover {
+    background: var(--azul-secundario);
+    transform: translateY(-2px);
+}
+
+.boton-consultar-paquete > i {
+    font-size: 24px;
+}
+
+.boton-consultar-paquete span {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.boton-consultar-paquete small {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+.mensaje-reserva {
+    margin: 13px 0 0;
+    color: var(--texto-suave);
+    font-size: 10px;
+    text-align: center;
+}
+
+.mensaje-reserva i {
+    margin-right: 4px;
+    color: #31945c;
+}
+
+/* =========================================================
+   AYUDA
+========================================================= */
+
+.tarjeta-ayuda {
+    margin-top: 18px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    background: #edf5f9;
+    border: 1px solid #d5e5ee;
+    border-radius: 15px;
+}
+
+.ayuda-icono {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--blanco);
+    background: var(--azul-secundario);
+    border-radius: 11px;
+}
+
+.tarjeta-ayuda div {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.tarjeta-ayuda strong {
+    color: var(--azul-principal);
+    font-size: 13px;
+}
+
+.tarjeta-ayuda p {
+    margin: 5px 0 10px;
+    color: var(--texto-suave);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.tarjeta-ayuda a {
+    color: var(--azul-principal);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tarjeta-ayuda a i {
+    margin-left: 4px;
+}
+
+.volver-paquetes {
+    margin-top: 18px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--azul-principal);
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: 11px;
+    font-size: 12px;
+    font-weight: 700;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.volver-paquetes:hover {
+    color: var(--azul-principal);
+    background: #edf4f8;
+    border-color: var(--azul-secundario);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+    .detalle-columnas {
+        grid-template-columns: minmax(0, 1fr) 310px;
+        gap: 22px;
+    }
+
+    .tarjeta-detalle {
+        padding: 25px;
+    }
+
+    .columnas-servicios {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 850px) {
+    .detalle-portada {
+        height: 540px;
+    }
+
+    .detalle-portada-contenido {
+        padding: 0 35px;
+    }
+
+    .detalle-navegacion-interna {
+        top: 72px;
+    }
+
+    .detalle-columnas {
+        grid-template-columns: 1fr;
+    }
+
+    .detalle-columna-lateral {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+        gap: 18px;
+    }
+
+    .tarjeta-reserva {
+        position: static;
+    }
+
+    .volver-paquetes {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 650px) {
+    .migas-navegacion span {
+        max-width: 130px;
+    }
+
+    .detalle-portada {
+        height: 570px;
+    }
+
+    .detalle-portada-sombra {
+        background: rgba(3, 27, 52, 0.76);
+    }
+
+    .detalle-portada-contenido {
+        padding: 0 15px;
+    }
+
+    .detalle-portada h1 {
+        font-size: 42px;
+    }
+
+    .detalle-resumen {
+        font-size: 15px;
+    }
+
+    .detalle-portada-datos {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .detalle-contenido {
+        padding: 45px 0 70px;
+    }
+
+    .detalle-navegacion-interna .contenedor {
+        width: 100%;
+        padding: 0 8px;
+    }
+
+    .enlace-detalle {
+        padding: 15px 13px;
+    }
+
+    .tarjeta-detalle {
+        padding: 21px 18px;
+        border-radius: 16px;
+    }
+
+    .titulo-tarjeta {
+        align-items: flex-start;
+    }
+
+    .titulo-tarjeta h2 {
+        font-size: 23px;
+    }
+
+    .rejilla-datos-viaje {
+        grid-template-columns: 1fr;
+    }
+
+    .contenido-dia {
+        padding: 0 17px 18px;
+    }
+
+    .fila-informacion {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .fila-informacion strong {
+        padding-left: 28px;
+        text-align: left;
+    }
+
+    .detalle-columna-lateral {
+        grid-template-columns: 1fr;
+    }
+
+    .volver-paquetes {
+        grid-column: auto;
+    }
+}

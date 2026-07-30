@@ -557,4 +557,13 @@ class DestinoController extends Controller
 
         return $slug;
     }
+
+    public function detalle(string $slug)
+    {
+        $destino = Destino::where('slug', $slug)
+            ->where('estado_publicacion', 'publicado')
+            ->firstOrFail();
+
+        return view('paquetes.detalle', compact('destino'));
+    }
 }

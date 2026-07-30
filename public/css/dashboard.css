@@ -1,0 +1,322 @@
+.dashboard {
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+.bienvenida-dashboard {
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.bienvenida-dashboard h2 {
+    margin: 0 0 4px;
+    color: #093d77;
+    font-size: 23px;
+}
+
+.bienvenida-dashboard p {
+    margin: 0;
+    color: #71808e;
+    font-size: 13px;
+}
+
+.bienvenida-dashboard > span {
+    padding: 8px 13px;
+    color: #5e6d7a;
+    background: #ffffff;
+    border: 1px solid #dfe7ed;
+    border-radius: 7px;
+    font-size: 11px;
+}
+
+/* Estadísticas principales */
+
+.estadisticas-dashboard {
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.estadistica-dashboard {
+    min-height: 125px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    background: #ffffff;
+    border: 1px solid #dfe7ed;
+    border-radius: 11px;
+}
+
+.estadistica-dashboard > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.estadistica-dashboard span {
+    margin-bottom: 7px;
+    color: #71808e;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.estadistica-dashboard strong {
+    color: #2b2b2b;
+    font-size: 27px;
+    line-height: 1;
+}
+
+.estadistica-dashboard > i {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #093d77;
+    background: #eaf2f7;
+    border-radius: 9px;
+    font-size: 20px;
+}
+
+/* Resumen secundario */
+
+.resumen-secundario {
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.resumen-secundario a {
+    padding: 17px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    color: #2b2b2b;
+    background: #ffffff;
+    border: 1px solid #dfe7ed;
+    border-radius: 9px;
+    text-decoration: none;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.resumen-secundario a:hover {
+    color: #2b2b2b;
+    background: #f8fafb;
+    border-color: #3a7ca5;
+}
+
+.resumen-secundario a > i {
+    width: 39px;
+    height: 39px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #ffffff;
+    background: #3a7ca5;
+    border-radius: 8px;
+    font-size: 17px;
+}
+
+.resumen-secundario a > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.resumen-secundario strong {
+    color: #093d77;
+    font-size: 19px;
+    line-height: 1.1;
+}
+
+.resumen-secundario span {
+    margin-top: 3px;
+    color: #71808e;
+    font-size: 10px;
+}
+
+/* Reservas recientes */
+
+.panel-reservas-recientes {
+    background: #ffffff;
+    border: 1px solid #dfe7ed;
+    border-radius: 11px;
+    overflow: hidden;
+}
+
+.encabezado-panel-dashboard {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1px solid #e7edf1;
+}
+
+.encabezado-panel-dashboard h3 {
+    margin: 0 0 3px;
+    color: #093d77;
+    font-size: 16px;
+}
+
+.encabezado-panel-dashboard p {
+    margin: 0;
+    color: #71808e;
+    font-size: 10px;
+}
+
+.encabezado-panel-dashboard > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #093d77;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.encabezado-panel-dashboard > a:hover {
+    color: #3a7ca5;
+}
+
+.tabla-dashboard-contenedor {
+    overflow-x: auto;
+}
+
+.tabla-dashboard {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-dashboard th {
+    padding: 12px 16px;
+    color: #71808e;
+    background: #f8fafb;
+    border-bottom: 1px solid #e7edf1;
+    font-size: 9px;
+    font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tabla-dashboard td {
+    padding: 14px 16px;
+    color: #4c5b69;
+    border-bottom: 1px solid #edf1f3;
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+.tabla-dashboard tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tabla-dashboard tbody tr:hover {
+    background: #fbfcfd;
+}
+
+.tabla-dashboard td strong {
+    color: #093d77;
+}
+
+.estado-reserva,
+.estado-pago {
+    padding: 5px 8px;
+    display: inline-flex;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.estado-confirmada,
+.estado-pago-pagado {
+    color: #167543;
+    background: #e4f6ec;
+}
+
+.estado-pendiente,
+.estado-pago-pendiente {
+    color: #826318;
+    background: #fff5d6;
+}
+
+.estado-cancelada {
+    color: #b63838;
+    background: #fdeaea;
+}
+
+.estado-pago-parcial {
+    color: #175e86;
+    background: #e5f3fb;
+}
+
+/* Estado vacío */
+
+.dashboard-vacio {
+    padding: 45px 20px;
+    color: #71808e;
+    text-align: center;
+}
+
+.dashboard-vacio > i {
+    margin-bottom: 10px;
+    display: block;
+    color: #3a7ca5;
+    font-size: 34px;
+}
+
+.dashboard-vacio p {
+    margin: 0 0 14px;
+    font-size: 12px;
+}
+
+.dashboard-vacio a {
+    padding: 9px 13px;
+    display: inline-flex;
+    color: #ffffff;
+    background: #093d77;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* Adaptación */
+
+@media (max-width: 1050px) {
+    .estadisticas-dashboard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 750px) {
+    .resumen-secundario {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 550px) {
+    .bienvenida-dashboard {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .estadisticas-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .encabezado-panel-dashboard {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

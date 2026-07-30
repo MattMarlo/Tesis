@@ -1,1035 +1,1106 @@
-<!doctype html>
-<html class="no-js"  lang="en">
-
-	<head>
-		<!-- META DATA -->
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-
-		<!--font-family-->
-		<link href="https://fonts.googleapis.com/css?family=Rufina:400,700" rel="stylesheet" />
-
-		<link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet" />
-
-		<!-- TITLE OF SITE -->
-		<title>PassionTravel</title>
-
-		<!-- favicon img -->
-		<link rel="shortcut icon" type="image/icon" href="{{ asset('assets/logo/favicon.png') }}"/>
-
-		<!--font-awesome.min.css-->
-		<link rel="stylesheet" href="{{ asset('assets/css/font-awesome.min.css') }}" />
-
-		<!--animate.css-->
-		<link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}" />
-
-		<!--hover.css-->
-		<link rel="stylesheet" href="{{ asset('assets/css/hover-min.css') }}" />
-
-		<!--datepicker.css-->
-		<link rel="stylesheet"  href="{{ asset('assets/css/datepicker.css') }}" >
-
-		<!--owl.carousel.css-->
-        <link rel="stylesheet" href="{{ asset('assets/css/owl.carousel.min.css') }}">
-		<link rel="stylesheet" href="{{ asset('assets/css/owl.theme.default.min.css') }}"/>
-
-		<!-- range css-->
-        <link rel="stylesheet" href="{{ asset('assets/css/jquery-ui.min.css') }}" />
-
-		<!--bootstrap.min.css-->
-		<link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
-
-		<!-- bootsnav -->
-		<link rel="stylesheet" href="{{ asset('assets/css/bootsnav.css') }}"/>
-
-		<!--style.css-->
-		<link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" />
-
-		<!--responsive.css-->
-		<link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}" />
-
-		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-
-		<!--[if lt IE 9]>
-		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
-
-	</head>
-
-	<body>
-		<!--[if lte IE 9]>
-		<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade
-			your browser</a> to improve your experience and security.</p>
-		<![endif]-->
-
-		<!-- main-menu Start -->
-		<header class="top-area">
-			<div class="header-area">
-				<div class="container">
-					<div class="row">
-						<div class="col-sm-2">
-							<div class="logo">
-								<a href="index.html">
-									Passion<span>Travel</span>
-								</a>
-							</div><!-- /.logo-->
-						</div><!-- /.col-->
-						<div class="col-sm-10">
-							<div class="main-menu">
-							
-								<!-- Brand and toggle get grouped for better mobile display -->
-								<div class="navbar-header">
-									<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-										<i class="fa fa-bars"></i>
-									</button><!-- / button-->
-								</div><!-- /.navbar-header-->
-								<div class="collapse navbar-collapse">		  
-									<ul class="nav navbar-nav navbar-right">
-										<li class="smooth-menu"><a href="#home">Inicio </a></li>
-										<li class="smooth-menu"><a href="#gallery">Destinos</a></li>
-										<li class="smooth-menu"><a href="#spo">Ofertas Especiales</a></li>
-										<li class="smooth-menu"><a href="#subs">Subscripción</a></li>
-                                        <li>
-                                            <a href="{{ route('login') }}">
-                                                <button class="book-btn">
-                                                    Iniciar sesión
-                                                </button>
-                                            </a>
-                                        </li><!--/.project-btn--> 
-									</ul>
-								</div><!-- /.navbar-collapse -->
-							</div><!-- /.main-menu-->
-						</div><!-- /.col-->
-					</div><!-- /.row -->
-					<div class="home-border"></div><!-- /.home-border-->
-				</div><!-- /.container-->
-			</div><!-- /.header-area -->
-
-		</header><!-- /.top-area-->
-		<!-- main-menu End -->
-
-		
-		<!--about-us start -->
-		<section id="home" class="about-us">
-			<div class="container">
-				<div class="about-us-content">
-					<div class="row">
-						<div class="col-sm-12">
-							<div class="single-about-us">
-								<div class="about-us-txt">
-									<h2>
-										Explora destinos inolvidables con PassionTravel 
-
-									</h2>
-									<div class="about-btn">
-										<button  class="about-view">
-											Mas información
-										</button>
-									</div><!--/.about-btn-->
-								</div><!--/.about-us-txt-->
-							</div><!--/.single-about-us-->
-						</div><!--/.col-->
-						<div class="col-sm-0">
-							<div class="single-about-us">
-								
-							</div><!--/.single-about-us-->
-						</div><!--/.col-->
-					</div><!--/.row-->
-				</div><!--/.about-us-content-->
-			</div><!--/.container-->
-
-		</section><!--/.about-us-->
-		<!--about-us end -->
-
-		<!--travel-box start-->
-		<section  class="travel-box">
-        	<div class="container">
-        		<div class="row">
-        			<div class="col-md-12">
-        				<div class="single-travel-boxes">
-        					<div id="desc-tabs" class="desc-tabs">
-
-								<ul class="nav nav-tabs" role="tablist">
-
-									<li role="presentation" class="active">
-									 	<a href="#tours" aria-controls="tours" role="tab" data-toggle="tab">
-									 		<i class="fa fa-tree"></i>
-							 		Tours
-									<li role="presentation">
-									 	<a href="#flights" aria-controls="flights" role="tab" data-toggle="tab">
-									 		<i class="fa fa-plane"></i>
-									 		Visados
-									 	</a>
-									</li>
-								</ul>
-
-								<!-- Tab panes -->
-								<div class="tab-content">
-
-									<div role="tabpanel" class="tab-pane active fade in" id="tours">
-										<div class="tab-para">
-
-											<div class="row">
-												<div class="col-lg-4 col-md-4 col-sm-12">
-													<div class="single-tab-select-box">
-
-														<h2>Destinos</h2>
-
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">Selecciona tu país de destino</option><!-- /.option-->
-                                                                <!-- /.traer de la tabla destinos -->
-															  	<option value="turkey">turkey</option><!-- /.option-->
-
-															  	<option value="russia">russia</option><!-- /.option-->
-															  	<option value="egept">egypt</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-
-
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-3 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Salida</h2>
-														<div class="travel-check-icon">
-															<form action="#">
-																<input type="text" name="check_in" class="form-control" data-toggle="datepicker" placeholder="12 -01 - 2017 ">
-															</form>
-														</div><!-- /.travel-check-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-3 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Retorno</h2>
-														<div class="travel-check-icon">
-															<form action="#">
-																<input type="text" name="check_out" class="form-control"  data-toggle="datepicker" placeholder="22 -01 - 2017 ">
-															</form>
-														</div><!-- /.travel-check-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-1 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Duración</h2>
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">5</option><!-- /.option-->
-
-															  	<option value="10">10</option><!-- /.option-->
-
-															  	<option value="15">15</option><!-- /.option-->
-															  	<option value="20">20</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-1 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Miembros</h2>
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">1</option><!-- /.option-->
-
-															  	<option value="2">2</option><!-- /.option-->
-
-															  	<option value="4">4</option><!-- /.option-->
-															  	<option value="8">8</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-											</div><!--/.row-->
-
-											<div class="row">
-												<div class="col-sm-5">
-													<div class="travel-budget">
-														<div class="row">
-															<div class="col-md-3 col-sm-4">
-																<h3>Presupuesto: </h3>
-															</div><!--/.col-->
-															<div class="co-md-9 col-sm-8">
-																<div class="travel-filter">
-																	<div class="info_widget">
-																		<div class="price_filter">
-																			
-																			<div id="slider-range"></div><!--/.slider-range-->
-
-																			<div class="price_slider_amount">
-																				<input type="text" id="amount" name="price"  placeholder="Agregue su presupuesto" />
-																			</div><!--/.price_slider_amount-->
-																		</div><!--/.price-filter-->
-																	</div><!--/.info_widget-->
-																</div><!--/.travel-filter-->		
-															</div><!--/.col-->
-														</div><!--/.row-->
-													</div><!--/.travel-budget-->
-												</div><!--/.col-->
-												<div class="clo-sm-7">
-													<div class="about-btn travel-mrt-0 pull-right">
-														<button  class="about-view travel-btn">
-															Buscar	
-														</button><!--/.travel-btn-->
-													</div><!--/.about-btn-->
-												</div><!--/.col-->
-
-											</div><!--/.row-->
-
-										</div><!--/.tab-para-->
-
-									</div><!--/.tabpannel-->
-
-									<div role="tabpanel" class="tab-pane fade in" id="flights">
-										<div class="tab-para">
-											<div class="trip-circle">
-												<div class="single-trip-circle">
-													<input type="radio" id="radio01" name="radio" />
-  													<label for="radio01">
-  														<span class="round-boarder">
-  															<span class="round-boarder1"></span>
-  														</span>Solo ida
-  													</label>
-												</div><!--/.single-trip-circle-->
-												<div class="single-trip-circle">
-													<input type="radio" id="radio02" name="radio" />
-  													<label for="radio02">
-  														<span class="round-boarder">
-  															<span class="round-boarder1"></span>
-  														</span>Ida y vuelta
-  													</label>
-												</div><!--/.single-trip-circle-->
-											</div><!--/.trip-circle-->
-											<div class="row">
-												<div class="col-lg-4 col-md-4 col-sm-12">
-													<div class="single-tab-select-box">
-
-														<h2>Desde</h2>
-
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">Selecciona tu pais de partida</option><!-- /.option-->
-
-															  	<option value="turkey">turkey</option><!-- /.option-->
-
-															  	<option value="russia">russia</option><!-- /.option-->
-															  	<option value="egept">egypt</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-3 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Salida</h2>
-														<div class="travel-check-icon">
-															<form action="#">
-																<input type="text" name="departure" class="form-control" data-toggle="datepicker"
-																placeholder="12 -01 - 2017 ">
-															</form>
-														</div><!-- /.travel-check-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-3 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Retorno</h2>
-														<div class="travel-check-icon">
-															<form action="#">
-																<input type="text" name="return" class="form-control" data-toggle="datepicker" placeholder="22 -01 - 2017 ">
-															</form>
-														</div><!-- /.travel-check-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-1 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Adultos</h2>
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">5</option><!-- /.option-->
-
-															  	<option value="10">10</option><!-- /.option-->
-
-															  	<option value="15">15</option><!-- /.option-->
-															  	<option value="20">20</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-												<div class="col-lg-2 col-md-1 col-sm-4">
-													<div class="single-tab-select-box">
-														<h2>Niños</h2>
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">1</option><!-- /.option-->
-
-															  	<option value="2">2</option><!-- /.option-->
-
-															  	<option value="4">4</option><!-- /.option-->
-															  	<option value="8">8</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-
-											</div><!--/.row-->
-
-											<div class="row">
-												<div class="col-lg-4 col-md-4 col-sm-12">
-													<div class="single-tab-select-box">
-
-														<h2>Hacia</h2>
-
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">Selecciona tu país destino</option><!-- /.option-->
-
-															  	<option value="istambul">istambul</option><!-- /.option-->
-
-															  	<option value="mosko">mosko</option><!-- /.option-->
-															  	<option value="cairo">cairo</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-												<div class="col-lg-3 col-md-3 col-sm-4">
-													<div class="single-tab-select-box">
-
-														<h2>clase</h2>
-														<div class="travel-select-icon">
-															<select class="form-control ">
-
-															  	<option value="default">Selecciona la clase</option><!-- /.option-->
-
-															  	<option value="A">A</option><!-- /.option-->
-
-															  	<option value="B">B</option><!-- /.option-->
-															  	<option value="C">C</option><!-- /.option-->
-
-															</select><!-- /.select-->
-														</div><!-- /.travel-select-icon -->
-													</div><!--/.single-tab-select-box-->
-												</div><!--/.col-->
-												<div class="clo-sm-5">
-													<div class="about-btn pull-right">
-														<button  class="about-view travel-btn">
-															Buscar	
-														</button><!--/.travel-btn-->
-													</div><!--/.about-btn-->
-												</div><!--/.col-->
-												
-											</div><!--/.row-->
-
-										</div>
-
-									</div><!--/.tabpannel-->
-
-								</div><!--/.tab content-->
-							</div><!--/.desc-tabs-->
-        				</div><!--/.single-travel-box-->
-        			</div><!--/.col-->
-        		</div><!--/.row-->
-        	</div><!--/.container-->
-
-        </section><!--/.travel-box-->
-		<!--travel-box end-->
-
-        <!--service start-->
-		<section id="service" class="service">
-			<div class="container">
-
-				<div class="service-counter text-center">
-
-					<div class="col-md-4 col-sm-4">
-						<div class="single-service-box">
-							<div class="service-img">
-								<img src="{{ asset('assets/images/service/ubicacion.png') }}" alt="service-icon" />
-							</div><!--/.service-img-->
-							<div class="service-content">
-								<h2>
-									<a href="#">
-									 Descubre experiencias inolvidables 
-									</a>
-								</h2>
-								<p>Planifica tu viaje perfecto con nuestro Tour Planner, diseñado para crear paquetes turísticos únicos y a tu medida.</p>
-							</div><!--/.service-content-->
-						</div><!--/.single-service-box-->
-					</div><!--/.col-->
-
-					<div class="col-md-4 col-sm-4">
-						<div class="single-service-box">
-							<div class="service-img">
-								<img src="{{ asset('assets/images/service/hotel.png') }}" alt="service-icon" />
-							</div><!--/.service-img-->
-							<div class="service-content">
-								<h2>
-									<a href="#">
-										Hoteles de primer nivel
-									</a>
-								</h2>
-								<p>Los mejores hoteles del Ecuador con total confianza, comodidad y las mejores ofertas exclusivas para ti.</p>
-							</div><!--/.service-content-->
-						</div><!--/.single-service-box-->
-					</div><!--/.col-->
-
-					<div class="col-md-4 col-sm-4">
-						<div class="single-service-box">
-							<div class="statistics-img">
-								<img src="{{ asset('assets/images/service/vuelos.png') }}" alt="service-icon" />
-							</div><!--/.service-img-->
-							<div class="service-content">
-
-								<h2>
-									<a href="#">
-										Vuelos al instante
-									</a>
-								</h2>
-								<p>Compra tus boletos de avión de forma rápida y segura. Encuentra las mejores rutas y precios con solo un clic.</p>
-							</div><!--/.service-content-->
-						</div><!--/.single-service-box-->
-					</div><!--/.col-->
-
-				</div><!--/.statistics-counter-->	
-			</div><!--/.container-->
-
-		</section><!--/.service-->
-		<!--service end-->
-
-		<section id="gallery" class="packages">
-			<div class="container">
-				<div class="gallary-header text-center">
-					<h2>Destinos Populares</h2>
-					<p>
-						Descubre nuestros mejores destinos de viaje especialmente diseñados para ti.  
-					</p>
-				</div><div class="packages-content">
-					<div class="row">
-
-						@forelse($destinos as $destino)
-							<div class="col-md-4 col-sm-6" style="margin-bottom: 30px;">
-								<div class="single-package-item">
-									<img src="{{ asset('storage/' . $destino->imagen) }}" alt="{{ $destino->pais }}" style="width: 100%; height: 250px; object-fit: cover;">
-									
-									<div class="single-package-item-txt">
-										<h3>{{ ucfirst($destino->pais) }} <span class="pull-right">${{ number_format($destino->precio, 0) }}</span></h3>
-										
-										<div class="packages-para">
-											<p>
-												<span>
-													<i class="fa fa-angle-right"></i> {{ $destino->dias }} Días
-												</span>
-												<i class="fa fa-angle-right"></i> {{ $destino->etiqueta }}
-											</p>
-											<p>
-												<span>
-													<i class="fa fa-angle-right"></i> Cupos: {{ $destino->capacidad }} libres
-												</span>
-												<i class="fa fa-angle-right"></i> Transporte incluido
-											</p>
-										</div><div class="packages-review">
-											<p>
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
-												<span>5.0 rating</span>
-											</p>
-										</div><div class="about-btn">
-											<a href="https://t.me/PassionTravelBot?text={{ urlencode('Quiero reservar para ' . $destino->pais) }}" target="_blank" class="about-view packages-btn" 
-												style="display: inline-block; text-decoration: none;">
-													Reservar Ahora
-											</a>
-										</div></div></div></div>@empty
-							<div class="col-12 text-center py-5">
-								<p class="text-muted">Próximamente estaremos publicando nuestros mejores destinos. ¡Mantente atento!</p>
-							</div>
-						@endforelse
-
-					</div>
-				</div>
+@extends('layouts.publico')
+
+@section('title', 'Passion Travel | Viajes y paquetes turísticos')
+
+@section('descripcion',
+    'Descubre paquetes turísticos, destinos, ofertas y experiencias de viaje con Passion Travel.'
+)
+
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/inicio-publico.css') }}">
+@endsection
+
+@section('content')
+
+@php
+    $paquetesCarrusel = $destacados->isNotEmpty()
+        ? $destacados->take(4)
+        : $destinos->take(4);
+@endphp
+
+{{-- Carrusel principal --}}
+<section class="hero-publico" id="inicio">
+
+    <div class="hero-carrusel" id="heroCarrusel">
+
+        @forelse($paquetesCarrusel as $indice => $paquete)
+            <article
+                class="hero-diapositiva {{ $indice === 0 ? 'hero-activa' : '' }}"
+                data-indice="{{ $indice }}"
+            >
+                <img
+                    src="{{ asset('storage/' . $paquete->imagen) }}"
+                    alt="{{ $paquete->nombre_paquete }}"
+                    class="hero-imagen"
+                >
+
+                <div class="hero-sombra"></div>
+
+                <div class="contenedor hero-contenido">
+
+                    <span class="hero-etiqueta">
+                        <i class="fa fa-star"></i>
+                        {{ $paquete->destacado
+                            ? 'Experiencia destacada'
+                            : 'Descubre un nuevo destino' }}
+                    </span>
+
+                    <h1>
+                        {{ $paquete->nombre_paquete }}
+                    </h1>
+
+                    <p>
+                        {{ $paquete->descripcion_corta
+                            ?: 'Vive una experiencia inolvidable y descubre nuevos lugares con Passion Travel.' }}
+                    </p>
+
+                    <div class="hero-datos">
+
+                        <span>
+                            <i class="fa fa-map-marker"></i>
+                            {{ $paquete->ciudad_destino ?: $paquete->pais }}
+                        </span>
+
+                        <span>
+                            <i class="fa fa-clock-o"></i>
+                            {{ $paquete->dias }} días
+                        </span>
+
+                        @if($paquete->fecha_salida)
+                            <span>
+                                <i class="fa fa-calendar"></i>
+                                {{ $paquete->fecha_salida->format('d/m/Y') }}
+                            </span>
+                        @endif
+
+                    </div>
+
+                    <div class="hero-acciones">
+
+                        <a
+                            href="{{ route('paquetes.detalle', $paquete->slug) }}"
+                            class="boton-hero-principal"
+                        >
+                            Ver experiencia
+                            <i class="fa fa-arrow-right"></i>
+                        </a>
+
+                        <a
+                            href="#paquetes"
+                            class="boton-hero-secundario"
+                        >
+                            Explorar paquetes
+                        </a>
+
+                    </div>
+
+                </div>
+            </article>
+        @empty
+            <article class="hero-diapositiva hero-activa hero-predeterminada">
+
+                <img
+                    src="{{ asset('assets/images/home/banner.jpg') }}"
+                    alt="Viaja con Passion Travel"
+                    class="hero-imagen"
+                >
+
+                <div class="hero-sombra"></div>
+
+                <div class="contenedor hero-contenido">
+
+                    <span class="hero-etiqueta">
+                        <i class="fa fa-plane"></i>
+                        Tu próxima aventura comienza aquí
+                    </span>
+
+                    <h1>Descubre el mundo con Passion Travel</h1>
+
+                    <p>
+                        Encuentra experiencias, destinos y paquetes pensados
+                        para crear recuerdos inolvidables.
+                    </p>
+
+                    <div class="hero-acciones">
+                        <a href="#paquetes" class="boton-hero-principal">
+                            Explorar paquetes
+                            <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </article>
+        @endforelse
+
+        @if($paquetesCarrusel->count() > 1)
+            <button
+                type="button"
+                class="control-hero control-anterior"
+                id="heroAnterior"
+                aria-label="Destino anterior"
+            >
+                <i class="fa fa-angle-left"></i>
+            </button>
+
+            <button
+                type="button"
+                class="control-hero control-siguiente"
+                id="heroSiguiente"
+                aria-label="Siguiente destino"
+            >
+                <i class="fa fa-angle-right"></i>
+            </button>
+
+            <div class="indicadores-hero">
+                @foreach($paquetesCarrusel as $indice => $paquete)
+                    <button
+                        type="button"
+                        class="indicador-hero {{ $indice === 0 ? 'indicador-activo' : '' }}"
+                        data-diapositiva="{{ $indice }}"
+                        aria-label="Ver destino {{ $indice + 1 }}"
+                    ></button>
+                @endforeach
+            </div>
+        @endif
+
+    </div>
+
+</section>
+
+{{-- Buscador --}}
+<section class="seccion-buscador">
+    <div class="contenedor">
+
+        <form class="buscador-paquetes" id="formularioBusqueda">
+
+            <div class="encabezado-buscador">
+                <span class="icono-buscador">
+                    <i class="fa fa-search"></i>
+                </span>
+
+                <div>
+                    <strong>Encuentra tu próximo viaje</strong>
+                    <span>Busca entre nuestros paquetes disponibles</span>
+                </div>
+            </div>
+
+            <div class="campo-buscador">
+                <label for="buscarDestino">
+                    Destino o paquete
+                </label>
+
+                <div class="campo-con-icono">
+                    <i class="fa fa-map-marker"></i>
+
+                    <input
+                        type="text"
+                        id="buscarDestino"
+                        placeholder="Ejemplo: Cartagena"
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <div class="campo-buscador">
+                <label for="buscarCategoria">Tipo de viaje</label>
+
+                <div class="campo-con-icono">
+                    <i class="fa fa-tags"></i>
+
+                    <select id="buscarCategoria">
+                        <option value="">Todas las categorías</option>
+
+                        @foreach($categorias as $categoria)
+                            <option value="{{ $categoria }}">
+                                {{ $categoria }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo-buscador">
+                <label for="buscarSalida">Ciudad de salida</label>
+
+                <div class="campo-con-icono">
+                    <i class="fa fa-plane"></i>
+
+                    <input
+                        type="text"
+                        id="buscarSalida"
+                        placeholder="Ciudad de salida"
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <button type="submit" class="boton-buscar">
+                <i class="fa fa-search"></i>
+                Buscar viajes
+            </button>
+
+        </form>
+
+    </div>
+</section>
+
+{{-- Paquetes --}}
+<section class="seccion-publica seccion-paquetes" id="paquetes">
+    <div class="contenedor">
+
+        <div class="cabecera-seccion">
+
+            <div>
+                <span class="subtitulo-seccion">Experiencias para ti</span>
+                <h2>Paquetes turísticos disponibles</h2>
+
+                <p>
+                    Explora diferentes destinos y encuentra una experiencia
+                    que se adapte a tu próxima aventura.
+                </p>
+            </div>
+
+            <div class="contador-resultados">
+                <strong id="cantidadResultados">
+                    {{ $destinos->count() }}
+                </strong>
+                <span>paquetes encontrados</span>
+            </div>
+
+        </div>
+
+        <div class="filtros-rapidos">
+            <button
+                type="button"
+                class="filtro-rapido filtro-activo"
+                data-categoria=""
+            >
+                Todos
+            </button>
+
+            @foreach($categorias as $categoria)
+                <button
+                    type="button"
+                    class="filtro-rapido"
+                    data-categoria="{{ $categoria }}"
+                >
+                    {{ $categoria }}
+                </button>
+            @endforeach
+        </div>
+
+        <div class="rejilla-paquetes" id="rejillaPaquetes">
+
+            @forelse($destinos as $paquete)
+                @php
+                    $precioVisible = $paquete->precio_promocional
+                        ?: $paquete->precio;
+                @endphp
+
+                <article
+                    class="tarjeta-paquete-publico"
+                    data-nombre="{{ $paquete->nombre_paquete }}"
+                    data-destino="{{ $paquete->ciudad_destino }} {{ $paquete->pais }}"
+                    data-salida="{{ $paquete->ciudad_salida }}"
+                    data-categoria="{{ $paquete->categoria }}"
+                >
+
+                    <div class="paquete-imagen-contenedor">
+
+                        <img
+                            src="{{ asset('storage/' . $paquete->imagen) }}"
+                            alt="{{ $paquete->nombre_paquete }}"
+                            class="paquete-imagen"
+                            loading="lazy"
+                        >
+
+                        <div class="paquete-etiquetas">
+
+                            @if($paquete->destacado)
+                                <span class="distintivo destacado">
+                                    <i class="fa fa-star"></i>
+                                    Destacado
+                                </span>
+                            @endif
+
+                            @if($paquete->precio_promocional)
+                                <span class="distintivo promocion">
+                                    Oferta
+                                </span>
+                            @endif
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="boton-favorito"
+                            aria-label="Agregar a favoritos"
+                            data-paquete="{{ $paquete->nombre_paquete }}"
+                        >
+                            <i class="fa fa-heart-o"></i>
+                        </button>
+
+                        @if($paquete->categoria)
+                            <span class="categoria-imagen">
+                                {{ $paquete->categoria }}
+                            </span>
+                        @endif
+
+                    </div>
+
+                    <div class="paquete-contenido">
+
+                        <div class="paquete-ruta">
+                            <i class="fa fa-map-marker"></i>
+
+                            <span>
+                                {{ $paquete->ciudad_salida ?: 'Salida por confirmar' }}
+                                <i class="fa fa-long-arrow-right"></i>
+                                {{ $paquete->ciudad_destino ?: $paquete->pais }}
+                            </span>
+                        </div>
+
+                        <h3>{{ $paquete->nombre_paquete }}</h3>
+
+                        <p class="paquete-descripcion">
+                            {{ $paquete->descripcion_corta
+                                ?: 'Descubre todos los detalles de esta experiencia turística.' }}
+                        </p>
+
+                        <div class="paquete-caracteristicas">
+
+                            <span>
+                                <i class="fa fa-clock-o"></i>
+                                {{ $paquete->dias }} días
+
+                                @if($paquete->noches)
+                                    / {{ $paquete->noches }} noches
+                                @endif
+                            </span>
+
+                            <span>
+                                <i class="fa fa-users"></i>
+                                {{ $paquete->capacidad }} cupos
+                            </span>
+
+                            @if($paquete->fecha_salida)
+                                <span>
+                                    <i class="fa fa-calendar"></i>
+                                    {{ $paquete->fecha_salida->format('d/m/Y') }}
+                                </span>
+                            @endif
+
+                        </div>
+
+                        <div class="paquete-pie">
+
+                            <div class="paquete-precio">
+                                <span>Desde</span>
+
+                                @if($paquete->precio_promocional)
+                                    <del>
+                                        {{ $paquete->moneda }}
+                                        ${{ number_format($paquete->precio, 2) }}
+                                    </del>
+                                @endif
+
+                                <strong>
+                                    <small>{{ $paquete->moneda }}</small>
+                                    ${{ number_format($precioVisible, 2) }}
+                                </strong>
+
+                                <span>por persona</span>
+                            </div>
+
+                            <a
+                                href="{{ route('paquetes.detalle', $paquete->slug) }}"
+                                class="boton-ver-paquete"
+                            >
+                                Ver detalles
+                                <i class="fa fa-arrow-right"></i>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+            @empty
+                <div class="sin-paquetes">
+                    <i class="fa fa-suitcase"></i>
+                    <h3>Próximamente tendremos nuevas experiencias</h3>
+
+                    <p>
+                        En este momento no existen paquetes publicados.
+                    </p>
+                </div>
+            @endforelse
+
+        </div>
+
+        <div class="sin-resultados" id="sinResultados">
+            <i class="fa fa-search"></i>
+            <h3>No encontramos paquetes con esos datos</h3>
+
+            <p>
+                Intenta cambiar el destino, la categoría o la ciudad de salida.
+            </p>
+
+            <button type="button" id="limpiarBusqueda">
+                Mostrar todos los paquetes
+            </button>
+        </div>
+
+    </div>
+</section>
+
+{{-- Información de la empresa --}}
+<section class="seccion-publica seccion-nosotros" id="nosotros">
+    <div class="contenedor nosotros-contenido">
+
+        <div class="nosotros-imagenes">
+
+            <div class="imagen-nosotros imagen-principal">
+                <img
+                    src="{{ asset('assets/images/gallary/g1.jpg') }}"
+                    alt="Experiencias de viaje"
+                    loading="lazy"
+                >
+            </div>
+
+            <div class="imagen-nosotros imagen-secundaria">
+                <img
+                    src="{{ asset('assets/images/gallary/g2.jpg') }}"
+                    alt="Destinos turísticos"
+                    loading="lazy"
+                >
+            </div>
+
+            <div class="sello-experiencia">
+                <i class="fa fa-globe"></i>
+                <span>
+                    <strong>Viajes</strong>
+                    hechos para ti
+                </span>
+            </div>
+
+        </div>
+
+        <div class="nosotros-texto">
+
+            <span class="subtitulo-seccion">Quiénes somos</span>
+
+			<h2>Viajes preparados con dedicación y amor</h2>
+
+			<p class="texto-principal-nosotros">
+				Passion Travel es una agencia de viajes ubicada en Salcedo,
+				Ecuador. Nació por iniciativa de una profesional que identificó
+				la oportunidad de ayudar a otras personas a descubrir nuevos
+				destinos y disfrutar experiencias organizadas con dedicación y
+				responsabilidad.
+			</p>
+
+			<p>
+				La agencia se caracteriza por brindar una atención confiable,
+				eficiente y cercana. Cada viaje se prepara cuidando los detalles
+				y pensando en las necesidades de sus clientes. Más que ofrecer
+				paquetes turísticos, Passion Travel busca crear experiencias
+				especiales, planificadas con compromiso y, sobre todo, con amor
+				por lo que hace.
+			</p>
+
+			<p>
+				Su propósito es acompañar a cada viajero desde la elección del
+				destino hasta la realización del viaje, proporcionando
+				información clara y una atención que genere seguridad y
+				confianza.
+			</p>
+
+            <div class="valores-nosotros">
+
+                <div class="valor-nosotros">
+                    <i class="fa fa-heart"></i>
+
+                    <div>
+                        <strong>Atención personalizada</strong>
+                        <span>
+                            Orientación durante la consulta y planificación.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="valor-nosotros">
+                    <i class="fa fa-shield"></i>
+
+                    <div>
+                        <strong>Información clara</strong>
+                        <span>
+                            Conoce los detalles antes de elegir tu viaje.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="valor-nosotros">
+                    <i class="fa fa-paper-plane"></i>
+
+                    <div>
+                        <strong>Comunicación directa</strong>
+                        <span>
+                            Atención mediante nuestro asistente en Telegram.
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <a href="#ubicacion" class="boton-secundario">
+                Conocer más sobre nosotros
+                <i class="fa fa-arrow-right"></i>
+            </a>
+
+        </div>
+
+    </div>
+</section>
+
+{{-- Servicios --}}
+<section class="seccion-publica seccion-servicios" id="beneficios">
+    <div class="contenedor">
+
+        <div class="cabecera-seccion cabecera-centrada">
+            <div>
+                <span class="subtitulo-seccion">Pensamos en tu experiencia</span>
+                <h2>Servicios para planificar tu viaje</h2>
+
+                <p>
+                    Consulta información y encuentra diferentes alternativas
+                    desde un solo lugar.
+                </p>
+            </div>
+        </div>
+
+        <div class="rejilla-servicios">
+
+            <article class="tarjeta-servicio">
+                <span class="servicio-numero">01</span>
+
+                <div class="servicio-icono">
+                    <i class="fa fa-plane"></i>
+                </div>
+
+                <h3>Paquetes turísticos</h3>
+
+                <p>
+                    Consulta destinos, fechas, itinerarios y servicios
+                    incluidos en cada experiencia.
+                </p>
+            </article>
+
+            <article class="tarjeta-servicio">
+                <span class="servicio-numero">02</span>
+
+                <div class="servicio-icono">
+                    <i class="fa fa-building"></i>
+                </div>
+
+                <h3>Hospedaje</h3>
+
+                <p>
+                    Encuentra información sobre los hoteles contemplados
+                    dentro de los paquetes disponibles.
+                </p>
+            </article>
+
+            <article class="tarjeta-servicio">
+                <span class="servicio-numero">03</span>
+
+                <div class="servicio-icono">
+                    <i class="fa fa-comments"></i>
+                </div>
+
+                <h3>Asistencia en línea</h3>
+
+                <p>
+                    Comunícate con nuestro asistente para consultar
+                    disponibilidad o iniciar una prerreserva.
+                </p>
+            </article>
+
+            <article class="tarjeta-servicio">
+                <span class="servicio-numero">04</span>
+
+                <div class="servicio-icono">
+                    <i class="fa fa-calendar-check-o"></i>
+                </div>
+
+                <h3>Planificación</h3>
+
+                <p>
+                    Revisa las fechas, duración y actividades programadas
+                    antes de elegir tu próxima experiencia.
+                </p>
+            </article>
+
+        </div>
+
+    </div>
+</section>
+
+{{-- Galería --}}
+<section class="seccion-publica seccion-galeria" id="destinos">
+    <div class="contenedor">
+
+        <div class="cabecera-seccion">
+
+            <div>
+                <span class="subtitulo-seccion">Momentos para recordar</span>
+                <h2>Galería de experiencias</h2>
+
+                <p>
+                    Una mirada a los destinos y experiencias que pueden formar
+                    parte de tu próxima aventura.
+                </p>
+            </div>
+
+            <div class="controles-galeria">
+                <button
+                    type="button"
+                    id="galeriaAnterior"
+                    aria-label="Imagen anterior"
+                >
+                    <i class="fa fa-angle-left"></i>
+                </button>
+
+                <button
+                    type="button"
+                    id="galeriaSiguiente"
+                    aria-label="Siguiente imagen"
+                >
+                    <i class="fa fa-angle-right"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="galeria-ventana">
+            <div class="galeria-carril" id="galeriaCarril">
+
+				<figure class="galeria-elemento">
+					<img
+						src="{{ asset('assets/images/viajes/viaje-punta-cana.jpg') }}"
+						alt="Viaje organizado por Passion Travel a Punta Cana"
+						loading="lazy"
+					>
+
+					<figcaption>
+						<span>Experiencia internacional</span>
+						<strong>Punta Cana</strong>
+						<small>
+							Momentos compartidos por nuestros viajeros.
+						</small>
+					</figcaption>
+				</figure>
+
+				<figure class="galeria-elemento">
+					<img
+						src="{{ asset('assets/images/viajes/viaje-brasil.jpg') }}"
+						alt="Viaje organizado por Passion Travel a Brasil"
+						loading="lazy"
+					>
+
+					<figcaption>
+						<span>Destino internacional</span>
+						<strong>Brasil</strong>
+						<small>
+							Una experiencia grupal llena de alegría y recuerdos.
+						</small>
+					</figcaption>
+				</figure>
+
+				<figure class="galeria-elemento">
+					<img
+						src="{{ asset('assets/images/viajes/viaje-mexico-basilica.jpg') }}"
+						alt="Viajeros de Passion Travel en la Basílica de Guadalupe"
+						loading="lazy"
+					>
+
+					<figcaption>
+						<span>Turismo cultural y religioso</span>
+						<strong>Basílica de Guadalupe</strong>
+						<small>
+							Un recorrido especial por uno de los lugares más
+							representativos de México.
+						</small>
+					</figcaption>
+				</figure>
+
+				<figure class="galeria-elemento">
+					<img
+						src="{{ asset('assets/images/viajes/viaje-mexico-teotihuacan.jpg') }}"
+						alt="Viaje de Passion Travel a México"
+						loading="lazy"
+					>
+
+					<figcaption>
+						<span>Historia y cultura</span>
+						<strong>México</strong>
+						<small>
+							Nuestros viajeros descubriendo lugares llenos de historia.
+						</small>
+					</figcaption>
+				</figure>
+
+				<figure class="galeria-elemento">
+					<img
+						src="{{ asset('assets/images/viajes/viaje-panama.jpg') }}"
+						alt="Viaje organizado por Passion Travel a Panamá"
+						loading="lazy"
+					>
+
+					<figcaption>
+						<span>Experiencia grupal</span>
+						<strong>Panamá</strong>
+						<small>
+							Una nueva aventura organizada junto a Passion Travel.
+						</small>
+					</figcaption>
+				</figure>
+
 			</div>
-		</section>
+        </div>
 
-		<!--special-offer start-->
-		<section id="spo" class="special-offer">
-			<div class="container">
-				<div class="special-offer-content">
-					<div class="row">
-						<div class="col-sm-8">
-							<div class="single-special-offer">
-								<div class="single-special-offer-txt">
-									<h2>Tailandia</h2>
-									<div class="packages-review special-offer-review">
-										<p>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<span>2544 review</span>
-										</p>
-									</div><!--/.packages-review-->
-									<div class="packages-para special-offer-para">
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i> 5 Days 6 nights
-											</span>
-											<span>
-												<i class="fa fa-angle-right"></i> 2 person
-											</span>
-											<span>
-												<i class="fa fa-angle-right"></i>  5 star accomodation
-											</span>
-										</p>
-										<p>
-											<span>
-												<i class="fa fa-angle-right"></i>  transportation
-											</span>
-											<span>
-												<i class="fa fa-angle-right"></i>  food facilities
-											</span>  
-										</p>
-										<p class="offer-para">
-											Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tem ut labore et dolore magna  aliqua. Ut enim ad minim veniam, quis nostrud exercitation una <br> ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-										</p>
-									</div><!--/.packages-para-->
-									<div class="offer-btn-group">
-										<div class="about-btn">
-											<button  class="about-view packages-btn offfer-btn">
-												make tour
-											</button>
-										</div><!--/.about-btn-->
-										<div class="about-btn">
-											<button  class="about-view packages-btn">
-												book now
-											</button>
-										</div><!--/.about-btn-->
-									</div><!--/.offer-btn-group-->
-								</div><!--/.single-special-offer-txt-->
-							</div><!--/.single-special-offer-->
-						</div><!--/.col-->
-						<div class="col-sm-4">
-							<div class="single-special-offer">
-								<div class="single-special-offer-bg">
-									<img src="{{ asset('assets/images/offer/offer-shape.png') }}" alt="offer-shape">
-								</div><!--/.single-special-offer-bg-->
-								<div class="single-special-shape-txt">
-									<h3>special offer</h3>
-									<h4><span>40%</span><br>off</h4>
-									<p><span>$999</span><br>reguler $ 1450</p>
-								</div><!--/.single-special-shape-txt-->
-							</div><!--/.single-special-offer-->
-						</div><!--/.col-->
-					</div><!--/.row-->
-				</div><!--/.special-offer-content-->
-			</div><!--/.container-->
+    </div>
+</section>
 
-		</section><!--/.special-offer end-->
-		<!--special-offer end-->
+{{-- Testimonios publicados --}}
+@if($testimonios->isNotEmpty())
+    <section
+        class="seccion-publica seccion-testimonios"
+        id="testimonios"
+    >
+        <div class="contenedor">
 
-		<!-- testemonial Start -->
-		<section   class="testemonial">
-			<div class="container">
+            <div class="cabecera-seccion cabecera-centrada">
+                <div>
+                    <span class="subtitulo-seccion">
+                        Opiniones de viajeros
+                    </span>
 
-				<div class="gallary-header text-center">
-					<h2>
-						Opiniones de clientes
-					</h2>
-					<p>
-						Lee lo que nuestros clientes satisfechos tienen que decir sobre nuestros servicios. 
-					</p>
+                    <h2>Experiencias compartidas</h2>
 
-				</div><!--/.gallery-header-->
+                    <p>
+                        Conoce las experiencias de quienes han viajado
+                        junto a Passion Travel.
+                    </p>
+                </div>
+            </div>
 
-				<div class="owl-carousel owl-theme" id="testemonial-carousel">
+            <div
+                class="testimonios-carrusel"
+                id="testimoniosCarrusel"
+            >
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial1.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                @foreach($testimonios as $indice => $testimonio)
+                    <article
+                        class="testimonio {{
+                            $indice === 0
+                                ? 'testimonio-activo'
+                                : ''
+                        }}"
+                    >
+                        <div class="comillas-testimonio">
+                            “
+                        </div>
 
-					</div><!--/.item-->
+                        <div class="estrellas-testimonio">
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial2.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                            @for(
+                                $estrella = 1;
+                                $estrella <= 5;
+                                $estrella++
+                            )
+                                <i class="fa {{
+                                    $estrella <=
+                                    $testimonio->calificacion
+                                        ? 'fa-star'
+                                        : 'fa-star-o'
+                                }}"></i>
+                            @endfor
 
-					</div><!--/.item-->
+                        </div>
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial1.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                        <p>
+                            “{{ $testimonio->comentario }}”
+                        </p>
 
-					</div><!--/.item-->
+                        <div class="cliente-testimonio">
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial1.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                            @if($testimonio->foto)
+                                <img
+                                    src="{{ asset(
+                                        'storage/' .
+                                        $testimonio->foto
+                                    ) }}"
+                                    alt="{{ $testimonio->nombre }}"
+                                    class="foto-testimonio-publico"
+                                >
+                            @else
+                                <span class="avatar-testimonio">
+                                    {{ mb_strtoupper(
+                                        mb_substr(
+                                            $testimonio->nombre,
+                                            0,
+                                            1
+                                        )
+                                    ) }}
+                                </span>
+                            @endif
 
-					</div><!--/.item-->
+                            <div>
+                                <strong>
+                                    {{ $testimonio->nombre }}
+                                </strong>
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial2.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                                <span>
+                                    @if($testimonio->destino)
+                                        Experiencia en
+                                        {{ $testimonio->destino }}
+                                    @else
+                                        Viajero de Passion Travel
+                                    @endif
+                                </span>
+                            </div>
 
-					</div><!--/.item-->
+                        </div>
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial1.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                    </article>
+                @endforeach
 
-					</div><!--/.item-->
+                @if($testimonios->count() > 1)
+                    <div class="controles-testimonios">
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial1.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                        <button
+                            type="button"
+                            id="testimonioAnterior"
+                            aria-label="Testimonio anterior"
+                        >
+                            <i class="fa fa-angle-left"></i>
+                        </button>
 
-					</div><!--/.item-->
+                        <div id="indicadoresTestimonios"></div>
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial2.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+                        <button
+                            type="button"
+                            id="testimonioSiguiente"
+                            aria-label="Siguiente testimonio"
+                        >
+                            <i class="fa fa-angle-right"></i>
+                        </button>
 
-					</div><!--/.item-->
+                    </div>
+                @endif
 
-					<div class="home1-testm item">
-						<div class="home1-testm-single text-center">
-							<div class="home1-testm-img">
-								<img src="{{ asset('assets/images/client/testimonial1.jpg') }}" alt="img"/>
-							</div><!--/.home1-testm-img-->
-							<div class="home1-testm-txt">
-								<span class="icon section-icon">
-									<i class="fa fa-quote-left" aria-hidden="true"></i>
-								</span>
-								<p>
-									Lorem ipsum dolor sit amet, contur adip elit, sed do mod incid ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
-								</p>
-								<h3>
-									<a href="#">
-										kevin watson
-									</a>
-								</h3>
-								<h4>london, england</h4>
-							</div><!--/.home1-testm-txt-->	
-						</div><!--/.home1-testm-single-->
+            </div>
 
-					</div><!--/.item-->
+        </div>
+    </section>
+@endif
 
-				</div><!--/.testemonial-carousel-->
-			</div><!--/.container-->
+{{-- Ubicación --}}
+{{-- Ubicación y contacto --}}
+<section class="seccion-publica seccion-ubicacion" id="ubicacion">
+    <div class="contenedor">
 
-		</section><!--/.testimonial-->	
-		<!-- testemonial End -->
-		
-		<!--subscribe start-->
-		<section id="subs" class="subscribe">
-			<div class="container">
-				<div class="subscribe-title text-center">
-					<h2>
-						Únete a nuestra lista de suscriptores para recibir actualizaciones regulares
-					</h2>
-					<p>
-						Suscríbete ahora. Te enviaremos las mejores ofertas para tu viaje 
-					</p>
-				</div>
-				<form>
-					<div class="row">
-						<div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
-							<div class="custom-input-group">
-								<input type="email" class="form-control" placeholder="Ingresa tu correo aquí">
-								<button class="appsLand-btn subscribe-btn">Suscribirse</button>
-								<div class="clearfix"></div>
-								<i class="fa fa-envelope"></i>
-							</div>
+        <div class="ubicacion-contenido">
 
-						</div>
-					</div>
-				</form>
-			</div>
+            <div class="informacion-ubicacion">
 
-		</section>
-		<!--subscribe end-->
+                <span class="subtitulo-seccion">Visítanos</span>
 
-		<!-- footer-copyright start -->
-		<footer  class="footer-copyright">
-			<div class="container">
-				<div class="footer-content">
-					<div class="row">
+                <h2>Estamos ubicados en Salcedo</h2>
 
-						<div class="col-sm-3">
-							<div class="single-footer-item">
-								<div class="footer-logo">
-									<a href="index.html">
-										tour<span>Nest</span>
-									</a>
-									<p>
-										La mejor agencia de viajes
-									</p>
-								</div>
-							</div><!--/.single-footer-item-->
-						</div><!--/.col-->
+                <p>
+                    Visita nuestra agencia o comunícate con nosotros para
+                    recibir información sobre paquetes turísticos, destinos
+                    y opciones de viaje.
+                </p>
 
-						<div class="col-sm-3">
-							<div class="single-footer-item">
-								<h2>Enlaces</h2>
-								<div class="single-footer-txt">
-									<p><a href="#">Inicio</a></p>
-									<p><a href="#">Destinos</a></p>
-									<p><a href="#">Ofertas especiales</a></p>
-									<p><a href="#">Contactos</a></p>
-								</div><!--/.single-footer-txt-->
-							</div><!--/.single-footer-item-->
+                <div class="dato-ubicacion">
+                    <i class="fa fa-map-marker"></i>
 
-						</div><!--/.col-->
+                    <div>
+                        <span>Dirección</span>
+                        <strong>Salcedo, Cotopaxi, Ecuador</strong>
+                    </div>
+                </div>
 
-						<div class="col-sm-3">
-							<div class="single-footer-item">
-								<h2>Destinos populares</h2>
-								<div class="single-footer-txt">
-									<p><a href="#">China</a></p>
-									<p><a href="#">Venezuela</a></p>
-									<p><a href="#">Brasil</a></p>
-									<p><a href="#">Australia</a></p>
-									<p><a href="#">Londres</a></p>
-								</div><!--/.single-footer-txt-->
-							</div><!--/.single-footer-item-->
-						</div><!--/.col-->
+                <div class="dato-ubicacion">
+                    <i class="fa fa-clock-o"></i>
 
-						<div class="col-sm-3">
-							<div class="single-footer-item text-center">
-								<h2 class="text-left">Contactos</h2>
-								<div class="single-footer-txt text-left">
-									<p>+1 (300) 1234 6543</p>
-									<p class="foot-email"><a href="#">info@tnest.com</a></p>
-									<p>North Warnner Park 336/A</p>
-									<p>Nueva York, USA</p>
-								</div><!--/.single-footer-txt-->
-							</div><!--/.single-footer-item-->
-						</div><!--/.col-->
+                    <div>
+                        <span>Lunes a viernes</span>
+                        <strong>
+                            9:00 a. m. – 1:00 p. m. y
+                            3:00 p. m. – 6:00 p. m.
+                        </strong>
+                    </div>
+                </div>
 
-					</div><!--/.row-->
+                <div class="dato-ubicacion">
+                    <i class="fa fa-calendar"></i>
 
-				</div><!--/.footer-content-->
-				<hr>
-				<div class="foot-icons ">
-					<ul class="footer-social-links list-inline list-unstyled">
-		                <li><a href="#" target="_blank" class="foot-icon-bg-1"><i class="fa fa-facebook"></i></a></li>
-		                <li><a href="#" target="_blank" class="foot-icon-bg-2"><i class="fa fa-twitter"></i></a></li>
-		                <li><a href="#" target="_blank" class="foot-icon-bg-3"><i class="fa fa-instagram"></i></a></li>
-		        	</ul>
-<p>&copy; 2017 <a href="https://www.themesine.com">ThemeSINE</a>. Todos los derechos reservados</p>
+                    <div>
+                        <span>Fin de semana</span>
+                        <strong>
+                            Sábado: 9:00 a. m. – 12:00 p. m.<br>
+                            Domingo: cerrado
+                        </strong>
+                    </div>
+                </div>
 
-		        </div><!--/.foot-icons-->
-				<div id="scroll-Top">
-					<i class="fa fa-angle-double-up return-to-top" id="scroll-top" data-toggle="tooltip" data-placement="top" title="" data-original-title="Back to Top" aria-hidden="true"></i>
-				</div><!--/.scroll-Top-->
-			</div><!-- /.container-->
+                <div class="dato-ubicacion">
+                    <i class="fa fa-phone"></i>
 
-		</footer><!-- /.footer-copyright-->
-		<!-- footer-copyright end -->
+                    <div>
+                        <span>Teléfono</span>
 
+                        <a href="tel:+593984443833">
+                            <strong>098 444 3833</strong>
+                        </a>
+                    </div>
+                </div>
 
+                <div class="dato-ubicacion">
+                    <i class="fa fa-envelope"></i>
 
+                    <div>
+                        <span>Correo electrónico</span>
 
-		<script src="{{ asset('assets/js/jquery.js') }}"></script>
-		<!-- Include all compiled plugins (below), or include individual files as needed -->
+                        <a href="mailto:passiontravel48@gmail.com">
+                            <strong>passiontravel48@gmail.com</strong>
+                        </a>
+                    </div>
+                </div>
 
-		<!--modernizr.min.js-->
-		<script  src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+                <div class="botones-ubicacion">
 
+                    <a
+                        href="https://maps.app.goo.gl/BcySuXQbntDDHPZY8"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="boton-secundario"
+                    >
+                        <i class="fa fa-map-marker"></i>
+                        Cómo llegar
+                    </a>
 
-		<!--bootstrap.min.js-->
-		<script  src="{{ asset('assets/js/bootstrap.min.js') }}"></script>
+                    <a
+                        href="https://t.me/ReservasPassionTravelBot"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="boton-contacto-directo"
+                    >
+                        <i class="fa fa-telegram"></i>
+                        Consultar
+                    </a>
 
-		<!-- bootsnav js -->
-		<script src="{{ asset('assets/js/bootsnav.js') }}"></script>
+                </div>
 
-		<!-- jquery.filterizr.min.js -->
-		<script src="{{ asset('assets/js/jquery.filterizr.min.js') }}"></script>
+            </div>
 
-		<script  src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+            <div class="mapa-contenedor">
 
-		<!--jquery-ui.min.js-->
-        <script src="{{ asset('assets/js/jquery-ui.min.js') }}"></script>
+                <iframe
+                    src="https://www.google.com/maps?q=Passion+Travel,+Salcedo,+Cotopaxi,+Ecuador&output=embed"
+                    title="Ubicación de Passion Travel en Salcedo"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    allowfullscreen
+                ></iframe>
 
-        <!-- counter js -->
-		<script src="{{ asset('assets/js/jquery.counterup.min.js') }}"></script>
-		<script src="{{ asset('assets/js/waypoints.min.js') }}"></script>
+            </div>
 
-		<!--owl.carousel.js-->
-        <script  src="{{ asset('assets/js/owl.carousel.min.js') }}"></script>
+        </div>
 
-        <!-- jquery.sticky.js -->
-		<script src="{{ asset('assets/js/jquery.sticky.js') }}"></script>
+    </div>
+</section>
 
-        <!--datepicker.js-->
-        <script  src="{{ asset('assets/js/datepicker.js') }}"></script>
+{{-- Preguntas frecuentes --}}
+<section class="seccion-publica seccion-preguntas" id="preguntas">
+    <div class="contenedor">
 
-		<!--Custom JS-->
-		<script src="{{ asset('assets/js/custom.js') }}"></script>
+        <div class="cabecera-seccion cabecera-centrada">
+            <div>
+                <span class="subtitulo-seccion">Resolvemos tus dudas</span>
+                <h2>Preguntas frecuentes</h2>
+            </div>
+        </div>
 
+        <div class="lista-preguntas">
 
-	</body>
+            <article class="pregunta">
+                <button type="button" class="pregunta-boton">
+                    <span>¿Cómo puedo consultar un paquete turístico?</span>
+                    <i class="fa fa-plus"></i>
+                </button>
 
-</html>
+                <div class="pregunta-respuesta">
+                    <p>
+                        Puedes revisar los detalles del paquete y comunicarte
+                        mediante Telegram para solicitar información adicional.
+                    </p>
+                </div>
+            </article>
+
+            <article class="pregunta">
+                <button type="button" class="pregunta-boton">
+                    <span>¿Dónde puedo revisar las fechas disponibles?</span>
+                    <i class="fa fa-plus"></i>
+                </button>
+
+                <div class="pregunta-respuesta">
+                    <p>
+                        La fecha de salida y regreso se encuentra dentro de la
+                        información de cada paquete publicado.
+                    </p>
+                </div>
+            </article>
+
+            <article class="pregunta">
+                <button type="button" class="pregunta-boton">
+                    <span>¿Cómo se realiza una prerreserva?</span>
+                    <i class="fa fa-plus"></i>
+                </button>
+
+                <div class="pregunta-respuesta">
+                    <p>
+                        Nuestro asistente en Telegram recopilará la información
+                        necesaria para iniciar el proceso de prerreserva.
+                    </p>
+                </div>
+            </article>
+
+            <article class="pregunta">
+                <button type="button" class="pregunta-boton">
+                    <span>¿Qué servicios incluye cada viaje?</span>
+                    <i class="fa fa-plus"></i>
+                </button>
+
+                <div class="pregunta-respuesta">
+                    <p>
+                        Cada paquete cuenta con un apartado que explica los
+                        servicios incluidos, no incluidos y el itinerario.
+                    </p>
+                </div>
+            </article>
+
+        </div>
+
+    </div>
+</section>
+
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('js/inicio-publico.js') }}"></script>
+@endsection

@@ -14,13 +14,42 @@ use App\Http\Controllers\ReservaGrupalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\TestimonioController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Middleware\CheckUserPermission;
+use App\Models\Testimonio;
 
 Route::get('/', function () {
-    $destinos = Destino::whereNotNull('imagen')->get(); 
-    
-    return view('loading', compact('destinos'));
+    $destinos = Destino::where('estado_publicacion', 'publicado')
+        ->whereNotNull('imagen')
+        ->orderByDesc('destacado')
+        ->orderBy('fecha_salida')
+        ->get();
+
+    $destacados = $destinos
+        ->where('destacado', true)
+        ->values();
+
+    $categorias = $destinos
+        ->pluck('categoria')
+        ->filter()
+        ->unique()
+        ->sort()
+        ->values();
+
+    $testimonios = Testimonio::publicados()->get();
+
+    return view('loading', compact(
+        'destinos',
+        'destacados',
+        'categorias',
+        'testimonios'
+    ));
 });
+
+// Detalle público de cada paquete turístico
+Route::get('/paquetes/{slug}', [DestinoController::class, 'detalle'])
+    ->name('paquetes.detalle');
 
 // Endpoint público para recibir pre-reservas desde n8n (POST JSON)
 Route::post('/prereservas/webhook', [PreReservaController::class, 'storeFromWebhook']);
@@ -31,13 +60,12 @@ Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->n
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function() {
-    Route::get('/main', function () {
-        return view('layouts.main');
-    })->name('main');
+    Route::get(
+        '/main',
+        [DashboardController::class, 'index']
+    )->name('main');
 
     Route::prefix('usuarios')->group(function() {
         Route::get('/', [UserController::class, 'index'])->middleware('check.permission:usuarios.ver')->name('usuarios');
@@ -109,16 +137,32 @@ Route::middleware('auth')->group(function() {
     Route::prefix('reportes')->group(function(){
         Route::get('/reportes/ingresos',[ReporteController::class,'ingresosMensuales'])->name('reportes.ingresos');
     });
+    
+    //testimonios
+    Route::prefix('testimonios')->group(function () {
+        Route::get('/',[TestimonioController::class, 'index'])->name('testimonios.index');
+        Route::get('/create',[TestimonioController::class, 'create'])->name('testimonios.create');
+        Route::post('/store',[TestimonioController::class, 'store'])->name('testimonios.store');
+        Route::get('/{testimonio}/edit',[TestimonioController::class, 'edit'])->name('testimonios.edit');
+        Route::put('/{testimonio}',[TestimonioController::class, 'update'])->name('testimonios.update');
+        Route::delete('/{testimonio}',[TestimonioController::class, 'destroy'])->name('testimonios.destroy');
+    });
+
+    // Pre-reservas (administración)
+    Route::prefix('prereservas')->group(function () {
+        Route::get('/check',[PreReservaController::class, 'checkExistence'])->name('prereservas.check');
+        Route::get('/',[PreReservaController::class, 'index'])->name('prereservas.index');
+        Route::get('/{id}/editar',[PreReservaController::class, 'edit'])->name('prereservas.edit');
+        Route::patch('/{id}',[PreReservaController::class, 'update'])->name('prereservas.update');
+        Route::post('/{id}/convertir',[PreReservaController::class, 'convertToReserva'])->name('prereservas.convertir');
+        Route::delete('/{id}',[PreReservaController::class, 'destroy'])->name('prereservas.destroy');
+    });
 });
-// Pre-reservas (administración)
-Route::prefix('prereservas')->group(function() {
-    Route::get('/', [PreReservaController::class, 'index'])->name('prereservas.index');
-    Route::get('/{id}/editar', [PreReservaController::class, 'edit'])->name('prereservas.edit');
-    Route::patch('/{id}', [PreReservaController::class, 'update'])->name('prereservas.update');
-    Route::post('/{id}/convertir', [PreReservaController::class, 'convertToReserva'])->name('prereservas.convertir');
-    Route::delete('/{id}', [PreReservaController::class, 'destroy'])->name('prereservas.destroy');
-    Route::get('/check', [PreReservaController::class, 'checkExistence'])->name('prereservas.check');
-});
+
+Route::post(
+    '/prereservas/webhook',
+    [PreReservaController::class, 'storeFromWebhook']
+);
 
 
 

@@ -1,277 +1,305 @@
 @extends('layouts.main')
 
-@section('titulo', $titulo)
+@section('titulo', 'Clientes')
 
 @section('content')
-<main id="main" class="main">
+<link
+    rel="stylesheet"
+    href="{{ asset('css/clientes-listado.css') }}"
+>
 
-    <div class="pagetitle d-flex justify-content-between align-items-center">
+<main id="main" class="main pagina-clientes">
+    <div class="clientes-encabezado">
         <div>
-            <h1 class="text-dark fw-bold">Clientes</h1>
-            <p class="text-muted small mb-0">Gestiona la base de datos de clientes</p>
+            <span class="clientes-modulo">Gestión de viajes</span>
+
+            <h1>Clientes</h1>
+
+            <p>
+                Consulta y administra la información de las personas
+                registradas en la agencia.
+            </p>
         </div>
-        <button type="button" class="btn btn-primary px-3 py-2 fw-semibold" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#modalNuevoCliente">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Cliente
-        </button>
+
+        <a
+            href="{{ route('clientes.create') }}"
+            class="btn-nuevo-cliente"
+        >
+            <i class="bi bi-person-plus"></i>
+            Registrar cliente
+        </a>
     </div>
 
-    <section class="section">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm" style="border-radius: 10px;">
-                    <div class="card-body p-2">
-                        <div class="row g-2 align-items-center">
-                            <div class="col-md-8 col-sm-12">
-                                <form action="{{ route('clientes') }}" method="GET" class="d-flex gap-2">
-                                    <input 
-                                        type="text" 
-                                        name="documento" 
-                                        class="form-control " 
-                                        placeholder="Buscar cliente por cédula"
-                                        value="{{ request('documento') }}"
-                                    >
-                                    <button type="submit" class="btn btn-primary btn-sm">
-                                        <i class="bi bi-search"></i> Buscar Cliente
-                                    </button>
-                                    @if(request('documento'))
-                                        <a href="{{ route('clientes') }}" class="btn btn-outline-secondary btn-sm ">
-                                            <i class="bi bi-x-circle"></i> Limpiar
-                                        </a>
-                                    @endif
-                                </form>
-                            </div>
-                            
-                            <div class="col-md-4 col-sm-12 text-md-end text-start">
-                                <div class="dropdown d-inline-block w-100 text-md-end">
-                                    <button class="btn btn-light border-0 py-2 px-3 dropdown-toggle text-secondary" type="button" id="filterStatus" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 8px; background-color: #f1f3f5;">
-                                        <i class="bi bi-funnel me-1"></i> Todos los estados
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="filterStatus">
-                                        <li>
-                                            <a class="dropdown-item {{ !request('estado') || request('estado') == 'todos' ? 'active' : '' }}" 
-                                            href="{{ route('clientes', array_merge(request()->only('documento'), ['estado' => 'todos'])) }}">
-                                                <i class="bi bi-circle-fill text-primary me-2" style="font-size: 0.6rem;"></i>Todos los estados
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item {{ request('estado') == 'activo' ? 'active' : '' }}" 
-                                            href="{{ route('clientes', array_merge(request()->only('documento'), ['estado' => 'activo'])) }}">
-                                                <i class="bi bi-circle-fill text-success me-2" style="font-size: 0.6rem;"></i>Activos
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item {{ request('estado') == 'inactivo' ? 'active' : '' }}" 
-                                            href="{{ route('clientes', array_merge(request()->only('documento'), ['estado' => 'inactivo'])) }}">
-                                                <i class="bi bi-circle-fill text-danger me-2" style="font-size: 0.6rem;"></i>Inactivos
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <section class="clientes-resumen">
+        <div class="resumen-cliente">
+            <span>Total de clientes</span>
+            <strong>{{ $clientes->count() }}</strong>
         </div>
 
-        <div class="row g-3">
-            @forelse ($clientes as $cliente)
-                <div class="col-12 col-md-6">
-                    <div class="card client-card shadow-sm border-0 h-100">
-                        
-                        <div class="dropdown card-action-menu">
-                            <button class="btn btn-three-dots dropdown-toggle no-caret" type="button" id="actionMenu{{ $cliente->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-three-dots-vertical"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="actionMenu{{ $cliente->id }}" style="border-radius: 8px;">
-                                <li>
-                                    <a class="dropdown-item py-2 text-warning" href="{{ route('clientes.edit', $cliente->id) }}">
-                                        <i class="bi bi-pencil-square me-2"></i> Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider my-1"></li>
-                                <li>
-                                    <form action="{{ route('clientes.destroy', $cliente->id) }}" method="POST" class="d-inline form-eliminar">
-                                      @csrf
-                                      @method('DELETE')
-                                      <button type="button" class="dropdown-item py-2 text-danger btn-borrar">
-                                          <i class="bi bi-trash3-fill me-2"></i> Eliminar
-                                      </button>
-                                  </form>
-                                </li>
-                            </ul>
-                        </div>
+        <div class="resumen-cliente">
+            <span>Clientes activos</span>
+            <strong>
+                {{ $clientes->where('estado', 'activo')->count() }}
+            </strong>
+        </div>
 
-                        <div class="card-body p-4 d-flex flex-column h-100">
-                            <div class="d-flex align-items-start mb-3">
-                                @php
-                                    // Genera iniciales automáticas basándose en el nombre y apellido
-                                    $iniciales = strtoupper(substr($cliente->nombres, 0, 1) . substr($cliente->apellidos, 0, 1));
-                                @endphp
-                                <div class="avatar-circle bg-primary text-white shadow-sm">
-                                    {{ $iniciales }}
-                                </div>
-                                <div>
-                                    <h5 class="card-title p-0 m-0 text-dark fw-bold" style="font-size: 1.1rem;">{{ $cliente->nombres }} {{ $cliente->apellidos }}</h5>
-                                    <p class="text-muted small mb-2">DNI: {{ $cliente->documento }}</p>
-                                    <span class="client-status-pill text-white {{ $cliente->estado == 'activo' ? 'bg-success' : 'bg-danger' }}">
-                                        {{ $cliente->estado }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="mt-2" style="font-size: 0.9rem; color: #5f666c;">
-                                <div class="mb-2 d-flex align-items-center">
-                                    <i class="bi bi-envelope text-muted me-2"></i>
-                                    <span>{{ $cliente->email }}</span>
-                                </div>
-                                <div class="mb-2 d-flex align-items-center">
-                                    <i class="bi bi-telephone text-muted me-2"></i>
-                                    <span>{{ $cliente->telefono }}</span>
-                                </div>
-                                
-                                <!-- BOTÓN SUBIÓ AQUÍ (justo después del teléfono) -->
-                                @if($cliente->archivo)
-                                    <div class="mb-2 d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-file-earmark-text text-muted me-2"></i>
-                                            <span class="text-muted">Documento:</span>
-                                        </div>
-                                        <a href="{{ Storage::url($cliente->archivo) }}" 
-                                        target="_blank" 
-                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold" 
-                                        style="border-color: #0d6efd; background-color: #f0f7ff; transition: all 0.2s; font-size: 0.75rem;"
-                                        onmouseover="this.style.backgroundColor='#0d6efd'; this.style.color='white';" 
-                                        onmouseout="this.style.backgroundColor='#f0f7ff'; this.style.color='#0d6efd';">
-                                            <i class="bi bi-file-earmark-text me-1"></i> Ver documento
-                                        </a>
-                                    </div>
-                                @endif
-                                <div class="mb-2 d-flex align-items-center">
-                                    <i class="bi bi-geo-alt text-muted me-2"></i>
-                                    <span>viajes (X viajes realizados)</span>
-                                </div>
-                                
-
-                            </div>
-
-                            <div class="text-end text-muted small mt-a pt-2 border-top" style="font-size: 0.8rem; margin-top: auto;">
-                                Registrado el {{ $cliente->created_at->format('d/m/Y') }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
-                    <h4 class="text-muted mt-3">No se encontraron clientes registrados.</h4>
-                </div>
-            @endforelse
+        <div class="resumen-cliente">
+            <span>Clientes inactivos</span>
+            <strong>
+                {{ $clientes->where('estado', 'inactivo')->count() }}
+            </strong>
         </div>
     </section>
+
+    <section class="clientes-herramientas">
+        <div class="clientes-buscador">
+            <i class="bi bi-search"></i>
+
+            <input
+                id="buscarCliente"
+                type="search"
+                placeholder="Buscar por nombre, documento, correo o teléfono"
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="clientes-filtro">
+            <label for="filtrarClientes">
+                Estado:
+            </label>
+
+            <select id="filtrarClientes">
+                <option value="">Todos</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+            </select>
+        </div>
+    </section>
+
+    <section id="contenedorClientes" class="clientes-grid">
+        @forelse ($clientes as $cliente)
+            @php
+                $tieneMovimientos =
+                    $cliente->reservas_count > 0 ||
+                    $cliente->pagos_count > 0 ||
+                    $cliente->grupos_count > 0;
+
+                $iniciales =
+                    strtoupper(substr($cliente->nombres, 0, 1)) .
+                    strtoupper(substr($cliente->apellidos, 0, 1));
+            @endphp
+
+            <article
+                class="tarjeta-cliente"
+                data-estado="{{ $cliente->estado }}"
+                data-busqueda="{{ strtolower(
+                    $cliente->nombre_completo . ' ' .
+                    $cliente->documento . ' ' .
+                    $cliente->email . ' ' .
+                    $cliente->telefono
+                ) }}"
+            >
+                <header class="tarjeta-cliente-encabezado">
+                    <div class="cliente-principal">
+                        <span class="cliente-iniciales">
+                            {{ $iniciales }}
+                        </span>
+
+                        <div>
+                            <h2>{{ $cliente->nombre_completo }}</h2>
+
+                            <span class="cliente-registro">
+                                Cliente desde
+                                {{ $cliente->created_at?->format('d/m/Y') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    @if ($cliente->estado === 'activo')
+                        <span class="estado-cliente activo">
+                            <span></span>
+                            Activo
+                        </span>
+                    @else
+                        <span class="estado-cliente inactivo">
+                            <span></span>
+                            Inactivo
+                        </span>
+                    @endif
+                </header>
+
+                <div class="tarjeta-cliente-contenido">
+                    <div class="dato-cliente">
+                        <i class="bi bi-person-vcard"></i>
+
+                        <div>
+                            <span>
+                                @if ($cliente->tipo_documento === 'cedula')
+                                    Cédula
+                                @elseif ($cliente->tipo_documento === 'pasaporte')
+                                    Pasaporte
+                                @else
+                                    Documento
+                                @endif
+                            </span>
+
+                            <strong>{{ $cliente->documento }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="dato-cliente">
+                        <i class="bi bi-envelope"></i>
+
+                        <div>
+                            <span>Correo electrónico</span>
+                            <strong>{{ $cliente->email }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="dato-cliente">
+                        <i class="bi bi-telephone"></i>
+
+                        <div>
+                            <span>Teléfono</span>
+                            <strong>{{ $cliente->telefono }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="dato-cliente">
+                        <i class="bi bi-globe-americas"></i>
+
+                        <div>
+                            <span>Nacionalidad</span>
+                            <strong>
+                                {{ $cliente->nacionalidad ?: 'Sin registrar' }}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actividad-cliente">
+                    <div>
+                        <strong>{{ $cliente->reservas_count }}</strong>
+                        <span>
+                            {{ $cliente->reservas_count === 1
+                                ? 'Reserva'
+                                : 'Reservas' }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <strong>{{ $cliente->grupos_count }}</strong>
+                        <span>
+                            {{ $cliente->grupos_count === 1
+                                ? 'Viaje grupal'
+                                : 'Viajes grupales' }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <strong>{{ $cliente->pagos_count }}</strong>
+                        <span>
+                            {{ $cliente->pagos_count === 1
+                                ? 'Pago'
+                                : 'Pagos' }}
+                        </span>
+                    </div>
+                </div>
+
+                <footer class="tarjeta-cliente-pie">
+                    <div class="documento-cliente">
+                        @if ($cliente->archivo)
+                            <a
+                                href="{{ Storage::url($cliente->archivo) }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <i class="bi bi-paperclip"></i>
+                                Ver documento
+                            </a>
+                        @else
+                            <span>
+                                <i class="bi bi-file-earmark"></i>
+                                Sin documento adjunto
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="acciones-cliente">
+                        <a
+                            href="{{ route(
+                                'clientes.edit',
+                                $cliente->id
+                            ) }}"
+                            class="accion-cliente editar"
+                            title="Editar cliente"
+                        >
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </a>
+
+                        @if (!$tieneMovimientos)
+                            <form
+                                action="{{ route(
+                                    'clientes.destroy',
+                                    $cliente->id
+                                ) }}"
+                                method="POST"
+                                class="formulario-eliminar-cliente"
+                                data-nombre="{{ $cliente->nombre_completo }}"
+                            >
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    type="button"
+                                    class="accion-cliente eliminar"
+                                    title="Eliminar cliente"
+                                >
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        @else
+                            <button
+                                type="button"
+                                class="accion-cliente bloqueada"
+                                title="Tiene historial registrado. Puedes cambiar su estado a inactivo."
+                                disabled
+                            >
+                                <i class="bi bi-lock"></i>
+                            </button>
+                        @endif
+                    </div>
+                </footer>
+            </article>
+        @empty
+            <div class="clientes-vacio">
+                <i class="bi bi-people"></i>
+
+                <strong>No hay clientes registrados</strong>
+
+                <span>
+                    Registra un cliente para comenzar a gestionar sus
+                    viajes.
+                </span>
+            </div>
+        @endforelse
+    </section>
+
+    <div id="clientesSinResultados" class="clientes-sin-resultados">
+        <i class="bi bi-search"></i>
+        <strong>No se encontraron clientes</strong>
+        <span>Prueba con otro nombre, documento o estado.</span>
+    </div>
 </main>
 
-<div class="modal fade" id="modalNuevoCliente" tabindex="-1" aria-labelledby="modalNuevoClienteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            
-            <div class="modal-header border-0 pb-0 pt-4 px-4 position-relative">
-                <div>
-                    <h4 class="modal-title fw-bold text-dark" id="modalNuevoClienteLabel" style="font-size: 1.4rem;">Registrar Nuevo Cliente</h4>
-                    <p class="text-muted small mb-0">Completa la información del cliente</p>
-                </div>
-                <button type="button" class="btn-close position-absolute" data-bs-dismiss="modal" aria-label="Close" style="top: 25px; right: 25px;"></button>
-            </div>
-
-            <div class="modal-body p-4">
-                <form action="{{ route('clientes.store') }}" id="form_nuevo_cliente" method="post" enctype="multipart/form-data">
-                    @csrf
-
-                    <div class="row g-3">
-                        <div class="col-12 col-sm-6">
-                            <label for="nombres" class="form-label text-secondary small fw-semibold">Nombres</label>
-                            <input required class="form-control py-2 bg-light border-0" placeholder="María" type="text" name="nombres" id="nombres" style="border-radius: 8px;">
-                        </div>
-
-                        <div class="col-12 col-sm-6">
-                            <label for="apellidos" class="form-label text-secondary small fw-semibold">Apellidos</label>
-                            <input required class="form-control py-2 bg-light border-0" placeholder="González" type="text" name="apellidos" id="apellidos" style="border-radius: 8px;">
-                        </div>
-
-                        <div class="col-12">
-                            <label for="email" class="form-label text-secondary small fw-semibold">Correo electrónico</label>
-                            <input required class="form-control py-2 bg-light border-0" placeholder="maria@gmail.com" type="email" name="email" id="email" style="border-radius: 8px;">
-                        </div>
-
-                        <div class="col-12">
-                            <label for="telefono" class="form-label text-secondary small fw-semibold">Teléfono</label>
-                            <input required class="form-control py-2 bg-light border-0" placeholder="09876543210" type="text" name="telefono" id="telefono" style="border-radius: 8px;">
-                        </div>
-
-                        <div class="col-12 col-sm-6">
-                            <label for="documento" class="form-label text-secondary small fw-semibold">Cédula</label>
-                            <input required class="form-control py-2 bg-light border-0" placeholder="1700000000" type="text" name="documento" id="documento" style="border-radius: 8px;">
-                        </div>
-
-            
-
-                        <div class="col-12 col-sm-6">
-                            <label for="estado" class="form-label text-secondary small fw-semibold">Estado</label>
-                            <select name="estado" id="estado" class="form-select py-2 bg-light border-0" required style="border-radius: 8px;">
-                                <option value="" disabled selected hidden>Seleccione un estado</option>
-                                <option value="activo">Activo</option>
-                                <option value="inactivo">Inactivo</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-12">
-                        <label for="archivo" class="form-label text-secondary small fw-semibold">Visa (PDF o Imagen) opcional</label>
-                        <input  class="form-control py-2 bg-light border-0"  type="file" name="archivo" id="archivo" style="border-radius: 8px;"
-                        accept=".pdf,.jpg,.jpeg,.png" style="border-radius: 8px;">
-                    </div>
-
-                    <div class="d-flex gap-2 mt-4 pt-2 justify-content-end">
-                        <button type="button" class="btn btn-light px-4 py-2 border text-secondary fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px; background-color: #fff;">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold" style="border-radius: 8px; background-color: #0d6efd;">
-                            Guardar Cliente
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-
-        </div>
-    </div>
-</div>
-
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const botonesBorrar = document.querySelectorAll('.btn-borrar');
-        
-        botonesBorrar.forEach(boton => {
-            boton.addEventListener('click', function(e) {
-                e.preventDefault();
-                const formulario = this.closest('.form-eliminar');
-
-                Swal.fire({
-                    title: '¿Estás seguro de eliminar este cliente?',
-                    text: "Esta acción no se puede deshacer.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        formulario.submit();
-                    }
-                });
-            });
-        });
-    });
+    window.mensajesListadoClientes = {
+        exito: @json(session('success')),
+        error: @json(session('error'))
+    };
 </script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="{{ asset('js/clientes-listado.js') }}"></script>
 @endsection

@@ -12,7 +12,6 @@
     <!-- filepond-->
     <!-- CSS -->
     <link href="https://unpkg.com/filepond/dist/filepond.min.css" rel="stylesheet">
-    <link href="{{ asset('css/cliente-modulo.css') }}" rel="stylesheet">
 
     <!-- JS -->
     <script src="https://unpkg.com/filepond/dist/filepond.min.js"></script>

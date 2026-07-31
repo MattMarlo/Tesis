@@ -29,7 +29,7 @@ class Grupo extends Model
      */
     public function clientes()
     {
-        return $this->belongsToMany(Cliente::class, 'grupo_cliente', 'grupo_id', 'cliente_id')
+        return $this->belongsToMany(Cliente::class, 'grupos_clientes', 'grupo_id', 'cliente_id')
                     ->withPivot('monto_asignado', 'es_lider')
                     ->withTimestamps();
     }

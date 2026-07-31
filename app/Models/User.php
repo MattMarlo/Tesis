@@ -2,42 +2,20 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Reserva;
-use App\Models\Pago;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
-    protected $table = 'users';
+    public const ROL_ADMIN = 'admin';
+    public const ROL_AGENTE = 'agente';
 
-    public function isAdmin(): bool
-    {
-        return $this->rol === self::ROL_ADMIN;
-    }
-
-    public function isAgente(): bool
-    {
-        return $this->rol === self::ROL_AGENTE;
-    }
-
-    public function hasPermission(string $permission): bool
-    {
-        if ($this->isAdmin()) {
-            return true;
-        }
-
-        if ($permission === 'usuarios.ver' || $permission === 'usuarios.crear') {
-            return false;
-        }
-
-        return true;
-    }
+    public const ESTADO_ACTIVO = 'activo';
+    public const ESTADO_INACTIVO = 'inactivo';
 
     protected $fillable = [
         'nombres',
@@ -46,6 +24,7 @@ class User extends Authenticatable
         'telefono',
         'documento',
         'rol',
+        'estado',
         'password',
     ];
 
@@ -62,18 +41,55 @@ class User extends Authenticatable
         ];
     }
 
-    // 🔥 ROLES
-    const ROL_ADMIN = 'admin';
-    const ROL_AGENTE = 'agente';
-
-   
-    public function reservas(){
-       return $this->hasMany(Reserva::class, 'user_id');
+    public function isAdmin(): bool
+    {
+        return $this->rol === self::ROL_ADMIN;
     }
 
-    
-    public function pagos(){
-        return $this->hasMany(Pago::class, 'users_id');
+    public function isAgente(): bool
+    {
+        return $this->rol === self::ROL_AGENTE;
     }
-    
+
+    public function estaActivo(): bool
+    {
+        return $this->estado === self::ESTADO_ACTIVO;
+    }
+
+    public function hasPermission(string $permiso): bool
+    {
+        if (!$this->estaActivo()) {
+            return false;
+        }
+
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        /*
+         * El equipo de trabajo no puede acceder a ninguna
+         * función relacionada con la administración de usuarios.
+         */
+        if (str_starts_with($permiso, 'usuarios.')) {
+            return false;
+        }
+
+        return $this->isAgente();
+    }
+
+    public function reservas()
+    {
+        return $this->hasMany(
+            Reserva::class,
+            'user_id'
+        );
+    }
+
+    public function pagos()
+    {
+        return $this->hasMany(
+            Pago::class,
+            'user_id'
+        );
+    }
 }

@@ -526,9 +526,30 @@
             @endif
 
             @if ($errors->any())
+                @php
+                    $mensajeError = $errors->first();
+                    $mensajeMinusculas = mb_strtolower($mensajeError);
+
+                    if (str_contains($mensajeMinusculas, 'inactiva')) {
+                        $tituloError = 'Cuenta inactiva';
+                    } elseif (
+                        str_contains($mensajeMinusculas, 'contraseña') ||
+                        str_contains($mensajeMinusculas, 'credenciales')
+                    ) {
+                        $tituloError = 'No se pudo iniciar sesión';
+                    } elseif (
+                        str_contains($mensajeMinusculas, 'correo') &&
+                        str_contains($mensajeMinusculas, 'asociada')
+                    ) {
+                        $tituloError = 'Correo no registrado';
+                    } else {
+                        $tituloError = 'Revisa la información ingresada';
+                    }
+                @endphp
+
                 Swal.fire({
                     icon: 'error',
-                    title: 'No hay una cuenta asociada a este correo',
+                    title: @json($tituloError),
                     text: @json(implode("\n", $errors->all())),
                     confirmButtonText: 'Corregir',
                     confirmButtonColor: '#093D77'

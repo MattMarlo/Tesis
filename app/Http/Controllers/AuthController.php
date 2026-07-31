@@ -18,20 +18,64 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $datos = $request->validate(
+            [
+                'email' => [
+                    'required',
+                    'email',
+                    'max:100',
+                ],
+                'password' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+            ],
+            [
+                'email.required' =>
+                    'Ingresa tu correo electrónico.',
+                'email.email' =>
+                    'Escribe un correo electrónico válido.',
+                'password.required' =>
+                    'Ingresa tu contraseña.',
+            ]
+        );
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            //return redirect()->intended('/main')->with('success', '¡Bienvenido de nuevo!');
-            return redirect()->route('reservas')->with('success', '¡Bienvenido de nuevo!');
+        $correo = mb_strtolower(trim($datos['email']));
+
+        $usuario = User::where('email', $correo)->first();
+
+        if (
+            !$usuario ||
+            !Hash::check($datos['password'], $usuario->password)
+        ) {
+            return back()
+                ->withErrors([
+                    'email' =>
+                        'El correo o la contraseña no son correctos.',
+                ])
+                ->onlyInput('email');
         }
 
-        return back()->withErrors([
-            'email' => 'Las credenciales no coinciden.',
-        ])->onlyInput('email');
+        if (!$usuario->estaActivo()) {
+            return back()
+                ->withErrors([
+                    'email' =>
+                        'Tu cuenta está inactiva. Comunícate con la administradora.',
+                ])
+                ->onlyInput('email');
+        }
+
+        Auth::login($usuario);
+
+        $request->session()->regenerate();
+
+        return redirect()
+            ->route('main')
+            ->with(
+                'success',
+                'Bienvenido al sistema, ' . $usuario->nombres . '.'
+            );
     }
 
     public function showForgotPassword()

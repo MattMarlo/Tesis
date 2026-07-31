@@ -18,6 +18,7 @@ class RoleAccessTest extends TestCase
             'telefono' => '3000000000',
             'documento' => '1000000000',
             'rol' => User::ROL_ADMIN,
+            'estado' => 'activo',
             'password' => 'password123',
         ]);
 
@@ -35,6 +36,7 @@ class RoleAccessTest extends TestCase
             'telefono' => '3000000001',
             'documento' => '1000000001',
             'rol' => User::ROL_AGENTE,
+            'estado' => 'activo',
             'password' => 'password123',
         ]);
 

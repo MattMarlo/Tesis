@@ -54,8 +54,12 @@ Route::get('/paquetes/{slug}', [DestinoController::class, 'detalle'])
 // Endpoint público para recibir pre-reservas desde n8n (POST JSON)
 Route::post('/prereservas/webhook', [PreReservaController::class, 'storeFromWebhook']);
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/login', [AuthController::class, 'showLogin'])
+    ->name('login');
+
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->name('login.process');
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
@@ -67,14 +71,18 @@ Route::middleware('auth')->group(function() {
         [DashboardController::class, 'index']
     )->name('main');
 
-    Route::prefix('usuarios')->group(function() {
-        Route::get('/', [UserController::class, 'index'])->middleware('check.permission:usuarios.ver')->name('usuarios');
-        Route::get('/create', [UserController::class, 'create'])->middleware('check.permission:usuarios.crear')->name('usuarios.create');
-        Route::post('/store', [UserController::class, 'store'])->middleware('check.permission:usuarios.crear')->name('usuarios.store');
-        Route::delete('/destroy/{id}', [UserController::class, 'destroy'])->middleware('check.permission:usuarios.crear')->name('usuarios.destroy');
-        Route::get('/edit/{id}', [UserController::class, 'edit'])->middleware('check.permission:usuarios.crear')->name('usuarios.edit');
-        Route::put('/update/{id}', [UserController::class, 'update'])->middleware('check.permission:usuarios.crear')->name('usuarios.update');
-    });
+    Route::prefix('usuarios')
+        ->middleware('check.permission:usuarios.administrar')
+        ->group(function () {
+            Route::get('/',[UserController::class, 'index'])->name('usuarios');
+            Route::get('/create',[UserController::class, 'create'])->name('usuarios.create');
+            Route::post('/store',[UserController::class, 'store'])->name('usuarios.store');
+            Route::get('/edit/{id}',[UserController::class, 'edit'])->name('usuarios.edit');
+            Route::put('/update/{id}',[UserController::class, 'update'])->name('usuarios.update');
+            Route::delete('/destroy/{id}',[UserController::class, 'destroy'])->name('usuarios.destroy');
+        }
+    );
+
     Route::prefix('clientes')->group(function() {
         Route::get('/', [ClienteController::class, 'index'])->name('clientes');
         Route::get('/create', [ClienteController::class, 'create'])->name('clientes.create');

@@ -25,7 +25,7 @@
     <form
         id="loginForm"
         class="auth-form"
-        action="{{ route('login') }}"
+        action="{{ route('login.process') }}"
         method="POST"
         novalidate
     >

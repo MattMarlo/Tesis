@@ -1,0 +1,692 @@
+:root {
+    --exp-azul: #093D77;
+    --exp-celeste: #3A7CA5;
+    --exp-fondo: #F8F9FA;
+    --exp-texto: #2B2B2B;
+    --exp-gris: #65717E;
+    --exp-borde: #DCE4EA;
+    --exp-dorado: #DAA520;
+    --exp-verde: #218B5A;
+    --exp-rojo: #C53B45;
+    --exp-blanco: #FFFFFF;
+}
+
+.pagina-operacion-viaje {
+    color: var(--exp-texto);
+}
+
+.expediente-encabezado {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.3rem;
+}
+
+.volver-operaciones {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.9rem;
+    color: var(--exp-gris);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.volver-operaciones:hover {
+    color: var(--exp-azul);
+}
+
+.expediente-modulo {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--exp-celeste);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.expediente-encabezado h1 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 1.7rem;
+    font-weight: 800;
+}
+
+.expediente-encabezado p {
+    margin: 0.35rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.88rem;
+}
+
+.estado-expediente {
+    display: inline-flex;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.estado-pendiente {
+    background: #FFF4D6;
+    color: #876600;
+}
+
+.estado-preparacion {
+    background: #E7F1F8;
+    color: #24678C;
+}
+
+.estado-completo {
+    background: #E5F6ED;
+    color: #18734A;
+}
+
+.estado-notificado {
+    background: #EFE9FA;
+    color: #6E43A5;
+}
+
+.resumen-expediente {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.resumen-expediente article {
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.7rem;
+    background: var(--exp-blanco);
+}
+
+.resumen-expediente span,
+.resumen-expediente strong {
+    display: block;
+}
+
+.resumen-expediente span {
+    margin-bottom: 0.35rem;
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.resumen-expediente strong {
+    color: var(--exp-azul);
+    font-size: 1rem;
+}
+
+.aviso-expediente-bloqueado {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    border-left: 3px solid var(--exp-rojo);
+    border-radius: 0 0.6rem 0.6rem 0;
+    background: #FFF0F1;
+    color: #8F3038;
+    font-size: 0.8rem;
+}
+
+.bloque-expediente {
+    margin-bottom: 1rem;
+    padding: 1.15rem;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.8rem;
+    background: var(--exp-blanco);
+}
+
+.bloque-expediente-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.bloque-expediente-titulo span {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--exp-celeste);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.bloque-expediente-titulo h2 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.btn-agregar-expediente {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.45rem;
+    padding: 0 0.85rem;
+    border: 0;
+    border-radius: 0.55rem;
+    background: var(--exp-azul);
+    color: var(--exp-blanco);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.formulario-estado-operacion {
+    display: grid;
+    grid-template-columns: 200px minmax(260px, 1fr) auto;
+    gap: 0.8rem;
+    align-items: end;
+}
+
+.campo-operacion label,
+.campo-expediente label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #46525C;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.campo-expediente label strong {
+    color: var(--exp-rojo);
+}
+
+.campo-operacion select,
+.campo-operacion textarea,
+.campo-expediente input,
+.campo-expediente select,
+.campo-expediente textarea {
+    width: 100%;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.55rem;
+    background: var(--exp-blanco);
+    color: var(--exp-texto);
+    font-size: 0.8rem;
+    outline: none;
+}
+
+.campo-operacion select,
+.campo-expediente input,
+.campo-expediente select {
+    min-height: 2.65rem;
+    padding: 0 0.75rem;
+}
+
+.campo-operacion textarea,
+.campo-expediente textarea {
+    padding: 0.7rem 0.75rem;
+    resize: vertical;
+}
+
+.campo-operacion select:focus,
+.campo-operacion textarea:focus,
+.campo-expediente input:focus,
+.campo-expediente select:focus,
+.campo-expediente textarea:focus {
+    border-color: var(--exp-celeste);
+    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.1);
+}
+
+.campo-expediente small {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+}
+
+.btn-guardar-operacion {
+    min-height: 2.65rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.9rem;
+    border: 0;
+    border-radius: 0.55rem;
+    background: var(--exp-azul);
+    color: var(--exp-blanco);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.lista-viajeros-expediente {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+}
+
+.lista-viajeros-expediente article {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.75rem;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.6rem;
+    background: #FBFCFD;
+}
+
+.viajero-inicial {
+    width: 2.35rem;
+    height: 2.35rem;
+    display: grid;
+    place-items: center;
+    border-radius: 0.55rem;
+    background: var(--exp-azul);
+    color: var(--exp-blanco);
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.lista-viajeros-expediente strong,
+.lista-viajeros-expediente small {
+    display: block;
+}
+
+.lista-viajeros-expediente strong {
+    font-size: 0.78rem;
+}
+
+.lista-viajeros-expediente small {
+    margin-top: 0.18rem;
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+}
+
+.lista-elementos-expediente {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.elemento-expediente {
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.7rem;
+    overflow: hidden;
+}
+
+.elemento-expediente-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--exp-borde);
+    background: #F5F8FA;
+}
+
+.etiqueta-tramo {
+    display: inline-flex;
+    margin-bottom: 0.3rem;
+    color: var(--exp-celeste);
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.elemento-expediente-cabecera h3 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.elemento-expediente-cabecera h3 i {
+    margin: 0 0.35rem;
+    color: var(--exp-celeste);
+    font-size: 0.8rem;
+}
+
+.elemento-expediente-cabecera p {
+    margin: 0.25rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.72rem;
+}
+
+.acciones-elemento {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.acciones-elemento button {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 0.45rem;
+    background: var(--exp-blanco);
+    cursor: pointer;
+}
+
+.btn-editar-elemento {
+    border: 1px solid rgba(58, 124, 165, 0.3);
+    color: var(--exp-celeste);
+}
+
+.btn-eliminar-elemento {
+    border: 1px solid rgba(197, 59, 69, 0.3);
+    color: var(--exp-rojo);
+}
+
+.datos-elemento {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem;
+    padding: 0.9rem 1rem;
+}
+
+.datos-elemento span,
+.datos-elemento strong,
+.datos-elemento small {
+    display: block;
+}
+
+.datos-elemento span {
+    margin-bottom: 0.3rem;
+    color: var(--exp-gris);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.datos-elemento strong {
+    font-size: 0.76rem;
+}
+
+.datos-elemento small {
+    margin-top: 0.2rem;
+    color: var(--exp-gris);
+    font-size: 0.66rem;
+}
+
+.detalle-adicional {
+    margin: 0;
+    padding: 0 1rem 0.9rem;
+    color: var(--exp-gris);
+    font-size: 0.74rem;
+}
+
+.boletos-vuelo {
+    padding: 0.9rem 1rem;
+    border-top: 1px solid var(--exp-borde);
+}
+
+.boletos-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.7rem;
+}
+
+.boletos-titulo h4 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.boletos-titulo span {
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+}
+
+.tabla-boletos-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabla-boletos {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+}
+
+.tabla-boletos th {
+    padding: 0.55rem 0.65rem;
+    border-bottom: 1px solid var(--exp-borde);
+    background: #EEF3F6;
+    color: #596670;
+    font-size: 0.64rem;
+    font-weight: 800;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.tabla-boletos td {
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid #E8EDF1;
+    font-size: 0.7rem;
+}
+
+.tabla-boletos tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.estado-boleto {
+    display: inline-flex;
+    padding: 0.24rem 0.4rem;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 800;
+}
+
+.estado-boleto.estado-pendiente {
+    background: #FFF4D6;
+    color: #876600;
+}
+
+.estado-boleto.estado-emitido {
+    background: #E5F6ED;
+    color: #18734A;
+}
+
+.estado-boleto.estado-cancelado {
+    background: #FBE8EA;
+    color: #A52D38;
+}
+
+.btn-gestionar-boleto {
+    padding: 0.35rem 0.55rem;
+    border: 1px solid rgba(9, 61, 119, 0.25);
+    border-radius: 0.4rem;
+    background: rgba(9, 61, 119, 0.06);
+    color: var(--exp-azul);
+    font-size: 0.66rem;
+    font-weight: 700;
+}
+
+.sin-elementos-expediente {
+    padding: 2rem;
+    border: 1px dashed var(--exp-borde);
+    border-radius: 0.65rem;
+    text-align: center;
+}
+
+.sin-elementos-expediente i,
+.sin-elementos-expediente strong,
+.sin-elementos-expediente span {
+    display: block;
+}
+
+.sin-elementos-expediente i {
+    margin-bottom: 0.5rem;
+    color: var(--exp-celeste);
+    font-size: 1.6rem;
+}
+
+.sin-elementos-expediente span {
+    margin-top: 0.3rem;
+    color: var(--exp-gris);
+    font-size: 0.72rem;
+}
+
+.modal-expediente {
+    border: 0;
+    border-radius: 0.85rem;
+    overflow: hidden;
+}
+
+.modal-expediente .modal-header {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--exp-borde);
+}
+
+.modal-expediente .modal-header span {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--exp-celeste);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.modal-expediente .modal-header h2 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.modal-expediente .modal-body {
+    padding: 1.2rem;
+}
+
+.modal-expediente .modal-footer {
+    padding: 0.85rem 1.2rem;
+    border-top: 1px solid var(--exp-borde);
+}
+
+.formulario-expediente-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.campo-completo {
+    grid-column: 1 / -1;
+}
+
+.nota-interna-expediente {
+    display: flex;
+    gap: 0.55rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-left: 3px solid var(--exp-dorado);
+    border-radius: 0 0.55rem 0.55rem 0;
+    background: #FFF9E8;
+    color: #6D5E25;
+    font-size: 0.72rem;
+}
+
+.btn-principal-expediente,
+.btn-secundario-expediente {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.9rem;
+    border-radius: 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.btn-principal-expediente {
+    border: 0;
+    background: var(--exp-azul);
+    color: var(--exp-blanco);
+}
+
+.btn-secundario-expediente {
+    border: 1px solid var(--exp-borde);
+    background: var(--exp-blanco);
+    color: var(--exp-gris);
+}
+
+.viajero-boleto-seleccionado {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.6rem;
+    background: #EEF3F6;
+}
+
+.viajero-boleto-seleccionado i {
+    color: var(--exp-azul);
+    font-size: 1.25rem;
+}
+
+.viajero-boleto-seleccionado span,
+.viajero-boleto-seleccionado strong {
+    display: block;
+}
+
+.viajero-boleto-seleccionado span {
+    color: var(--exp-gris);
+    font-size: 0.66rem;
+}
+
+.archivo-actual-boleto {
+    margin-top: 0.5rem;
+    padding: 0.55rem;
+    border-radius: 0.45rem;
+    background: #EEF3F6;
+    font-size: 0.7rem;
+}
+
+.input-error {
+    border-color: var(--exp-rojo) !important;
+}
+
+.oculto {
+    display: none !important;
+}
+
+@media (max-width: 1000px) {
+    .resumen-expediente {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .datos-elemento {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lista-viajeros-expediente {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .formulario-estado-operacion {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .expediente-encabezado {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .resumen-expediente,
+    .lista-viajeros-expediente,
+    .formulario-expediente-grid,
+    .datos-elemento {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-completo {
+        grid-column: auto;
+    }
+
+    .bloque-expediente-titulo {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

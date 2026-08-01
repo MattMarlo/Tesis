@@ -176,4 +176,12 @@ class Reserva extends Model
     {
         return $this->tipo === self::TIPO_INDIVIDUAL;
     }
+
+    public function operacionViaje()
+    {
+        return $this->hasOne(
+            OperacionViaje::class,
+            'reserva_id'
+        );
+    }
 }

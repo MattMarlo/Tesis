@@ -16,6 +16,11 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\TestimonioController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OperacionViajeController;
+use App\Http\Controllers\VueloReservaController;
+use App\Http\Controllers\BoletoVueloController;
+use App\Http\Controllers\AlojamientoReservaController;
+use App\Http\Controllers\GuiaReservaController;
 use App\Http\Middleware\CheckUserPermission;
 use App\Models\Testimonio;
 
@@ -114,6 +119,25 @@ Route::middleware('auth')->group(function() {
         Route::get('/{reserva}/detalle',[ReservaController::class, 'detalleJson'])->name('reservas.detalle');
         Route::patch('/{reserva}/cancelar',[ReservaController::class, 'cancelar'])->name('reservas.cancelar');
     });
+
+    Route::prefix('operaciones')
+        ->name('operaciones.')
+        ->group(function () {
+            Route::get('/',[OperacionViajeController::class, 'index'])->name('index');
+            Route::get('/reserva/{id}',[OperacionViajeController::class, 'show'])->name('show');
+            Route::put('/expediente/{operacion}',[OperacionViajeController::class, 'update'])->name('update');
+            Route::post('/expediente/{operacion}/vuelos',[VueloReservaController::class, 'store'])->name('vuelos.store');
+            Route::put('/vuelos/{vuelo}',[VueloReservaController::class, 'update'])->name('vuelos.update');
+            Route::delete('/vuelos/{vuelo}',[VueloReservaController::class, 'destroy'])->name('vuelos.destroy');
+            Route::post('/vuelos/{vuelo}/boletos',[BoletoVueloController::class, 'store'])->name('boletos.store');
+            Route::delete('/boletos/{boleto}',[BoletoVueloController::class, 'destroy'])->name('boletos.destroy');
+            Route::post('/expediente/{operacion}/alojamientos',[AlojamientoReservaController::class, 'store'])->name('alojamientos.store');
+            Route::put('/alojamientos/{alojamiento}',[AlojamientoReservaController::class, 'update'])->name('alojamientos.update');
+            Route::delete('/alojamientos/{alojamiento}',[AlojamientoReservaController::class, 'destroy'])->name('alojamientos.destroy');
+            Route::post('/expediente/{operacion}/guias',[GuiaReservaController::class, 'store'])->name('guias.store');
+            Route::put('/guias/{guia}',[GuiaReservaController::class, 'update'])->name('guias.update');
+            Route::delete('/guias/{guia}',[GuiaReservaController::class, 'destroy'])->name('guias.destroy');
+        });
 
     Route::prefix('pagos')->group(function () {
         Route::get('/', [PagoController::class, 'index'])->name('pagos');

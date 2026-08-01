@@ -122,6 +122,19 @@
             </a>
 
             <a
+                href="{{ route('operaciones.index') }}"
+                class="nav-link {{
+                    request()->routeIs('operaciones.*')
+                        ? 'active'
+                        : ''
+                }}"
+                title="Preparación de viajes"
+            >
+                <i class="bi bi-luggage-fill"></i>
+                <span>Preparación de viajes</span>
+            </a>
+
+            <a
                 href="{{ route('prereservas.index') }}"
                 class="nav-link {{
                     request()->routeIs('prereservas*')

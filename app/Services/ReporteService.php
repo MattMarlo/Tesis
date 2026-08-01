@@ -2,251 +2,289 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\Pago;
+use App\Models\Reserva;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class ReporteService
 {
-    
-    public function obtenerAñosDisponibles()
+    public function obtenerAniosDisponibles(): array
     {
-        return DB::table('pagos')
-            ->select(DB::raw('DISTINCT YEAR(fecha_pago) as year'))
-            ->orderBy('year', 'desc')
-            ->pluck('year')
-            ->toArray();
+        $anios = Pago::registrados()
+            ->whereNotNull('fecha_pago')
+            ->get(['fecha_pago'])
+            ->map(
+                fn (Pago $pago) =>
+                    $pago->fecha_pago->year
+            )
+            ->push(now()->year)
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return $anios->all();
     }
 
-    
-    public function obtenerIngresosMensuales($anio)
-    {
-        // Validar año
-        $anio = (int) $anio;
-        if ($anio < 2000 || $anio > 2100) {
-            $anio = now()->year;
-        }
+    public function obtenerReporte(
+        int $anio,
+        ?int $mes = null
+    ): array {
+        $inicio = $mes
+            ? Carbon::create(
+                $anio,
+                $mes,
+                1
+            )->startOfMonth()
+            : Carbon::create(
+                $anio,
+                1,
+                1
+            )->startOfYear();
 
-        // Obtener pagos agrupados por mes
-        $ingresosMensuales = DB::table('pagos')
-            ->select(
-                DB::raw('MONTH(fecha_pago) as mes'),
-                DB::raw('SUM(monto_depositado) as total')
+        $fin = $mes
+            ? $inicio->copy()->endOfMonth()
+            : $inicio->copy()->endOfYear();
+
+        $pagos = Pago::registrados()
+            ->whereBetween(
+                'fecha_pago',
+                [
+                    $inicio,
+                    $fin,
+                ]
             )
-            ->whereYear('fecha_pago', $anio)
-            ->groupBy('mes')
-            ->orderBy('mes', 'asc')
+            ->orderBy('fecha_pago')
             ->get();
 
-        // Preparar datos para todos los 12 meses
+        $grafico = $mes
+            ? $this->agruparPorDia(
+                $pagos,
+                $inicio
+            )
+            : $this->agruparPorMes(
+                $pagos,
+                $anio
+            );
+
+        $totalCobrado = (float)
+            $pagos->sum(
+                'monto_depositado'
+            );
+
+        $cantidadPagos =
+            $pagos->count();
+
+        $promedioPago =
+            $cantidadPagos > 0
+                ? $totalCobrado /
+                    $cantidadPagos
+                : 0;
+
+        $saldos = $this
+            ->obtenerSaldosPendientes();
+
+        return [
+            'labels' =>
+                $grafico['labels'],
+
+            'data' =>
+                $grafico['data'],
+
+            'total_cobrado' =>
+                round($totalCobrado, 2),
+
+            'cantidad_pagos' =>
+                $cantidadPagos,
+
+            'promedio_pago' =>
+                round($promedioPago, 2),
+
+            'saldo_pendiente' =>
+                $saldos['saldo_pendiente'],
+
+            'reservas_con_saldo' =>
+                $saldos['reservas_con_saldo'],
+
+            'metodos_pago' =>
+                $this->agruparPorMetodo(
+                    $pagos
+                ),
+        ];
+    }
+
+    private function agruparPorMes(
+        Collection $pagos,
+        int $anio
+    ): array {
         $labels = [];
         $data = [];
-        $totalIngresosPorMes = [];
 
         for ($mes = 1; $mes <= 12; $mes++) {
-            $labels[] = date('M', mktime(0, 0, 0, $mes, 1));
-            $registro = $ingresosMensuales->firstWhere('mes', $mes);
-            $monto = $registro ? (float) $registro->total : 0.0;
-            $data[] = round($monto, 2);
-            $totalIngresosPorMes[$mes] = $monto;
-        }
+            $fecha = Carbon::create(
+                $anio,
+                $mes,
+                1
+            )->locale('es');
 
-        // Calcular métricas exactas
-        $totalIngresos = array_sum($data);
-        $totalPagos = DB::table('pagos')
-            ->whereYear('fecha_pago', $anio)
-            ->count();
+            $labels[] = ucfirst(
+                $fecha->translatedFormat('M')
+            );
 
-        // Obtener ingresos del mes actual (solo si es el año actual)
-        $ingresosMesActual = 0.0;
-        if ($anio == now()->year) {
-            $ingresosMesActual = round(
-                (float) DB::table('pagos')
-                    ->whereMonth('fecha_pago', now()->month)
-                    ->whereYear('fecha_pago', $anio)
-                    ->sum('monto_depositado'),
+            $total = $pagos
+                ->filter(
+                    fn (Pago $pago) =>
+                        $pago->fecha_pago
+                            ->month === $mes
+                )
+                ->sum('monto_depositado');
+
+            $data[] = round(
+                (float) $total,
                 2
             );
         }
 
-        // Promedio diario exacto del año
-        $diasDelAnio = date('z', mktime(0, 0, 0, 12, 31, $anio)) + 1;
-        $promedioDiario = $diasDelAnio > 0 ? round($totalIngresos / $diasDelAnio, 2) : 0.0;
-
-        // Ingreso máximo y mínimo
-        $ingresoMaximo = !empty($data) ? max($data) : 0.0;
-        $datosConIngresos = array_filter($data);
-        $ingresoMinimo = !empty($datosConIngresos) ? min($datosConIngresos) : 0.0;
-
-        // Ingresos acumulados hasta la fecha actual (hasta hoy)
-        $ingresosHastaHoy = (float) DB::table('pagos')
-            ->whereDate('fecha_pago', '<=', Carbon::now()->toDateString())
-            ->sum('monto_depositado');
-
-        return [
-            'labels'                => $labels,
-            'data'                  => $data,
-            'total_ingresos'        => round($totalIngresos, 2),
-            'ingresos_hasta_hoy'    => round($ingresosHastaHoy, 2),
-            'total_pagos'           => $totalPagos,
-            'ingresos_mes_actual'   => $ingresosMesActual,
-            'promedio_diario'       => $promedioDiario,
-            'ingreso_maximo'        => $ingresoMaximo,
-            'ingreso_minimo'        => $ingresoMinimo,
-            'mes_con_mayor_ingreso' => $this->obtenerMesConMayorIngreso($totalIngresosPorMes)
-        ];
+        return compact(
+            'labels',
+            'data'
+        );
     }
 
-    
-    public function obtenerIngresosDiarios($anio, $mes)
-    {
-        // Validar año y mes
-        $anio = (int) $anio;
-        $mes = (int) $mes;
-
-        if ($anio < 2000 || $anio > 2100 || $mes < 1 || $mes > 12) {
-            return null;
-        }
-
-        // Obtener pagos agrupados por día
-        $ingresosDiarios = DB::table('pagos')
-            ->select(
-                DB::raw('DAY(fecha_pago) as dia'),
-                DB::raw('SUM(monto_depositado) as total')
-            )
-            ->whereYear('fecha_pago', $anio)
-            ->whereMonth('fecha_pago', $mes)
-            ->groupBy('dia')
-            ->orderBy('dia', 'asc')
-            ->get();
-
-        // Preparar datos para todos los días del mes
-        $diasDelMes = cal_days_in_month(CAL_GREGORIAN, $mes, $anio);
+    private function agruparPorDia(
+        Collection $pagos,
+        Carbon $inicio
+    ): array {
         $labels = [];
         $data = [];
-        $totalIngresosPorDia = [];
 
-        for ($dia = 1; $dia <= $diasDelMes; $dia++) {
-            $labels[] = $dia;
-            $registro = $ingresosDiarios->firstWhere('dia', $dia);
-            $monto = $registro ? (float) $registro->total : 0.0;
-            $data[] = round($monto, 2);
-            $totalIngresosPorDia[$dia] = $monto;
+        $dias = $inicio->daysInMonth;
+
+        for ($dia = 1; $dia <= $dias; $dia++) {
+            $labels[] = (string) $dia;
+
+            $total = $pagos
+                ->filter(
+                    fn (Pago $pago) =>
+                        $pago->fecha_pago
+                            ->day === $dia
+                )
+                ->sum('monto_depositado');
+
+            $data[] = round(
+                (float) $total,
+                2
+            );
         }
 
-        // Calcular métricas exactas
-        $totalIngresos = array_sum($data);
-        $totalPagos = DB::table('pagos')
-            ->whereYear('fecha_pago', $anio)
-            ->whereMonth('fecha_pago', $mes)
-            ->count();
-
-        // Promedio diario exacto del mes
-        $promedioDiario = $diasDelMes > 0 ? round($totalIngresos / $diasDelMes, 2) : 0.0;
-
-        // Ingreso máximo y mínimo
-        $ingresoMaximo = !empty($data) ? max($data) : 0.0;
-        $datosConIngresos = array_filter($data);
-        $ingresoMinimo = !empty($datosConIngresos) ? min($datosConIngresos) : 0.0;
-
-        // Calcular días sin ingresos
-        $diasSinIngresos = count(array_filter($data, fn($v) => $v == 0));
-
-        return [
-            'labels'                 => $labels,
-            'data'                   => $data,
-            'total_ingresos'         => round($totalIngresos, 2),
-            // Ingresos acumulados hasta la fecha actual (hasta hoy)
-            'ingresos_hasta_hoy'     => round((float) DB::table('pagos')
-                                            ->whereDate('fecha_pago', '<=', Carbon::now()->toDateString())
-                                            ->sum('monto_depositado'), 2),
-            'total_pagos'            => $totalPagos,
-            'promedio_diario'        => $promedioDiario,
-            'ingreso_maximo'         => $ingresoMaximo,
-            'ingreso_minimo'         => $ingresoMinimo,
-            'dia_con_mayor_ingreso'  => $this->obtenerDiaConMayorIngreso($totalIngresosPorDia),
-            'dias_sin_ingresos'      => $diasSinIngresos,
-            'total_dias'             => $diasDelMes
-        ];
+        return compact(
+            'labels',
+            'data'
+        );
     }
 
-    /**
-     * Obtiene el nombre del mes con mayor ingreso
-     */
-    private function obtenerMesConMayorIngreso(array $ingresosPorMes)
-    {
-        if (empty($ingresosPorMes)) {
-            return null;
-        }
+    private function agruparPorMetodo(
+        Collection $pagos
+    ): array {
+        $nombres = [
+            Pago::METODO_EFECTIVO =>
+                'Efectivo',
 
-        $mesConMayor = array_key_first($ingresosPorMes);
-        foreach ($ingresosPorMes as $mes => $ingreso) {
-            if ($ingreso > ($ingresosPorMes[$mesConMayor] ?? 0)) {
-                $mesConMayor = $mes;
-            }
-        }
+            Pago::METODO_TRANSFERENCIA =>
+                'Transferencia',
 
-        return [
-            'mes' => (int) $mesConMayor,
-            'nombre' => date('F', mktime(0, 0, 0, $mesConMayor, 1)),
-            'ingreso' => (float) $ingresosPorMes[$mesConMayor]
+            Pago::METODO_TARJETA =>
+                'Tarjeta',
+
+            Pago::METODO_OTRO =>
+                'Otro',
         ];
-    }
 
-    
-    private function obtenerDiaConMayorIngreso(array $ingresosPorDia)
-    {
-        if (empty($ingresosPorDia)) {
-            return null;
-        }
+        return collect($nombres)
+            ->map(
+                function (
+                    string $nombre,
+                    string $metodo
+                ) use ($pagos) {
+                    return [
+                        'metodo' =>
+                            $metodo,
 
-        $diaConMayor = array_key_first($ingresosPorDia);
-        foreach ($ingresosPorDia as $dia => $ingreso) {
-            if ($ingreso > ($ingresosPorDia[$diaConMayor] ?? 0)) {
-                $diaConMayor = $dia;
-            }
-        }
+                        'nombre' =>
+                            $nombre,
 
-        return [
-            'dia' => (int) $diaConMayor,
-            'ingreso' => (float) $ingresosPorDia[$diaConMayor]
-        ];
-    }
+                        'cantidad' =>
+                            $pagos
+                                ->where(
+                                    'metodo_pago',
+                                    $metodo
+                                )
+                                ->count(),
 
-    
-    public function obtenerMetricasPagos()
-    {
-        $totalPagosInfo = DB::table('pagos')
-            ->select(
-                DB::raw('SUM(monto_depositado) as total_monto'),
-                DB::raw('COUNT(id) as total_trx')
+                        'total' =>
+                            round(
+                                (float) $pagos
+                                    ->where(
+                                        'metodo_pago',
+                                        $metodo
+                                    )
+                                    ->sum(
+                                        'monto_depositado'
+                                    ),
+                                2
+                            ),
+                    ];
+                }
             )
-            ->first();
+            ->values()
+            ->all();
+    }
 
-        $totalEsperado = DB::table('reservas')
-            ->sum('precio_total_viaje');
+    private function obtenerSaldosPendientes(): array
+    {
+        $reservas = Reserva::query()
+            ->where(
+                'estado',
+                '!=',
+                Reserva::ESTADO_CANCELADA
+            )
+            ->withSum(
+                'pagos as pagado_reporte',
+                'monto_depositado'
+            )
+            ->get([
+                'id',
+                'precio_total_viaje',
+            ]);
 
-        $totalPagos = $totalPagosInfo?->total_monto ?? 0.0;
-        $totalTrx = $totalPagosInfo?->total_trx ?? 0;
-        $totalEsperado = (float) $totalEsperado;
-
-        $cobrado = (float) $totalPagos;
-        $tasaCobro = $totalEsperado > 0 ? round(($cobrado / $totalEsperado) * 100, 2) : 0.0;
-
-        $pendiente = $totalEsperado - $cobrado;
-        if ($pendiente < 0) $pendiente = 0.0;
-
-        $reservasConDeuda = DB::table('reservas')
-            ->whereRaw('precio_total_viaje > (SELECT COALESCE(SUM(monto_depositado), 0) FROM pagos WHERE pagos.reserva_id = reservas.id)')
-            ->count();
+        $saldos = $reservas->map(
+            function (Reserva $reserva) {
+                return max(
+                    0,
+                    (float)
+                        $reserva
+                            ->precio_total_viaje -
+                    (float)
+                        ($reserva
+                            ->pagado_reporte ?? 0)
+                );
+            }
+        );
 
         return [
-            'total_pagos'      => round($cobrado, 2),
-            'total_trx'        => $totalTrx,
-            'total_esperado'   => round($totalEsperado, 2),
-            'cobrado'          => round($cobrado, 2),
-            'tasa_cobro'       => $tasaCobro,
-            'pendiente'        => round($pendiente, 2),
-            'reservas_deuda'   => $reservasConDeuda
+            'saldo_pendiente' =>
+                round(
+                    (float) $saldos->sum(),
+                    2
+                ),
+
+            'reservas_con_saldo' =>
+                $saldos
+                    ->filter(
+                        fn (float $saldo) =>
+                            $saldo > 0
+                    )
+                    ->count(),
         ];
     }
 }

@@ -165,9 +165,12 @@ Route::middleware('auth')->group(function() {
         Route::put('/{id}',[ReservaGrupalController::class, 'update'])->name('reservas_grupal.update');
     });
 
-    Route::prefix('reportes')->group(function(){
-        Route::get('/reportes/ingresos',[ReporteController::class,'ingresosMensuales'])->name('reportes.ingresos');
-    });
+    Route::prefix('reportes')
+        ->name('reportes.')
+        ->group(function () {
+            Route::get('/ingresos',[ReporteController::class,'ingresosMensuales',])->name('ingresos');
+        }
+    );
     
     //testimonios
     Route::prefix('testimonios')->group(function () {

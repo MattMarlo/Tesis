@@ -1,177 +1,314 @@
 @extends('layouts.main')
 
+@section('titulo', $titulo)
 
 @section('content')
-<div class="container-fluid mt-4 px-4">
 
-    <!-- Encabezado con selectores de año y mes -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<link
+    rel="stylesheet"
+    href="{{ asset('css/reporte-financiero.css') }}"
+>
+
+@php
+    $periodo = $mes
+        ? $nombreMes . ' de ' . $anio
+        : 'Año ' . $anio;
+
+    $totalMetodos = collect(
+        $metodos_pago
+    )->sum('total');
+@endphp
+
+<main
+    id="main"
+    class="main pagina-reporte"
+>
+    <header class="reporte-encabezado">
         <div>
-            <h1 class="fw-bold">
-                <i class="bi bi-bar-chart-line-fill text-primary"></i>
-                Ingresos Mensuales
-            </h1>
-            
-            @if($mes)
-                <p class="text-muted small">Ingresos diarios de {{ \Carbon\Carbon::create($anio, $mes, 1)->locale('es')->translatedFormat('F Y') }}</p>
-                
-            @else
-                <p class="text-muted small">Análisis de ingresos por mes</p>
-            @endif
+            <h1>Reporte financiero</h1>
+
+            <p>
+                Consulta los pagos registrados y saldos
+                pendientes de la agencia.
+            </p>
         </div>
-        <div class="d-flex gap-2 align-items-center">
-            <form method="GET" action="{{ route('reportes.ingresos') }}" class="d-flex gap-2">
-                <!-- Selector de año -->
-                <select name="anio" class="form-select" onchange="this.form.submit()">
-                    @foreach($years as $year)
-                        <option value="{{ $year }}" {{ $year == $anio ? 'selected' : '' }}>
+
+        <form
+            method="GET"
+            action="{{ route('reportes.ingresos') }}"
+            class="reporte-filtros"
+        >
+            <div class="reporte-filtro">
+                <label for="anio">
+                    Año
+                </label>
+
+                <select
+                    id="anio"
+                    name="anio"
+                >
+                    @foreach ($years as $year)
+                        <option
+                            value="{{ $year }}"
+                            @selected(
+                                (int) $year ===
+                                (int) $anio
+                            )
+                        >
                             {{ $year }}
                         </option>
                     @endforeach
                 </select>
+            </div>
 
-                <!-- Selector de mes (opcional) -->
-                <select name="mes" class="form-select" onchange="this.form.submit()">
-                    <option value="">-- Todos los meses --</option>
-                    @foreach(range(1, 12) as $m)
-                        <option value="{{ $m }}" {{ $mes == $m ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::create($anio, $m, 1)->locale('es')->translatedFormat('F') }}
+            <div class="reporte-filtro">
+                <label for="mes">
+                    Mes
+                </label>
+
+                <select
+                    id="mes"
+                    name="mes"
+                >
+                    <option value="">
+                        Todos los meses
+                    </option>
+
+                    @foreach (range(1, 12) as $numeroMes)
+                        <option
+                            value="{{ $numeroMes }}"
+                            @selected(
+                                (int) $mes ===
+                                $numeroMes
+                            )
+                        >
+                            {{
+                                ucfirst(
+                                    \Carbon\Carbon::create(
+                                        $anio,
+                                        $numeroMes,
+                                        1
+                                    )
+                                        ->locale('es')
+                                        ->translatedFormat('F')
+                                )
+                            }}
                         </option>
                     @endforeach
                 </select>
+            </div>
 
-                <button type="submit" class="btn btn-outline-primary">
-                    <i class="bi bi-search"></i> Filtrar
-                </button>
-            </form>
-            <a href="{{ route('reportes.ingresos') }}" class="btn btn-outline-secondary" title="Restablecer">
-                <i class="bi bi-arrow-repeat"></i>
+            <button
+                type="submit"
+                class="btn-filtrar-reporte"
+            >
+                <i class="bi bi-funnel"></i>
+                Consultar
+            </button>
+
+            <a
+                href="{{ route('reportes.ingresos') }}"
+                class="btn-limpiar-reporte"
+                title="Restablecer filtros"
+            >
+                <i class="bi bi-arrow-counterclockwise"></i>
             </a>
-        </div>
-    </div>
+        </form>
+    </header>
 
-    <!-- Tarjetas resumen -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-cash-stack text-success display-5"></i>
-                    <h3 class="mt-3">${{ number_format($totalIngresos, 2) }}</h3>
-                    @if($mes)
-                        <p class="text-muted mb-0">Total de Ingresos en el año</p>
-                    @else
-                        <p class="text-muted mb-0">Ingresos del año {{ $anio }}</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-credit-card text-primary display-5"></i>
-                    <h3 class="mt-3">{{ $totalPagos }}</h3>
-                    @if($mes)
-                        <p class="text-muted mb-0">Pagos en el mes</p>
-                    @else
-                        <p class="text-muted mb-0">Pagos en {{ $anio }}</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-calendar-week text-warning display-5"></i>
-                    <h3 class="mt-3">${{ number_format($ingresosMesActual ?? 0, 2) }}</h3>
-                    <p class="text-muted mb-0">Ingresos del Mes de {{$nombreMes}}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-graph-up-arrow text-info display-5"></i>
-                    <h3 class="mt-3">${{ number_format($promedioDiario, 2) }}</h3>
-                    @if($mes)
-                        <p class="text-muted mb-0">Promedio Diario</p>
-                    @else
-                        <p class="text-muted mb-0">Promedio Diario (aprox.)</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
+    <section class="reporte-resumen">
+        <article class="tarjeta-reporte">
+            <span class="tarjeta-reporte-icono">
+                <i class="bi bi-cash-stack"></i>
+            </span>
 
-    <!-- Gráfico -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white">
-            @if($mes)
-                <h5 class="fw-bold mb-0"><i class="bi bi-graph-up me-2"></i>Evolución Diaria</h5>
+            <div class="tarjeta-reporte-contenido">
+                <span>Total cobrado</span>
+
+                <strong>
+                    USD {{
+                        number_format(
+                            $total_cobrado,
+                            2
+                        )
+                    }}
+                </strong>
+
+                <small>{{ $periodo }}</small>
+            </div>
+        </article>
+
+        <article class="tarjeta-reporte">
+            <span class="tarjeta-reporte-icono">
+                <i class="bi bi-receipt"></i>
+            </span>
+
+            <div class="tarjeta-reporte-contenido">
+                <span>Pagos registrados</span>
+
+                <strong>
+                    {{ $cantidad_pagos }}
+                </strong>
+
+                <small>
+                    No incluye pagos anulados
+                </small>
+            </div>
+        </article>
+
+        <article class="tarjeta-reporte">
+            <span class="tarjeta-reporte-icono">
+                <i class="bi bi-calculator"></i>
+            </span>
+
+            <div class="tarjeta-reporte-contenido">
+                <span>Promedio por pago</span>
+
+                <strong>
+                    USD {{
+                        number_format(
+                            $promedio_pago,
+                            2
+                        )
+                    }}
+                </strong>
+
+                <small>{{ $periodo }}</small>
+            </div>
+        </article>
+
+        <article class="tarjeta-reporte">
+            <span class="tarjeta-reporte-icono">
+                <i class="bi bi-exclamation-circle"></i>
+            </span>
+
+            <div class="tarjeta-reporte-contenido">
+                <span>Saldo pendiente</span>
+
+                <strong>
+                    USD {{
+                        number_format(
+                            $saldo_pendiente,
+                            2
+                        )
+                    }}
+                </strong>
+
+                <small>
+                    {{ $reservas_con_saldo }}
+                    reservas activas con saldo
+                </small>
+            </div>
+        </article>
+    </section>
+
+    <section class="reporte-contenido-grid">
+        <article class="panel-reporte">
+            <header class="panel-reporte-encabezado">
+                <h2>
+                    {{
+                        $mes
+                            ? 'Ingresos por día'
+                            : 'Ingresos por mes'
+                    }}
+                </h2>
+
+                <span>{{ $periodo }}</span>
+            </header>
+
+            <div class="panel-grafico">
+                <canvas
+                    id="graficoIngresos"
+                ></canvas>
+            </div>
+        </article>
+
+        <article class="panel-reporte">
+            <header class="panel-reporte-encabezado">
+                <h2>Métodos de pago</h2>
+
+                <span>{{ $periodo }}</span>
+            </header>
+
+            @if ($cantidad_pagos > 0)
+                <div class="lista-metodos-pago">
+                    @foreach ($metodos_pago as $metodo)
+                        @php
+                            $porcentaje =
+                                $totalMetodos > 0
+                                    ? (
+                                        $metodo['total'] /
+                                        $totalMetodos
+                                    ) * 100
+                                    : 0;
+                        @endphp
+
+                        <div class="metodo-pago">
+                            <div class="metodo-pago-datos">
+                                <strong>
+                                    {{ $metodo['nombre'] }}
+                                </strong>
+
+                                <span>
+                                    USD {{
+                                        number_format(
+                                            $metodo['total'],
+                                            2
+                                        )
+                                    }}
+                                </span>
+                            </div>
+
+                            <small>
+                                {{ $metodo['cantidad'] }}
+                                {{
+                                    $metodo['cantidad'] === 1
+                                        ? 'pago'
+                                        : 'pagos'
+                                }}
+                            </small>
+
+                            <div class="metodo-pago-barra">
+                                <div
+                                    class="metodo-pago-progreso"
+                                    style="width: {{
+                                        number_format(
+                                            $porcentaje,
+                                            2,
+                                            '.',
+                                            ''
+                                        )
+                                    }}%"
+                                ></div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             @else
-                <h5 class="fw-bold mb-0"><i class="bi bi-graph-up me-2"></i>Evolución Mensual</h5>
+                <div class="reporte-sin-datos">
+                    No existen pagos registrados
+                    para el periodo seleccionado.
+                </div>
             @endif
-        </div>
-        <div class="card-body">
-            <canvas id="ingresosChart" style="width:100%; max-height:400px;"></canvas>
-        </div>
-    </div>
-
-</div>
-
-<!-- Incluir Chart.js desde CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        </article>
+    </section>
+</main>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('ingresosChart').getContext('2d');
-
-        const labels = @json($labels);
-        const data = @json($data);
-        const isMonthly = @json($mes ? false : true); // true = mensual, false = diario
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: isMonthly ? 'Ingresos por mes ($)' : 'Ingresos por día ($)',
-                    data: data,
-                    backgroundColor: isMonthly
-                        ? 'rgba(54, 162, 235, 0.6)'
-                        : 'rgba(255, 159, 64, 0.6)',
-                    borderColor: isMonthly
-                        ? 'rgba(54, 162, 235, 1)'
-                        : 'rgba(255, 159, 64, 1)',
-                    borderWidth: 2,
-                    borderRadius: 6,
-                    tension: 0.2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: true },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return '$' + context.parsed.y.toFixed(2);
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    });
+    window.configuracionReporteFinanciero = {
+        labels: @json($labels),
+        datos: @json($data),
+        tipo: @json($tipo),
+        periodo: @json($periodo),
+        errores: @json($errors->toArray()),
+        mensajeError: @json(session('error'))
+    };
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script
+    src="{{ asset('js/reporte-financiero.js') }}"
+></script>
+
 @endsection

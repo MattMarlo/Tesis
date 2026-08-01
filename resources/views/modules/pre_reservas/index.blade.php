@@ -82,4 +82,33 @@
         </tbody>
     </table>
 </div>
+<script>
+    $(function () {
+        $(document).on(
+            'click',
+            '.btn-convertir-prerreserva',
+            function () {
+                const formulario = $(this).closest('form');
+
+                Swal.fire({
+                    icon: 'question',
+                    title: '¿Continuar con la conversión?',
+                    text:
+                        'Se comprobarán los datos del cliente antes de abrir el formulario de reserva.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, continuar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#093D77',
+                    cancelButtonColor: '#6C7780',
+                    reverseButtons: true
+                }).then(function (resultado) {
+                    if (resultado.isConfirmed) {
+                        formulario[0].submit();
+                    }
+                });
+            }
+        );
+    });
+</script>
+
 @endsection

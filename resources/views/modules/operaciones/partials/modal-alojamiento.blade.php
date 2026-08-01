@@ -99,7 +99,7 @@
 
                     <div class="campo-expediente">
                         <label for="alojamientoPais">
-                            País
+                            País <strong>*</strong>
                         </label>
 
                         <input
@@ -107,6 +107,7 @@
                             name="pais"
                             type="text"
                             maxlength="120"
+                            required
                         >
                     </div>
 
@@ -166,7 +167,7 @@
 
                     <div class="campo-expediente">
                         <label for="alojamientoTipoHabitacion">
-                            Tipo de habitación
+                            Tipo de habitación <strong>*</strong>
                         </label>
 
                         <input
@@ -175,6 +176,7 @@
                             type="text"
                             maxlength="120"
                             placeholder="Ejemplo: doble"
+                            required
                         >
                     </div>
 

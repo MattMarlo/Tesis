@@ -37,13 +37,39 @@
                 <td>{{ $pre->estado }}</td>
                 <td>
                     <a href="{{ route('prereservas.edit', $pre->id) }}" class="btn btn-sm btn-primary">Editar</a>
-                    @if(!$pre->reserva_id)
-                        <form method="POST" action="{{ route('prereservas.convertir', $pre->id) }}" style="display:inline">
+                    @if (
+                        !$pre->reserva_id &&
+                        in_array(
+                            $pre->estado,
+                            ['pendiente_contacto', 'contactado'],
+                            true
+                        )
+                    )
+                        <form
+                            method="POST"
+                            action="{{ route(
+                                'prereservas.convertir',
+                                $pre->id
+                            ) }}"
+                            class="d-inline formulario-convertir-prerreserva"
+                        >
                             @csrf
-                            <button class="btn btn-sm btn-success">Convertir a Reserva</button>
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-success btn-convertir-prerreserva"
+                            >
+                                Convertir en reserva
+                            </button>
                         </form>
+                    @elseif ($pre->reserva_id)
+                        <span class="badge bg-success">
+                            Reserva generada
+                        </span>
                     @else
-                        <span class="badge bg-success">Reservada</span>
+                        <span class="badge bg-secondary">
+                            No disponible
+                        </span>
                     @endif
                     <form method="POST" action="{{ route('prereservas.destroy', $pre->id) }}" style="display:inline" onsubmit="return confirm('¿Está seguro de que desea eliminar esta pre-reserva?');">
                         @csrf

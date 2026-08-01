@@ -7,6 +7,9 @@ use App\Services\PagoService;
 use App\Models\Reserva;
 use App\Models\Pago;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 
 class PagoController extends Controller
 {
@@ -52,73 +55,240 @@ class PagoController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'reserva_id' => 'required|exists:reservas,id',
-            'monto_depositado' => 'required|numeric|min:1',
-            'metodo_pago' => 'required|string',
-            'cliente_id' => 'nullable|exists:clientes,id'
+        $datos = $request->validate([
+            'reserva_id' => [
+                'required',
+                'integer',
+                'exists:reservas,id',
+            ],
+            'cliente_id' => [
+                'nullable',
+                'integer',
+                'exists:clientes,id',
+            ],
+            'monto_depositado' => [
+                'required',
+                'numeric',
+                'gt:0',
+            ],
+            'metodo_pago' => [
+                'required',
+                Rule::in([
+                    Pago::METODO_EFECTIVO,
+                    Pago::METODO_TRANSFERENCIA,
+                    Pago::METODO_TARJETA,
+                    Pago::METODO_OTRO,
+                ]),
+            ],
+            'referencia' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_if:metodo_pago,transferencia,tarjeta',
+            ],
+            'redirect_after' => [
+                'nullable',
+                Rule::in([
+                    'pagos',
+                    'reservas',
+                ]),
+            ],
+        ], [
+            'reserva_id.required' =>
+                'Selecciona la reserva que recibirá el pago.',
+            'reserva_id.exists' =>
+                'La reserva seleccionada no existe.',
+
+            'cliente_id.exists' =>
+                'El integrante seleccionado no existe.',
+
+            'monto_depositado.required' =>
+                'Ingresa el monto recibido.',
+            'monto_depositado.numeric' =>
+                'El monto debe ser un valor numérico.',
+            'monto_depositado.gt' =>
+                'El monto debe ser mayor que cero.',
+
+            'metodo_pago.required' =>
+                'Selecciona el método de pago.',
+            'metodo_pago.in' =>
+                'El método de pago seleccionado no es válido.',
+
+            'referencia.required_if' =>
+                'Ingresa el número de comprobante o referencia.',
+            'referencia.max' =>
+                'La referencia no puede superar 100 caracteres.',
         ]);
 
-        $reserva = Reserva::findOrFail($request->reserva_id);
-        
-        $montoDepositado = (float) $request->input('monto_depositado', 0); 
-        $totalPagado = $reserva->pago()->sum('monto_depositado');
-        $pendiente = max(0, (float) $reserva->precio_total_viaje - $totalPagado);
-        // cambio para validar que el monto a pagar no sea mayor al pago que se va a realizar
-        if ($montoDepositado > $pendiente) {
-            return redirect()->back()
+        $usuarioId = Auth::id();
+
+        if (!$usuarioId) {
+            return redirect()
+                ->route('login')
+                ->with(
+                    'error',
+                    'Debes iniciar sesión para registrar un pago.'
+                );
+        }
+
+        $datos['user_id'] = (int) $usuarioId;
+
+        try {
+            $this->pagoService->registrarPago(
+                $datos
+            );
+
+            $mensaje =
+                'Pago registrado correctamente.';
+
+            if (
+                ($datos['redirect_after'] ?? null) ===
+                'reservas'
+            ) {
+                return redirect()
+                    ->route('reservas')
+                    ->with('success', $mensaje);
+            }
+
+            $consulta = array_filter([
+                'reserva_id' =>
+                    $datos['reserva_id'],
+            ]);
+
+            return redirect()
+                ->route('pagos', $consulta)
+                ->with('success', $mensaje);
+        } catch (InvalidArgumentException $error) {
+            return back()
                 ->withInput()
-                ->with('error', 'El  monto a cobrar no puede ser mayor a la deuda pendiente ($$' . number_format($pendiente, 2, '.', '') . ').');
+                ->with(
+                    'error',
+                    $error->getMessage()
+                );
+        } catch (\Throwable $error) {
+            Log::error(
+                'Error al registrar pago',
+                [
+                    'reserva_id' =>
+                        $datos['reserva_id'] ?? null,
+                    'usuario_id' => $usuarioId,
+                    'mensaje' =>
+                        $error->getMessage(),
+                ]
+            );
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'No se pudo registrar el pago. Inténtalo nuevamente.'
+                );
         }
-
-        $datos = $request->only(['reserva_id', 'monto_depositado', 'metodo_pago', 'referencia', 'cliente_id']);
-        $datos['user_id'] = Auth::id() ?? 1; // Fallback for dev
-
-        // Si no envía cliente_id (por ejemplo pago de reserva individual general), sacamos de la reserva
-        if (empty($datos['cliente_id'])) {
-            $datos['cliente_id'] = $reserva->cliente_id;
-        }
-
-        $this->pagoService->registrarPago($datos);
-
-        $redirectTo = $request->input('redirect_after', 'pagos');
-        $msg = 'Pago registrado correctamente. El estado de la reserva se ha actualizado.';
-
-        if ($redirectTo === 'reservas') {
-            return redirect()->route('reservas')->with('success', $msg)->with('toast_sync', true);
-        }
-
-        $query = array_filter([
-            'reserva_id' => $request->input('reserva_id'),
-            'abrir_cobro' => $request->input('abrir_cobro'),
-        ], fn ($v) => $v !== null && $v !== '');
-
-        return redirect()->route('pagos', $query)->with('success', $msg)->with('toast_sync', true);
     }
 
     public function auditoria(Pago $pago)
     {
-        $pago->load('user', 'cliente', 'reserva');
+        $pago->load([
+            'user',
+            'cliente',
+            'reserva',
+            'anuladoPor',
+        ]);
 
-        $cobrador = $pago->user
-            ? trim(($pago->user->nombres ?? '').' '.($pago->user->apellidos ?? ''))
-            : '—';
+        $cobrador = 'Sin información';
+
+        if ($pago->user) {
+            $cobrador = trim(
+                ($pago->user->nombres ?? '') .
+                ' ' .
+                ($pago->user->apellidos ?? '')
+            );
+        }
+
+        $nombreCliente = 'Sin información';
+
+        if ($pago->cliente) {
+            $nombreCliente = trim(
+                ($pago->cliente->nombres ?? '') .
+                ' ' .
+                ($pago->cliente->apellidos ?? '')
+            );
+        }
+
+        $usuarioAnulacion = null;
+
+        if ($pago->anuladoPor) {
+            $usuarioAnulacion = trim(
+                ($pago->anuladoPor->nombres ?? '') .
+                ' ' .
+                ($pago->anuladoPor->apellidos ?? '')
+            );
+        }
+
+        $reservaCancelada = $pago->reserva
+            ? $pago->reserva->estaCancelada()
+            : false;
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'id'              => $pago->id,
-                'reserva_id'      => $pago->reserva_id,
-                'monto'           => (float) $pago->monto_depositado,
-                'metodo_pago'     => ucfirst($pago->metodo_pago),
-                'metodo_pago_val' => $pago->metodo_pago,
-                'referencia'      => $pago->referencia,
-                'fecha_pago'      => $pago->fecha_pago,
-                'fecha_pago_fmt'  => \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y H:i:s'),
-                'cobrador'        => $cobrador,
-                'cliente'         => $pago->cliente
-                    ? trim($pago->cliente->nombres.' '.$pago->cliente->apellidos)
-                    : '—',
+            'data' => [
+                'id' =>
+                    $pago->id,
+                'reserva_id' =>
+                    $pago->reserva_id,
+                'codigo_reserva' =>
+                    $pago->reserva
+                        ? $pago->reserva
+                            ->codigo_reserva
+                        : null,
+                'moneda' =>
+                    $pago->reserva &&
+                    $pago->reserva->moneda
+                        ? $pago->reserva->moneda
+                        : 'USD',
+                'monto' =>
+                    (float) $pago
+                        ->monto_depositado,
+                'metodo_pago' =>
+                    ucfirst(
+                        $pago->metodo_pago
+                    ),
+                'metodo_pago_val' =>
+                    $pago->metodo_pago,
+                'referencia' =>
+                    $pago->referencia,
+                'fecha_pago' =>
+                    $pago->fecha_pago
+                        ? $pago->fecha_pago
+                            ->format('Y-m-d H:i:s')
+                        : null,
+                'fecha_pago_fmt' =>
+                    $pago->fecha_pago
+                        ? $pago->fecha_pago
+                            ->format('d/m/Y H:i')
+                        : null,
+                'cobrador' =>
+                    $cobrador,
+                'cliente' =>
+                    $nombreCliente,
+                'estado' =>
+                    $pago->estado,
+                'esta_anulado' =>
+                    $pago->estaAnulado(),
+                'motivo_anulacion' =>
+                    $pago->motivo_anulacion,
+                'fecha_anulacion' =>
+                    $pago->fecha_anulacion
+                        ? $pago->fecha_anulacion
+                            ->format('d/m/Y H:i')
+                        : null,
+                'anulado_por' =>
+                    $usuarioAnulacion,
+                'puede_editar' =>
+                    !$pago->estaAnulado() &&
+                    !$reservaCancelada,
+                'puede_anular' =>
+                    !$pago->estaAnulado(),
             ],
         ]);
     }
@@ -128,109 +298,267 @@ class PagoController extends Controller
      * @param int $reservaId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function listaPagosReserva(int $reservaId)
-    {
-        $pagos = Pago::where('reserva_id', $reservaId)
-            ->with(['cliente', 'user'])
-            ->orderBy('fecha_pago', 'desc')
+
+    public function listaPagosReserva(
+        int $reservaId
+    ) {
+        $pagos = Pago::query()
+            ->where(
+                'reserva_id',
+                $reservaId
+            )
+            ->with([
+                'cliente',
+                'user',
+                'anuladoPor',
+                'reserva',
+            ])
+            ->orderByDesc('fecha_pago')
             ->get();
 
-        $pagosFormato = $pagos->map(function ($pago) {
-            $cobrador = $pago->user
-                ? trim(($pago->user->nombres ?? '').' '.($pago->user->apellidos ?? ''))
-                : '—';
+        $pagosFormato = $pagos->map(
+            function ($pago) {
+                $cobrador = $pago->user
+                    ? trim(
+                        ($pago->user->nombres ?? '') .
+                        ' ' .
+                        ($pago->user->apellidos ?? '')
+                    )
+                    : 'Sin información';
 
-            return [
-                'id'              => $pago->id,
-                'monto'           => (float) $pago->monto_depositado,
-                'metodo_pago'     => ucfirst($pago->metodo_pago),
-                'referencia'      => $pago->referencia ?? '—',
-                'fecha_pago_fmt'  => \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y H:i:s'),
-                'cobrador'        => $cobrador,
-                'cliente'         => $pago->cliente
-                    ? trim($pago->cliente->nombres.' '.$pago->cliente->apellidos)
-                    : '—',
-            ];
-        });
+                return [
+                    'id' =>
+                        $pago->id,
+                    'monto' =>
+                        (float) $pago
+                            ->monto_depositado,
+                    'moneda' =>
+                        $pago->reserva?->moneda
+                            ?: 'USD',
+                    'metodo_pago' =>
+                        ucfirst(
+                            $pago->metodo_pago
+                        ),
+                    'metodo_pago_val' =>
+                        $pago->metodo_pago,
+                    'referencia' =>
+                        $pago->referencia
+                            ?: 'Sin referencia',
+                    'fecha_pago_fmt' =>
+                        $pago->fecha_pago
+                            ?->format('d/m/Y H:i'),
+                    'cobrador' =>
+                        $cobrador,
+                    'cliente' => $pago->cliente
+                        ? trim(
+                            ($pago->cliente->nombres ?? '') .
+                            ' ' .
+                            ($pago->cliente->apellidos ?? '')
+                        )
+                        : 'Sin información',
+                    'estado' =>
+                        $pago->estado,
+                    'esta_anulado' =>
+                        $pago->estaAnulado(),
+                    'motivo_anulacion' =>
+                        $pago->motivo_anulacion,
+                    'fecha_anulacion' =>
+                        $pago->fecha_anulacion
+                            ?->format('d/m/Y H:i'),
+                    'puede_editar' =>
+                        !$pago->estaAnulado() &&
+                        !$pago->reserva
+                            ?->estaCancelada(),
+                    'puede_anular' =>
+                        !$pago->estaAnulado(),
+                ];
+            }
+        );
+
+        $totalRegistrado = (float) $pagos
+            ->where(
+                'estado',
+                Pago::ESTADO_REGISTRADO
+            )
+            ->sum('monto_depositado');
 
         return response()->json([
-            'success' => true,
-            'data'    => $pagosFormato,
-            'total'   => $pagos->sum('monto_depositado'),
+            'success' =>
+                true,
+            'data' =>
+                $pagosFormato,
+            'total_registrado' =>
+                $totalRegistrado,
         ]);
     }
 
-    public function update(Request $request, Pago $pago)
-    {
-        $request->validate([
-            'monto_depositado' => 'required|numeric|min:1',
-            'metodo_pago'      => 'required|string',
-            'referencia'       => 'nullable|string|max:100',
-        ]);
+    public function update(
+        Request $request,
+        Pago $pago
+    ) {
+        $datos = $request->validate([
+            'monto_depositado' => [
+                'required',
+                'numeric',
+                'gt:0',
+            ],
+            'metodo_pago' => [
+                'required',
+                Rule::in([
+                    Pago::METODO_EFECTIVO,
+                    Pago::METODO_TRANSFERENCIA,
+                    Pago::METODO_TARJETA,
+                    Pago::METODO_OTRO,
+                ]),
+            ],
+            'referencia' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_if:metodo_pago,transferencia,tarjeta',
+            ],
+            'reserva_id' => [
+                'nullable',
+                'integer',
+            ],
+        ], [
+            'monto_depositado.required' =>
+                'Ingresa el monto del pago.',
+            'monto_depositado.numeric' =>
+                'El monto debe ser un valor numérico.',
+            'monto_depositado.gt' =>
+                'El monto debe ser mayor que cero.',
 
-        $this->pagoService->actualizarPago($pago->id, $request->only([
-            'monto_depositado',
-            'metodo_pago',
-            'referencia',
-        ]));
+            'metodo_pago.required' =>
+                'Selecciona el método de pago.',
+            'metodo_pago.in' =>
+                'El método de pago no es válido.',
 
-        $query = array_filter([
-            'reserva_id' => $request->input('reserva_id'),
-        ], fn ($v) => $v !== null && $v !== '');
-
-        return redirect()->route('pagos', $query)->with('success', 'Pago actualizado. Estado de reserva sincronizado.')->with('toast_sync', true);
-    }
-
-    public function anular(Request $request, Pago $pago)
-    {
-        $this->pagoService->anularPago($pago->id);
-
-        $query = array_filter([
-            'reserva_id' => $request->input('reserva_id'),
-        ], fn ($v) => $v !== null && $v !== '');
-
-        return redirect()->route('pagos', $query)->with('success', 'Pago anulado. El estado de la reserva se ha recalculado.')->with('toast_sync', true);
-    }
-
-    public function anularMultiple(Request $request)
-    {
-        $request->validate([
-            'pago_ids' => 'required|array|min:1',
-            'pago_ids.*' => 'integer|exists:pagos,id',
-        ]);
-
-        $this->pagoService->anularPagos($request->input('pago_ids', []));
-
-        $query = array_filter([
-            'reserva_id' => $request->input('reserva_id'),
-        ], fn ($v) => $v !== null && $v !== '');
-
-        return redirect()->route('pagos', $query)->with('success', 'Pagos eliminados. El estado de las reservas se ha recalculado.')->with('toast_sync', true);
-    }
-
-    public function updateIntegrante(Request $request)
-    {
-        $request->validate([
-            'reserva_id'     => 'required|exists:reservas,id',
-            'cliente_id'     => 'required|exists:clientes,id',
-            'nombres'        => 'required|string|max:250',
-            'apellidos'      => 'required|string|max:250',
-            'monto_asignado' => 'required|numeric|min:0',
+            'referencia.required_if' =>
+                'Ingresa el comprobante o referencia.',
+            'referencia.max' =>
+                'La referencia no puede superar 100 caracteres.',
         ]);
 
         try {
-            $this->pagoService->actualizarIntegranteGrupal(
-                (int) $request->reserva_id,
-                (int) $request->cliente_id,
-                $request->only(['nombres', 'apellidos', 'monto_asignado'])
+            $this->pagoService->actualizarPago(
+                $pago->id,
+                $datos
             );
 
-            // Asegurar que el estado de la reserva se sincronice también en caso de cambios de monto
-            $this->pagoService->sincronizarEstadoPagoReserva((int) $request->reserva_id);
-        } catch (\InvalidArgumentException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            $consulta = array_filter([
+                'reserva_id' =>
+                    $datos['reserva_id'] ?? null,
+            ]);
+
+            return redirect()
+                ->route('pagos', $consulta)
+                ->with(
+                    'success',
+                    'Pago actualizado correctamente.'
+                );
+        } catch (InvalidArgumentException $error) {
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    $error->getMessage()
+                );
+        } catch (\Throwable $error) {
+            Log::error(
+                'Error al actualizar pago',
+                [
+                    'pago_id' => $pago->id,
+                    'usuario_id' =>
+                        Auth::id(),
+                    'mensaje' =>
+                        $error->getMessage(),
+                ]
+            );
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'No se pudo actualizar el pago.'
+                );
+        }
+    }
+
+    public function anular(
+        Request $request,
+        Pago $pago
+    ) {
+        $datos = $request->validate([
+            'motivo_anulacion' => [
+                'required',
+                'string',
+                'min:10',
+                'max:500',
+            ],
+            'reserva_id' => [
+                'nullable',
+                'integer',
+            ],
+        ], [
+            'motivo_anulacion.required' =>
+                'Escribe el motivo de la anulación.',
+            'motivo_anulacion.min' =>
+                'El motivo debe tener al menos 10 caracteres.',
+            'motivo_anulacion.max' =>
+                'El motivo no puede superar 500 caracteres.',
+        ]);
+
+        $usuarioId = Auth::id();
+
+        if (!$usuarioId) {
+            return redirect()
+                ->route('login')
+                ->with(
+                    'error',
+                    'Debes iniciar sesión para anular un pago.'
+                );
         }
 
-        return response()->json(['success' => true, 'message' => 'Integrante actualizado.']);
+        try {
+            $this->pagoService->anularPago(
+                $pago->id,
+                $datos['motivo_anulacion'],
+                (int) $usuarioId
+            );
+
+            $consulta = array_filter([
+                'reserva_id' =>
+                    $datos['reserva_id'] ?? null,
+            ]);
+
+            return redirect()
+                ->route('pagos', $consulta)
+                ->with(
+                    'success',
+                    'Pago anulado correctamente. El historial se mantiene disponible.'
+                );
+        } catch (InvalidArgumentException $error) {
+            return back()->with(
+                'error',
+                $error->getMessage()
+            );
+        } catch (\Throwable $error) {
+            Log::error(
+                'Error al anular pago',
+                [
+                    'pago_id' => $pago->id,
+                    'usuario_id' => $usuarioId,
+                    'mensaje' =>
+                        $error->getMessage(),
+                ]
+            );
+
+            return back()->with(
+                'error',
+                'No se pudo anular el pago.'
+            );
+        }
     }
+
 }

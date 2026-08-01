@@ -1,0 +1,472 @@
+:root {
+    --reserva-azul: #093D77;
+    --reserva-celeste: #3A7CA5;
+    --reserva-dorado: #DAA520;
+    --reserva-texto: #2B2B2B;
+    --reserva-borde: #DCE3E8;
+    --reserva-error: #C83D48;
+}
+
+.pagina-reserva-individual {
+    padding: 2rem;
+    color: var(--reserva-texto);
+}
+
+.reserva-encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto 1.5rem;
+}
+
+.reserva-modulo {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--reserva-celeste);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.reserva-encabezado h1 {
+    margin: 0;
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.reserva-encabezado p {
+    max-width: 620px;
+    margin: 0.4rem 0 0;
+    color: #68747E;
+    font-size: 0.87rem;
+    line-height: 1.55;
+}
+
+.volver-reservas {
+    min-height: 2.55rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--reserva-borde);
+    border-radius: 0.5rem;
+    background: #FFFFFF;
+    color: var(--reserva-azul);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.volver-reservas:hover {
+    border-color: var(--reserva-celeste);
+    background: #F4F8FB;
+    color: var(--reserva-azul);
+}
+
+.formulario-reserva {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.reserva-seccion {
+    margin-bottom: 1rem;
+    padding: 1.35rem;
+    border: 1px solid var(--reserva-borde);
+    border-radius: 0.7rem;
+    background: #FFFFFF;
+}
+
+.seccion-titulo {
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid #E8EDF0;
+}
+
+.seccion-titulo h2 {
+    margin: 0;
+    color: var(--reserva-azul);
+    font-size: 0.98rem;
+    font-weight: 700;
+}
+
+.seccion-titulo p {
+    margin: 0.25rem 0 0;
+    color: #75808A;
+    font-size: 0.76rem;
+}
+
+.campo-reserva {
+    max-width: 650px;
+}
+
+.campo-reserva label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: #39434B;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.campo-reserva label span {
+    color: var(--reserva-error);
+}
+
+.control-reserva {
+    width: 100%;
+    min-height: 2.85rem;
+    padding: 0.68rem 0.8rem;
+    border: 1px solid #CAD4DB;
+    border-radius: 0.5rem;
+    outline: none;
+    background: #FFFFFF;
+    color: var(--reserva-texto);
+    font-family: inherit;
+    font-size: 0.83rem;
+}
+
+.control-reserva:focus {
+    border-color: var(--reserva-celeste);
+    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+}
+
+.control-reserva.input-error {
+    border-color: var(--reserva-error);
+    box-shadow: 0 0 0 3px rgba(200, 61, 72, 0.1);
+}
+
+.mensaje-error {
+    display: none;
+    margin-top: 0.35rem;
+    color: var(--reserva-error);
+    font-size: 0.7rem;
+}
+
+.acciones-cliente-reserva {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.55rem;
+}
+
+.acciones-cliente-reserva a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--reserva-azul);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.acciones-cliente-reserva a:hover {
+    text-decoration: underline;
+}
+
+.acciones-cliente-reserva span {
+    color: #87919A;
+    font-size: 0.68rem;
+}
+
+.resumen-seleccion {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    padding: 0.9rem;
+    border: 1px solid #D8E4EC;
+    border-radius: 0.55rem;
+    background: #F7FAFC;
+}
+
+.resumen-icono {
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 2.4rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #E7F0F7;
+    color: var(--reserva-azul);
+}
+
+.resumen-informacion {
+    min-width: 0;
+}
+
+.resumen-informacion span {
+    display: block;
+    color: #7A858D;
+    font-size: 0.67rem;
+}
+
+.resumen-informacion strong {
+    display: block;
+    margin-top: 0.12rem;
+    color: #303A42;
+    font-size: 0.84rem;
+}
+
+.resumen-informacion small {
+    display: block;
+    margin-top: 0.15rem;
+    color: #727E87;
+    font-size: 0.7rem;
+}
+
+.aviso-incompleto {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-left: auto;
+    max-width: 340px;
+    padding: 0.7rem;
+    border-left: 3px solid var(--reserva-dorado);
+    background: #FFF9E8;
+    color: #665720;
+}
+
+.aviso-incompleto > i {
+    margin-top: 0.1rem;
+}
+
+.aviso-incompleto strong,
+.aviso-incompleto span {
+    display: block;
+}
+
+.aviso-incompleto strong {
+    font-size: 0.72rem;
+}
+
+.aviso-incompleto span {
+    margin-top: 0.12rem;
+    font-size: 0.67rem;
+    line-height: 1.45;
+}
+
+.aviso-incompleto a {
+    display: inline-block;
+    margin-top: 0.25rem;
+    color: var(--reserva-azul);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.resumen-paquete {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0;
+    margin-top: 1rem;
+    border: 1px solid #DCE4E9;
+    border-radius: 0.55rem;
+    background: #F8FAFB;
+}
+
+.dato-paquete {
+    min-width: 0;
+    padding: 0.8rem;
+    border-right: 1px solid #DCE4E9;
+}
+
+.dato-paquete:last-child {
+    border-right: 0;
+}
+
+.dato-paquete span {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #7A858D;
+    font-size: 0.65rem;
+}
+
+.dato-paquete strong {
+    display: block;
+    overflow: hidden;
+    color: #364049;
+    font-size: 0.74rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.calculo-tarifa {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid #D7E1E7;
+    border-radius: 0.55rem;
+    overflow: hidden;
+}
+
+.calculo-tarifa > div {
+    padding: 0.9rem;
+    border-right: 1px solid #D7E1E7;
+    background: #FAFBFC;
+}
+
+.calculo-tarifa > div:last-child {
+    border-right: 0;
+}
+
+.calculo-tarifa span {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #74808A;
+    font-size: 0.67rem;
+}
+
+.calculo-tarifa strong {
+    color: #374149;
+    font-size: 0.85rem;
+}
+
+.calculo-tarifa .tarifa-total {
+    background: #EEF4F9;
+}
+
+.tarifa-total strong {
+    color: var(--reserva-azul);
+    font-size: 1rem;
+}
+
+.nota-pago {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin-top: 0.85rem;
+    padding: 0.7rem 0.8rem;
+    border-left: 3px solid var(--reserva-celeste);
+    background: #F2F7FA;
+    color: #50616D;
+    font-size: 0.7rem;
+    line-height: 1.5;
+}
+
+.oculto {
+    display: none !important;
+}
+
+.acciones-reserva {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    padding: 0.25rem 0 1rem;
+}
+
+.btn-cancelar-reserva,
+.btn-guardar-reserva {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.68rem 1.05rem;
+    border-radius: 0.5rem;
+    font-family: inherit;
+    font-size: 0.81rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-cancelar-reserva {
+    border: 1px solid #CCD5DB;
+    background: #FFFFFF;
+    color: #59656E;
+}
+
+.btn-guardar-reserva {
+    border: 1px solid var(--reserva-azul);
+    background: var(--reserva-azul);
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+.btn-guardar-reserva:hover {
+    background: #0B4B89;
+}
+
+.btn-guardar-reserva:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.btn-guardar-reserva.cargando i {
+    animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 900px) {
+    .resumen-paquete {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dato-paquete {
+        border-bottom: 1px solid #DCE4E9;
+    }
+
+    .calculo-tarifa {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .pagina-reserva-individual {
+        padding: 1.25rem;
+    }
+
+    .reserva-encabezado {
+        flex-direction: column;
+    }
+
+    .resumen-seleccion {
+        flex-wrap: wrap;
+    }
+
+    .aviso-incompleto {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 520px) {
+    .pagina-reserva-individual {
+        padding: 1rem;
+    }
+
+    .reserva-encabezado h1 {
+        font-size: 1.4rem;
+    }
+
+    .reserva-seccion {
+        padding: 1rem;
+    }
+
+    .resumen-paquete,
+    .calculo-tarifa {
+        grid-template-columns: 1fr;
+    }
+
+    .dato-paquete,
+    .calculo-tarifa > div {
+        border-right: 0;
+        border-bottom: 1px solid #DCE4E9;
+    }
+
+    .acciones-reserva {
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancelar-reserva,
+    .btn-guardar-reserva {
+        width: 100%;
+    }
+}

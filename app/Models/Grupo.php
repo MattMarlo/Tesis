@@ -6,31 +6,60 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
+    public const TIPO_FAMILIAR = 'familiar';
+    public const TIPO_INDEPENDIENTE = 'independiente';
+
     protected $table = 'grupos';
 
     protected $fillable = [
         'nombre_grupo',
-        'descripcion'
+        'descripcion',
+        'tipo_grupo',
+        'responsable_pago_id',
     ];
 
-    /**
-     * RELACIÓN CORREGIDA: Hacia la reserva
-     * Como usamos una tabla puente (reserva_grupo), la relación es a través de ella.
-     */
     public function reserva()
     {
-        // Un grupo está vinculado a una reserva mediante la tabla puente
-        return $this->hasOne(ReservaGrupo::class, 'grupo_id');
+        return $this->hasOne(
+            ReservaGrupo::class,
+            'grupo_id'
+        );
     }
 
-    /**
-     * RELACIÓN DE CLIENTES:
-     * Añadimos withTimestamps() si tus tablas tienen created_at/updated_at
-     */
     public function clientes()
     {
-        return $this->belongsToMany(Cliente::class, 'grupos_clientes', 'grupo_id', 'cliente_id')
-                    ->withPivot('monto_asignado', 'es_lider')
-                    ->withTimestamps();
+        return $this->belongsToMany(
+            Cliente::class,
+            'grupos_clientes',
+            'grupo_id',
+            'cliente_id'
+        )
+            ->withPivot([
+                'monto_asignado',
+                'es_lider',
+                'edad_al_viajar',
+                'categoria_tarifa',
+                'porcentaje_tarifa',
+                'precio_base',
+            ])
+            ->withTimestamps();
+    }
+
+    public function responsablePago()
+    {
+        return $this->belongsTo(
+            Cliente::class,
+            'responsable_pago_id'
+        );
+    }
+
+    public function esFamiliar(): bool
+    {
+        return $this->tipo_grupo === self::TIPO_FAMILIAR;
+    }
+
+    public function esIndependiente(): bool
+    {
+        return $this->tipo_grupo === self::TIPO_INDEPENDIENTE;
     }
 }

@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\PreReserva;
 use App\Models\Cliente;
 use App\Models\Destino;
-use App\Services\ReservaService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -16,12 +15,6 @@ use Illuminate\Support\Facades\Http;
 
 class PreReservaController extends Controller
 {
-    protected ReservaService $reservaService;
-
-    public function __construct(ReservaService $reservaService)
-    {
-        $this->reservaService = $reservaService;
-    }
 
     private function normalizeSearchPattern(string $value): string
     {
@@ -248,59 +241,113 @@ class PreReservaController extends Controller
     }
 
     // Convertir pre-reserva a reserva (acción rápida desde UI)
-    public function convertToReserva($id)
+    public function convertToReserva(string $id)
     {
-        $pre = PreReserva::findOrFail($id);
-        // intentar encontrar cliente por email, luego por cédula y teléfono
-        $cliente = null;
-        if (!empty($pre->email)) {
-            $cliente = Cliente::where('email', mb_strtolower(trim($pre->email)))->first();
-        }
-        if (!$cliente && !empty($pre->cedula)) {
-            $cliente = Cliente::where('documento', $pre->cedula)->first();
-        }
-        if (!$cliente && !empty($pre->telefono)) {
-            $cliente = Cliente::where('telefono', $pre->telefono)->first();
+        $preReserva = PreReserva::findOrFail($id);
+
+        if (
+            $preReserva->estado === 'convertida' ||
+            $preReserva->reserva_id
+        ) {
+            return to_route('prereservas.index')->with(
+                'error',
+                'Esta prerreserva ya fue convertida anteriormente.'
+            );
         }
 
-        // si no existe cliente, crearlo en estado inactivo (faltan datos como cédula)
-        if (!$cliente) {
-            $parts = preg_split('/\s+/', trim($pre->cliente_nombre), 2);
-            $cliente = Cliente::create([
-                'nombres' => $parts[0] ?? $pre->cliente_nombre,
-                'apellidos' => $parts[1] ?? '',
-                'email' => $pre->email ?? '',
-                'telefono' => $pre->telefono ?? '',
-                'documento' => $pre->cedula ?? '',
-                'estado' => empty($pre->cedula) ? 'inactivo' : 'activo',
-            ]);
-        }
-        
-        $destino = $this->findDestinoBySearch($pre->destino);
+        $destino = $this->findDestinoBySearch(
+            $preReserva->destino
+        );
+
         if (!$destino) {
-            return to_route('prereservas.index')->with('error','Destino no encontrado para convertir');
+            return to_route('prereservas.index')->with(
+                'error',
+                'No se encontró un paquete relacionado con el destino solicitado.'
+            );
         }
 
-        $datosReserva = [
-            'cliente_id' => $cliente->id,
-            'destino_id' => $destino->id,
-            'user_id' => Auth::id(),
-            'fecha_reserva' => Carbon::now()->toDateTimeString(),
-            'fecha_viaje' => $pre->fecha_viaje,
-            'precio_total_viaje' => 0,
-            'monto_depositado' => 0,
-        ];
+        $cliente = null;
 
-        $codigo = $this->reservaService->guardarIndividual($datosReserva);
-        $reservaId = DB::table('reservas')->where('codigo_reserva', $codigo)->value('id');
-        if ($reservaId) {
-            $pre->reserva_id = $reservaId;
-            $pre->estado = 'convertida';
-            $pre->user_id = Auth::id();
-            $pre->save();
+        if (!empty($preReserva->email)) {
+            $cliente = Cliente::where(
+                'email',
+                mb_strtolower(
+                    trim($preReserva->email)
+                )
+            )->first();
         }
 
-        return to_route('prereservas.index')->with('success','Pre-reserva convertida: '.$codigo);
+        if (
+            !$cliente &&
+            !empty($preReserva->cedula)
+        ) {
+            $cliente = Cliente::where(
+                'documento',
+                $preReserva->cedula
+            )->first();
+        }
+
+        if (
+            !$cliente &&
+            !empty($preReserva->telefono)
+        ) {
+            $cliente = Cliente::where(
+                'telefono',
+                $preReserva->telefono
+            )->first();
+        }
+
+        if (!$cliente) {
+            return redirect()
+                ->route(
+                    'clientes.create',
+                    [
+                        'prereserva_id' =>
+                            $preReserva->id,
+                        'destino_id' =>
+                            $destino->id,
+                    ]
+                )
+                ->with(
+                    'error',
+                    'Primero registra los datos completos del cliente de la prerreserva.'
+                );
+        }
+
+        $informacionCompleta =
+            $cliente->estaActivo() &&
+            !empty($cliente->documento) &&
+            !empty($cliente->tipo_documento) &&
+            !empty($cliente->fecha_nacimiento) &&
+            !empty($cliente->nacionalidad);
+
+        if (!$informacionCompleta) {
+            return redirect()
+                ->route(
+                    'clientes.edit',
+                    [
+                        'id' => $cliente->id,
+                        'prereserva_id' =>
+                            $preReserva->id,
+                        'destino_id' =>
+                            $destino->id,
+                    ]
+                )
+                ->with(
+                    'error',
+                    'Completa la información del cliente antes de convertir la prerreserva.'
+                );
+        }
+
+        return redirect()->route(
+            'reservas_individual.create',
+            [
+                'cliente_id' => $cliente->id,
+                'destino_id' => $destino->id,
+                'prereserva_id' =>
+                    $preReserva->id,
+            ]
+        );
     }
 
     // Eliminar pre-reserva

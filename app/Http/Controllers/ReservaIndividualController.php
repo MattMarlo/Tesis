@@ -2,113 +2,341 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Services\ReservaService;
+use App\Models\Cliente;
+use App\Models\Destino;
+use App\Services\ReservaIndividualService;
+use App\Models\Reserva;
+use App\Models\PreReserva;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 class ReservaIndividualController extends Controller
 {
-    protected $reservaService;
-    // Inyectamos el servicio en el constructor
-    public function __construct(ReservaService $reservaService)
-    {
-        $this->reservaService = $reservaService;
+    public function __construct(
+        private ReservaIndividualService $reservaService
+    ) {
     }
-    public function create()
+
+    public function create(Request $request)
     {
-        $clientes = DB::table('clientes')->get();
-        $destinos = DB::table('destinos')->get();
-        $reservas = DB::table('reservas')->get();
-        return view('modules.reservas.individual.create', compact('clientes', 'destinos','reservas'));
+        $clientes = Cliente::query()
+            ->activos()
+            ->orderBy('nombres')
+            ->orderBy('apellidos')
+            ->get();
+
+        $destinos = Destino::query()
+            ->where('estado_publicacion', 'publicado')
+            ->whereDate('fecha_salida', '>=', today())
+            ->orderBy('fecha_salida')
+            ->get();
+
+        return view(
+            'modules.reservas.individual.create',
+            [
+                'titulo' => 'Nueva reserva individual',
+                'clientes' => $clientes,
+                'destinos' => $destinos,
+                'clienteSeleccionado' =>
+                    $request->integer('cliente_id'),
+                'destinoSeleccionado' =>
+                    $request->integer('destino_id'),
+                'preReservaId' =>
+                    $request->integer('prereserva_id'),
+            ]
+        );
     }
-    
+
+    public function edit(string $id)
+    {
+        $reserva = \App\Models\Reserva::with([
+            'cliente',
+            'destino',
+        ])->findOrFail($id);
+
+        if (!$reserva->esIndividual()) {
+            return to_route('reservas')->with(
+                'error',
+                'La reserva seleccionada no es individual.'
+            );
+        }
+
+        if ($reserva->estaCancelada()) {
+            return to_route('reservas')->with(
+                'error',
+                'Las reservas canceladas no se pueden editar.'
+            );
+        }
+
+        if (
+            $reserva->estado !==
+            \App\Models\Reserva::ESTADO_PENDIENTE
+        ) {
+            return to_route('reservas')->with(
+                'error',
+                'Solo se pueden editar reservas pendientes.'
+            );
+        }
+
+        if ($reserva->pagos()->exists()) {
+            return to_route('reservas')->with(
+                'error',
+                'La reserva tiene pagos registrados y no se puede editar.'
+            );
+        }
+
+        $clientes = Cliente::query()
+            ->activos()
+            ->orderBy('nombres')
+            ->orderBy('apellidos')
+            ->get();
+
+        $destinos = Destino::query()
+            ->where('estado_publicacion', 'publicado')
+            ->whereDate('fecha_salida', '>=', today())
+            ->orderBy('fecha_salida')
+            ->get();
+
+        return view(
+            'modules.reservas.individual.edit',
+            [
+                'titulo' => 'Editar reserva individual',
+                'reserva' => $reserva,
+                'clientes' => $clientes,
+                'destinos' => $destinos,
+            ]
+        );
+    }
+
+    public function update(
+        Request $request,
+        string $id
+    ) {
+        $datos = $request->validate([
+            'cliente_id' => [
+                'required',
+                'integer',
+                'exists:clientes,id',
+            ],
+            'destino_id' => [
+                'required',
+                'integer',
+                'exists:destinos,id',
+            ],
+        ], [
+            'cliente_id.required' =>
+                'Selecciona el cliente que realizará el viaje.',
+            'cliente_id.exists' =>
+                'El cliente seleccionado no existe.',
+            'destino_id.required' =>
+                'Selecciona el paquete turístico.',
+            'destino_id.exists' =>
+                'El paquete seleccionado no existe.',
+        ]);
+
+        try {
+            $reserva = $this->reservaService->actualizar(
+                (int) $id,
+                (int) $datos['cliente_id'],
+                (int) $datos['destino_id']
+            );
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' =>
+                        'Reserva actualizada correctamente.',
+                    'codigo' =>
+                        $reserva->codigo_reserva,
+                    'redirect' =>
+                        route('reservas'),
+                ]);
+            }
+
+            return to_route('reservas')->with(
+                'success',
+                'Reserva actualizada correctamente.'
+            );
+        } catch (InvalidArgumentException $error) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $error->getMessage(),
+                ], 422);
+            }
+
+            return back()
+                ->withInput()
+                ->with('error', $error->getMessage());
+        } catch (\Throwable $error) {
+            Log::error(
+                'Error al actualizar reserva individual',
+                [
+                    'reserva_id' => $id,
+                    'mensaje' => $error->getMessage(),
+                    'usuario_id' => Auth::id(),
+                ]
+            );
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'No se pudo actualizar la reserva.',
+                ], 500);
+            }
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'No se pudo actualizar la reserva. Inténtalo nuevamente.'
+                );
+        }
+    }
+
     public function store(Request $request)
     {
         $datos = $request->validate([
-            'cliente_id'         => 'required|exists:clientes,id',
-            'destino_id'         => 'required|exists:destinos,id',
-            //'estado'             => 'nullable|in:confirmada,pendiente,cancelada',
-            'fecha_reserva'      => 'required|date',
-            'fecha_viaje'        => 'required|date',
-            'precio_total_viaje' => 'required|numeric|min:0',
-            'monto_depositado'   => 'nullable|numeric|min:0',
-            'metodo_pago'        => 'nullable|string',
-            'fecha_pago'         => 'nullable|date',
+            'cliente_id' => [
+                'required',
+                'integer',
+                'exists:clientes,id',
+            ],
+            'destino_id' => [
+                'required',
+                'integer',
+                'exists:destinos,id',
+            ],
+            'prereserva_id' => [
+                'nullable',
+                'integer',
+                'exists:pre_reservas,id',
+            ],
+        ], [
+            'cliente_id.required' =>
+                'Selecciona el cliente que realizará el viaje.',
+            'cliente_id.exists' =>
+                'El cliente seleccionado no existe.',
+            'destino_id.required' =>
+                'Selecciona el paquete turístico.',
+            'destino_id.exists' =>
+                'El paquete seleccionado no existe.',
+            'prereserva_id.exists' =>
+                'La prerreserva seleccionada no existe.',
         ]);
-         
-        
-        // Validación: la fecha de viaje no debe ser anterior a la fecha de reserva
-        $fechaViaje = isset($datos['fecha_viaje']) ? Carbon::parse($datos['fecha_viaje']) : null;
-        $fechaReserva = isset($datos['fecha_reserva']) ? Carbon::parse($datos['fecha_reserva']) : Carbon::now();
 
-        if ($fechaViaje && $fechaReserva && $fechaViaje->lt($fechaReserva)) {
-            $msg = 'La fecha de viaje no debe ser antes de la fecha de reserva';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 422);
-            }
-            return back()->with('error', $msg)->withInput();
-        }
+        $usuarioId = Auth::id();
 
-        // Validación de que la fecha de viaje no sea mayor a un año desde ahora
-        $fechaLimite = Carbon::now()->addYear(1);
-        if ($fechaViaje && $fechaViaje->gt($fechaLimite)) {
-            $msg = 'La fecha de viaje no debe exceder el año';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 422);
-            }
-            return back()->with('error', $msg)->withInput();
+        if (!$usuarioId) {
+            return redirect()
+                ->route('login')
+                ->with(
+                    'error',
+                    'Debes iniciar sesión para registrar una reserva.'
+                );
         }
-
-        // Validar que el precio de viaje sea mayor o igual al monto a cobrar
-        if (isset($datos['monto_depositado']) && $datos['monto_depositado'] > $datos['precio_total_viaje']) {
-            $msg = 'El monto depositado no debe ser mayor al precio total del viaje';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 422);
-            }
-            return back()->with('error', $msg)->withInput();
-        }
-        // validar que no exista una reserva activa para el mismo cliente , detino y fecha de viaje 
-        $duplicada = DB::table('reservas')
-            ->where('cliente_id',$datos['cliente_id'])
-            ->where('destino_id',$datos['destino_id'])
-            ->where('fecha_viaje',$datos['fecha_viaje'])
-            ->whereIn('estado',['pendiente','confirmada'])
-            ->first();
-        if($duplicada){
-            $msg="Ya existe una reserva activa (código:{$duplicada->codigo_reserva}) para este cliente
-            en el mismo destino,fecha.No se puede crear una nueva ";
-            if($request->expectsJson()){
-                return response()->json(['message'=>$msg],422);
-            }
-            return back()->with('error',$msg)->withInput();
-
-        }
-        $usuario_id = Auth::id();
-        if (!$usuario_id) {
-            $msg = 'Debes estar autenticado para crear una reserva.';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 401);
-            }
-            return back()->with('error', $msg)->withInput();
-        }
-
-        $datos['user_id'] = $usuario_id;
-        //$datos['estado'] = $datos['estado'] ?? 'pendiente';
 
         try {
-            $codigo = $this->reservaService->guardarIndividual($datos);
+            $reserva = DB::transaction(function () use (
+                $datos,
+                $usuarioId
+            ) {
+                $preReserva = null;
+
+                if (!empty($datos['prereserva_id'])) {
+                    $preReserva = PreReserva::query()
+                        ->lockForUpdate()
+                        ->findOrFail(
+                            $datos['prereserva_id']
+                        );
+
+                    if (
+                        $preReserva->estado === 'convertida' ||
+                        $preReserva->reserva_id
+                    ) {
+                        throw new InvalidArgumentException(
+                            'Esta prerreserva ya fue convertida anteriormente.'
+                        );
+                    }
+                }
+
+                $reserva = $this->reservaService->guardar(
+                    (int) $datos['cliente_id'],
+                    (int) $datos['destino_id'],
+                    (int) $usuarioId
+                );
+
+                if ($preReserva) {
+                    $preReserva->update([
+                        'estado' => 'convertida',
+                        'reserva_id' => $reserva->id,
+                        'user_id' => $usuarioId,
+                    ]);
+                }
+
+                return $reserva;
+            });
+
+            /*
+             * La prerreserva se actualizará en el siguiente paso,
+             * después de validar que corresponda al cliente.
+             */
+
             if ($request->expectsJson()) {
-                return response()->json(['success' => true, 'redirect' => route('reservas'), 'codigo' => $codigo]);
+                return response()->json([
+                    'success' => true,
+                    'message' =>
+                        'Reserva registrada correctamente.',
+                    'codigo' =>
+                        $reserva->codigo_reserva,
+                    'redirect' =>
+                        route('reservas'),
+                ], 201);
             }
-            return to_route('reservas')->with('success', 'Reserva creada. Código: ' . $codigo);
-        } catch (\Exception $e) {
-            $msg = 'Error al crear reserva: ' . $e->getMessage();
+
+            return to_route('reservas')->with(
+                'success',
+                'Reserva registrada correctamente. Código: ' .
+                $reserva->codigo_reserva
+            );
+        } catch (InvalidArgumentException $error) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => $error->getMessage(),
+                ], 422);
             }
-            return back()->with('error', $msg)->withInput();
+
+            return back()
+                ->withInput()
+                ->with('error', $error->getMessage());
+        } catch (\Throwable $error) {
+            Log::error(
+                'Error al registrar reserva individual',
+                [
+                    'mensaje' => $error->getMessage(),
+                    'usuario_id' => $usuarioId,
+                ]
+            );
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'No se pudo registrar la reserva.',
+                ], 500);
+            }
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'No se pudo registrar la reserva. Inténtalo nuevamente.'
+                );
         }
     }
 }

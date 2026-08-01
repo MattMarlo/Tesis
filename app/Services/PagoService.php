@@ -4,308 +4,941 @@ namespace App\Services;
 
 use App\Models\Reserva;
 use App\Models\Pago;
+use App\Models\Grupo;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PagoService
 {
-    public function getMetricasGenerales()
+    public function getMetricasGenerales(): array
     {
-        $totalPagosInfo = DB::table('pagos')
-            ->select(DB::raw('SUM(monto_depositado) as total_monto'), DB::raw('COUNT(id) as total_trx'))
-            ->first();
+        $reservas = Reserva::query()
+            ->where(
+                'estado',
+                '!=',
+                Reserva::ESTADO_CANCELADA
+            )
+            ->withSum(
+                'pagos as total_pagado',
+                'monto_depositado'
+            )
+            ->get();
 
-        $reservas = DB::table('reservas')
-            ->select(DB::raw('SUM(precio_total_viaje) as total_esperado'))
-            ->first();
+        $totalEsperado = (float) $reservas
+            ->sum('precio_total_viaje');
 
-        $totalPagos = $totalPagosInfo?->total_monto ?? 0;
-        $totalTrx = $totalPagosInfo?->total_trx ?? 0;
-        $totalEsperado = $reservas?->total_esperado ?? 0;
+        $totalPagos = (float) $reservas
+            ->sum(
+                fn ($reserva) =>
+                    (float) (
+                        $reserva->total_pagado ?? 0
+                    )
+            );
 
-        $cobrado = $totalPagos;
-        $tasaCobro = $totalEsperado > 0 ? round(($cobrado / $totalEsperado) * 100) : 0;
-
-        $pendiente = $totalEsperado - $cobrado;
-        if ($pendiente < 0) $pendiente = 0;
-
-        $reservasConDeuda = DB::table('reservas')
-            ->whereRaw('precio_total_viaje > (SELECT COALESCE(SUM(monto_depositado), 0) FROM pagos WHERE pagos.reserva_id = reservas.id)')
+        $totalTransacciones = Pago::query()
+            ->registrados()
+            ->whereHas(
+                'reserva',
+                function ($consulta) {
+                    $consulta->where(
+                        'estado',
+                        '!=',
+                        Reserva::ESTADO_CANCELADA
+                    );
+                }
+            )
             ->count();
 
-        $sinIniciar = DB::table('reservas')
-            ->whereRaw('NOT EXISTS (SELECT 1 FROM pagos WHERE pagos.reserva_id = reservas.id)')
-            ->get();
-            
-        $sinIniciarMonto = $sinIniciar->sum('precio_total_viaje');
-        $criticaId = $sinIniciar->first() ? $sinIniciar->first()->id : null;
+        $pendiente = max(
+            0,
+            $totalEsperado - $totalPagos
+        );
+
+        $reservasConDeuda = $reservas
+            ->filter(function ($reserva) {
+                return (float) $reserva
+                    ->precio_total_viaje >
+                    (float) (
+                        $reserva->total_pagado ?? 0
+                    );
+            })
+            ->count();
+
+        $sinIniciar = $reservas
+            ->filter(function ($reserva) {
+                return (float) (
+                    $reserva->total_pagado ?? 0
+                ) <= 0;
+            });
+
+        $sinIniciarMonto = (float) $sinIniciar
+            ->sum('precio_total_viaje');
+
+        $reservaCritica = $sinIniciar
+            ->sortBy('fecha_viaje')
+            ->first()
+            ?->id;
+
+        $tasaCobro = $totalEsperado > 0
+            ? round(
+                ($totalPagos / $totalEsperado) * 100
+            )
+            : 0;
 
         return [
-            'total_pagos'      => $totalPagos,
-            'total_trx'        => $totalTrx,
-            'cobrado'          => $cobrado,
-            'tasa_cobro'       => $tasaCobro,
-            'pendiente'        => $pendiente,
-            'reservas_deuda'   => $reservasConDeuda,
-            'sin_iniciar_monto'=> $sinIniciarMonto,
-            'reserva_critica'  => $criticaId
+            'total_pagos' =>
+                $totalPagos,
+            'total_trx' =>
+                $totalTransacciones,
+            'cobrado' =>
+                $totalPagos,
+            'tasa_cobro' =>
+                $tasaCobro,
+            'pendiente' =>
+                $pendiente,
+            'reservas_deuda' =>
+                $reservasConDeuda,
+            'sin_iniciar_monto' =>
+                $sinIniciarMonto,
+            'reserva_critica' =>
+                $reservaCritica,
         ];
     }
 
-    public function getListaReservas($filtros = [])
-    {
-        // Usamos reservaGrupo para la relación correcta (tabla pivote reservas_grupos)
-        $reservas = Reserva::with(['cliente', 'pago', 'reservaGrupo.grupo'])
-            ->orderBy('created_at', 'desc')
+    public function getListaReservas(
+        array $filtros = []
+    ) {
+        $reservas = Reserva::query()
+            ->with([
+                'cliente',
+                'destino',
+                'grupo.responsablePago',
+                'grupo.clientes',
+                'pagos',
+            ])
+            ->latest()
             ->get();
 
-        $lista = $reservas->map(function ($r) {
-            $pagado   = $r->pago->sum('monto_depositado');
-            $pendiente = $r->precio_total_viaje - $pagado;
-            if ($pendiente < 0) $pendiente = 0;
+        $lista = $reservas->map(
+            function ($reserva) {
+                $pagado = (float) $reserva
+                    ->pagos
+                    ->sum('monto_depositado');
 
-            $estado_calculado = 'Sin pago';
-            $porcentaje = 0;
-            
-            if ($pagado >= $r->precio_total_viaje && $r->precio_total_viaje > 0) {
-                $estado_calculado = 'Completado';
-                $porcentaje = 100;
-            } elseif ($pagado > 0) {
-                $estado_calculado = 'Parcial';
-                $porcentaje = $r->precio_total_viaje > 0 ? round(($pagado / $r->precio_total_viaje) * 100) : 0;
+                $precioTotal = (float)
+                    $reserva->precio_total_viaje;
+
+                $pendiente = max(
+                    0,
+                    $precioTotal - $pagado
+                );
+
+                if ($reserva->estaCancelada()) {
+                    $estadoCalculado =
+                        'Cancelada';
+                } elseif (
+                    $precioTotal > 0 &&
+                    $pagado >= $precioTotal
+                ) {
+                    $estadoCalculado =
+                        'Completado';
+                } elseif ($pagado > 0) {
+                    $estadoCalculado =
+                        'Parcial';
+                } else {
+                    $estadoCalculado =
+                        'Sin pago';
+                }
+
+                $porcentaje = $precioTotal > 0
+                    ? min(
+                        100,
+                        round(
+                            ($pagado / $precioTotal) *
+                            100
+                        )
+                    )
+                    : 0;
+
+                $ultimoPago = $reserva
+                    ->pagos
+                    ->sortByDesc('fecha_pago')
+                    ->first();
+
+                $grupo = $reserva->grupo;
+
+                if (
+                    $reserva->esGrupal() &&
+                    $grupo
+                ) {
+                    $nombre = $grupo->nombre_grupo;
+                } else {
+                    $nombre = $reserva->cliente
+                        ? $reserva->cliente
+                            ->nombre_completo
+                        : 'Cliente no disponible';
+                }
+
+                $modalidadPago = 'Individual';
+
+                if ($grupo?->esFamiliar()) {
+                    $modalidadPago =
+                        'Pago familiar';
+                } elseif (
+                    $grupo?->esIndependiente()
+                ) {
+                    $modalidadPago =
+                        'Pago por integrante';
+                }
+
+                return [
+                    'reserva_id' =>
+                        $reserva->id,
+                    'codigo_reserva' =>
+                        $reserva->codigo_reserva,
+                    'tipo' =>
+                        $reserva->tipo,
+                    'cliente_grupo' =>
+                        $nombre,
+                    'paquete' =>
+                        $reserva->destino
+                            ?->nombre_paquete,
+                    'moneda' =>
+                        $reserva->moneda ?: 'USD',
+                    'pagado' =>
+                        $pagado,
+                    'pendiente' =>
+                        $pendiente,
+                    'precio_total' =>
+                        $precioTotal,
+                    'metodo' =>
+                        $ultimoPago
+                            ? ucfirst(
+                                $ultimoPago
+                                    ->metodo_pago
+                            )
+                            : 'Sin registro',
+                    'metodo_valor' =>
+                        $ultimoPago
+                            ? $ultimoPago
+                                ->metodo_pago
+                            : null,
+                    'fecha_ultimo_pago' =>
+                        $ultimoPago
+                            ? $ultimoPago
+                                ->fecha_pago
+                                ?->format('d/m/Y')
+                            : null,
+                    'estado' =>
+                        $estadoCalculado,
+                    'estado_reserva' =>
+                        $reserva->estado,
+                    'porcentaje' =>
+                        $porcentaje,
+                    'id_ultimo_pago' =>
+                        $ultimoPago?->id,
+                    'modalidad_pago' =>
+                        $modalidadPago,
+                    'responsable_pago' =>
+                        $grupo
+                            ?->responsablePago
+                            ?->nombre_completo,
+                    'cliente_pago_id' =>
+                        $reserva->esIndividual()
+                            ? $reserva->cliente_id
+                            : (
+                                $grupo?->esFamiliar()
+                                    ? $grupo
+                                        ->responsable_pago_id
+                                    : null
+                            ),
+
+                    'nombre_pagador' =>
+                        $reserva->esIndividual()
+                            ? $reserva->cliente
+                                ?->nombre_completo
+                            : (
+                                $grupo?->esFamiliar()
+                                    ? $grupo
+                                        ->responsablePago
+                                        ?->nombre_completo
+                                    : null
+                            ),
+                    'cantidad_viajeros' =>
+                        $reserva
+                            ->cantidad_viajeros,
+                    'puede_cobrar' =>
+                        !$reserva->estaCancelada() &&
+                        $pendiente > 0,
+                ];
             }
+        );
 
-            $ultimo_pago = $r->pago->sortByDesc('fecha_pago')->first();
+        if (
+            !empty($filtros['estado']) &&
+            $filtros['estado'] !== 'todos'
+        ) {
+            $estado = mb_strtolower(
+                $filtros['estado']
+            );
 
-            // Nombre del cliente o grupo usando la relación reservaGrupo->grupo
-            if ($r->tipo == 'grupal' && $r->reservaGrupo && $r->reservaGrupo->grupo) {
-                $cliente_grupo_nombre = $r->reservaGrupo->grupo->nombre_grupo;
-            } else {
-                $cliente_grupo_nombre = $r->cliente
-                    ? $r->cliente->nombres . ' ' . $r->cliente->apellidos
-                    : 'Desconocido';
-            }
-
-            return [
-                'reserva_id'        => $r->id,
-                'codigo_reserva'    => $r->codigo_reserva,
-                'tipo'              => $r->tipo,
-                'cliente_grupo'     => $cliente_grupo_nombre,
-                'pagado'            => $pagado,
-                'pendiente'         => $pendiente,
-                'precio_total'      => $r->precio_total_viaje,
-                'metodo'            => $ultimo_pago ? ucfirst($ultimo_pago->metodo_pago) : '-',
-                'fecha_ultimo_pago' => $ultimo_pago ? Carbon::parse($ultimo_pago->fecha_pago)->format('Y-m-d') : '-',
-                'estado'            => $estado_calculado,
-                'porcentaje'        => $porcentaje,
-                'id_ultimo_pago'    => $ultimo_pago ? $ultimo_pago->id : null
-            ];
-        });
-
-        if (!empty($filtros['estado']) && $filtros['estado'] != 'todos') {
-            $estadoFiltro = strtolower($filtros['estado']);
-            $lista = $lista->filter(function($row) use ($estadoFiltro) {
-                return strtolower($row['estado']) == $estadoFiltro || str_starts_with(strtolower($row['estado']), $estadoFiltro);
-            });
+            $lista = $lista
+                ->filter(
+                    fn ($fila) =>
+                        mb_strtolower(
+                            $fila['estado']
+                        ) === $estado
+                )
+                ->values();
         }
-        
-        if (!empty($filtros['metodo']) && $filtros['metodo'] != 'todos') {
-            $metodoFiltro = strtolower($filtros['metodo']);
-            $lista = $lista->filter(function($row) use ($metodoFiltro) {
-                return strtolower($row['metodo']) == $metodoFiltro;
-            });
+
+        if (
+            !empty($filtros['metodo']) &&
+            $filtros['metodo'] !== 'todos'
+        ) {
+            $metodo = mb_strtolower(
+                $filtros['metodo']
+            );
+
+            $lista = $lista
+                ->filter(
+                    fn ($fila) =>
+                        $fila['metodo_valor'] ===
+                        $metodo
+                )
+                ->values();
         }
 
         return $lista;
     }
 
-    public function getDesgloseGrupal($reserva_id)
-    {
-        // Usamos la relación reservaGrupo (tabla pivote reservas_grupos) para obtener el grupo
-        $reserva = Reserva::with(['reservaGrupo.grupo', 'pago'])->findOrFail($reserva_id);
-        
-        if ($reserva->tipo !== 'grupal' || !$reserva->reservaGrupo || !$reserva->reservaGrupo->grupo) {
-            return [];
+    public function getDesgloseGrupal(
+        int $reservaId
+    ): array {
+        $reserva = Reserva::query()
+            ->with([
+                'grupo.responsablePago',
+                'grupo.clientes',
+                'pagos',
+            ])
+            ->findOrFail($reservaId);
+
+        if (
+            !$reserva->esGrupal() ||
+            !$reserva->grupo
+        ) {
+            throw new InvalidArgumentException(
+                'La reserva seleccionada no es grupal.'
+            );
         }
 
-        $grupo_id = $reserva->reservaGrupo->grupo_id;
-        
-        // Obtener los clientes del grupo desde la tabla grupos_clientes
-        $integrantes = DB::table('grupos_clientes')
-            ->join('clientes', 'grupos_clientes.cliente_id', '=', 'clientes.id')
-            ->where('grupos_clientes.grupo_id', $grupo_id)
-            ->select(
-                'clientes.id',
-                'clientes.nombres',
-                'clientes.apellidos',
-                'grupos_clientes.monto_asignado',
-                'grupos_clientes.es_lider'
-            )
-            ->get();
+        $grupo = $reserva->grupo;
+        $esFamiliar = $grupo->esFamiliar();
 
-        $desglose = $integrantes->map(function ($integrante) use ($reserva) {
-            $pagos_cliente = $reserva->pago->where('cliente_id', $integrante->id)->sum('monto_depositado');
-            $asignado  = $integrante->monto_asignado ?? 0;
-            $pendiente = $asignado - $pagos_cliente;
-            if ($pendiente < 0) $pendiente = 0;
+        $totalPagado = (float) $reserva
+            ->pagos
+            ->sum('monto_depositado');
 
-            $estado = 'Sin pago';
-            if ($pagos_cliente >= $asignado && $asignado > 0) {
-                $estado = 'Pagado';
-            } elseif ($pagos_cliente > 0) {
-                $estado = 'Parcial';
-            }
+        $saldoTotal = max(
+            0,
+            (float) $reserva->precio_total_viaje -
+            $totalPagado
+        );
 
-            return [
-                'cliente_id'     => $integrante->id,
-                'nombre_completo'=> $integrante->nombres . ' ' . $integrante->apellidos,
-                'es_lider'       => $integrante->es_lider ? true : false,
-                'asignado'       => $asignado,
-                'pagado'         => $pagos_cliente,
-                'pendiente'      => $pendiente,
-                'estado'         => $estado
-            ];
-        });
+        $integrantes = $grupo
+            ->clientes
+            ->map(function ($cliente) use (
+                $reserva,
+                $esFamiliar
+            ) {
+                $montoAsignado = (float) (
+                    $cliente->pivot
+                        ->monto_asignado ?? 0
+                );
 
-        return $desglose;
+                if ($esFamiliar) {
+                    $pagado = null;
+                    $pendiente = null;
+                    $estado = 'Pago colectivo';
+                } else {
+                    $pagado = (float) $reserva
+                        ->pagos
+                        ->where(
+                            'cliente_id',
+                            $cliente->id
+                        )
+                        ->sum('monto_depositado');
+
+                    $pendiente = max(
+                        0,
+                        $montoAsignado -
+                        $pagado
+                    );
+
+                    if (
+                        $montoAsignado > 0 &&
+                        $pagado >= $montoAsignado
+                    ) {
+                        $estado = 'Pagado';
+                    } elseif ($pagado > 0) {
+                        $estado = 'Parcial';
+                    } else {
+                        $estado = 'Sin pago';
+                    }
+                }
+
+                return [
+                    'cliente_id' =>
+                        $cliente->id,
+                    'nombre_completo' =>
+                        $cliente->nombre_completo,
+                    'documento' =>
+                        $cliente->documento,
+                    'es_lider' =>
+                        (bool) $cliente->pivot
+                            ->es_lider,
+                    'es_responsable_pago' =>
+                        (int) $cliente->id ===
+                        (int) (
+                            $reserva->grupo
+                                ->responsable_pago_id ?? 0
+                        ),
+                    'edad' =>
+                        $cliente->pivot
+                            ->edad_al_viajar,
+                    'categoria' =>
+                        $cliente->pivot
+                            ->categoria_tarifa,
+                    'porcentaje' =>
+                        $cliente->pivot
+                            ->porcentaje_tarifa,
+                    'asignado' =>
+                        $montoAsignado,
+                    'pagado' =>
+                        $pagado,
+                    'pendiente' =>
+                        $pendiente,
+                    'estado' =>
+                        $estado,
+                    'puede_cobrar' =>
+                        !$esFamiliar &&
+                        !$reserva->estaCancelada() &&
+                        $pendiente > 0,
+                ];
+            })
+            ->values()
+            ->all();
+
+        return [
+            'reserva_id' =>
+                $reserva->id,
+            'codigo_reserva' =>
+                $reserva->codigo_reserva,
+            'nombre_grupo' =>
+                $grupo->nombre_grupo,
+            'tipo_grupo' =>
+                $grupo->tipo_grupo,
+            'modalidad' =>
+                $esFamiliar
+                    ? 'familiar'
+                    : 'independiente',
+            'moneda' =>
+                $reserva->moneda ?: 'USD',
+            'responsable_pago' =>
+                $grupo->responsablePago
+                    ? [
+                        'id' =>
+                            $grupo
+                                ->responsablePago->id,
+                        'nombre' =>
+                            $grupo
+                                ->responsablePago
+                                ->nombre_completo,
+                    ]
+                    : null,
+            'precio_total' =>
+                (float) $reserva
+                    ->precio_total_viaje,
+            'total_pagado' =>
+                $totalPagado,
+            'saldo_total' =>
+                $saldoTotal,
+            'puede_cobrar_total' =>
+                $esFamiliar &&
+                !$reserva->estaCancelada() &&
+                $saldoTotal > 0,
+            'integrantes' =>
+                $integrantes,
+        ];
     }
 
-    public function registrarPago($datos)
+    public function registrarPago(array $datos)
     {
         return DB::transaction(function () use ($datos) {
-            $fecha_actual = Carbon::now();
-            $monto = $datos['monto_depositado'];
+            $reserva = Reserva::query()
+                ->with([
+                    'grupo.clientes',
+                    'grupo.responsablePago',
+                ])
+                ->lockForUpdate()
+                ->findOrFail($datos['reserva_id']);
 
-            $pago_id = DB::table('pagos')->insertGetId([
-                'reserva_id'       => $datos['reserva_id'],
-                'cliente_id'       => $datos['cliente_id'] ?? null,
-                'user_id'          => $datos['user_id'] ?? null,
+            if ($reserva->estaCancelada()) {
+                throw new InvalidArgumentException(
+                    'No se pueden registrar pagos en una reserva cancelada.'
+                );
+            }
+
+            $monto = round(
+                (float) ($datos['monto_depositado'] ?? 0),
+                2
+            );
+
+            if ($monto <= 0) {
+                throw new InvalidArgumentException(
+                    'El monto del pago debe ser mayor que cero.'
+                );
+            }
+
+            $metodo = strtolower(
+                trim($datos['metodo_pago'] ?? '')
+            );
+
+            $metodosPermitidos = [
+                Pago::METODO_EFECTIVO,
+                Pago::METODO_TRANSFERENCIA,
+                Pago::METODO_TARJETA,
+                Pago::METODO_OTRO,
+            ];
+
+            if (!in_array(
+                $metodo,
+                $metodosPermitidos,
+                true
+            )) {
+                throw new InvalidArgumentException(
+                    'El método de pago seleccionado no es válido.'
+                );
+            }
+
+            $clienteId = (int) (
+                $datos['cliente_id'] ?? 0
+            );
+
+            if ($reserva->esIndividual()) {
+                $clienteId = (int) $reserva->cliente_id;
+
+                $totalPagado = (float) Pago::query()
+                    ->registrados()
+                    ->where(
+                        'reserva_id',
+                        $reserva->id
+                    )
+                    ->sum('monto_depositado');
+
+                $saldoPermitido = max(
+                    0,
+                    (float) $reserva->precio_total_viaje -
+                    $totalPagado
+                );
+            } else {
+                $grupo = $reserva->grupo;
+
+                if (!$grupo) {
+                    throw new InvalidArgumentException(
+                        'La reserva no tiene un grupo asociado.'
+                    );
+                }
+
+                if ($grupo->esFamiliar()) {
+                    $clienteId = (int) (
+                        $grupo->responsable_pago_id ?? 0
+                    );
+
+                    if (!$clienteId) {
+                        throw new InvalidArgumentException(
+                            'El grupo familiar no tiene un responsable del pago.'
+                        );
+                    }
+
+                    $totalPagado = (float) Pago::query()
+                        ->registrados()
+                        ->where(
+                            'reserva_id',
+                            $reserva->id
+                        )
+                        ->sum('monto_depositado');
+
+                    $saldoPermitido = max(
+                        0,
+                        (float) $reserva->precio_total_viaje -
+                        $totalPagado
+                    );
+                } else {
+                    if (!$clienteId) {
+                        throw new InvalidArgumentException(
+                            'Selecciona el integrante que realiza el pago.'
+                        );
+                    }
+
+                    $integrante = $grupo
+                        ->clientes
+                        ->firstWhere(
+                            'id',
+                            $clienteId
+                        );
+
+                    if (!$integrante) {
+                        throw new InvalidArgumentException(
+                            'El cliente seleccionado no pertenece al grupo.'
+                        );
+                    }
+
+                    $montoAsignado = (float) (
+                        $integrante->pivot
+                            ->monto_asignado ?? 0
+                    );
+
+                    $pagadoIntegrante = (float) Pago::query()
+                        ->registrados()
+                        ->where(
+                            'reserva_id',
+                            $reserva->id
+                        )
+                        ->where(
+                            'cliente_id',
+                            $clienteId
+                        )
+                        ->sum('monto_depositado');
+
+                    $saldoPermitido = max(
+                        0,
+                        $montoAsignado -
+                        $pagadoIntegrante
+                    );
+                }
+            }
+
+            if ($saldoPermitido <= 0) {
+                throw new InvalidArgumentException(
+                    'La deuda seleccionada ya está pagada.'
+                );
+            }
+
+            if ($monto > $saldoPermitido) {
+                throw new InvalidArgumentException(
+                    'El pago no puede superar el saldo pendiente de ' .
+                    number_format(
+                        $saldoPermitido,
+                        2,
+                        '.',
+                        ''
+                    ) .
+                    ' ' .
+                    ($reserva->moneda ?: 'USD') .
+                    '.'
+                );
+            }
+
+            $pago = Pago::create([
+                'reserva_id' => $reserva->id,
+                'cliente_id' => $clienteId,
+                'user_id' => $datos['user_id'],
                 'monto_depositado' => $monto,
-                'fecha_pago'       => $fecha_actual,
-                'metodo_pago'      => strtolower($datos['metodo_pago'] ?? 'efectivo'),
-                'referencia'       => $datos['referencia'] ?? null,
+                'fecha_pago' => now(),
+                'metodo_pago' => $metodo,
+                'referencia' => !empty(
+                    $datos['referencia']
+                )
+                    ? trim($datos['referencia'])
+                    : null,
+                'estado' => Pago::ESTADO_REGISTRADO,
             ]);
 
-            $this->sincronizarEstadoPagoReserva((int) $datos['reserva_id']);
+            $this->sincronizarEstadoPagoReserva(
+                $reserva->id
+            );
 
-            return $pago_id;
+            return $pago->id;
         });
     }
 
     /**
      * Recalcula estado_pago (y confirma la reserva si corresponde) según suma de pagos.
      */
-    public function sincronizarEstadoPagoReserva(int $reservaId): void
-    {
-        $reserva = Reserva::find($reservaId);
+    public function sincronizarEstadoPagoReserva(
+        int $reservaId
+    ): void {
+        $reserva = Reserva::find(
+            $reservaId
+        );
+
         if (!$reserva) {
             return;
         }
 
-        $totalPagado = (float) DB::table('pagos')->where('reserva_id', $reserva->id)->sum('monto_depositado');
-        $precio = (float) $reserva->precio_total_viaje;
+        $totalPagado = (float) Pago::query()
+            ->registrados()
+            ->where(
+                'reserva_id',
+                $reserva->id
+            )
+            ->sum('monto_depositado');
 
-        //oe ponte pilas este cCambios es critico Si la reserva está cancelada, no modificar su estado (solo actualizar estado_pago si procede)
-        if ($reserva->estado === 'cancelada') {
-            $totalPagado = DB::table('pagos')->where('reserva_id', $reserva->id)->sum('monto_depositado');
-            
-            if ($totalPagado <= 0) {
-                $reserva->estado_pago = 'pendiente';  // Sin pagos, sin deuda
-            } else {
-                $reserva->estado_pago = 'parcial';    // Con pagos, requiere revisión
-            }
-            
-            $reserva->save();
-            return;
-        }
+        $precioTotal = (float)
+            $reserva->precio_total_viaje;
 
         if ($totalPagado <= 0) {
-            $reserva->estado_pago = 'pendiente';
-            $reserva->estado = 'pendiente';
-        } elseif ($precio > 0 && $totalPagado >= $precio) {
-            $reserva->estado_pago = 'pagado';
-            if ($reserva->estado !== 'cancelada') {
-                $reserva->estado = 'confirmada';
-            }
+            $estadoPago =
+                Reserva::PAGO_PENDIENTE;
+        } elseif (
+            $precioTotal > 0 &&
+            $totalPagado >= $precioTotal
+        ) {
+            $estadoPago =
+               Reserva::PAGO_COMPLETO;
         } else {
-            $reserva->estado_pago = 'parcial';
-            $reserva->estado = 'pendiente';
+            $estadoPago =
+                Reserva::PAGO_PARCIAL;
+        }
+
+        $reserva->estado_pago =
+            $estadoPago;
+
+        if (!$reserva->estaCancelada()) {
+            $reserva->estado =
+                $estadoPago === Reserva::PAGO_COMPLETO
+                    ? Reserva::ESTADO_CONFIRMADA
+                    : Reserva::ESTADO_PENDIENTE;
         }
 
         $reserva->save();
     }
 
-    public function actualizarPago(int $pagoId, array $datos): void
-    {
-        DB::transaction(function () use ($pagoId, $datos) {
-            $pago = Pago::findOrFail($pagoId);
-            $updates = [
-                'monto_depositado' => $datos['monto_depositado'],
-                'metodo_pago'      => strtolower($datos['metodo_pago'] ?? $pago->metodo_pago),
-                'referencia'       => $datos['referencia'] ?? null,
-            ];
-            DB::table('pagos')->where('id', $pagoId)->update($updates);
+    public function actualizarPago(
+        int $pagoId,
+        array $datos
+    ): void {
+        DB::transaction(function () use (
+            $pagoId,
+            $datos
+        ) {
+            $pago = Pago::query()
+                ->lockForUpdate()
+                ->findOrFail($pagoId);
 
-            $this->sincronizarEstadoPagoReserva((int) $pago->reserva_id);
-        });
-    }
-
-    public function anularPago(int $pagoId): void
-    {
-        DB::transaction(function () use ($pagoId) {
-            $pago = Pago::findOrFail($pagoId);
-            $reservaId = (int) $pago->reserva_id;
-            DB::table('pagos')->where('id', $pagoId)->delete();
-            $this->sincronizarEstadoPagoReserva($reservaId);
-        });
-    }
-
-    public function anularPagos(array $pagoIds): void
-    {
-        $pagos = Pago::whereIn('id', $pagoIds)->get();
-        if ($pagos->isEmpty()) {
-            return;
-        }
-
-        $reservaIds = $pagos->pluck('reserva_id')->unique();
-
-        DB::transaction(function () use ($pagos, $reservaIds) {
-            DB::table('pagos')->whereIn('id', $pagos->pluck('id')->all())->delete();
-            foreach ($reservaIds as $reservaId) {
-                $this->sincronizarEstadoPagoReserva((int) $reservaId);
+            if ($pago->estaAnulado()) {
+                throw new InvalidArgumentException(
+                    'Los pagos anulados no se pueden editar.'
+                );
             }
+
+            $reserva = Reserva::query()
+                ->with([
+                    'grupo.clientes',
+                    'grupo.responsablePago',
+                ])
+                ->lockForUpdate()
+                ->findOrFail($pago->reserva_id);
+
+            if ($reserva->estaCancelada()) {
+                throw new InvalidArgumentException(
+                    'No se pueden editar pagos de una reserva cancelada.'
+                );
+            }
+
+            $monto = round(
+                (float) (
+                    $datos['monto_depositado'] ?? 0
+                ),
+                2
+            );
+
+            if ($monto <= 0) {
+                throw new InvalidArgumentException(
+                    'El monto debe ser mayor que cero.'
+                );
+            }
+
+            $metodo = strtolower(
+                trim(
+                    $datos['metodo_pago'] ??
+                    $pago->metodo_pago
+                )
+            );
+
+            $metodosPermitidos = [
+                Pago::METODO_EFECTIVO,
+                Pago::METODO_TRANSFERENCIA,
+                Pago::METODO_TARJETA,
+                Pago::METODO_OTRO,
+            ];
+
+            if (!in_array(
+                $metodo,
+                $metodosPermitidos,
+                true
+            )) {
+                throw new InvalidArgumentException(
+                    'El método de pago seleccionado no es válido.'
+                );
+            }
+
+            if (
+                $reserva->esGrupal() &&
+                $reserva->grupo?->esIndependiente()
+            ) {
+                $integrante = $reserva
+                    ->grupo
+                    ->clientes
+                    ->firstWhere(
+                        'id',
+                        $pago->cliente_id
+                    );
+
+                if (!$integrante) {
+                    throw new InvalidArgumentException(
+                        'El cliente del pago no pertenece al grupo.'
+                    );
+                }
+
+                $montoAsignado = (float) (
+                    $integrante->pivot
+                        ->monto_asignado ?? 0
+                );
+
+                $otrosPagos = (float) Pago::query()
+                    ->registrados()
+                    ->where(
+                        'reserva_id',
+                        $reserva->id
+                    )
+                    ->where(
+                        'cliente_id',
+                        $pago->cliente_id
+                    )
+                    ->where(
+                        'id',
+                        '!=',
+                        $pago->id
+                    )
+                    ->sum('monto_depositado');
+
+                $maximoPermitido = max(
+                    0,
+                    $montoAsignado -
+                    $otrosPagos
+                );
+            } else {
+                $otrosPagos = (float) Pago::query()
+                    ->registrados()
+                    ->where(
+                        'reserva_id',
+                        $reserva->id
+                    )
+                    ->where(
+                        'id',
+                        '!=',
+                        $pago->id
+                    )
+                    ->sum('monto_depositado');
+
+                $maximoPermitido = max(
+                    0,
+                    (float) $reserva
+                        ->precio_total_viaje -
+                    $otrosPagos
+                );
+            }
+
+            if ($monto > $maximoPermitido) {
+                throw new InvalidArgumentException(
+                    'El pago no puede superar el valor disponible de ' .
+                    number_format(
+                        $maximoPermitido,
+                        2,
+                        '.',
+                        ''
+                    ) .
+                    ' ' .
+                    ($reserva->moneda ?: 'USD') .
+                    '.'
+                );
+            }
+
+            $referencia = !empty(
+                $datos['referencia']
+            )
+                ? trim($datos['referencia'])
+                : null;
+
+            if (
+                in_array(
+                    $metodo,
+                    [
+                        Pago::METODO_TRANSFERENCIA,
+                        Pago::METODO_TARJETA,
+                    ],
+                    true
+                ) &&
+                !$referencia
+            ) {
+                throw new InvalidArgumentException(
+                    'Ingresa el comprobante o referencia del pago.'
+                );
+            }
+
+            $pago->update([
+                'monto_depositado' =>
+                    $monto,
+                'metodo_pago' =>
+                    $metodo,
+                'referencia' =>
+                    $referencia,
+            ]);
+
+            $this->sincronizarEstadoPagoReserva(
+                (int) $reserva->id
+            );
         });
     }
 
-    public function actualizarIntegranteGrupal(int $reservaId, int $clienteId, array $datos): void
-    {
-        $reserva = Reserva::with('reservaGrupo')->findOrFail($reservaId);
-        if ($reserva->tipo !== 'grupal' || !$reserva->reservaGrupo) {
-            throw new InvalidArgumentException('La reserva no es grupal.');
-        }
-        $grupoId = $reserva->reservaGrupo->grupo_id;
+    public function anularPago(
+        int $pagoId,
+        string $motivo,
+        int $usuarioId
+    ): void {
+        DB::transaction(function () use (
+            $pagoId,
+            $motivo,
+            $usuarioId
+        ) {
+            $pago = Pago::query()
+                ->lockForUpdate()
+                ->findOrFail($pagoId);
 
-        DB::table('clientes')->where('id', $clienteId)->update([
-            'nombres'   => $datos['nombres'],
-            'apellidos' => $datos['apellidos'],
-        ]);
+            if ($pago->estaAnulado()) {
+                throw new InvalidArgumentException(
+                    'El pago ya se encuentra anulado.'
+                );
+            }
 
-        DB::table('grupos_clientes')
-            ->where('grupo_id', $grupoId)
-            ->where('cliente_id', $clienteId)
-            ->update(['monto_asignado' => $datos['monto_asignado']]);
+            $pago->update([
+                'estado' =>
+                    Pago::ESTADO_ANULADO,
+                'motivo_anulacion' =>
+                    trim($motivo),
+                'fecha_anulacion' =>
+                    now(),
+                'anulado_por_user_id' =>
+                    $usuarioId,
+            ]);
 
-        // Sincronizar el precio total de la reserva usando los montos asignados actualizados
-        $totalAsignado = DB::table('grupos_clientes')
-            ->where('grupo_id', $grupoId)
-            ->sum('monto_asignado');
-
-        $reserva = Reserva::findOrFail($reservaId);
-        $reserva->precio_total_viaje = $totalAsignado;
-        $reserva->save();
-
-        // Recalcular estados de pago y reserva luego de ajuste en monto asignado
-        $this->sincronizarEstadoPagoReserva($reservaId);
+            $this->sincronizarEstadoPagoReserva(
+                (int) $pago->reserva_id
+            );
+        });
     }
+
 }

@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('titulo', 'Nueva reserva individual')
+@section('titulo', $titulo)
 
 @section('content')
 <link
@@ -15,11 +15,11 @@
                 Reservas
             </span>
 
-            <h1>Nueva reserva individual</h1>
+            <h1>Editar reserva individual</h1>
 
             <p>
-                Selecciona el cliente y el paquete. El sistema calculará
-                automáticamente la tarifa según la edad del viajero.
+                Corrige el cliente o el paquete de la reserva
+                {{ $reserva->codigo_reserva }}. El valor se calculará nuevamente.
             </p>
         </div>
 
@@ -35,19 +35,16 @@
     <form
         id="formularioReservaIndividual"
         class="formulario-reserva"
-        action="{{ route('reservas_individual.store') }}"
+        action="{{ route(
+            'reservas_individual.update',
+            $reserva->id
+        ) }}"
         method="POST"
         novalidate
     >
         @csrf
 
-        @if ($preReservaId)
-            <input
-                type="hidden"
-                name="prereserva_id"
-                value="{{ $preReservaId }}"
-            >
-        @endif
+        @method('PUT')
 
         <section class="reserva-seccion">
             <div class="seccion-titulo">
@@ -82,7 +79,7 @@
 
                             $seleccionado = old(
                                 'cliente_id',
-                                $clienteSeleccionado
+                                $reserva->cliente_id
                             );
                         @endphp
 
@@ -208,7 +205,7 @@
 
                             $seleccionado = old(
                                 'destino_id',
-                                $destinoSeleccionado
+                                $reserva->destino_id
                             );
                         @endphp
 
@@ -326,7 +323,7 @@
                 type="submit"
                 class="btn-guardar-reserva"
             >
-                <span>Registrar reserva</span>
+                <span>Guardar cambios</span>
                 <i class="bi bi-check-lg"></i>
             </button>
         </div>

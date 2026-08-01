@@ -2,111 +2,442 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cliente;
+use App\Models\Destino;
+use App\Models\Grupo;
+use App\Models\Reserva;
+use App\Services\ReservaGrupalService;
 use Illuminate\Http\Request;
-use App\Services\ReservaService;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 
 class ReservaGrupalController extends Controller
 {
-    protected $reservaService;
-
-    public function __construct(ReservaService $reservaService)
-    {
-        $this->reservaService = $reservaService;
+    public function __construct(
+        private ReservaGrupalService $reservaService
+    ) {
     }
 
     public function create()
     {
-        $clientes = DB::table('clientes')->get();
-        $destinos = DB::table('destinos')->get();
-        $reservas = DB::table('reservas')->get();
-        $grupos   = DB::table('grupos')->get();
-        return view('modules.reservas.grupal.create', compact('clientes', 'destinos', 'reservas', 'grupos'));
+        $clientes = Cliente::query()
+            ->activos()
+            ->orderBy('nombres')
+            ->orderBy('apellidos')
+            ->get();
+
+        $destinos = Destino::query()
+            ->where('estado_publicacion', 'publicado')
+            ->whereDate('fecha_salida', '>=', today())
+            ->orderBy('fecha_salida')
+            ->get();
+
+        return view(
+            'modules.reservas.grupal.create',
+            [
+                'titulo' => 'Nueva reserva grupal',
+                'clientes' => $clientes,
+                'destinos' => $destinos,
+            ]
+        );
+    }
+
+    public function edit(string $id)
+    {
+        $reserva = Reserva::with([
+            'grupo.clientes',
+            'grupo.responsablePago',
+            'destino',
+        ])->findOrFail($id);
+
+        if (!$reserva->esGrupal()) {
+            return to_route('reservas')->with(
+                'error',
+                'La reserva seleccionada no es grupal.'
+            );
+        }
+
+        if ($reserva->estaCancelada()) {
+            return to_route('reservas')->with(
+                'error',
+                'Las reservas canceladas no se pueden editar.'
+            );
+        }
+
+        if (
+            $reserva->estado !==
+            Reserva::ESTADO_PENDIENTE
+        ) {
+            return to_route('reservas')->with(
+                'error',
+                'Solo se pueden editar reservas pendientes.'
+            );
+        }
+
+        if ($reserva->pagos()->exists()) {
+            return to_route('reservas')->with(
+                'error',
+                'La reserva tiene pagos registrados y no se puede editar.'
+            );
+        }
+
+        if (!$reserva->grupo) {
+            return to_route('reservas')->with(
+                'error',
+                'La reserva no tiene un grupo asociado.'
+            );
+        }
+
+        $clientes = Cliente::query()
+            ->activos()
+            ->orderBy('nombres')
+            ->orderBy('apellidos')
+            ->get();
+
+        $destinos = Destino::query()
+            ->where('estado_publicacion', 'publicado')
+            ->whereDate('fecha_salida', '>=', today())
+            ->orderBy('fecha_salida')
+            ->get();
+
+        $integrantesActuales = $reserva->grupo
+            ->clientes
+            ->map(function ($cliente) {
+                return [
+                    'cliente_id' => $cliente->id,
+                    'es_lider' =>
+                        (bool) $cliente->pivot->es_lider,
+                ];
+            })
+            ->values()
+            ->all();
+
+        return view(
+            'modules.reservas.grupal.edit',
+            [
+                'titulo' => 'Editar reserva grupal',
+                'reserva' => $reserva,
+                'grupo' => $reserva->grupo,
+                'clientes' => $clientes,
+                'destinos' => $destinos,
+                'integrantesActuales' =>
+                    old(
+                        'integrantes',
+                        $integrantesActuales
+                    ),
+            ]
+        );
+    }
+
+    public function update(
+        Request $request,
+        string $id
+    ) {
+        $datos = $request->validate([
+            'nombre_grupo' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+            ],
+            'tipo_grupo' => [
+                'required',
+                Rule::in([
+                    Grupo::TIPO_FAMILIAR,
+                    Grupo::TIPO_INDEPENDIENTE,
+                ]),
+            ],
+            'responsable_pago_id' => [
+                'nullable',
+                'required_if:tipo_grupo,familiar',
+                'integer',
+                'exists:clientes,id',
+            ],
+            'destino_id' => [
+                'required',
+                'integer',
+                'exists:destinos,id',
+            ],
+            'integrantes' => [
+                'required',
+                'array',
+                'min:2',
+            ],
+            'integrantes.*.cliente_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:clientes,id',
+            ],
+            'integrantes.*.es_lider' => [
+                'required',
+                'boolean',
+            ],
+        ], [
+            'nombre_grupo.required' =>
+                'Ingresa un nombre para identificar al grupo.',
+            'nombre_grupo.min' =>
+                'El nombre del grupo debe tener al menos 3 caracteres.',
+            'nombre_grupo.max' =>
+                'El nombre del grupo no puede superar 150 caracteres.',
+
+            'tipo_grupo.required' =>
+                'Selecciona el tipo de grupo.',
+            'tipo_grupo.in' =>
+                'El tipo de grupo seleccionado no es válido.',
+
+            'responsable_pago_id.required_if' =>
+                'Selecciona al responsable del pago familiar.',
+            'responsable_pago_id.exists' =>
+                'El responsable del pago no existe.',
+
+            'destino_id.required' =>
+                'Selecciona el paquete turístico.',
+            'destino_id.exists' =>
+                'El paquete seleccionado no existe.',
+
+            'integrantes.required' =>
+                'Agrega los integrantes del grupo.',
+            'integrantes.array' =>
+                'La lista de integrantes no es válida.',
+            'integrantes.min' =>
+                'Una reserva grupal necesita al menos dos integrantes.',
+
+            'integrantes.*.cliente_id.required' =>
+                'Selecciona correctamente cada integrante.',
+            'integrantes.*.cliente_id.distinct' =>
+                'No puedes agregar el mismo cliente más de una vez.',
+            'integrantes.*.cliente_id.exists' =>
+                'Uno de los integrantes no existe.',
+
+            'integrantes.*.es_lider.required' =>
+                'Selecciona el líder del grupo.',
+            'integrantes.*.es_lider.boolean' =>
+                'El líder seleccionado no es válido.',
+        ]);
+
+        try {
+            $reserva = $this->reservaService
+                ->actualizar(
+                    (int) $id,
+                    $datos
+                );
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' =>
+                        'Reserva grupal actualizada correctamente.',
+                    'codigo' =>
+                        $reserva->codigo_reserva,
+                    'redirect' =>
+                        route('reservas'),
+                ]);
+            }
+
+            return to_route('reservas')->with(
+                'success',
+                'Reserva grupal actualizada correctamente.'
+            );
+        } catch (InvalidArgumentException $error) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        $error->getMessage(),
+                ], 422);
+            }
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    $error->getMessage()
+                );
+        } catch (\Throwable $error) {
+            Log::error(
+                'Error al actualizar reserva grupal',
+                [
+                    'reserva_id' => $id,
+                    'mensaje' =>
+                        $error->getMessage(),
+                    'usuario_id' =>
+                        Auth::id(),
+                ]
+            );
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'No se pudo actualizar la reserva grupal.',
+                ], 500);
+            }
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'No se pudo actualizar la reserva grupal. Inténtalo nuevamente.'
+                );
+        }
     }
 
     public function store(Request $request)
     {
         $datos = $request->validate([
-            //'grupo_id'                       => 'nullable|exists:grupos,id',
-            'nombre_grupo'                   => 'nullable|string|max:255',
-            'destino_id'                     => 'required|exists:destinos,id',
-            'fecha_reserva'                  => 'required|date',
-            'fecha_viaje'                    => 'required|date',
-            'precio_total_viaje'             => 'required|numeric|min:0',
-            'integrantes'                    => 'required|array|min:1',
-            'integrantes.*.cliente_id'       => 'required|exists:clientes,id',
-            'integrantes.*.monto_asignado'   => 'required|numeric|min:0',
-            'integrantes.*.es_lider'         => 'nullable|boolean'
+            'nombre_grupo' => [
+                'required',
+                'string',
+                'min:3',
+                'max:150',
+            ],
+            'tipo_grupo' => [
+                'required',
+                Rule::in([
+                    Grupo::TIPO_FAMILIAR,
+                    Grupo::TIPO_INDEPENDIENTE,
+                ]),
+            ],
+            'responsable_pago_id' => [
+                'nullable',
+                'required_if:tipo_grupo,familiar',
+                'integer',
+                'exists:clientes,id',
+            ],
+            'destino_id' => [
+                'required',
+                'integer',
+                'exists:destinos,id',
+            ],
+            'integrantes' => [
+                'required',
+                'array',
+                'min:2',
+            ],
+            'integrantes.*.cliente_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:clientes,id',
+            ],
+            'integrantes.*.es_lider' => [
+                'required',
+                'boolean',
+            ],
+        ], [
+            'nombre_grupo.required' =>
+                'Ingresa un nombre para identificar al grupo.',
+            'nombre_grupo.min' =>
+                'El nombre del grupo debe tener al menos 3 caracteres.',
+            'nombre_grupo.max' =>
+                'El nombre del grupo no puede superar 150 caracteres.',
+
+            'tipo_grupo.required' =>
+                'Selecciona el tipo de grupo.',
+            'tipo_grupo.in' =>
+                'El tipo de grupo seleccionado no es válido.',
+
+            'responsable_pago_id.required_if' =>
+                'Selecciona al responsable del pago familiar.',
+            'responsable_pago_id.exists' =>
+                'El responsable del pago no existe.',
+
+            'destino_id.required' =>
+                'Selecciona el paquete turístico.',
+            'destino_id.exists' =>
+                'El paquete seleccionado no existe.',
+
+            'integrantes.required' =>
+                'Agrega los integrantes del grupo.',
+            'integrantes.array' =>
+                'La lista de integrantes no es válida.',
+            'integrantes.min' =>
+                'Una reserva grupal necesita al menos dos integrantes.',
+
+            'integrantes.*.cliente_id.required' =>
+                'Selecciona correctamente cada integrante.',
+            'integrantes.*.cliente_id.distinct' =>
+                'No puedes agregar el mismo cliente más de una vez.',
+            'integrantes.*.cliente_id.exists' =>
+                'Uno de los integrantes no existe.',
+
+            'integrantes.*.es_lider.required' =>
+                'Selecciona el líder del grupo.',
+            'integrantes.*.es_lider.boolean' =>
+                'El líder seleccionado no es válido.',
         ]);
 
-        /*if (empty($datos['grupo_id']) && empty($datos['nombre_grupo'])) {
-            $msg = 'Debe seleccionar un grupo existente o ingresar el nombre para uno nuevo.';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 422);
-            }
-            return back()->with('error', $msg)->withInput();
-        }*/
+        $usuarioId = Auth::id();
 
-        $usuario_id = Auth::id();
-        if (!$usuario_id) {
-            $msg = 'Debes estar autenticado para crear una reserva.';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 401);
-            }
-            return back()->with('error', $msg)->withInput();
-        }
-
-        $datos['user_id'] = $usuario_id;
-        // Validación: la fecha de viaje no debe ser anterior a la fecha de reserva
-        $fechaViaje = isset($datos['fecha_viaje']) ? Carbon::parse($datos['fecha_viaje']) : null;
-        $fechaReserva = isset($datos['fecha_reserva']) ? Carbon::parse($datos['fecha_reserva']) : Carbon::now();
-
-        if ($fechaViaje && $fechaReserva && $fechaViaje->lt($fechaReserva)) {
-            $msg = 'La fecha de viaje no debe ser antes de la fecha de reserva';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 422);
-            }
-            return back()->with('error', $msg)->withInput();
-        }
-
-        // Validación de que la fecha de viaje no sea mayor a un año desde ahora
-        $fechaLimite = Carbon::now()->addYear(1);
-        if ($fechaViaje && $fechaViaje->gt($fechaLimite)) {
-            $msg = 'La fecha de viaje no debe exceder el año';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 422);
-            }
-            return back()->with('error', $msg)->withInput();
-        }
-        // Validate total amount matches the sum of assignments
-        $sumaAsignada = 0;
-        foreach ($datos['integrantes'] as $integrante) {
-            $sumaAsignada += $integrante['monto_asignado'];
-        }
-
-        if (abs($sumaAsignada - $datos['precio_total_viaje']) > 0.01) {
-            $msg = 'La suma de los montos asignados debe ser igual al monto total del grupo.';
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 422);
-            }
-            return back()->with('error', $msg)->withInput();
+        if (!$usuarioId) {
+            return redirect()
+                ->route('login')
+                ->with(
+                    'error',
+                    'Debes iniciar sesión para registrar una reserva.'
+                );
         }
 
         try {
-            $codigo = $this->reservaService->guardarGrupal($datos);
+            $reserva = $this->reservaService->guardar(
+                $datos,
+                (int) $usuarioId
+            );
+
             if ($request->expectsJson()) {
-                return response()->json(['success' => true, 'redirect' => route('reservas'), 'codigo' => $codigo]);
+                return response()->json([
+                    'success' => true,
+                    'message' =>
+                        'Reserva grupal registrada correctamente.',
+                    'codigo' =>
+                        $reserva->codigo_reserva,
+                    'redirect' =>
+                        route('reservas'),
+                ], 201);
             }
-            return to_route('reservas')->with('success', 'Reserva grupal creada. Código: ' . $codigo);
-        } catch (\Exception $e) {
-            $msg = 'Error al crear reserva grupal: ' . $e->getMessage();
+
+            return to_route('reservas')->with(
+                'success',
+                'Reserva grupal registrada correctamente. Código: ' .
+                $reserva->codigo_reserva
+            );
+        } catch (InvalidArgumentException $error) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => $msg], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => $error->getMessage(),
+                ], 422);
             }
-            return back()->with('error', $msg)->withInput();
+
+            return back()
+                ->withInput()
+                ->with('error', $error->getMessage());
+        } catch (\Throwable $error) {
+            Log::error(
+                'Error al registrar reserva grupal',
+                [
+                    'mensaje' => $error->getMessage(),
+                    'usuario_id' => $usuarioId,
+                ]
+            );
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'No se pudo registrar la reserva grupal.',
+                ], 500);
+            }
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'No se pudo registrar la reserva grupal. Inténtalo nuevamente.'
+                );
         }
     }
 }

@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('titulo', 'Nueva reserva grupal')
+@section('titulo', $titulo)
 
 @section('content')
 <link
@@ -13,11 +13,11 @@
         <div>
             <span class="grupal-modulo">Reservas</span>
 
-            <h1>Nueva reserva grupal</h1>
+            <h1>Editar reserva grupal</h1>
 
             <p>
-                Agrega los integrantes y el sistema calculará la tarifa
-                de cada persona según su edad en la fecha del viaje.
+                Corrige los datos de la reserva
+                {{ $reserva->codigo_reserva }}. Las tarifas se calcularán nuevamente.
             </p>
         </div>
 
@@ -33,11 +33,16 @@
     <form
         id="formularioReservaGrupal"
         class="formulario-grupal"
-        action="{{ route('reservas_grupal.store') }}"
+        action="{{ route(
+            'reservas_grupal.update',
+            $reserva->id
+        ) }}"
         method="POST"
         novalidate
     >
         @csrf
+
+        @method('PUT')
 
         <section class="grupal-seccion">
             <div class="seccion-titulo">
@@ -60,7 +65,10 @@
                         name="nombre_grupo"
                         class="control-grupal"
                         type="text"
-                        value="{{ old('nombre_grupo') }}"
+                        value="{{ old(
+                            'nombre_grupo',
+                            $grupo->nombre_grupo
+                        ) }}"
                         placeholder="Ejemplo: Familia Pérez"
                         maxlength="150"
                         required
@@ -107,8 +115,10 @@
                                 data-moneda="{{ strtoupper($destino->moneda ?: 'USD') }}"
                                 data-capacidad="{{ $destino->capacidad }}"
                                 @selected(
-                                    (int) old('destino_id') ===
-                                    $destino->id
+                                    (int) old(
+                                        'destino_id',
+                                        $reserva->destino_id
+                                    ) === $destino->id
                                 )
                             >
                                 {{ $destino->nombre_paquete }}
@@ -136,7 +146,12 @@
                             type="radio"
                             name="tipo_grupo"
                             value="familiar"
-                            @checked(old('tipo_grupo') === 'familiar')
+                            @checked(
+                                old(
+                                    'tipo_grupo',
+                                    $grupo->tipo_grupo
+                                ) === 'familiar'
+                            )
                         >
 
                         <span>
@@ -156,7 +171,12 @@
                             type="radio"
                             name="tipo_grupo"
                             value="independiente"
-                            @checked(old('tipo_grupo') === 'independiente')
+                            @checked(
+                                old(
+                                    'tipo_grupo',
+                                    $grupo->tipo_grupo
+                                ) === 'independiente'
+                            )
                         >
 
                         <span>
@@ -389,7 +409,7 @@
                 type="submit"
                 class="btn-guardar-grupal"
             >
-                <span>Registrar reserva grupal</span>
+                <span>Guardar cambios</span>
                 <i class="bi bi-check-lg"></i>
             </button>
         </div>
@@ -398,10 +418,21 @@
 
 <script>
     window.configuracionReservaGrupal = {
+        modo: 'editar',
         errores: @json($errors->toArray()),
         mensajeError: @json(session('error')),
-        integrantesAnteriores: @json(old('integrantes', [])),
-        responsableAnterior: @json(old('responsable_pago_id'))
+        integrantesAnteriores: @json(
+            old(
+                'integrantes',
+                $integrantesActuales
+            )
+        ),
+        responsableAnterior: @json(
+            old(
+                'responsable_pago_id',
+                $grupo->responsable_pago_id
+            )
+        )
     };
 </script>
 

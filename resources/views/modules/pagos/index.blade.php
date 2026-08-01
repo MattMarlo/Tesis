@@ -1,1173 +1,831 @@
 @extends('layouts.main')
 
+@section('titulo', 'Pagos')
+
 @section('content')
-<style>
-    /*  VARIABLES DE COLOR  */
-    :root {
-        --bg-body: #f8fafc;
-        --bg-card: #ffffff;
-        --bg-table: #ffffff;
-        --border-color: #e2e8f0;
-        --text-primary: #1e293b;
-        --text-secondary: #475569;
-        --text-muted: #64748b;
-        --hover-bg: rgba(0,0,0,0.02);
-    }
+<link
+    rel="stylesheet"
+    href="{{ asset('css/pagos-listado.css') }}"
+>
 
-    body {
-        background-color: var(--bg-body);
-        color: var(--text-primary);
-    }
-
-    .page-title {
-        color: #2553EB;
-        font-weight: 700;
-        margin-bottom: 0.2rem;
-    }
-
-    .page-subtitle {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-
-    .btn-registrar {
-        background-color: #3b82f6;
-        color: white;
-        border-radius: 8px;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border: none;
-    }
-
-    /* Stats Cards */
-    .stat-card {
-        background-color: var(--bg-card);
-        border-radius: 12px;
-        padding: 1.25rem;
-        border: 1px solid var(--border-color);
-        border-top: 3px solid transparent;
-        height: 100%;
-    }
-    .stat-card-total { border-top-color: #3b82f6; }
-    .stat-card-cobrado { border-top-color: #10b981; }
-    .stat-card-pendiente { border-top-color: #f59e0b; }
-    .stat-card-sin-iniciar { border-top-color: #ef4444; }
-
-    .stat-title {
-        color: var(--text-muted);
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-    }
-    .stat-value.total { color: #3b82f6; }
-    .stat-value.cobrado { color: #10b981; }
-    .stat-value.pendiente { color: #f59e0b; }
-    .stat-value.sin-iniciar { color: #ef4444; }
-
-    .stat-desc {
-        color: var(--text-muted);
-        font-size: 0.8rem;
-    }
-
-    /* Table Area */
-    .table-container {
-        background-color: var(--bg-table);
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        overflow-x: auto;
-    }
-
-    .table-dark-custom {
-        width: 100%;
-        color: var(--text-primary);
-        border-collapse: collapse;
-    }
-
-    .table-dark-custom th {
-        background-color: var(--bg-table);
-        color: var(--text-secondary);
-        font-size: 0.7rem;
-        font-weight: 600;
-        white-space: nowrap;
-        text-transform: uppercase;
-        padding: 0.6rem 0.8rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .table-dark-custom td {
-        padding: 0.6rem 0.8rem;
-        border-bottom: 1px solid var(--border-color);
-        vertical-align: middle;
-        font-size: 0.8rem;
-    }
-
-    .table-dark-custom tr:hover {
-        background-color: var(--hover-bg);
-    }
-
-    /* Badges & Text Colors (NO CAMBIAR, son colores de estado) */
-    .text-cobrado { color: #10b981 !important; font-weight: 600; }
-    .text-pendiente { color: #ef4444 !important; font-weight: 600; }
-    .text-parcial { color: #f59e0b !important; font-weight: 600; }
-
-    .badge-status {
-        padding: 0.35rem 0.75rem;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-    .badge-status i { font-size: 0.5rem; }
-
-    .bg-status-completado { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
-    .bg-status-sinpago { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
-    .bg-status-parcial { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-
-    .badge-grupo {
-        background-color: #4c1d95;
-        color: #ddd6fe;
-        font-size: 0.7rem;
-        padding: 0.15rem 0.4rem;
-        border-radius: 4px;
-        margin-right: 0.5rem;
-    }
-
-    .badge-lider {
-        background-color: #5b21b6;
-        color: #c4b5fd;
-        font-size: 0.7rem;
-        padding: 0.15rem 0.4rem;
-        border-radius: 4px;
-        margin-left: 0.5rem;
-    }
-
-    .avatar-circle {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background-color: #3b82f6;
-        color: white;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-right: 0.5rem;
-    }
-
-    /* Aciones de los botones */
-   
-    .btn-desglose-active {
-        background-color: #e2e8f0;
-        color: var(--text-primary);
-        border-color: var(--border-color);
-    }
-    .btn-desglose-active:hover {
-        background-color: #cbd5e1;
-    }
-    .btn-action {
-        border-radius: 8px;
-        padding: 0.35rem 0.75rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        transition: all 0.2s;
-    }
-    .btn-action:hover {
-        background-color: var(--border-color);
-        color: white;
-    }
-
-    .btn-action-cobrar {
-        border-color: #047857;
-        color: #10b981;
-    }
-    .btn-action-cobrar:hover {
-        background-color: rgba(16, 185, 129, 0.1);
-        color: #34d399;
-    }
-
-    /* Filters */
-    .search-input {
-        background-color: var(--bg-table);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: 8px;
-        padding: 0.5rem 1rem 0.5rem 2.5rem;
-        width: 100%;
-        max-width: 400px;
-    }
-    .search-input:focus {
-        border-color: #3b82f6;
-        outline: none;
-        box-shadow: none;
-        background-color: var(--bg-table);
-        color: var(--text-primary);
-    }
-    .search-icon {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-muted);
-    }
-
-    .filter-select {
-        background-color: var(--bg-table);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: 8px;
-        padding: 0.5rem 2rem 0.5rem 1rem;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.5rem center;
-    }
-
-    /* Desglose Grupal Panel */
-    .desglose-panel {
-        background-color: var(--bg-card);
-        border-top: 1px solid var(--border-color);
-        display: none;
-    }
-    .desglose-panel.active {
-        display: table-row;
-    }
-    .desglose-container {
-        padding: 1.5rem !important;
-    }
-    .desglose-header {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 1rem;
-        font-size: 0.95rem;
-    }
-
-    /* ===== MODALES (TEMA CLARO) ===== */
-    .modal-content.dark-modal {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-    .modal-content.dark-modal .modal-header {
-        border-bottom: 1px solid var(--border-color);
-    }
-    .modal-content.dark-modal .modal-footer {
-        border-top: 1px solid var(--border-color);
-    }
-    .modal-content.dark-modal .modal-title {
-        color: var(--text-primary);
-    }
-
-    .modal-content.dark-modal .text-secondary {
-        color: var(--text-secondary) !important;
-    }
-    .modal-content.dark-modal .text-muted {
-        color: var(--text-muted) !important;
-    }
-    .modal-content.dark-modal .text-light,
-    .modal-content.dark-modal .text-white {
-        color: var(--text-primary) !important;
-    }
-    .modal-content.dark-modal strong {
-        color: var(--text-primary);
-    }
-    .modal-content.dark-modal .text-cobrado {
-        color: #10b981 !important;
-    }
-    .modal-content.dark-modal .text-pendiente {
-        color: #ef4444 !important;
-    }
-    .modal-content.dark-modal .text-parcial {
-        color: #f59e0b !important;
-    }
-
-    /* Inputs del modal */
-    .dark-input {
-        background-color: #f1f5f9;
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-    }
-    .dark-input:focus {
-        background-color: #ffffff;
-        color: var(--text-primary);
-        border-color: #3b82f6;
-        box-shadow: none;
-    }
-    .dark-input::placeholder {
-        color: var(--text-muted);
-    }
-
-    .desglose-panel .text-light {
-        color: var(--text-primary) !important;
-    }
-    .desglose-panel .text-muted {
-        color: var(--text-muted) !important;
-    }
-
-    /* ANULAR PAGO */
-    #lista_pagos_anular .text-white,
-    #lista_pagos_anular .text-light {
-        color: var(--text-primary) !important;
-    }
-    #lista_pagos_anular .text-muted {
-        color: var(--text-muted) !important;
-    }
-    #lista_pagos_anular .text-cobrado {
-        color: #10b981 !important;
-    }
-
-    .modal-body .text-white#aud_fecha {
-        color: var(--text-primary) !important;
-    }
-
-    .btn-desglose.bg-secondary.text-white {
-        background-color: #e2e8f0 !important;
-        color: var(--text-primary) !important;
-        border-color: var(--border-color) !important;
-    }
-    .btn-desglose.bg-secondary.text-white:hover {
-        background-color: #cbd5e1 !important;
-    }
-</style>
-
-<div class="container-fluid py-4" style="max-width: 1400px;">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<main id="main" class="main pagina-pagos">
+    <header class="pagos-encabezado">
         <div>
-            <h1 class="page-title">Pagos</h1>
-            <div class="page-subtitle">Control de transacciones y cobros</div>
-        </div>
-        <div>
-            <button class="btn btn-registrar" data-bs-toggle="modal" data-bs-target="#modalRegistrarPago">
-                + Registrar pago
-            </button>
-        </div>
-    </div>
+            <span class="pagos-modulo">
+                Gestión financiera
+            </span>
 
-    @if (session('success') && !session('toast_sync'))
-        <div class="alert alert-success bg-status-completado border-0">
-            {{ session('success') }}
-        </div>
-    @endif
+            <h1>Pagos</h1>
 
-    @if($reservaFiltroId ?? null)
-        <div class="alert border-0 mb-3" style="background:rgba(59,130,246,0.12);color:#2553EB;border:1px solid rgba(59,130,246,0.35)!important;">
-            <strong>Filtrando por reserva #{{ $reservaFiltroId }}.</strong> 
-            <a href="{{ route('pagos') }}" class="text-black text-decoration-underline ms-2">Quitar filtro</a>
+            <p>
+                Registra cobros y consulta el historial de cada reserva.
+            </p>
         </div>
-    @endif
 
-    @if(session('toast_sync'))
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
-        <div id="toastSyncPagos" class="toast align-items-center text-bg-success border-0" role="alert" data-bs-autohide="true" data-bs-delay="5000">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi bi-check2-circle me-1"></i> {{ session('success') }}
+        <a
+            href="{{ route('reservas') }}"
+            class="btn-volver-reservas"
+        >
+            <i class="bi bi-calendar-check"></i>
+            Ver reservas
+        </a>
+    </header>
+
+    <section class="resumen-pagos">
+        <article class="resumen-pago">
+            <span>Total recibido</span>
+
+            <strong>
+                USD {{ number_format(
+                    $metricas['cobrado'],
+                    2,
+                    '.',
+                    ','
+                ) }}
+            </strong>
+
+            <small>
+                {{ $metricas['total_trx'] }}
+                transacciones registradas
+            </small>
+        </article>
+
+        <article class="resumen-pago">
+            <span>Saldo pendiente</span>
+
+            <strong>
+                USD {{ number_format(
+                    $metricas['pendiente'],
+                    2,
+                    '.',
+                    ','
+                ) }}
+            </strong>
+
+            <small>
+                {{ $metricas['reservas_deuda'] }}
+                reservas con deuda
+            </small>
+        </article>
+
+        <article class="resumen-pago">
+            <span>Avance de cobro</span>
+
+            <strong>
+                {{ $metricas['tasa_cobro'] }}%
+            </strong>
+
+            <small>
+                Sobre las reservas activas
+            </small>
+        </article>
+
+        <article class="resumen-pago">
+            <span>Sin pagos</span>
+
+            <strong>
+                USD {{ number_format(
+                    $metricas['sin_iniciar_monto'],
+                    2,
+                    '.',
+                    ','
+                ) }}
+            </strong>
+
+            <small>
+                Reservas que aún no registran abonos
+            </small>
+        </article>
+    </section>
+
+    <form
+        method="GET"
+        action="{{ route('pagos') }}"
+        class="filtros-pagos"
+    >
+        @if ($reservaFiltroId)
+            <input
+                type="hidden"
+                name="reserva_id"
+                value="{{ $reservaFiltroId }}"
+            >
+        @endif
+
+        <div class="buscar-pagos">
+            <i class="bi bi-search"></i>
+
+            <input
+                id="buscarPagos"
+                type="search"
+                placeholder="Buscar código, cliente, grupo o paquete"
+                autocomplete="off"
+            >
+        </div>
+
+        <select name="estado">
+            <option value="todos">
+                Todos los estados
+            </option>
+
+            <option
+                value="sin pago"
+                @selected($filtros['estado'] === 'sin pago')
+            >
+                Sin pago
+            </option>
+
+            <option
+                value="parcial"
+                @selected($filtros['estado'] === 'parcial')
+            >
+                Pago parcial
+            </option>
+
+            <option
+                value="completado"
+                @selected($filtros['estado'] === 'completado')
+            >
+                Pago completado
+            </option>
+
+            <option
+                value="cancelada"
+                @selected($filtros['estado'] === 'cancelada')
+            >
+                Reserva cancelada
+            </option>
+        </select>
+
+        <select name="metodo">
+            <option value="todos">
+                Todos los métodos
+            </option>
+
+            <option
+                value="efectivo"
+                @selected($filtros['metodo'] === 'efectivo')
+            >
+                Efectivo
+            </option>
+
+            <option
+                value="transferencia"
+                @selected($filtros['metodo'] === 'transferencia')
+            >
+                Transferencia
+            </option>
+
+            <option
+                value="tarjeta"
+                @selected($filtros['metodo'] === 'tarjeta')
+            >
+                Tarjeta
+            </option>
+
+            <option
+                value="otro"
+                @selected($filtros['metodo'] === 'otro')
+            >
+                Otro
+            </option>
+        </select>
+
+        <button type="submit">
+            Filtrar
+        </button>
+
+        @if (
+            $filtros['estado'] !== 'todos' ||
+            $filtros['metodo'] !== 'todos' ||
+            $reservaFiltroId
+        )
+            <a href="{{ route('pagos') }}">
+                Limpiar
+            </a>
+        @endif
+    </form>
+
+    <section class="contenedor-tabla-pagos">
+        <div class="tabla-pagos-responsive">
+            <table class="tabla-pagos">
+                <thead>
+                    <tr>
+                        <th>Reserva</th>
+                        <th>Cliente o grupo</th>
+                        <th>Modalidad</th>
+                        <th>Valores</th>
+                        <th>Último pago</th>
+                        <th>Estado</th>
+                        <th class="columna-acciones">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody id="cuerpoTablaPagos">
+                    @forelse ($reservas as $reserva)
+                        <tr
+                            class="fila-pago"
+                            data-busqueda="{{ mb_strtolower(
+                                $reserva['codigo_reserva'] . ' ' .
+                                $reserva['cliente_grupo'] . ' ' .
+                                ($reserva['paquete'] ?? '')
+                            ) }}"
+                        >
+                            <td>
+                                <strong class="codigo-reserva-pago">
+                                    {{ $reserva['codigo_reserva'] }}
+                                </strong>
+
+                                <small>
+                                    {{ ucfirst($reserva['tipo']) }}
+                                </small>
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ $reserva['cliente_grupo'] }}
+                                </strong>
+
+                                <small>
+                                    {{ $reserva['paquete']
+                                        ?: 'Paquete no disponible' }}
+                                </small>
+
+                                @if ($reserva['responsable_pago'])
+                                    <small>
+                                        Responsable:
+                                        {{ $reserva['responsable_pago'] }}
+                                    </small>
+                                @endif
+                            </td>
+
+                            <td>
+                                <span class="modalidad-pago">
+                                    {{ $reserva['modalidad_pago'] }}
+                                </span>
+
+                                <small>
+                                    {{ $reserva['cantidad_viajeros'] }}
+                                    viajero(s)
+                                </small>
+                            </td>
+
+                            <td>
+                                <div class="valores-reserva-pago">
+                                    <span>
+                                        Total:
+                                        <strong>
+                                            {{ $reserva['moneda'] }}
+                                            {{ number_format(
+                                                $reserva['precio_total'],
+                                                2,
+                                                '.',
+                                                ','
+                                            ) }}
+                                        </strong>
+                                    </span>
+
+                                    <span class="valor-pagado">
+                                        Pagado:
+                                        {{ $reserva['moneda'] }}
+                                        {{ number_format(
+                                            $reserva['pagado'],
+                                            2,
+                                            '.',
+                                            ','
+                                        ) }}
+                                    </span>
+
+                                    <span class="valor-pendiente">
+                                        Saldo:
+                                        {{ $reserva['moneda'] }}
+                                        {{ number_format(
+                                            $reserva['pendiente'],
+                                            2,
+                                            '.',
+                                            ','
+                                        ) }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ $reserva['metodo'] }}
+                                </strong>
+
+                                <small>
+                                    {{ $reserva['fecha_ultimo_pago']
+                                        ?: 'Sin pagos registrados' }}
+                                </small>
+                            </td>
+
+                            <td>
+                                <span
+                                    class="estado-cobro estado-{{ \Illuminate\Support\Str::slug(
+                                        $reserva['estado']
+                                    ) }}"
+                                >
+                                    {{ $reserva['estado'] }}
+                                </span>
+
+                                <div class="barra-cobro">
+                                    <span
+                                        style="width: {{ $reserva['porcentaje'] }}%"
+                                    ></span>
+                                </div>
+
+                                <small>
+                                    {{ $reserva['porcentaje'] }}%
+                                </small>
+                            </td>
+
+                            <td>
+                                <div class="acciones-pago">
+                                    <button
+                                        type="button"
+                                        class="accion-pago historial btn-historial-pagos"
+                                        data-url="{{ route(
+                                            'pagos.lista',
+                                            $reserva['reserva_id'],
+                                            false
+                                        ) }}"
+                                        data-codigo="{{ $reserva['codigo_reserva'] }}"
+                                        title="Ver historial"
+                                    >
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+
+                                    @if ($reserva['tipo'] === 'grupal')
+                                        <button
+                                            type="button"
+                                            class="accion-pago grupo btn-desglose-pago"
+                                            data-url="{{ route(
+                                                'pagos.grupo',
+                                                $reserva['reserva_id'],
+                                                false
+                                            ) }}"
+                                            title="Ver desglose grupal"
+                                        >
+                                            <i class="bi bi-people"></i>
+                                        </button>
+                                    @endif
+
+                                    @if (
+                                        $reserva['puede_cobrar'] &&
+                                        $reserva['modalidad_pago'] !==
+                                            'Pago por integrante'
+                                    )
+                                        <button
+                                            type="button"
+                                            class="accion-pago cobrar btn-cobrar-reserva"
+                                            data-reserva-id="{{ $reserva['reserva_id'] }}"
+                                            data-codigo="{{ $reserva['codigo_reserva'] }}"
+                                            data-nombre="{{ $reserva['nombre_pagador'] }}"
+                                            data-cliente-id="{{ $reserva['cliente_pago_id'] }}"
+                                            data-saldo="{{ $reserva['pendiente'] }}"
+                                            data-moneda="{{ $reserva['moneda'] }}"
+                                            title="Registrar pago"
+                                        >
+                                            <i class="bi bi-cash-coin"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td
+                                colspan="7"
+                                class="sin-pagos"
+                            >
+                                <i class="bi bi-receipt"></i>
+                                <strong>
+                                    No existen reservas para mostrar
+                                </strong>
+                                <span>
+                                    Cambia los filtros o registra una reserva.
+                                </span>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+{{-- Modal para registrar un pago --}}
+<div
+    class="modal fade"
+    id="modalRegistrarPago"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <form
+            id="formularioRegistrarPago"
+            method="POST"
+            action="{{ route('pagos.store') }}"
+            class="modal-content modal-pago"
+            novalidate
+        >
+            @csrf
+
+            <input
+                type="hidden"
+                name="reserva_id"
+                id="pagoReservaId"
+            >
+
+            <input
+                type="hidden"
+                name="cliente_id"
+                id="pagoClienteId"
+            >
+
+            <div class="modal-header">
+                <div>
+                    <span>Registrar pago</span>
+                    <h2 id="pagoCodigoReserva">Reserva</h2>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
-    @endif
 
-    <!-- Cards de Resumen -->
-    <div class="row g-4 mb-4">
-        <!-- Card: total pagos -->
-        <div class="col-md-3">
-            <div class="stat-card stat-card-total">
-                <div class="stat-title">TOTAL PAGOS</div>
-                <div class="stat-value total">€{{ number_format($metricas['cobrado'], 0, ',', '.') }}</div>
-                <div class="stat-desc">{{ $metricas['total_trx'] }} transacciones</div>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
             </div>
-        </div>
-        <!-- Card: Cobrado -->
-        <div class="col-md-3">
-            <div class="stat-card stat-card-cobrado">
-                <div class="stat-title">COBRADO</div>
-                <div class="stat-value cobrado">€{{ number_format($metricas['cobrado'], 0, ',', '.') }}</div>
-                <!--<div class="stat-desc">Tasa de cobro {{ $metricas['tasa_cobro'] }}%</div>-->
-            </div>
-        </div>
-        <!-- Card: Pendiente -->
-        <div class="col-md-3">
-            <div class="stat-card stat-card-pendiente">
-                <div class="stat-title">PENDIENTE</div>
-                <div class="stat-value pendiente">€{{ number_format($metricas['pendiente'], 0, ',', '.') }}</div>
-                <div class="stat-desc">{{ $metricas['reservas_deuda'] }} reservas con deuda</div>
-            </div>
-        </div>
-        <!-- Card: Sin Iniciar -->
-        <div class="col-md-3">
-            <div class="stat-card stat-card-sin-iniciar">
-                <div class="stat-title">SIN INICIAR</div>
-                <div class="stat-value sin-iniciar">€{{ number_format($metricas['sin_iniciar_monto'], 0, ',', '.') }}</div>
-                <div class="stat-desc">
-                    @if($metricas['reserva_critica'])
-                        Reserva #{{ $metricas['reserva_critica'] }} crítica
-                    @else
-                        Sin reservas pendientes nuevas
-                    @endif
+
+            <div class="modal-body">
+                <div class="resumen-cobro-modal">
+                    <span id="pagoNombreCliente">
+                        Cliente
+                    </span>
+
+                    <strong id="pagoSaldoDisponible">
+                        USD 0.00
+                    </strong>
+
+                    <small>Saldo máximo disponible</small>
+                </div>
+
+                <div class="campo-pago">
+                    <label for="pagoMonto">
+                        Monto recibido <span>*</span>
+                    </label>
+
+                    <input
+                        id="pagoMonto"
+                        name="monto_depositado"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
+
+                    <small
+                        id="pagoMontoError"
+                        class="mensaje-error"
+                    ></small>
+                </div>
+
+                <div class="campo-pago">
+                    <label for="pagoMetodo">
+                        Método de pago <span>*</span>
+                    </label>
+
+                    <select
+                        id="pagoMetodo"
+                        name="metodo_pago"
+                        required
+                    >
+                        <option value="">
+                            Selecciona una opción
+                        </option>
+                        <option value="efectivo">
+                            Efectivo
+                        </option>
+                        <option value="transferencia">
+                            Transferencia
+                        </option>
+                        <option value="tarjeta">
+                            Tarjeta
+                        </option>
+                        <option value="otro">
+                            Otro
+                        </option>
+                    </select>
+
+                    <small
+                        id="pagoMetodoError"
+                        class="mensaje-error"
+                    ></small>
+                </div>
+
+                <div class="campo-pago">
+                    <label for="pagoReferencia">
+                        Comprobante o referencia
+                    </label>
+
+                    <input
+                        id="pagoReferencia"
+                        name="referencia"
+                        type="text"
+                        maxlength="100"
+                        placeholder="Ejemplo: transferencia 45821"
+                    >
+
+                    <small>
+                        Obligatorio para transferencia y tarjeta.
+                    </small>
+
+                    <small
+                        id="pagoReferenciaError"
+                        class="mensaje-error"
+                    ></small>
                 </div>
             </div>
-        </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn-secundario-pago"
+                    data-bs-dismiss="modal"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-principal-pago"
+                >
+                    <span>Registrar pago</span>
+                    <i class="bi bi-check-lg"></i>
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <!-- Filtros -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="position-relative w-100" style="max-width: 400px;">
-            <i class="bi bi-search search-icon"></i>
-            <input type="text" class="form-control search-input" id="searchPagos" placeholder="Buscar por cliente o reserva...">
-        </div>
-        <div class="d-flex gap-2">
-            <form action="{{ route('pagos') }}" method="GET" class="d-flex gap-2" id="formFiltros">
-                @if($reservaFiltroId ?? null)
-                    <input type="hidden" name="reserva_id" value="{{ $reservaFiltroId }}">
-                @endif
-                <select name="estado" class="form-select filter-select" onchange="document.getElementById('formFiltros').submit()">
-                    <option value="todos" {{ $filtros['estado'] == 'todos' ? 'selected' : '' }}>Todos los estados</option>
-                    <option value="completado" {{ $filtros['estado'] == 'completado' ? 'selected' : '' }}>Completado</option>
-                    <option value="parcial" {{ $filtros['estado'] == 'parcial' ? 'selected' : '' }}>Parcial</option>
-                    <option value="sin pago" {{ $filtros['estado'] == 'sin pago' ? 'selected' : '' }}>Sin pago</option>
-                </select>
-                <select name="metodo" class="form-select filter-select" onchange="document.getElementById('formFiltros').submit()">
-                    <option value="todos" {{ $filtros['metodo'] == 'todos' ? 'selected' : '' }}>Todos los métodos</option>
-                    <option value="transferencia" {{ $filtros['metodo'] == 'transferencia' ? 'selected' : '' }}>Transferencia</option>
-                    <option value="tarjeta" {{ $filtros['metodo'] == 'tarjeta' ? 'selected' : '' }}>Tarjeta</option>
-                    <option value="efectivo" {{ $filtros['metodo'] == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
-                </select>
-            </form>
-        </div>
-    </div>
+{{-- Modal de desglose grupal --}}
+<div
+    class="modal fade"
+    id="modalDesglosePago"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-pago">
+            <div class="modal-header">
+                <div>
+                    <span>Desglose grupal</span>
+                    <h2 id="desgloseNombreGrupo">Grupo</h2>
+                </div>
 
-    <!-- Tabla -->
-    <div class="table-container mb-4">
-        <table class="table-dark-custom" id="tablaPagos">
-            <thead>
-                <tr>
-                    <th>ID PAGO</th>
-                    <th>RESERVA</th>
-                    <th>CLIENTE / GRUPO</th>
-                    <th>PAGADO</th>
-                    <th>PENDIENTE</th>
-                    <th>MÉTODO</th>
-                    <th>FECHA</th>
-                    <th>ESTADO</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($reservas as $reserva)
-                <tr class="reserva-row">
-                    <td>#P{{ $reserva['id_ultimo_pago'] ?? '-' }}</td>
-                    <td>#{{ $reserva['reserva_id'] }}</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            @if($reserva['tipo'] == 'grupal')
-                                <span class="badge-grupo">Grupo</span>
-                            @else
-                                @php
-                                    // Generar iniciales
-                                    $partes = explode(' ', $reserva['cliente_grupo']);
-                                    $ini = strtoupper(substr($partes[0]??'C', 0, 1) . substr($partes[1]??'', 0, 1));
-                                    $bg_color = '#' . substr(md5($reserva['cliente_grupo']), 0, 6);
-                                @endphp
-                                <span class="avatar-circle" style="background-color: {{ $bg_color }}">{{ $ini }}</span>
-                            @endif
-                            {{ $reserva['cliente_grupo'] }}
-                        </div>
-                    </td>
-                    <td class="text-cobrado">€{{ number_format($reserva['pagado'], 0, ',', '.') }}</td>
-                    <td class="{{ $reserva['pendiente'] > 0 ? 'text-pendiente' : '' }}">
-                        €{{ number_format($reserva['pendiente'], 0, ',', '.') }}
-                    </td>
-                    <td>{{ $reserva['metodo'] }}</td>
-                    <td>{{ $reserva['fecha_ultimo_pago'] }}</td>
-                    <td>
-                        @if($reserva['estado'] == 'Completado')
-                            <span class="badge-status bg-status-completado"><i class="bi bi-circle-fill"></i> Completado</span>
-                        @elseif($reserva['estado'] == 'Parcial')
-                            <span class="badge-status bg-status-parcial"><i class="bi bi-circle-fill"></i> Parcial {{ $reserva['porcentaje'] }}%</span>
-                        @else
-                            <span class="badge-status bg-status-sinpago"><i class="bi bi-circle-fill"></i> Sin pago</span>
-                        @endif
-                    </td>
-                    <td class="text-end text-nowrap">
-                        @if(!empty($reserva['id_ultimo_pago']))
-                            <button type="button" class="btn btn-action" data-reserva-id="{{ $reserva['reserva_id'] }}" data-pendiente="{{ $reserva['pendiente'] }}" onclick="abrirModalAuditoria({{ $reserva['id_ultimo_pago'] }}, {{ $reserva['reserva_id'] }})">Ver</button>
-                        @else
-                            <button type="button" class="btn btn-action" disabled title="Sin transacciones">Ver</button>
-                        @endif
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
+            </div>
 
-                        @if($reserva['tipo'] == 'grupal')
-                            <button type="button" class="btn btn-action btn-desglose" data-id="{{ $reserva['reserva_id'] }}" data-nombre="{{ $reserva['cliente_grupo'] }}">Desglose</button>
-                        @elseif($reserva['pendiente'] > 0)
-                            <button type="button" class="btn btn-action btn-action-cobrar" onclick="abrirModalCobrar({{ $reserva['reserva_id'] }}, '{{ addslashes($reserva['cliente_grupo']) }}', {{ $reserva['pendiente'] }})">Cobrar</button>
-                        @endif
-                    </td>
-                </tr>
-                
-                @if($reserva['tipo'] == 'grupal')
-                <!-- Sub fila de desglose (oculta por defecto) -->
-                <tr class="desglose-panel" id="desglose-{{ $reserva['reserva_id'] }}">
-                    <td colspan="9" class="desglose-container">
-                        <div class="desglose-header">
-                            Desglose grupal &mdash; {{ $reserva['cliente_grupo'] }} (Reserva #{{ $reserva['reserva_id'] }})
-                        </div>
-                        <table class="table-dark-custom" style="background-color: transparent;">
+            <div class="modal-body">
+                <div
+                    id="desgloseCargando"
+                    class="estado-cargando-pago"
+                >
+                    <div class="spinner-border"></div>
+                    <span>Cargando información...</span>
+                </div>
+
+                <div
+                    id="desgloseContenido"
+                    class="oculto"
+                >
+                    <div
+                        id="resumenDesglose"
+                        class="resumen-desglose"
+                    ></div>
+
+                    <div class="tabla-pagos-responsive">
+                        <table class="tabla-integrantes-pago">
                             <thead>
                                 <tr>
-                                    <th style="background-color: transparent;">INTEGRANTE</th>
-                                    <th style="background-color: transparent;">ASIGNADO</th>
-                                    <th style="background-color: transparent;">PAGADO</th>
-                                    <th style="background-color: transparent;">PENDIENTE</th>
-                                    <th style="background-color: transparent;">ESTADO</th>
-                                    <th style="background-color: transparent;"></th>
+                                    <th>Integrante</th>
+                                    <th>Tarifa</th>
+                                    <th>Asignado</th>
+                                    <th>Pagado</th>
+                                    <th>Saldo</th>
+                                    <th>Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="body-desglose-{{ $reserva['reserva_id'] }}">
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">Cargando integrantes...</td>
-                                </tr>
-                            </tbody>
+
+                            <tbody id="cuerpoDesglosePago"></tbody>
                         </table>
-                    </td>
-                </tr>
-                @endif
-                
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Modal Registrar Pago (Global / Individual / Grupal) -->
-<div class="modal fade" id="modalRegistrarPago" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('pagos.store') }}" method="POST" class="modal-content dark-modal">
-            @csrf
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Registrar Pago</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label text-secondary">ID Reserva</label>
-                    <input type="number" name="reserva_id" id="modal_reserva_id" class="form-control dark-input" required @if($reservaFiltroId ?? null) value="{{ $reservaFiltroId }}" readonly @endif>
-                </div>
-                
-                <input type="hidden" name="cliente_id" id="modal_cliente_id"> <!-- Solo si paga un integrante grupal -->
-                
-                <div class="mb-3">
-                    <label class="form-label text-secondary">Cliente</label>
-                    <input type="text" id="modal_cliente_nombre" class="form-control dark-input" readonly>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-secondary">Monto (€)</label>
-                        <input type="number" step="0.01" name="monto_depositado" id="modal_monto" class="form-control dark-input" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-secondary">Método</label>
-                        <select name="metodo_pago" class="form-select dark-input" required>
-                            <option value="transferencia">Transferencia</option>
-                            <option value="tarjeta">Tarjeta</option>
-                            <option value="efectivo">Efectivo</option>
-                        </select>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label text-secondary">Referencia (Opcional)</label>
-                    <input type="text" name="referencia" class="form-control dark-input">
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary text-white" style="background:#334155; border:none;" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-registrar">Procesar pago</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-{{-- Auditoría / recibo digital --}}
-<div class="modal fade" id="modalAuditoriaPago" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content dark-modal">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Auditoría de transacción</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body small">
-                <p class="mb-2"><span class="text-secondary">ID pago:</span> <strong id="aud_id">—</strong></p>
-                <p class="mb-2"><span class="text-secondary">Reserva:</span> <strong id="aud_reserva">—</strong></p>
-                <p class="mb-2"><span class="text-secondary">Cliente:</span> <span id="aud_cliente">—</span></p>
-                <p class="mb-2"><span class="text-secondary">Cobró:</span> <span id="aud_cobrador">—</span></p>
-                <p class="mb-2"><span class="text-secondary">Método:</span> <span id="aud_metodo">—</span></p>
-                <p class="mb-2"><span class="text-secondary">Referencia:</span> <span id="aud_ref">—</span></p>
-                <p class="mb-0"><span class="text-secondary">Fecha ingreso:</span> <span id="aud_fecha" class="text-white">—</span></p>
-                <p class="mt-3 mb-0"><span class="text-secondary">Monto:</span> <span class="text-cobrado fs-5" id="aud_monto">—</span></p>
-            </div>
-            <div class="modal-footer border-0 flex-wrap gap-2">
-                <button type="button" class="btn btn-secondary text-white" style="background:#334155;border:none;" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn text-white" style="background:#3b82f6;" id="btn_abrir_editar_pago" onclick="abrirModalEditarDesdeAuditoria()">Editar pago</button>
-                <button type="button" class="btn text-white" style="background:#3b82f6;" id="btn_abrir_editar_otro_pago" onclick="abrirModalAnularOtroPago()">Editar otro pago</button>
-                <button type="button" class="btn text-white" style="background:#ef4444;" id="btn_anular_este_pago" onclick="confirmarAnularPago()">Anular este pago</button>
-                <button type="button" class="btn text-white" style="background:#ec4899;" id="btn_anular_otro_pago" onclick="abrirModalAnularOtroPago()">Anular otro pago</button>
             </div>
         </div>
     </div>
 </div>
 
-{{-- Editar pago --}}
-<div class="modal fade" id="modalEditarPago" tabindex="-1" aria-hidden="true">
+{{-- Modal del historial --}}
+<div
+    class="modal fade"
+    id="modalHistorialPagos"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-pago">
+            <div class="modal-header">
+                <div>
+                    <span>Historial de pagos</span>
+                    <h2 id="historialCodigoReserva">Reserva</h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
+            </div>
+
+            <div class="modal-body">
+                <div
+                    id="historialCargando"
+                    class="estado-cargando-pago"
+                >
+                    <div class="spinner-border"></div>
+                    <span>Cargando historial...</span>
+                </div>
+
+                <div
+                    id="historialContenido"
+                    class="oculto"
+                >
+                    <div
+                        id="historialResumen"
+                        class="historial-resumen"
+                    ></div>
+
+                    <div id="listaHistorialPagos"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal para editar un pago --}}
+<div
+    class="modal fade"
+    id="modalEditarPago"
+    tabindex="-1"
+    aria-hidden="true"
+>
     <div class="modal-dialog modal-dialog-centered">
-        <form id="formEditarPago" method="POST" class="modal-content dark-modal">
+        <form
+            id="formularioEditarPago"
+            method="POST"
+            action=""
+            class="modal-content modal-pago"
+            novalidate
+        >
             @csrf
             @method('PUT')
-            <input type="hidden" name="reserva_id" id="edit_ctx_reserva_id" value="">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Editar pago</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+            <input
+                type="hidden"
+                name="reserva_id"
+                id="editarReservaId"
+            >
+
+            <div class="modal-header">
+                <div>
+                    <span>Corregir transacción</span>
+                    <h2 id="editarPagoTitulo">Pago</h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
             </div>
+
             <div class="modal-body">
-                <div class="mb-3 small text-light">
-                    <div><span class="text-secondary">ID pago:</span> <strong id="edit_info_id">—</strong></div>
-                    <div><span class="text-secondary">Reserva:</span> <strong id="edit_info_reserva">—</strong></div>
-                    <div><span class="text-secondary">Cliente:</span> <span id="edit_info_cliente">—</span></div>
-                    <div><span class="text-secondary">Cobró:</span> <span id="edit_info_cobrador">—</span></div>
-                    <div><span class="text-secondary">Fecha pago:</span> <span id="edit_info_fecha">—</span></div>
-                    <div><span class="text-secondary">Disponible para asignar:</span> <strong id="edit_info_disponible">—</strong></div>
+                <div class="campo-pago">
+                    <label for="editarPagoMonto">
+                        Monto <span>*</span>
+                    </label>
+
+                    <input
+                        id="editarPagoMonto"
+                        name="monto_depositado"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
                 </div>
-                <div id="edit_error" class="alert alert-danger d-none" role="alert"></div>
-                <div class="mb-3">
-                    <label class="form-label text-secondary">Monto (€)</label>
-                    <input type="number" step="0.01" name="monto_depositado" id="edit_pago_monto" class="form-control dark-input" required min="0.01">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label text-secondary">Método</label>
-                    <select name="metodo_pago" id="edit_pago_metodo" class="form-select dark-input" required>
-                        <option value="transferencia">Transferencia</option>
-                        <option value="tarjeta">Tarjeta</option>
-                        <option value="efectivo">Efectivo</option>
-                        <option value="otro">Otro</option>
+
+                <div class="campo-pago">
+                    <label for="editarPagoMetodo">
+                        Método <span>*</span>
+                    </label>
+
+                    <select
+                        id="editarPagoMetodo"
+                        name="metodo_pago"
+                        required
+                    >
+                        <option value="efectivo">
+                            Efectivo
+                        </option>
+                        <option value="transferencia">
+                            Transferencia
+                        </option>
+                        <option value="tarjeta">
+                            Tarjeta
+                        </option>
+                        <option value="otro">
+                            Otro
+                        </option>
                     </select>
                 </div>
-                <div class="mb-0">
-                    <label class="form-label text-secondary">Referencia</label>
-                    <input type="text" name="referencia" id="edit_pago_ref" class="form-control dark-input" maxlength="100">
+
+                <div class="campo-pago">
+                    <label for="editarPagoReferencia">
+                        Referencia
+                    </label>
+
+                    <input
+                        id="editarPagoReferencia"
+                        name="referencia"
+                        type="text"
+                        maxlength="100"
+                    >
                 </div>
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary text-white" style="background:#334155;border:none;" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn text-white" style="background:#10b981;">Guardar corrección</button>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn-secundario-pago"
+                    data-bs-dismiss="modal"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-principal-pago"
+                >
+                    Guardar cambios
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<form id="formAnularPago" method="POST" action="#" class="d-none">
+<form
+    id="formularioAnularPago"
+    method="POST"
+    action=""
+    class="d-none"
+>
     @csrf
     @method('DELETE')
-    <input type="hidden" name="reserva_id" id="anular_ctx_reserva_id" value="">
-    <div id="anular_pago_ids_container"></div>
+
+    <input
+        type="hidden"
+        name="reserva_id"
+        id="anularReservaId"
+    >
+
+    <input
+        type="hidden"
+        name="motivo_anulacion"
+        id="anularMotivo"
+    >
 </form>
 
-{{-- Modal: Anular un pago diferente --}}
-<div class="modal fade" id="modalAnularOtroPago" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content dark-modal">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Anular un pagos</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <label class="form-label text-secondary fw-semibold mb-2">Seleccione los pagos que desea anular:</label>
-                <div id="lista_pagos_anular" style="max-height: 300px; overflow-y: auto; border: 1px solid #2d313f; border-radius: 8px; padding: 0;">
-                    <div class="text-center text-muted py-4">Cargando pagos...</div>
-                </div>
-                <input type="hidden" id="pago_seleccionado_ids" value="">
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary text-white" style="background:#334155;" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn text-white" style="background:#3b82f6;" id="btn_editar_seleccionado" onclick="abrirEditarPagoSeleccionado()" disabled>Editar pago seleccionado</button>
-                <button type="button" class="btn text-white" style="background:#ef4444;" id="btn_confirmar_anular" onclick="confirmarAnularPagosSeleccionados()" disabled>Anular pagos seleccionados</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Editar integrante grupal --}}
-<div class="modal fade" id="modalEditarIntegrante" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content dark-modal">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Editar integrante</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="int_reserva_id">
-                <input type="hidden" id="int_cliente_id">
-                <div class="mb-3">
-                    <label class="form-label text-secondary">Nombres</label>
-                    <input type="text" id="int_nombres" class="form-control dark-input" required maxlength="250">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label text-secondary">Apellidos</label>
-                    <input type="text" id="int_apellidos" class="form-control dark-input" required maxlength="250">
-                </div>
-                <div class="mb-0">
-                    <label class="form-label text-secondary">Monto asignado (€)</label>
-                    <input type="number" step="0.01" id="int_monto" class="form-control dark-input" required min="0">
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary text-white" style="background:#334155;border:none;" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn text-white" style="background:#3b82f6;" onclick="guardarIntegrante()">Guardar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-    const pagosBase = @json(url('/pagos'));
-    const csrfPagos = () => document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    let pagoAuditoriaActual = null;
-    let reservaCtxAuditoria = null;
-
-    function abrirModalAuditoria(pagoId, reservaId) {
-        reservaCtxAuditoria = reservaId;
-        fetch(pagosBase + '/' + pagoId + '/auditoria', { headers: { 'Accept': 'application/json' } })
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success) throw new Error();
-                pagoAuditoriaActual = data.data;
-                document.getElementById('aud_id').textContent = '#' + data.data.id;
-                document.getElementById('aud_reserva').textContent = '#' + data.data.reserva_id;
-                document.getElementById('aud_cliente').textContent = data.data.cliente;
-                document.getElementById('aud_cobrador').textContent = data.data.cobrador;
-                document.getElementById('aud_metodo').textContent = data.data.metodo_pago;
-                document.getElementById('aud_ref').textContent = data.data.referencia || '—';
-                document.getElementById('aud_fecha').textContent = data.data.fecha_pago_fmt;
-                document.getElementById('aud_monto').textContent = '€' + Number(data.data.monto).toLocaleString('es-ES');
-                new bootstrap.Modal(document.getElementById('modalAuditoriaPago')).show();
-            })
-            .catch(() => alert('No se pudo cargar la auditoría del pago.'));
-    }
-
-    function abrirModalEditarDesdeAuditoria() {
-        if (!pagoAuditoriaActual) return;
-        bootstrap.Modal.getInstance(document.getElementById('modalAuditoriaPago'))?.hide();
-        document.getElementById('formEditarPago').action = pagosBase + '/' + pagoAuditoriaActual.id;
-        document.getElementById('edit_ctx_reserva_id').value = reservaCtxAuditoria || '';
-        document.getElementById('edit_pago_monto').value = pagoAuditoriaActual.monto;
-        const mv = (pagoAuditoriaActual.metodo_pago_val || '').toLowerCase();
-        document.getElementById('edit_pago_metodo').value = mv || 'efectivo';
-        document.getElementById('edit_pago_ref').value = pagoAuditoriaActual.referencia || '';
-        // Mostrar información adicional en el modal de edición
-        document.getElementById('edit_info_id').textContent = '#' + pagoAuditoriaActual.id;
-        document.getElementById('edit_info_reserva').textContent = '#' + (pagoAuditoriaActual.reserva_id || '—');
-        document.getElementById('edit_info_cliente').textContent = pagoAuditoriaActual.cliente || '—';
-        document.getElementById('edit_info_cobrador').textContent = pagoAuditoriaActual.cobrador || '—';
-        document.getElementById('edit_info_fecha').textContent = pagoAuditoriaActual.fecha_pago_fmt || '—';
-
-        // Calcular monto máximo permitido: pendiente actual + monto del pago
-        const reservaId = pagoAuditoriaActual.reserva_id;
-        const pendienteTabla = obtenerPendienteDesdeTabla(reservaId);
-        const montoActualPago = Number(pagoAuditoriaActual.monto) || 0;
-        const disponible = pendienteTabla !== null ? pendienteTabla + montoActualPago : null;
-        document.getElementById('edit_info_disponible').textContent = disponible !== null
-            ? '€' + disponible.toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:2})
-            : '—';
-
-        document.getElementById('formEditarPago').dataset.maxAllowed = disponible !== null ? String(disponible) : '';
-
-        new bootstrap.Modal(document.getElementById('modalEditarPago')).show();
-    }
-
-    function obtenerPendienteDesdeTabla(reservaId) {
-        const button = document.querySelector(`#tablaPagos button[data-reserva-id="${reservaId}"]`);
-        if (!button) return null;
-        const pendiente = button.dataset.pendiente;
-        if (!pendiente) return null;
-        const num = Number(pendiente);
-        return Number.isFinite(num) ? num : null;
-    }
-
-    function confirmarAnularPago() {
-        if (!pagoAuditoriaActual) return;
-        if (!confirm('¿Anular este pago? El monto se restará del balance y se actualizará la reserva.')) return;
-        if (!confirm('Confirmación final: ¿anular el registro contable?')) return;
-        const f = document.getElementById('formAnularPago');
-        f.action = pagosBase + '/' + pagoAuditoriaActual.id;
-        document.getElementById('anular_ctx_reserva_id').value = reservaCtxAuditoria || '';
-        f.submit();
-    }
-
-    function abrirEditarIntegrante(reservaId, clienteId, nombreCompleto, asignado) {
-        const partes = (nombreCompleto || '').trim().split(/\s+/);
-        let nom = partes[0] || '';
-        let ape = partes.length > 1 ? partes.slice(1).join(' ') : '';
-        if (partes.length === 1 && nom) {
-            ape = '-';
-        }
-        document.getElementById('int_reserva_id').value = reservaId;
-        document.getElementById('int_cliente_id').value = clienteId;
-        document.getElementById('int_nombres').value = nom;
-        document.getElementById('int_apellidos').value = ape;
-        document.getElementById('int_monto').value = asignado;
-        new bootstrap.Modal(document.getElementById('modalEditarIntegrante')).show();
-    }
-
-    function guardarIntegrante() {
-        fetch(pagosBase + '/integrante-grupal', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrfPagos(),
-            },
-            body: JSON.stringify({
-                reserva_id: document.getElementById('int_reserva_id').value,
-                cliente_id: document.getElementById('int_cliente_id').value,
-                nombres: document.getElementById('int_nombres').value,
-                apellidos: document.getElementById('int_apellidos').value,
-                monto_asignado: document.getElementById('int_monto').value,
-            }),
-        })
-            .then(r => r.json())
-            .then(j => {
-                if (j.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('modalEditarIntegrante'))?.hide();
-                    window.location.reload();
-                } else {
-                    alert(j.message || 'No se pudo guardar');
-                }
-            })
-            .catch(() => alert('Error de red'));
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('formEditarPago');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const errBox = document.getElementById('edit_error');
-                errBox.classList.add('d-none');
-                errBox.textContent = '';
-
-                const montoVal = Number(document.getElementById('edit_pago_monto').value) || 0;
-                if (montoVal <= 0) {
-                    e.preventDefault();
-                    errBox.textContent = 'El monto debe ser un número mayor que 0.';
-                    errBox.classList.remove('d-none');
-                    return false;
-                }
-
-                const maxAllowed = Number(this.dataset.maxAllowed || '');
-                if (maxAllowed > 0 && montoVal > maxAllowed) {
-                    e.preventDefault();
-                    errBox.textContent = 'El monto no puede ser mayor a lo que debe la reserva. Máximo permitido: €' + maxAllowed.toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:2});
-                    errBox.classList.remove('d-none');
-                    return false;
-                }
-
-                return true;
-            });
-        }
-
-        @if(session('toast_sync'))
-        const tp = document.getElementById('toastSyncPagos');
-        if (tp && typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-            new bootstrap.Toast(tp).show();
-        }
-        @endif
-
-        @if(!empty($abrirCobro) && !empty($reservaFiltroId))
-        @php
-            $filaCobro = collect($reservas)->firstWhere('reserva_id', (int) $reservaFiltroId);
-        @endphp
-        @if($filaCobro)
-        abrirModalCobrar(
-            {{ (int) $reservaFiltroId }},
-            @json($filaCobro['cliente_grupo']),
-            {{ $filaCobro['pendiente'] }}
-        );
-        @endif
-        @endif
-
-        // Buscador JS simple en tabla (opcional ya que hay backend, pero ayuda a UI fluida)
-        document.getElementById('searchPagos').addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.reserva-row').forEach(row => {
-                const text = row.innerText.toLowerCase();
-                if(text.includes(term)) {
-                    row.style.display = '';
-                    // El panel de desglose también debe mostrarse si estaba activo? Mejor lo cerramos al filtrar
-                    const desglose = row.nextElementSibling;
-                    if(desglose && desglose.classList.contains('desglose-panel')) {
-                        desglose.classList.remove('active');
-                    }
-                } else {
-                    row.style.display = 'none';
-                    const desglose = row.nextElementSibling;
-                    if(desglose && desglose.classList.contains('desglose-panel')) {
-                        desglose.style.display = 'none';
-                    }
-                }
-            });
-        });
-
-        // Botones de Desglose
-        const botonesDesglose = document.querySelectorAll('.btn-desglose');
-        botonesDesglose.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const reservaId = this.getAttribute('data-id');
-                const panel = document.getElementById('desglose-' + reservaId);
-                
-                // Toggle
-                if (panel.classList.contains('active')) {
-                    panel.classList.remove('active');
-                    this.textContent = 'Desglose';
-                    this.classList.remove('bg-secondary');
-                } else {
-                    panel.classList.add('active');
-                    this.textContent = 'Cerrar desglose';
-                    this.classList.add('btn-desglose-active');
-                    this.textContent = 'Cerrar desglose';
-                    
-                    // Cargar datos por fetch
-                    fetch(`/pagos/grupo/${reservaId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            const tbody = document.getElementById('body-desglose-' + reservaId);
-                            if(data.success && data.data.length > 0) {
-                                tbody.innerHTML = '';
-                                data.data.forEach(intg => {
-                                    
-                                    // Generar iniciales
-                                    const part = intg.nombre_completo.split(' ');
-                                    const ini2 = (part[0]?part[0].charAt(0):'C') + (part[1]?part[1].charAt(0):'').toUpperCase();
-                                    const bgColor2 = '#' + intg.nombre_completo.length + 'a23c2'; // mock color
-
-                                    const pndColor = intg.pendiente > 0 ? 'text-pendiente' : '';
-                                    
-                                    let estadoBadge = '';
-                                    if(intg.estado === 'Pagado') estadoBadge = '<span class="badge-status bg-status-completado"><i class="bi bi-circle-fill"></i> Pagado</span>';
-                                    else if(intg.estado === 'Parcial') estadoBadge = '<span class="badge-status bg-status-parcial"><i class="bi bi-circle-fill"></i> Parcial</span>';
-                                    else estadoBadge = '<span class="badge-status bg-status-sinpago"><i class="bi bi-circle-fill"></i> Sin pago</span>';
-
-                                    let actionsBtn = '';
-                                    const nomJs = JSON.stringify(intg.nombre_completo);
-                                    if(intg.pendiente > 0) {
-                                        actionsBtn = `<button type="button" class="btn btn-action btn-action-cobrar" onclick='abrirModalCobrar(${reservaId}, ${nomJs}, ${intg.pendiente}, ${intg.cliente_id})'>Cobrar</button>`;
-                                    } else {
-                                        actionsBtn = `<button type="button" class="btn btn-action" disabled>Recibo</button>`;
-                                    }
-                                    actionsBtn += ` <button type="button" class="btn btn-action" title="Corregir nombre o monto asignado" onclick='abrirEditarIntegrante(${reservaId}, ${intg.cliente_id}, ${nomJs}, ${intg.asignado})'><i class="bi bi-pencil"></i></button>`;
-
-                                    const tr = document.createElement('tr');
-                                    tr.innerHTML = `
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <span class="avatar-circle" style="background-color: ${bgColor2}">${ini2}</span>
-                                                ${intg.nombre_completo}
-                                                ${intg.es_lider ? '<span class="badge-lider">Líder</span>' : ''}
-                                            </div>
-                                        </td>
-                                        <td>€${intg.asignado}</td>
-                                        <td class="text-cobrado">€${intg.pagado}</td>
-                                        <td class="${pndColor}">€${intg.pendiente}</td>
-                                        <td>${estadoBadge}</td>
-                                        <td class="text-end text-nowrap">${actionsBtn}</td>
-                                    `;
-                                    tbody.appendChild(tr);
-                                });
-                            } else {
-                                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No se encontraron integrantes or no se asignaron montos</td></tr>';
-                            }
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            document.getElementById('body-desglose-' + reservaId).innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar datos.</td></tr>';
-                        });
-                }
-            });
-        });
-    });
-    function abrirModalCobrar(reservaId, clienteNombre, pendiente, clienteId = '') {
-        document.getElementById('modal_reserva_id').value = reservaId;
-        document.getElementById('modal_cliente_nombre').value = clienteNombre;
-        document.getElementById('modal_monto').value = pendiente;
-        document.getElementById('modal_cliente_id').value = clienteId;
-
-        var myModal = new bootstrap.Modal(document.getElementById('modalRegistrarPago'));
-        myModal.show();
-    }
-
-    /**
-     * NUEVO: Abre modal para seleccionar y anular un pago diferente
-     * Carga todos los pagos de la reserva en una lista seleccionable
-     */
-    function abrirModalAnularOtroPago() {
-        if (!reservaCtxAuditoria) {
-            alert('No hay contexto de reserva. Por favor, intente nuevamente.');
-            return;
-        }
-
-        // Cerrar modal actual
-        bootstrap.Modal.getInstance(document.getElementById('modalAuditoriaPago'))?.hide();
-
-        // Limpiar estado previo
-        document.getElementById('pago_seleccionado_ids').value = '';
-        document.getElementById('btn_confirmar_anular').disabled = true;
-        document.getElementById('btn_confirmar_anular').innerHTML = 'Anular pagos seleccionados';
-        document.getElementById('lista_pagos_anular').innerHTML = '<div class="text-center text-muted py-4">Cargando pagos...</div>';
-        document.getElementById('anular_pago_ids_container').innerHTML = '';
-
-        // Cargar todos los pagos de la reserva
-        fetch(pagosBase + '/reserva/' + reservaCtxAuditoria + '/pagos-lista', {
-            headers: { 'Accept': 'application/json' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success || !data.data || data.data.length === 0) {
-                    document.getElementById('lista_pagos_anular').innerHTML = 
-                        '<div class="text-center text-muted py-4">No hay pagos registrados en esta reserva.</div>';
-                    return;
-                }
-
-                const listHTML = data.data.map((pago, idx) => `
-                    <div style="padding:12px;border-bottom:1px solid #2d313f;transition:all 0.2s;" 
-                         class="pago-item" 
-                         data-pago-id="${pago.id}">
-                        <label class="d-flex align-items-start gap-3" style="cursor:pointer;">
-                            <input type="checkbox" class="form-check-input mt-1" value="${pago.id}" onchange="actualizarSeleccion(this)"> 
-                            <div class="w-100">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <strong class="text-white d-block">${pago.cliente}</strong>
-                                        <small class="text-light">ID: #${pago.id} • ${pago.metodo_pago} • ${pago.fecha_pago_fmt}</small>
-                                    </div>
-                                    <span class="text-cobrado fw-bold" style="font-size:1.1rem;">€${Number(pago.monto).toFixed(2)}</span>
-                                </div>
-                                ${pago.referencia && pago.referencia !== '—' ? '<small class="text-muted d-block mt-1">Ref: ' + pago.referencia + '</small>' : ''}
-                            </div>
-                        </label>
-                    </div>
-                `).join('');
-
-                document.getElementById('lista_pagos_anular').innerHTML = listHTML;
-            })
-            .catch(err => {
-                console.error(err);
-                document.getElementById('lista_pagos_anular').innerHTML = 
-                    '<div class="text-center text-danger py-4">Error al cargar los pagos.</div>';
-            });
-
-        // Mostrar modal
-        new bootstrap.Modal(document.getElementById('modalAnularOtroPago')).show();
-    }
-
-    /**
-     * NUEVO: Actualiza la lista de pagos seleccionados cuando cambia un checkbox
-     */
-    function actualizarSeleccion(checkbox) {
-        const item = checkbox.closest('.pago-item');
-        if (!item) return;
-
-        item.style.backgroundColor = checkbox.checked ? 'rgba(239, 68, 68, 0.1)' : 'transparent';
-        item.style.borderLeft = checkbox.checked ? '4px solid #ef4444' : '4px solid transparent';
-
-        const selectedIds = Array.from(document.querySelectorAll('#lista_pagos_anular input[type="checkbox"]'))
-            .filter(chk => chk.checked)
-            .map(chk => Number(chk.value));
-
-        document.getElementById('pago_seleccionado_ids').value = selectedIds.join(',');
-        document.getElementById('btn_confirmar_anular').disabled = selectedIds.length === 0;
-        // Habilitar el botón de editar solo si hay exactamente un pago seleccionado
-        const btnEditar = document.getElementById('btn_editar_seleccionado');
-        if (btnEditar) btnEditar.disabled = selectedIds.length !== 1;
-    }
-
-    /**
-     * NUEVO: Confirma la anulación de los pagos seleccionados
-     */
-    function confirmarAnularPagosSeleccionados() {
-        const rawValue = document.getElementById('pago_seleccionado_ids').value || '';
-        const pagoIds = rawValue.split(',').filter(v => v !== '').map(v => Number(v));
-
-        if (!pagoIds.length) {
-            alert('Por favor, seleccione al menos un pago para anular.');
-            return;
-        }
-
-        if (!confirm('¿Está seguro de que desea ANULAR los pagos seleccionados?\n\nEl monto se restará del balance de las reservas correspondientes.')) {
-            return;
-        }
-
-        if (!confirm('Confirmación final: ¿Anular los registros contables seleccionados?')) {
-            return;
-        }
-
-        // Limpiar inputs previos y agregar campos al formulario
-        const container = document.getElementById('anular_pago_ids_container');
-        container.innerHTML = '';
-        pagoIds.forEach(id => {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = 'pago_ids[]';
-            hidden.value = id;
-            container.appendChild(hidden);
-        });
-
-        const f = document.getElementById('formAnularPago');
-        f.action = pagosBase + '/multiple';
-        document.getElementById('anular_ctx_reserva_id').value = reservaCtxAuditoria || '';
-
-        document.getElementById('btn_confirmar_anular').disabled = true;
-        document.getElementById('btn_confirmar_anular').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Anulando...';
-
-        f.submit();
-    }
-
-    /**
-     * Abre el modal de edición para el pago seleccionado en la lista (debe ser 1)
-     */
-    function abrirEditarPagoSeleccionado() {
-        const rawValue = document.getElementById('pago_seleccionado_ids').value || '';
-        const pagoIds = rawValue.split(',').filter(v => v !== '').map(v => Number(v));
-        if (pagoIds.length !== 1) {
-            alert('Por favor seleccione exactamente un pago para editar.');
-            return;
-        }
-        const pagoId = pagoIds[0];
-
-        // Cerrar modal de selección
-        bootstrap.Modal.getInstance(document.getElementById('modalAnularOtroPago'))?.hide();
-
-        // Obtener auditoría/detalle del pago y abrir modal de edición
-        fetch(pagosBase + '/' + pagoId + '/auditoria', { headers: { 'Accept': 'application/json' } })
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success) throw new Error();
-                pagoAuditoriaActual = data.data;
-                reservaCtxAuditoria = data.data.reserva_id || reservaCtxAuditoria;
-                // Reusar la función que abre el modal de editar desde auditoría
-                abrirModalEditarDesdeAuditoria();
-            })
-            .catch(() => alert('No se pudo cargar la información del pago seleccionado.'));
-    }
+    window.configuracionPagos = {
+        token: @json(csrf_token()),
+        basePagos: @json(route('pagos', [], false)),
+        mensajeExito: @json(session('success')),
+        mensajeError: @json(session('error')),
+        errores: @json($errors->toArray())
+    };
 </script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="{{ asset('js/pagos-listado.js') }}"></script>
 @endsection

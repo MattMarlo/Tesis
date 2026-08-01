@@ -57,7 +57,13 @@ Route::get('/paquetes/{slug}', [DestinoController::class, 'detalle'])
     ->name('paquetes.detalle');
 
 // Endpoint público para recibir pre-reservas desde n8n (POST JSON)
-Route::post('/prereservas/webhook', [PreReservaController::class, 'storeFromWebhook']);
+Route::post(
+    '/prereservas/webhook',
+    [
+        PreReservaController::class,
+        'storeFromWebhook',
+    ]
+)->name('prereservas.webhook');
 
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
@@ -193,10 +199,6 @@ Route::middleware('auth')->group(function() {
     });
 });
 
-Route::post(
-    '/prereservas/webhook',
-    [PreReservaController::class, 'storeFromWebhook']
-);
 
 
 

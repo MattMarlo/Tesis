@@ -1,0 +1,321 @@
+.pagina-prerreservas {
+    --pre-azul: #093d77;
+    --pre-celeste: #3a7ca5;
+    --pre-dorado: #daa520;
+    --pre-texto: #2b2b2b;
+    --pre-gris: #68737e;
+    --pre-borde: #dbe3ea;
+
+    padding: 1.5rem;
+    color: var(--pre-texto);
+}
+
+.prerreservas-encabezado {
+    margin-bottom: 1.4rem;
+}
+
+.prerreservas-encabezado span {
+    color: var(--pre-celeste);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.prerreservas-encabezado h1 {
+    margin: 0.25rem 0;
+    color: var(--pre-azul);
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.prerreservas-encabezado p {
+    margin: 0;
+    color: var(--pre-gris);
+    font-size: 0.88rem;
+}
+
+.resumen-prerreservas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.resumen-prerreservas article {
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--pre-borde);
+    border-radius: 0.75rem;
+    background: #ffffff;
+}
+
+.resumen-prerreservas span,
+.resumen-prerreservas small {
+    display: block;
+    color: var(--pre-gris);
+    font-size: 0.72rem;
+}
+
+.resumen-prerreservas strong {
+    display: block;
+    margin: 0.3rem 0;
+    color: var(--pre-azul);
+    font-size: 1.45rem;
+}
+
+.filtros-prerreservas {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--pre-borde);
+    border-radius: 0.75rem;
+    background: #ffffff;
+}
+
+.buscar-prerreserva {
+    position: relative;
+    flex: 1;
+}
+
+.buscar-prerreserva i {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    color: #8b959f;
+    transform: translateY(-50%);
+}
+
+.buscar-prerreserva input,
+.filtros-prerreservas select {
+    width: 100%;
+    height: 2.7rem;
+    border: 1px solid var(--pre-borde);
+    border-radius: 0.55rem;
+    background: #ffffff;
+    color: var(--pre-texto);
+    font-size: 0.84rem;
+}
+
+.buscar-prerreserva input {
+    padding: 0 0.9rem 0 2.5rem;
+}
+
+.filtros-prerreservas select {
+    max-width: 200px;
+    padding: 0 0.75rem;
+}
+
+.buscar-prerreserva input:focus,
+.filtros-prerreservas select:focus {
+    border-color: var(--pre-celeste);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+}
+
+.filtros-prerreservas button,
+.filtros-prerreservas > a {
+    height: 2.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    border-radius: 0.55rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.filtros-prerreservas button {
+    border: 1px solid var(--pre-azul);
+    background: var(--pre-azul);
+    color: #ffffff;
+}
+
+.filtros-prerreservas > a {
+    border: 1px solid var(--pre-borde);
+    background: #ffffff;
+    color: var(--pre-gris);
+}
+
+.contenedor-prerreservas {
+    border: 1px solid var(--pre-borde);
+    border-radius: 0.75rem;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.tabla-prerreservas-responsive {
+    overflow-x: auto;
+}
+
+.tabla-prerreservas {
+    width: 100%;
+    min-width: 1050px;
+    border-collapse: collapse;
+}
+
+.tabla-prerreservas th {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--pre-borde);
+    background: #f4f7f9;
+    color: var(--pre-gris);
+    font-size: 0.7rem;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.tabla-prerreservas td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid #edf1f4;
+    vertical-align: middle;
+    font-size: 0.82rem;
+}
+
+.tabla-prerreservas tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tabla-prerreservas td strong,
+.tabla-prerreservas td small {
+    display: block;
+}
+
+.tabla-prerreservas td small {
+    margin-top: 0.2rem;
+    color: var(--pre-gris);
+    font-size: 0.7rem;
+}
+
+.origen-telegram {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #2677a8;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.estado-prerreserva {
+    display: inline-flex;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.estado-pendiente_contacto {
+    background: #fff5d7;
+    color: #846310;
+}
+
+.estado-contactado {
+    background: #e8f2fb;
+    color: #245f8f;
+}
+
+.estado-convertida {
+    background: #e7f7ed;
+    color: #277647;
+}
+
+.estado-perdida {
+    background: #f1f3f5;
+    color: #68737e;
+}
+
+.acciones-prerreserva {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.acciones-prerreserva a,
+.acciones-prerreserva button {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-editar-prerreserva {
+    border: 1px solid #d7b558;
+    color: #8b6810;
+}
+
+.btn-convertir-prerreserva {
+    border: 1px solid #79b98f;
+    color: #267345;
+}
+
+.btn-descartar-prerreserva {
+    border: 1px solid #e6a2a8;
+    color: #b4323c;
+}
+
+.reserva-generada {
+    color: #277647;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.sin-prerreservas {
+    padding: 3rem 1rem !important;
+    color: var(--pre-gris);
+    text-align: center;
+}
+
+.sin-prerreservas i,
+.sin-prerreservas strong,
+.sin-prerreservas span {
+    display: block;
+}
+
+.sin-prerreservas i {
+    margin-bottom: 0.7rem;
+    color: var(--pre-celeste);
+    font-size: 2rem;
+}
+
+.paginacion-prerreservas {
+    margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+    .resumen-prerreservas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filtros-prerreservas {
+        flex-wrap: wrap;
+    }
+
+    .buscar-prerreserva {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .pagina-prerreservas {
+        padding: 1rem;
+    }
+
+    .resumen-prerreservas {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-prerreservas select {
+        max-width: none;
+    }
+
+    .filtros-prerreservas button,
+    .filtros-prerreservas > a,
+    .filtros-prerreservas select {
+        flex: 1 1 130px;
+    }
+}

@@ -1,0 +1,220 @@
+.pagina-prerreserva-formulario {
+    --pre-azul: #093d77;
+    --pre-celeste: #3a7ca5;
+    --pre-dorado: #daa520;
+    --pre-texto: #2b2b2b;
+    --pre-gris: #68737e;
+    --pre-borde: #dbe3ea;
+
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    color: var(--pre-texto);
+}
+
+.prerreserva-formulario-encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.3rem;
+}
+
+.prerreserva-formulario-encabezado span {
+    color: var(--pre-celeste);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.prerreserva-formulario-encabezado h1 {
+    margin: 0.25rem 0;
+    color: var(--pre-azul);
+    font-size: 1.6rem;
+}
+
+.prerreserva-formulario-encabezado p {
+    margin: 0;
+    color: var(--pre-gris);
+    font-size: 0.85rem;
+}
+
+.volver-prerreservas {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--pre-azul);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.origen-prerreserva {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #cfe0ec;
+    border-radius: 0.75rem;
+    background: #f3f8fc;
+}
+
+.origen-prerreserva span,
+.origen-prerreserva small {
+    display: block;
+}
+
+.origen-prerreserva span {
+    color: var(--pre-gris);
+    font-size: 0.7rem;
+}
+
+.origen-prerreserva strong {
+    color: var(--pre-azul);
+    font-size: 0.85rem;
+}
+
+.origen-prerreserva small {
+    margin-top: 0.2rem;
+    color: var(--pre-gris);
+    font-size: 0.68rem;
+}
+
+.formulario-prerreserva {
+    padding: 1.25rem;
+    border: 1px solid var(--pre-borde);
+    border-radius: 0.8rem;
+    background: #ffffff;
+}
+
+.formulario-prerreserva-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.campo-prerreserva {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.campo-prerreserva-completo {
+    grid-column: 1 / -1;
+}
+
+.campo-prerreserva label {
+    color: #39434d;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.campo-prerreserva label span {
+    color: #c53b45;
+}
+
+.campo-prerreserva input,
+.campo-prerreserva select,
+.campo-prerreserva textarea {
+    width: 100%;
+    border: 1px solid var(--pre-borde);
+    border-radius: 0.55rem;
+    background: #ffffff;
+    color: var(--pre-texto);
+    font-size: 0.85rem;
+}
+
+.campo-prerreserva input,
+.campo-prerreserva select {
+    height: 2.8rem;
+    padding: 0 0.8rem;
+}
+
+.campo-prerreserva textarea {
+    min-height: 105px;
+    padding: 0.8rem;
+    resize: vertical;
+}
+
+.campo-prerreserva input:focus,
+.campo-prerreserva select:focus,
+.campo-prerreserva textarea:focus {
+    border-color: var(--pre-celeste);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+}
+
+.campo-prerreserva .input-error {
+    border-color: #d34c55;
+    background: #fffafa;
+}
+
+.mensaje-error-prerreserva {
+    display: none;
+    color: #c53b45;
+    font-size: 0.7rem;
+}
+
+.acciones-formulario-prerreserva {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pre-borde);
+}
+
+.btn-cancelar-prerreserva,
+.btn-guardar-prerreserva {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0 1.1rem;
+    border-radius: 0.55rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-cancelar-prerreserva {
+    border: 1px solid var(--pre-borde);
+    background: #ffffff;
+    color: var(--pre-gris);
+}
+
+.btn-guardar-prerreserva {
+    border: 1px solid var(--pre-azul);
+    background: var(--pre-azul);
+    color: #ffffff;
+}
+
+.btn-guardar-prerreserva:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+@media (max-width: 720px) {
+    .pagina-prerreserva-formulario {
+        padding: 1rem;
+    }
+
+    .prerreserva-formulario-encabezado {
+        flex-direction: column;
+    }
+
+    .origen-prerreserva,
+    .formulario-prerreserva-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-prerreserva-completo {
+        grid-column: auto;
+    }
+
+    .acciones-formulario-prerreserva {
+        flex-direction: column-reverse;
+    }
+}

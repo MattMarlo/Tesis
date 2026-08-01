@@ -39,6 +39,26 @@
     >
         @csrf
 
+        @if ($preReservaId)
+            <input
+                type="hidden"
+                name="prereserva_id"
+                value="{{ $preReservaId }}"
+            >
+
+            <div class="nota-grupal">
+                <i class="bi bi-telegram"></i>
+
+                <span>
+                    Esta reserva proviene de una prerreserva de Telegram
+                    para aproximadamente
+                    <strong>{{ $cantidadPersonas }}</strong>
+                    personas. Agrega y verifica todos los integrantes
+                    antes de continuar.
+                </span>
+            </div>
+        @endif
+
         <section class="grupal-seccion">
             <div class="seccion-titulo">
                 <h2>1. Información del grupo</h2>
@@ -107,7 +127,10 @@
                                 data-moneda="{{ strtoupper($destino->moneda ?: 'USD') }}"
                                 data-capacidad="{{ $destino->capacidad }}"
                                 @selected(
-                                    (int) old('destino_id') ===
+                                    (int) old(
+                                        'destino_id',
+                                        $destinoSeleccionado
+                                    ) ===
                                     $destino->id
                                 )
                             >
@@ -398,10 +421,42 @@
 
 <script>
     window.configuracionReservaGrupal = {
-        errores: @json($errors->toArray()),
-        mensajeError: @json(session('error')),
-        integrantesAnteriores: @json(old('integrantes', [])),
-        responsableAnterior: @json(old('responsable_pago_id'))
+        errores: @json(
+            $errors->toArray()
+        ),
+
+        mensajeError: @json(
+            session('error')
+        ),
+
+        integrantesAnteriores: @json(
+            old(
+                'integrantes',
+                $clienteSeleccionado
+                    ? [
+                        [
+                            'cliente_id' =>
+                                $clienteSeleccionado,
+
+                            'es_lider' =>
+                                1,
+                        ],
+                    ]
+                    : []
+            )
+        ),
+
+        responsableAnterior: @json(
+            old('responsable_pago_id')
+        ),
+
+        cantidadEsperada: @json(
+            $cantidadPersonas
+        ),
+
+        provienePrerreserva: @json(
+            (bool) $preReservaId
+        )
     };
 </script>
 

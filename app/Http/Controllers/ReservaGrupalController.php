@@ -7,6 +7,8 @@ use App\Models\Destino;
 use App\Models\Grupo;
 use App\Models\Reserva;
 use App\Services\ReservaGrupalService;
+use App\Models\PreReserva;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,8 +22,9 @@ class ReservaGrupalController extends Controller
     ) {
     }
 
-    public function create()
-    {
+    public function create(
+        Request $request
+    ) {
         $clientes = Cliente::query()
             ->activos()
             ->orderBy('nombres')
@@ -29,17 +32,65 @@ class ReservaGrupalController extends Controller
             ->get();
 
         $destinos = Destino::query()
-            ->where('estado_publicacion', 'publicado')
-            ->whereDate('fecha_salida', '>=', today())
+            ->where(
+                'estado_publicacion',
+                'publicado'
+            )
+            ->whereDate(
+                'fecha_salida',
+                '>=',
+                today()
+            )
             ->orderBy('fecha_salida')
             ->get();
+
+        $clienteSeleccionado =
+            $request->integer(
+                'cliente_id'
+            );
+
+        $destinoSeleccionado =
+            $request->integer(
+                'destino_id'
+            );
+
+        $preReservaId =
+            $request->integer(
+                'prereserva_id'
+            );
+
+        $cantidadPersonas =
+            max(
+                2,
+                $request->integer(
+                    'cantidad_personas',
+                    2
+                )
+            );
 
         return view(
             'modules.reservas.grupal.create',
             [
-                'titulo' => 'Nueva reserva grupal',
-                'clientes' => $clientes,
-                'destinos' => $destinos,
+                'titulo' =>
+                    'Nueva reserva grupal',
+
+                'clientes' =>
+                    $clientes,
+
+                'destinos' =>
+                    $destinos,
+
+                'clienteSeleccionado' =>
+                    $clienteSeleccionado,
+
+                'destinoSeleccionado' =>
+                    $destinoSeleccionado,
+
+                'preReservaId' =>
+                    $preReservaId,
+
+                'cantidadPersonas' =>
+                    $cantidadPersonas,
             ]
         );
     }
@@ -312,6 +363,11 @@ class ReservaGrupalController extends Controller
                 'integer',
                 'exists:destinos,id',
             ],
+            'prereserva_id' => [
+                'nullable',
+                'integer',
+                'exists:pre_reservas,id',
+            ],
             'integrantes' => [
                 'required',
                 'array',
@@ -350,6 +406,9 @@ class ReservaGrupalController extends Controller
             'destino_id.exists' =>
                 'El paquete seleccionado no existe.',
 
+            'prereserva_id.exists' =>
+                'La prerreserva seleccionada no existe.',
+
             'integrantes.required' =>
                 'Agrega los integrantes del grupo.',
             'integrantes.array' =>
@@ -382,9 +441,90 @@ class ReservaGrupalController extends Controller
         }
 
         try {
-            $reserva = $this->reservaService->guardar(
-                $datos,
-                (int) $usuarioId
+            $reserva = DB::transaction(
+                function () use (
+                    $datos,
+                    $usuarioId
+                ) {
+                    $preReserva = null;
+
+                    if (
+                        !empty(
+                            $datos[
+                                'prereserva_id'
+                            ]
+                        )
+                    ) {
+                        $preReserva =
+                            PreReserva::query()
+                                ->lockForUpdate()
+                                ->findOrFail(
+                                    $datos[
+                                        'prereserva_id'
+                                    ]
+                                );
+
+                        if (
+                            $preReserva
+                                ->estaConvertida()
+                        ) {
+                            throw new
+                                InvalidArgumentException(
+                                    'Esta prerreserva ya fue convertida anteriormente.'
+                                );
+                        }
+
+                        if (
+                            $preReserva
+                                ->estaDescartada()
+                        ) {
+                            throw new
+                                InvalidArgumentException(
+                                    'Una prerreserva descartada no puede convertirse.'
+                                );
+                        }
+
+                        if (
+                            $preReserva
+                                ->destino_id &&
+                            (int)
+                                $preReserva
+                                    ->destino_id !==
+                            (int)
+                                $datos[
+                                    'destino_id'
+                                ]
+                        ) {
+                            throw new
+                                InvalidArgumentException(
+                                    'El paquete seleccionado no corresponde a la prerreserva.'
+                                );
+                        }
+                    }
+
+                    $reserva =
+                        $this->reservaService
+                            ->guardar(
+                                $datos,
+                                (int) $usuarioId
+                            );
+
+                    if ($preReserva) {
+                        $preReserva->update([
+                            'estado' =>
+                                PreReserva::
+                                    ESTADO_CONVERTIDA,
+
+                            'reserva_id' =>
+                                $reserva->id,
+
+                            'user_id' =>
+                                $usuarioId,
+                        ]);
+                    }
+
+                    return $reserva;
+                }
             );
 
             if ($request->expectsJson()) {

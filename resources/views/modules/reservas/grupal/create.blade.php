@@ -419,45 +419,49 @@
     </form>
 </main>
 
+@php
+    $integrantesAnteriores = old('integrantes');
+
+    if ($integrantesAnteriores === null) {
+        $integrantesAnteriores = $clienteSeleccionado
+            ? [
+                [
+                    'cliente_id' =>
+                        (int) $clienteSeleccionado,
+
+                    'es_lider' =>
+                        1,
+                ],
+            ]
+            : [];
+    }
+
+    $configuracionReservaGrupal = [
+        'errores' =>
+            $errors->toArray(),
+
+        'mensajeError' =>
+            session('error'),
+
+        'integrantesAnteriores' =>
+            $integrantesAnteriores,
+
+        'responsableAnterior' =>
+            old('responsable_pago_id'),
+
+        'cantidadEsperada' =>
+            $cantidadPersonas,
+
+        'provienePrerreserva' =>
+            (bool) $preReservaId,
+    ];
+@endphp
+
 <script>
-    window.configuracionReservaGrupal = {
-        errores: @json(
-            $errors->toArray()
-        ),
-
-        mensajeError: @json(
-            session('error')
-        ),
-
-        integrantesAnteriores: @json(
-            old(
-                'integrantes',
-                $clienteSeleccionado
-                    ? [
-                        [
-                            'cliente_id' =>
-                                $clienteSeleccionado,
-
-                            'es_lider' =>
-                                1,
-                        ],
-                    ]
-                    : []
-            )
-        ),
-
-        responsableAnterior: @json(
-            old('responsable_pago_id')
-        ),
-
-        cantidadEsperada: @json(
-            $cantidadPersonas
-        ),
-
-        provienePrerreserva: @json(
-            (bool) $preReservaId
-        )
-    };
+    window.configuracionReservaGrupal =
+        {{ Illuminate\Support\Js::from(
+            $configuracionReservaGrupal
+        ) }};
 </script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

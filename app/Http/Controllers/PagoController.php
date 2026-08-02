@@ -230,6 +230,8 @@ class PagoController extends Controller
                                 ($pago->cliente->apellidos ?? '')
                             )
                             : null,
+                        'email' =>
+                            $pago->cliente?->email,
                         'destino' =>
                             $pago->reserva?->destino?->nombre_paquete,
                         'monto' =>

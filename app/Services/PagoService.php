@@ -620,6 +620,11 @@ class PagoService
                 }
             }
 
+            $saldoPermitido = round(
+                $saldoPermitido,
+                2
+            );
+
             if ($saldoPermitido <= 0) {
                 throw new InvalidArgumentException(
                     'La deuda seleccionada ya está pagada.'

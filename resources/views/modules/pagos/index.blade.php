@@ -794,27 +794,86 @@
     </div>
 </div>
 
-<form
-    id="formularioAnularPago"
-    method="POST"
-    action=""
-    class="d-none"
+<div
+    class="modal fade"
+    id="modalAnularPago"
+    tabindex="-1"
+    aria-labelledby="tituloModalAnularPago"
+    aria-hidden="true"
 >
-    @csrf
-    @method('DELETE')
+    <div class="modal-dialog modal-dialog-centered">
+        <form
+            id="formularioAnularPago"
+            method="POST"
+            action=""
+            class="modal-content modal-pago"
+        >
+            @csrf
+            @method('DELETE')
 
-    <input
-        type="hidden"
-        name="reserva_id"
-        id="anularReservaId"
-    >
+            <input
+                type="hidden"
+                name="reserva_id"
+                id="anularReservaId"
+            >
 
-    <input
-        type="hidden"
-        name="motivo_anulacion"
-        id="anularMotivo"
-    >
-</form>
+            <div class="modal-header">
+                <div>
+                    <span>Anulación</span>
+                    <h2 id="tituloModalAnularPago">
+                        Anular pago
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
+            </div>
+
+            <div class="modal-body">
+                <p>
+                    El pago permanecerá en el historial, pero dejará de sumarse al total recibido.
+                </p>
+
+                <div class="campo-pago">
+                    <label for="anularMotivo">
+                        Motivo de la anulación <span>*</span>
+                    </label>
+
+                    <textarea
+                        id="anularMotivo"
+                        name="motivo_anulacion"
+                        rows="5"
+                        minlength="10"
+                        maxlength="500"
+                        placeholder="Explica por qué se anula este pago..."
+                        required
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn-secundario-pago"
+                    data-bs-dismiss="modal"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-principal-pago"
+                >
+                    Sí, anular pago
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
     window.configuracionPagos = {

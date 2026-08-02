@@ -30,6 +30,13 @@ $(function () {
             )
         );
 
+    const modalAnular = bootstrap.Modal
+        .getOrCreateInstance(
+            document.getElementById(
+                'modalAnularPago'
+            )
+        );
+
     const $formularioPago =
         $('#formularioRegistrarPago');
 
@@ -1089,9 +1096,19 @@ $(function () {
                     'modalHistorialPagos'
                 );
 
+            $('#formularioAnularPago').attr(
+                'action',
+                `${configuracion.basePagos}/${pagoId}`
+            );
+
+            $('#anularReservaId').val(reservaId);
+            $('#anularMotivo').val('');
+
             historialElemento.addEventListener(
                 'hidden.bs.modal',
-                mostrarConfirmacion,
+                function () {
+                    modalAnular.show();
+                },
                 { once: true }
             );
 

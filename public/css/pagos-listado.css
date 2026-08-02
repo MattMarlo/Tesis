@@ -487,6 +487,7 @@
 }
 
 .campo-pago input,
+.campo-pago textarea,
 .campo-pago select {
     width: 100%;
     min-height: 2.8rem;
@@ -499,7 +500,13 @@
     outline: none;
 }
 
+.campo-pago textarea {
+    padding: 0.8rem;
+    resize: vertical;
+}
+
 .campo-pago input:focus,
+.campo-pago textarea:focus,
 .campo-pago select:focus {
     border-color: var(--pagos-azul-claro);
     box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.1);

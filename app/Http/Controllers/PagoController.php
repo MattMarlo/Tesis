@@ -7,6 +7,7 @@ use App\Services\PagoService;
 use App\Models\Reserva;
 use App\Models\Pago;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
@@ -134,8 +135,12 @@ class PagoController extends Controller
         $datos['user_id'] = (int) $usuarioId;
 
         try {
-            $this->pagoService->registrarPago(
+            $pagoId = $this->pagoService->registrarPago(
                 $datos
+            );
+
+            $this->notificarPagoN8n(
+                (int) $pagoId
             );
 
             $mensaje =
@@ -183,6 +188,89 @@ class PagoController extends Controller
                     'error',
                     'No se pudo registrar el pago. Inténtalo nuevamente.'
                 );
+        }
+    }
+
+    private function notificarPagoN8n(int $pagoId): void
+    {
+        $webhookUrl = config(
+            'services.n8n.payment_notification_url'
+        );
+
+        if (!$webhookUrl) {
+            return;
+        }
+
+        try {
+            $pago = Pago::query()
+                ->with([
+                    'cliente',
+                    'reserva.destino',
+                    'user',
+                ])
+                ->find($pagoId);
+
+            if (!$pago) {
+                return;
+            }
+
+            $respuesta = Http::timeout(10)->post(
+                $webhookUrl,
+                [
+                    'event' => 'pago.registrado',
+                    'data' => [
+                        'pago_id' => $pago->id,
+                        'reserva_id' => $pago->reserva_id,
+                        'codigo_reserva' =>
+                            $pago->reserva?->codigo_reserva,
+                        'cliente' => $pago->cliente
+                            ? trim(
+                                ($pago->cliente->nombres ?? '') .
+                                ' ' .
+                                ($pago->cliente->apellidos ?? '')
+                            )
+                            : null,
+                        'destino' =>
+                            $pago->reserva?->destino?->nombre_paquete,
+                        'monto' =>
+                            (float) $pago->monto_depositado,
+                        'moneda' =>
+                            $pago->reserva?->moneda ?: 'USD',
+                        'metodo_pago' => $pago->metodo_pago,
+                        'referencia' => $pago->referencia,
+                        'fecha_pago' =>
+                            $pago->fecha_pago?->toIso8601String(),
+                        'estado_pago_reserva' =>
+                            $pago->reserva?->estado_pago,
+                        'total_pagado' =>
+                            $pago->reserva
+                                ? (float) $pago->reserva->total_pagado
+                                : null,
+                        'saldo_pendiente' =>
+                            $pago->reserva
+                                ? (float) $pago->reserva->saldo_pendiente
+                                : null,
+                    ],
+                ]
+            );
+
+            if ($respuesta->failed()) {
+                Log::warning(
+                    'n8n rechazó la notificación del pago.',
+                    [
+                        'pago_id' => $pago->id,
+                        'estado_http' => $respuesta->status(),
+                    ]
+                );
+            }
+        } catch (\Throwable $error) {
+            Log::error(
+                'No se pudo notificar el pago a n8n.',
+                [
+                    'pago_id' => $pagoId,
+                    'mensaje' => $error->getMessage(),
+                ]
+            );
         }
     }
 

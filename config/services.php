@@ -39,6 +39,9 @@ return [
         'notification_url' =>
             env('N8N_NOTIFICATION_URL'),
 
+        'payment_notification_url' =>
+            'http://passiontravelviajes.de:5678/webhook/confirmacion-pago-registrado',
+
         'webhook_secret' =>
             env('N8N_WEBHOOK_SECRET'),
     ],

@@ -1020,7 +1020,8 @@ $(function () {
             const reservaId =
                 $(this).data('reserva-id');
 
-            Swal.fire({
+            const mostrarConfirmacion = function () {
+                Swal.fire({
                 icon: 'warning',
                 title: 'Anular pago',
                 text:
@@ -1060,27 +1061,41 @@ $(function () {
 
                     return null;
                 }
-            }).then(function (resultado) {
-                if (!resultado.isConfirmed) {
-                    return;
-                }
+                }).then(function (resultado) {
+                    if (!resultado.isConfirmed) {
+                        return;
+                    }
 
-                $('#formularioAnularPago').attr(
-                    'action',
-                    `${configuracion.basePagos}/${pagoId}`
+                    $('#formularioAnularPago').attr(
+                        'action',
+                        `${configuracion.basePagos}/${pagoId}`
+                    );
+
+                    $('#anularReservaId').val(
+                        reservaId
+                    );
+
+                    $('#anularMotivo').val(
+                        $.trim(resultado.value)
+                    );
+
+                    $('#formularioAnularPago')[0]
+                        .submit();
+                });
+            };
+
+            const historialElemento =
+                document.getElementById(
+                    'modalHistorialPagos'
                 );
 
-                $('#anularReservaId').val(
-                    reservaId
-                );
+            historialElemento.addEventListener(
+                'hidden.bs.modal',
+                mostrarConfirmacion,
+                { once: true }
+            );
 
-                $('#anularMotivo').val(
-                    $.trim(resultado.value)
-                );
-
-                $('#formularioAnularPago')[0]
-                    .submit();
-            });
+            modalHistorial.hide();
         }
     );
 

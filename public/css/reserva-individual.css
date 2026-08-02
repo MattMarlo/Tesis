@@ -1,10 +1,10 @@
 :root {
-    --reserva-azul: #093D77;
-    --reserva-celeste: #3A7CA5;
+    --reserva-azul: #094c90;
+    --reserva-celeste: #097188;
     --reserva-dorado: #DAA520;
     --reserva-texto: #2B2B2B;
     --reserva-borde: #DCE3E8;
-    --reserva-error: #C83D48;
+    --reserva-error: #962234;
 }
 
 .pagina-reserva-individual {
@@ -130,7 +130,7 @@
 
 .control-reserva:focus {
     border-color: var(--reserva-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.12);
 }
 
 .control-reserva.input-error {
@@ -385,7 +385,7 @@
 }
 
 .btn-guardar-reserva:hover {
-    background: #0B4B89;
+    background: #052c53;
 }
 
 .btn-guardar-reserva:disabled {

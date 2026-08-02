@@ -15,7 +15,7 @@
 
 .encabezado-formulario-usuario h2 {
     margin: 0 0 5px;
-    color: #093d77;
+    color: #094c90;
     font-size: 22px;
 }
 
@@ -31,7 +31,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    color: #093d77;
+    color: #094c90;
     background: #ffffff;
     border: 1px solid #dfe7ed;
     border-radius: 7px;
@@ -54,7 +54,7 @@
 
 .bloque-formulario-usuario h3 {
     margin: 0 0 19px;
-    color: #093d77;
+    color: #094c90;
     font-size: 15px;
 }
 
@@ -87,7 +87,7 @@
 }
 
 .campo-usuario > label span {
-    color: #c84242;
+    color: #962234;
 }
 
 .campo-usuario input,
@@ -113,13 +113,13 @@
 .campo-usuario input:focus,
 .campo-usuario select:focus {
     background: #ffffff;
-    border-color: #3a7ca5;
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.11);
+    border-color: #097188;
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.11);
 }
 
 .campo-usuario.campo-invalido input,
 .campo-usuario.campo-invalido select {
-    border-color: #c84242;
+    border-color: #962234;
     box-shadow: 0 0 0 3px rgba(200, 66, 66, 0.08);
 }
 
@@ -135,7 +135,7 @@
     min-height: 15px;
     margin-top: 4px;
     display: block;
-    color: #c84242;
+    color: #962234;
     font-size: 9px;
 }
 
@@ -165,7 +165,7 @@
 }
 
 .mostrar-contrasena:hover {
-    color: #093d77;
+    color: #094c90;
     background: #edf3f6;
 }
 
@@ -198,20 +198,20 @@
 }
 
 .boton-cancelar-usuario:hover {
-    color: #093d77;
+    color: #094c90;
     background: #f1f5f8;
 }
 
 .boton-guardar-usuario {
     color: #ffffff;
-    background: #093d77;
-    border: 1px solid #093d77;
+    background: #094c90;
+    border: 1px solid #094c90;
     cursor: pointer;
 }
 
 .boton-guardar-usuario:hover {
-    background: #3a7ca5;
-    border-color: #3a7ca5;
+    background: #097188;
+    border-color: #097188;
 }
 
 @media (max-width: 650px) {

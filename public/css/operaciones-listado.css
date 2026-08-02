@@ -1,13 +1,13 @@
 :root {
-    --operacion-azul: #093D77;
-    --operacion-celeste: #3A7CA5;
+    --operacion-azul: #094c90;
+    --operacion-celeste: #097188;
     --operacion-fondo: #F8F9FA;
     --operacion-texto: #2B2B2B;
     --operacion-gris: #65717E;
     --operacion-borde: #DCE4EA;
     --operacion-dorado: #DAA520;
     --operacion-verde: #218B5A;
-    --operacion-rojo: #C53B45;
+    --operacion-rojo: #962234;
     --operacion-blanco: #FFFFFF;
 }
 
@@ -150,7 +150,7 @@
 .buscar-operacion input:focus,
 .filtros-operaciones select:focus {
     border-color: var(--operacion-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.1);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.1);
 }
 
 .filtros-operaciones button,
@@ -278,9 +278,9 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 0.7rem;
-    border: 1px solid rgba(9, 61, 119, 0.25);
+    border: 1px solid rgba(5, 44, 83, 0.25);
     border-radius: 0.5rem;
-    background: rgba(9, 61, 119, 0.06);
+    background: rgba(5, 44, 83, 0.06);
     color: var(--operacion-azul);
     font-size: 0.72rem;
     font-weight: 700;

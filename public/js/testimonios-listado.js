@@ -113,7 +113,7 @@ $(document).ready(function () {
                 showCancelButton: true,
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#d64545',
+                confirmButtonColor: '#962234',
                 reverseButtons: true,
                 focusCancel: true
             }).then(function (resultado) {

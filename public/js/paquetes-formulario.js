@@ -29,7 +29,7 @@ $(function () {
                     title: 'Revisa la información ingresada',
                     text: errores.join('\n'),
                     confirmButtonText: 'Corregir',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
             }
         } catch (error) {
@@ -216,7 +216,7 @@ $(function () {
                     title: 'Servicio obligatorio',
                     text: 'El paquete debe tener al menos un servicio incluido.',
                     confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
 
                 return;
@@ -229,7 +229,7 @@ $(function () {
                 showCancelButton: true,
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#093D77',
+                confirmButtonColor: '#094c90',
                 cancelButtonColor: '#6B7280'
             }).then(function (resultado) {
                 if (resultado.isConfirmed) {
@@ -340,7 +340,7 @@ $(function () {
                     title: 'Itinerario obligatorio',
                     text: 'El paquete debe tener al menos un día en el itinerario.',
                     confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
 
                 return;
@@ -353,7 +353,7 @@ $(function () {
                 showCancelButton: true,
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#B42318',
+                confirmButtonColor: '#90091d',
                 cancelButtonColor: '#6B7280'
             }).then(function (resultado) {
                 if (resultado.isConfirmed) {
@@ -432,7 +432,7 @@ $(function () {
                 title: 'Formato no permitido',
                 text: 'Selecciona una imagen JPG, PNG o WEBP.',
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -453,7 +453,7 @@ $(function () {
                 title: 'La imagen es demasiado grande',
                 text: 'La imagen no debe superar los 5 MB.',
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -990,7 +990,7 @@ $(function () {
                 title: 'Formulario incompleto',
                 text: 'Revisa los campos señalados antes de continuar.',
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -1044,8 +1044,8 @@ $(function () {
             showCancelButton: true,
             confirmButtonText: 'Sí, salir',
             cancelButtonText: 'Continuar editando',
-            confirmButtonColor: '#B42318',
-            cancelButtonColor: '#093D77'
+            confirmButtonColor: '#90091d',
+            cancelButtonColor: '#094c90'
         }).then(function (resultado) {
             if (resultado.isConfirmed) {
                 window.location.href = enlace;

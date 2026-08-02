@@ -1,6 +1,6 @@
 .pagina-prerreserva-formulario {
-    --pre-azul: #093d77;
-    --pre-celeste: #3a7ca5;
+    --pre-azul: #094c90;
+    --pre-celeste: #097188;
     --pre-dorado: #daa520;
     --pre-texto: #2b2b2b;
     --pre-gris: #68737e;
@@ -111,7 +111,7 @@
 }
 
 .campo-prerreserva label span {
-    color: #c53b45;
+    color: #962234;
 }
 
 .campo-prerreserva input,
@@ -142,7 +142,7 @@
 .campo-prerreserva textarea:focus {
     border-color: var(--pre-celeste);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.12);
 }
 
 .campo-prerreserva .input-error {
@@ -152,7 +152,7 @@
 
 .mensaje-error-prerreserva {
     display: none;
-    color: #c53b45;
+    color: #962234;
     font-size: 0.7rem;
 }
 

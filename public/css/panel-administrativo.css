@@ -1,9 +1,9 @@
 :root {
     --panel-sidebar: 285px;
     --panel-sidebar-reducido: 88px;
-    --panel-azul: #093d77;
-    --panel-azul-oscuro: #062d59;
-    --panel-celeste: #3a7ca5;
+    --panel-azul: #094c90;
+    --panel-azul-oscuro: #052c53;
+    --panel-celeste: #097188;
     --panel-dorado: #daa520;
     --panel-fondo: #f4f7f9;
     --panel-blanco: #ffffff;
@@ -41,7 +41,7 @@ body {
     color: var(--panel-texto);
     background: #ffffff;
     border-right: 1px solid var(--panel-borde);
-    box-shadow: 3px 0 12px rgba(9, 61, 119, 0.04);
+    box-shadow: 3px 0 12px rgba(5, 44, 83, 0.04);
     overflow: hidden;
     transition: var(--panel-transicion);
 }
@@ -83,6 +83,15 @@ body {
     background: var(--panel-dorado);
     border-radius: 9px;
     font-size: 18px;
+    overflow: hidden;
+}
+
+.marca-panel-icono img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: inherit;
+    object-fit: cover;
 }
 
 .marca-panel-textos {
@@ -345,8 +354,8 @@ body {
 
 .boton-cerrar-sesion:hover {
     color: #ffffff;
-    background: #c84242;
-    border-color: #c84242;
+    background: #962234;
+    border-color: #962234;
 }
 
 /* Menú contraído */
@@ -426,7 +435,7 @@ body {
     background: rgba(255, 255, 255, 0.94);
     border-bottom: 1px solid var(--panel-borde);
     backdrop-filter: blur(12px);
-    box-shadow: 0 4px 18px rgba(9, 61, 119, 0.04);
+    box-shadow: 0 4px 18px rgba(5, 44, 83, 0.04);
 }
 
 .titulo-topbar h5 {
@@ -461,7 +470,7 @@ body {
     border-radius: 11px;
     font-size: 12px;
     font-weight: 700;
-    box-shadow: 0 7px 16px rgba(9, 61, 119, 0.16);
+    box-shadow: 0 7px 16px rgba(5, 44, 83, 0.16);
     transition: var(--panel-transicion);
 }
 
@@ -577,14 +586,14 @@ body {
     background: #ffffff;
     border: 1px solid var(--panel-borde);
     border-radius: 15px;
-    box-shadow: 0 2px 8px rgba(9, 61, 119, 0.05);
+    box-shadow: 0 2px 8px rgba(5, 44, 83, 0.05);
     transition:
         box-shadow 0.2s ease,
         transform 0.2s ease;
 }
 
 .card-stats:hover {
-    box-shadow: 0 8px 20px rgba(9, 61, 119, 0.08);
+    box-shadow: 0 8px 20px rgba(5, 44, 83, 0.08);
     transform: translateY(-3px);
 }
 
@@ -627,7 +636,7 @@ body {
 }
 
 .editable-cell:hover {
-    background: rgba(58, 124, 165, 0.06);
+    background: rgba(9, 113, 136, 0.06);
 }
 
 .edit-icon {

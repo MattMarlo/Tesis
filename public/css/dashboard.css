@@ -13,7 +13,7 @@
 
 .bienvenida-dashboard h2 {
     margin: 0 0 4px;
-    color: #093d77;
+    color: #094c90;
     font-size: 23px;
 }
 
@@ -78,7 +78,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: #093d77;
+    color: #094c90;
     background: #eaf2f7;
     border-radius: 9px;
     font-size: 20px;
@@ -111,7 +111,7 @@
 .resumen-secundario a:hover {
     color: #2b2b2b;
     background: #f8fafb;
-    border-color: #3a7ca5;
+    border-color: #097188;
 }
 
 .resumen-secundario a > i {
@@ -122,7 +122,7 @@
     justify-content: center;
     flex-shrink: 0;
     color: #ffffff;
-    background: #3a7ca5;
+    background: #097188;
     border-radius: 8px;
     font-size: 17px;
 }
@@ -133,7 +133,7 @@
 }
 
 .resumen-secundario strong {
-    color: #093d77;
+    color: #094c90;
     font-size: 19px;
     line-height: 1.1;
 }
@@ -164,7 +164,7 @@
 
 .encabezado-panel-dashboard h3 {
     margin: 0 0 3px;
-    color: #093d77;
+    color: #094c90;
     font-size: 16px;
 }
 
@@ -178,14 +178,14 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #093d77;
+    color: #094c90;
     font-size: 11px;
     font-weight: 700;
     text-decoration: none;
 }
 
 .encabezado-panel-dashboard > a:hover {
-    color: #3a7ca5;
+    color: #097188;
 }
 
 .tabla-dashboard-contenedor {
@@ -226,7 +226,7 @@
 }
 
 .tabla-dashboard td strong {
-    color: #093d77;
+    color: #094c90;
 }
 
 .estado-reserva,
@@ -271,7 +271,7 @@
 .dashboard-vacio > i {
     margin-bottom: 10px;
     display: block;
-    color: #3a7ca5;
+    color: #097188;
     font-size: 34px;
 }
 
@@ -284,7 +284,7 @@
     padding: 9px 13px;
     display: inline-flex;
     color: #ffffff;
-    background: #093d77;
+    background: #094c90;
     border-radius: 7px;
     font-size: 11px;
     font-weight: 700;

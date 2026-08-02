@@ -32,16 +32,19 @@
 
     <div class="logo-container">
 
-        <a href="{{ route('main') }}" class="marca-panel">
+        <div class="marca-panel">
             <span class="marca-panel-icono">
-                <i class="bi bi-airplane-fill"></i>
+                <img
+                    src="{{ asset('assets/logo/logo_passion.png') }}"
+                    alt="Logo de Passion Travel"
+                >
             </span>
 
             <span class="marca-panel-textos">
                 <strong>Passion Travel</strong>
                 <span>Panel administrativo</span>
             </span>
-        </a>
+        </div>
 
         <button
             type="button"

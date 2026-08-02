@@ -325,7 +325,7 @@ $(function () {
                     text:
                         'Corrige los datos señalados antes de continuar.',
                     confirmButtonText: 'Corregir',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
 
                 return;
@@ -350,7 +350,7 @@ $(function () {
                 cancelButtonText:
                     'Cancelar',
                 confirmButtonColor:
-                    '#093D77',
+                    '#094c90',
                 cancelButtonColor:
                     '#65717E',
                 reverseButtons: true
@@ -435,7 +435,7 @@ $(function () {
                         confirmButtonText:
                             'Entendido',
                         confirmButtonColor:
-                            '#093D77'
+                            '#094c90'
                     });
                 });
         }
@@ -745,7 +745,7 @@ $(function () {
                     confirmButtonText:
                         'Entendido',
                     confirmButtonColor:
-                        '#093D77'
+                        '#094c90'
                 });
             });
     }
@@ -962,7 +962,7 @@ $(function () {
                     confirmButtonText:
                         'Corregir',
                     confirmButtonColor:
-                        '#093D77'
+                        '#094c90'
                 });
 
                 return;
@@ -984,7 +984,7 @@ $(function () {
                     confirmButtonText:
                         'Corregir',
                     confirmButtonColor:
-                        '#093D77'
+                        '#094c90'
                 });
 
                 return;
@@ -1002,7 +1002,7 @@ $(function () {
                 cancelButtonText:
                     'Cancelar',
                 confirmButtonColor:
-                    '#093D77',
+                    '#094c90',
                 cancelButtonColor:
                     '#65717E',
                 reverseButtons: true
@@ -1047,7 +1047,7 @@ $(function () {
                 cancelButtonText:
                     'Cancelar',
                 confirmButtonColor:
-                    '#C53B45',
+                    '#962234',
                 cancelButtonColor:
                     '#65717E',
                 reverseButtons: true,
@@ -1141,7 +1141,7 @@ $(function () {
             text:
                 mensajesErrores.join('\n'),
             confirmButtonText: 'Corregir',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     } else if (
         configuracion.mensajeError
@@ -1153,7 +1153,7 @@ $(function () {
             text:
                 configuracion.mensajeError,
             confirmButtonText: 'Entendido',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     } else if (
         configuracion.mensajeExito
@@ -1164,7 +1164,7 @@ $(function () {
             text:
                 configuracion.mensajeExito,
             confirmButtonText: 'Entendido',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 });

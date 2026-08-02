@@ -381,7 +381,7 @@
 .campo-con-icono select:focus {
     background: var(--blanco);
     border-color: var(--azul-secundario);
-    box-shadow: 0 0 0 4px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 4px rgba(9, 113, 136, 0.12);
 }
 
 .boton-buscar {
@@ -563,7 +563,7 @@
     bottom: 14px;
     padding: 6px 10px;
     color: var(--blanco);
-    background: rgba(9, 61, 119, 0.9);
+    background: rgba(5, 44, 83, 0.9);
     border-radius: 7px;
     font-size: 11px;
     font-weight: 700;
@@ -885,7 +885,7 @@
     background:
         radial-gradient(
             circle at 5% 10%,
-            rgba(58, 124, 165, 0.09),
+            rgba(9, 113, 136, 0.09),
             transparent 25%
         ),
         var(--fondo);
@@ -919,7 +919,7 @@
     position: absolute;
     top: 15px;
     right: 18px;
-    color: rgba(9, 61, 119, 0.08);
+    color: rgba(5, 44, 83, 0.08);
     font-family: 'Playfair Display', serif;
     font-size: 45px;
     font-weight: 700;
@@ -940,7 +940,7 @@
     );
     border-radius: 16px;
     font-size: 24px;
-    box-shadow: 0 10px 22px rgba(9, 61, 119, 0.2);
+    box-shadow: 0 10px 22px rgba(5, 44, 83, 0.2);
 }
 
 .tarjeta-servicio h3 {
@@ -1154,7 +1154,7 @@
     flex-shrink: 0;
     border: 3px solid var(--blanco);
     border-radius: 50%;
-    box-shadow: 0 5px 14px rgba(9, 61, 119, 0.16);
+    box-shadow: 0 5px 14px rgba(5, 44, 83, 0.16);
     object-fit: cover;
 }
 
@@ -1310,7 +1310,7 @@
     background:
         radial-gradient(
             circle at 20% 30%,
-            rgba(58, 124, 165, 0.17),
+            rgba(9, 113, 136, 0.17),
             transparent 25%
         ),
         repeating-linear-gradient(
@@ -1426,7 +1426,7 @@
     gap: 9px;
     color: var(--azul-principal);
     background: #edf5f9;
-    border: 1px solid rgba(9, 61, 119, 0.18);
+    border: 1px solid rgba(5, 44, 83, 0.18);
     border-radius: 11px;
     font-weight: 700;
     transition:

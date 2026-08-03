@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Cliente;
 use App\Models\Destino;
 use App\Models\PreReserva;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,8 +34,8 @@ class PreReservaController extends Controller
             $value
         );
 
-        return '%' .
-            str_replace(' ', '%', $value) .
+        return '%'.
+            str_replace(' ', '%', $value).
             '%';
     }
 
@@ -84,23 +83,13 @@ class PreReservaController extends Controller
             );
 
         if ($secretConfigurado) {
-            $secretRecibido = (string)
-                $request->header(
-                    'X-N8N-Webhook-Secret'
-                );
+            $secretRecibido = (string) $request->header('X-N8N-Webhook-Secret');
 
-            if (
-                !$secretRecibido ||
-                !hash_equals(
-                    $secretConfigurado,
-                    $secretRecibido
-                )
-            ) {
+            if (! $secretRecibido || ! hash_equals((string) $secretConfigurado, $secretRecibido)) {
                 return response()->json(
                     [
                         'success' => false,
-                        'message' =>
-                            'Solicitud no autorizada.',
+                        'message' => 'Solicitud no autorizada.',
                     ],
                     401
                 );
@@ -171,35 +160,25 @@ class PreReservaController extends Controller
                 ],
             ],
             [
-                'destino.required' =>
-                    'El destino es obligatorio.',
+                'destino.required' => 'El destino es obligatorio.',
 
-                'cliente_nombre.required' =>
-                    'El nombre del cliente es obligatorio.',
+                'cliente_nombre.required' => 'El nombre del cliente es obligatorio.',
 
-                'telefono.required' =>
-                    'El teléfono es obligatorio.',
+                'telefono.required' => 'El teléfono es obligatorio.',
 
-                'telefono.regex' =>
-                    'El teléfono no tiene un formato válido.',
+                'telefono.regex' => 'El teléfono no tiene un formato válido.',
 
-                'fecha_viaje.required' =>
-                    'La fecha tentativa es obligatoria.',
+                'fecha_viaje.required' => 'La fecha tentativa es obligatoria.',
 
-                'fecha_viaje.after_or_equal' =>
-                    'La fecha del viaje no puede ser anterior a hoy.',
+                'fecha_viaje.after_or_equal' => 'La fecha del viaje no puede ser anterior a hoy.',
 
-                'email.required' =>
-                    'El correo electrónico es obligatorio.',
+                'email.required' => 'El correo electrónico es obligatorio.',
 
-                'email.email' =>
-                    'El correo electrónico no es válido.',
+                'email.email' => 'El correo electrónico no es válido.',
 
-                'cantidad_personas.min' =>
-                    'Debe existir al menos un viajero.',
+                'cantidad_personas.min' => 'Debe existir al menos un viajero.',
 
-                'cantidad_personas.max' =>
-                    'La cantidad de viajeros no puede superar 100.',
+                'cantidad_personas.max' => 'La cantidad de viajeros no puede superar 100.',
             ]
         );
 
@@ -207,10 +186,8 @@ class PreReservaController extends Controller
             return response()->json(
                 [
                     'success' => false,
-                    'message' =>
-                        'Revisa la información enviada.',
-                    'errors' =>
-                        $validator->errors(),
+                    'message' => 'Revisa la información enviada.',
+                    'errors' => $validator->errors(),
                 ],
                 422
             );
@@ -223,12 +200,11 @@ class PreReservaController extends Controller
                 $data['destino']
             );
 
-        if (!$destino) {
+        if (! $destino) {
             return response()->json(
                 [
                     'success' => false,
-                    'message' =>
-                        'El destino enviado no corresponde a un paquete registrado.',
+                    'message' => 'El destino enviado no corresponde a un paquete registrado.',
                 ],
                 422
             );
@@ -239,7 +215,7 @@ class PreReservaController extends Controller
         );
 
         $referencia =
-            !empty(
+            ! empty(
                 $data['referencia_externa']
             )
                 ? trim(
@@ -259,10 +235,8 @@ class PreReservaController extends Controller
                 return response()->json([
                     'success' => true,
                     'duplicada' => true,
-                    'message' =>
-                        'La prerreserva ya estaba registrada.',
-                    'pre_reserva_id' =>
-                        $existente->id,
+                    'message' => 'La prerreserva ya estaba registrada.',
+                    'pre_reserva_id' => $existente->id,
                 ]);
             }
         }
@@ -289,10 +263,8 @@ class PreReservaController extends Controller
             return response()->json([
                 'success' => true,
                 'duplicada' => true,
-                'message' =>
-                    'La prerreserva ya estaba registrada.',
-                'pre_reserva_id' =>
-                    $duplicadaReciente->id,
+                'message' => 'La prerreserva ya estaba registrada.',
+                'pre_reserva_id' => $duplicadaReciente->id,
             ]);
         }
 
@@ -305,63 +277,47 @@ class PreReservaController extends Controller
                     $referencia
                 ) {
                     return PreReserva::create([
-                        'cliente_nombre' =>
-                            trim(
-                                $data[
-                                    'cliente_nombre'
-                                ]
-                            ),
+                        'cliente_nombre' => trim(
+                            $data[
+                                'cliente_nombre'
+                            ]
+                        ),
 
-                        'email' =>
-                            $email,
+                        'email' => $email,
 
-                        'destino' =>
-                            $destino
-                                ->nombre_paquete
+                        'destino' => $destino
+                            ->nombre_paquete
                             ?: $data['destino'],
 
-                        'destino_id' =>
-                            $destino->id,
+                        'destino_id' => $destino->id,
 
-                        'telefono' =>
-                            trim(
-                                $data['telefono']
-                            ),
+                        'telefono' => trim(
+                            $data['telefono']
+                        ),
 
-                        'cedula' =>
-                            '',
+                        'cedula' => '',
 
-                        'fecha_viaje' =>
-                            $data['fecha_viaje'],
+                        'fecha_viaje' => $data['fecha_viaje'],
 
-                        'cantidad_personas' =>
-                            (int) (
-                                $data[
-                                    'cantidad_personas'
-                                ] ?? 1
-                            ),
-
-                        'fecha_reserva' =>
-                            now(),
-
-                        'origen' =>
-                            PreReserva::
-                                ORIGEN_TELEGRAM,
-
-                        'telegram_chat_id' =>
+                        'cantidad_personas' => (int) (
                             $data[
+                                'cantidad_personas'
+                            ] ?? 1
+                        ),
+
+                        'fecha_reserva' => now(),
+
+                        'origen' => PreReserva::ORIGEN_TELEGRAM,
+
+                        'telegram_chat_id' => $data[
                                 'telegram_chat_id'
                             ] ?? null,
 
-                        'referencia_externa' =>
-                            $referencia,
+                        'referencia_externa' => $referencia,
 
-                        'estado' =>
-                            PreReserva::
-                                ESTADO_PENDIENTE,
+                        'estado' => PreReserva::ESTADO_PENDIENTE,
 
-                        'user_id' =>
-                            null,
+                        'user_id' => null,
                     ]);
                 }
             );
@@ -374,12 +330,9 @@ class PreReservaController extends Controller
                 [
                     'success' => true,
                     'duplicada' => false,
-                    'message' =>
-                        'Prerreserva registrada correctamente.',
-                    'pre_reserva_id' =>
-                        $preReserva->id,
-                    'estado' =>
-                        $preReserva->estado,
+                    'message' => 'Prerreserva registrada correctamente.',
+                    'pre_reserva_id' => $preReserva->id,
+                    'estado' => $preReserva->estado,
                 ],
                 201
             );
@@ -387,18 +340,15 @@ class PreReservaController extends Controller
             Log::error(
                 'Error al registrar prerreserva',
                 [
-                    'mensaje' =>
-                        $error->getMessage(),
-                    'referencia_externa' =>
-                        $referencia,
+                    'mensaje' => $error->getMessage(),
+                    'referencia_externa' => $referencia,
                 ]
             );
 
             return response()->json(
                 [
                     'success' => false,
-                    'message' =>
-                        'No se pudo registrar la prerreserva.',
+                    'message' => 'No se pudo registrar la prerreserva.',
                 ],
                 500
             );
@@ -412,7 +362,7 @@ class PreReservaController extends Controller
             'services.n8n.notification_url'
         );
 
-        if (!$webhookUrl) {
+        if (! $webhookUrl) {
             return;
         }
 
@@ -421,55 +371,43 @@ class PreReservaController extends Controller
                 ->post(
                     $webhookUrl,
                     [
-                        'event' =>
-                            'prereserva.creada',
+                        'event' => 'prereserva.creada',
 
                         'data' => [
-                            'id' =>
-                                $preReserva->id,
+                            'id' => $preReserva->id,
 
-                            'cliente_nombre' =>
-                                $preReserva
-                                    ->cliente_nombre,
+                            'cliente_nombre' => $preReserva
+                                ->cliente_nombre,
 
-                            'email' =>
-                                $preReserva->email,
+                            'email' => $preReserva->email,
 
-                            'telefono' =>
-                                $preReserva
-                                    ->telefono,
+                            'telefono' => $preReserva
+                                ->telefono,
 
-                            'destino' =>
-                                $preReserva
-                                    ->destino,
+                            'destino' => $preReserva
+                                ->destino,
 
-                            'fecha_viaje' =>
-                                $preReserva
-                                    ->fecha_viaje
-                                    ?->format(
-                                        'Y-m-d'
-                                    ),
+                            'fecha_viaje' => $preReserva
+                                ->fecha_viaje
+                                ?->format(
+                                    'Y-m-d'
+                                ),
 
-                            'cantidad_personas' =>
-                                $preReserva
-                                    ->cantidad_personas,
+                            'cantidad_personas' => $preReserva
+                                ->cantidad_personas,
 
-                            'telegram_chat_id' =>
-                                $preReserva
-                                    ->telegram_chat_id,
+                            'telegram_chat_id' => $preReserva
+                                ->telegram_chat_id,
 
-                            'origen' =>
-                                $preReserva
-                                    ->origen,
+                            'origen' => $preReserva
+                                ->origen,
 
-                            'estado' =>
-                                $preReserva
-                                    ->estado,
+                            'estado' => $preReserva
+                                ->estado,
 
-                            'created_at' =>
-                                $preReserva
-                                    ->created_at
-                                    ?->toIso8601String(),
+                            'created_at' => $preReserva
+                                ->created_at
+                                ?->toIso8601String(),
                         ],
                     ]
                 );
@@ -478,10 +416,8 @@ class PreReservaController extends Controller
                 Log::warning(
                     'n8n rechazó la notificación de prerreserva.',
                     [
-                        'pre_reserva_id' =>
-                            $preReserva->id,
-                        'estado_http' =>
-                            $respuesta->status(),
+                        'pre_reserva_id' => $preReserva->id,
+                        'estado_http' => $respuesta->status(),
                     ]
                 );
             }
@@ -489,10 +425,8 @@ class PreReservaController extends Controller
             Log::error(
                 'No se pudo notificar la prerreserva a n8n.',
                 [
-                    'pre_reserva_id' =>
-                        $preReserva->id,
-                    'mensaje' =>
-                        $error->getMessage(),
+                    'pre_reserva_id' => $preReserva->id,
+                    'mensaje' => $error->getMessage(),
                 ]
             );
         }
@@ -520,7 +454,7 @@ class PreReservaController extends Controller
 
         $cliente = null;
 
-        if (!empty($data['email'])) {
+        if (! empty($data['email'])) {
             $cliente = Cliente::where(
                 'email',
                 mb_strtolower(
@@ -530,8 +464,8 @@ class PreReservaController extends Controller
         }
 
         if (
-            !$cliente &&
-            !empty($data['cedula'])
+            ! $cliente &&
+            ! empty($data['cedula'])
         ) {
             $cliente = Cliente::where(
                 'documento',
@@ -546,46 +480,31 @@ class PreReservaController extends Controller
 
         return response()->json([
             'cliente' => [
-                'exists' =>
-                    (bool) $cliente,
+                'exists' => (bool) $cliente,
 
-                'data' =>
-                    $cliente
+                'data' => $cliente
                         ? [
-                            'id' =>
-                                $cliente->id,
-                            'nombres' =>
-                                $cliente->nombres,
-                            'apellidos' =>
-                                $cliente->apellidos,
-                            'email' =>
-                                $cliente->email,
-                            'telefono' =>
-                                $cliente->telefono,
+                            'id' => $cliente->id,
+                            'nombres' => $cliente->nombres,
+                            'apellidos' => $cliente->apellidos,
+                            'email' => $cliente->email,
+                            'telefono' => $cliente->telefono,
                         ]
                         : null,
             ],
 
             'destino' => [
-                'exists' =>
-                    (bool) $destino,
+                'exists' => (bool) $destino,
 
-                'data' =>
-                    $destino
+                'data' => $destino
                         ? [
-                            'id' =>
-                                $destino->id,
-                            'nombre_paquete' =>
-                                $destino
-                                    ->nombre_paquete,
-                            'pais' =>
-                                $destino->pais,
-                            'precio' =>
-                                $destino->precio,
-                            'dias' =>
-                                $destino->dias,
-                            'capacidad' =>
-                                $destino->capacidad,
+                            'id' => $destino->id,
+                            'nombre_paquete' => $destino
+                                ->nombre_paquete,
+                            'pais' => $destino->pais,
+                            'precio' => $destino->precio,
+                            'dias' => $destino->dias,
+                            'capacidad' => $destino->capacidad,
                         ]
                         : null,
             ],
@@ -662,60 +581,49 @@ class PreReservaController extends Controller
             ->withQueryString();
 
         $resumen = [
-            'total' =>
-                PreReserva::count(),
+            'total' => PreReserva::count(),
 
-            'pendientes' =>
-                PreReserva::where(
-                    'estado',
-                    PreReserva::
-                        ESTADO_PENDIENTE
-                )->count(),
+            'pendientes' => PreReserva::where(
+                'estado',
+                PreReserva::ESTADO_PENDIENTE
+            )->count(),
 
-            'contactadas' =>
-                PreReserva::where(
-                    'estado',
-                    PreReserva::
-                        ESTADO_CONTACTADO
-                )->count(),
+            'contactadas' => PreReserva::where(
+                'estado',
+                PreReserva::ESTADO_CONTACTADO
+            )->count(),
 
-            'convertidas' =>
-                PreReserva::where(
-                    'estado',
-                    PreReserva::
-                        ESTADO_CONVERTIDA
-                )->count(),
+            'convertidas' => PreReserva::where(
+                'estado',
+                PreReserva::ESTADO_CONVERTIDA
+            )->count(),
 
-            'descartadas' =>
-                PreReserva::where(
-                    'estado',
-                    PreReserva::
-                        ESTADO_DESCARTADA
-                )->count(),
+            'descartadas' => PreReserva::where(
+                'estado',
+                PreReserva::ESTADO_DESCARTADA
+            )->count(),
         ];
 
         return view(
             'modules.pre_reservas.index',
             [
-                'titulo' =>
-                    'Prerreservas',
+                'titulo' => 'Prerreservas',
 
-                'preReservas' =>
-                    $preReservas,
+                'preReservas' => $preReservas,
 
-                'resumen' =>
-                    $resumen,
+                'resumen' => $resumen,
             ]
         );
     }
 
     public function edit(string $id)
     {
-        $preReserva = PreReserva::with(
-            'destinoRelacionado'
-        )->findOrFail($id);
+        $preReserva = PreReserva::with([
+            'destinoRelacionado',
+            'integrantes',
+        ])->findOrFail($id);
 
-        if (!$preReserva->puedeGestionarse()) {
+        if (! $preReserva->puedeGestionarse()) {
             return to_route(
                 'prereservas.index'
             )->with(
@@ -735,14 +643,11 @@ class PreReservaController extends Controller
         return view(
             'modules.pre_reservas.edit',
             [
-                'titulo' =>
-                    'Editar prerreserva',
+                'titulo' => 'Editar prerreserva',
 
-                'preReserva' =>
-                    $preReserva,
+                'preReserva' => $preReserva,
 
-                'destinos' =>
-                    $destinos,
+                'destinos' => $destinos,
             ]
         );
     }
@@ -754,7 +659,7 @@ class PreReservaController extends Controller
         $preReserva =
             PreReserva::findOrFail($id);
 
-        if (!$preReserva->puedeGestionarse()) {
+        if (! $preReserva->puedeGestionarse()) {
             return to_route(
                 'prereservas.index'
             )->with(
@@ -793,7 +698,7 @@ class PreReservaController extends Controller
                     ) {
                         if (
                             $value &&
-                            !$this->validarCedulaEcuatoriana($value)
+                            ! $this->validarCedulaEcuatoriana($value)
                         ) {
                             $fail(
                                 'La cédula ecuatoriana ingresada no es válida.'
@@ -824,14 +729,11 @@ class PreReservaController extends Controller
                 'estado' => [
                     'required',
                     Rule::in([
-                        PreReserva::
-                            ESTADO_PENDIENTE,
+                        PreReserva::ESTADO_PENDIENTE,
 
-                        PreReserva::
-                            ESTADO_CONTACTADO,
+                        PreReserva::ESTADO_CONTACTADO,
 
-                        PreReserva::
-                            ESTADO_DESCARTADA,
+                        PreReserva::ESTADO_DESCARTADA,
                     ]),
                 ],
 
@@ -842,50 +744,35 @@ class PreReservaController extends Controller
                 ],
             ],
             [
-                'cliente_nombre.required' =>
-                    'Ingresa el nombre completo.',
+                'cliente_nombre.required' => 'Ingresa el nombre completo.',
 
-                'email.required' =>
-                    'Ingresa el correo electrónico.',
+                'email.required' => 'Ingresa el correo electrónico.',
 
-                'email.email' =>
-                    'Ingresa un correo válido.',
+                'email.email' => 'Ingresa un correo válido.',
 
-                'telefono.required' =>
-                    'Ingresa el teléfono.',
+                'telefono.required' => 'Ingresa el teléfono.',
 
-                'telefono.regex' =>
-                    'Ingresa un teléfono válido.',
+                'telefono.regex' => 'Ingresa un teléfono válido.',
 
-                'cedula.digits' =>
-                    'La cédula debe tener 10 dígitos.',
+                'cedula.digits' => 'La cédula debe tener 10 dígitos.',
 
-                'destino_id.required' =>
-                    'Selecciona el paquete turístico.',
+                'destino_id.required' => 'Selecciona el paquete turístico.',
 
-                'destino_id.exists' =>
-                    'El paquete seleccionado no existe.',
+                'destino_id.exists' => 'El paquete seleccionado no existe.',
 
-                'fecha_viaje.required' =>
-                    'Selecciona la fecha tentativa.',
+                'fecha_viaje.required' => 'Selecciona la fecha tentativa.',
 
-                'fecha_viaje.after_or_equal' =>
-                    'La fecha no puede ser anterior a hoy.',
+                'fecha_viaje.after_or_equal' => 'La fecha no puede ser anterior a hoy.',
 
-                'cantidad_personas.required' =>
-                    'Ingresa la cantidad de personas.',
+                'cantidad_personas.required' => 'Ingresa la cantidad de personas.',
 
-                'cantidad_personas.min' =>
-                    'Debe existir al menos una persona.',
+                'cantidad_personas.min' => 'Debe existir al menos una persona.',
 
-                'cantidad_personas.max' =>
-                    'La cantidad no puede superar 100 personas.',
+                'cantidad_personas.max' => 'La cantidad no puede superar 100 personas.',
 
-                'estado.in' =>
-                    'El estado seleccionado no es válido.',
+                'estado.in' => 'El estado seleccionado no es válido.',
 
-                'observaciones.max' =>
-                    'Las observaciones no pueden superar 2000 caracteres.',
+                'observaciones.max' => 'Las observaciones no pueden superar 2000 caracteres.',
             ]
         );
 
@@ -897,44 +784,33 @@ class PreReservaController extends Controller
             $preReserva->estado;
 
         $preReserva->update([
-            'cliente_nombre' =>
-                trim(
-                    $data['cliente_nombre']
-                ),
+            'cliente_nombre' => trim(
+                $data['cliente_nombre']
+            ),
 
-            'email' =>
-                mb_strtolower(
-                    trim($data['email'])
-                ),
+            'email' => mb_strtolower(
+                trim($data['email'])
+            ),
 
-            'telefono' =>
-                trim($data['telefono']),
+            'telefono' => trim($data['telefono']),
 
-            'cedula' =>
-                $data['cedula'] ?? '',
+            'cedula' => $data['cedula'] ?? '',
 
-            'destino' =>
-                $destino->nombre_paquete,
+            'destino' => $destino->nombre_paquete,
 
-            'destino_id' =>
-                $destino->id,
+            'destino_id' => $destino->id,
 
-            'fecha_viaje' =>
-                $data['fecha_viaje'],
+            'fecha_viaje' => $data['fecha_viaje'],
 
-            'cantidad_personas' =>
-                (int)
+            'cantidad_personas' => (int)
                     $data[
                         'cantidad_personas'
                     ],
 
-            'estado' =>
-                $data['estado'],
+            'estado' => $data['estado'],
 
-            'fecha_contacto' =>
-                $data['estado'] ===
-                    PreReserva::
-                        ESTADO_CONTACTADO
+            'fecha_contacto' => $data['estado'] ===
+                    PreReserva::ESTADO_CONTACTADO
                     ? (
                         $preReserva
                             ->fecha_contacto
@@ -943,19 +819,15 @@ class PreReservaController extends Controller
                     : $preReserva
                         ->fecha_contacto,
 
-            'fecha_descarte' =>
-                $data['estado'] ===
-                    PreReserva::
-                        ESTADO_DESCARTADA
+            'fecha_descarte' => $data['estado'] ===
+                    PreReserva::ESTADO_DESCARTADA
                     ? now()
                     : null,
 
-            'observaciones' =>
-                $data['observaciones']
+            'observaciones' => $data['observaciones']
                 ?? null,
 
-            'user_id' =>
-                Auth::id(),
+            'user_id' => Auth::id(),
         ]);
 
         return to_route(
@@ -1001,7 +873,7 @@ class PreReservaController extends Controller
                 $preReserva->destino
             );
 
-        if (!$destino) {
+        if (! $destino) {
             return to_route(
                 'prereservas.index'
             )->with(
@@ -1024,7 +896,7 @@ class PreReservaController extends Controller
         }
 
         if (
-            !$cliente &&
+            ! $cliente &&
             $preReserva->cedula
         ) {
             $cliente = Cliente::where(
@@ -1034,7 +906,7 @@ class PreReservaController extends Controller
         }
 
         if (
-            !$cliente &&
+            ! $cliente &&
             $preReserva->telefono
         ) {
             $cliente = Cliente::where(
@@ -1043,16 +915,14 @@ class PreReservaController extends Controller
             )->first();
         }
 
-        if (!$cliente) {
+        if (! $cliente) {
             return redirect()
                 ->route(
                     'clientes.create',
                     [
-                        'prereserva_id' =>
-                            $preReserva->id,
+                        'prereserva_id' => $preReserva->id,
 
-                        'destino_id' =>
-                            $destino->id,
+                        'destino_id' => $destino->id,
                     ]
                 )
                 ->with(
@@ -1063,30 +933,27 @@ class PreReservaController extends Controller
 
         $informacionCompleta =
             $cliente->estaActivo() &&
-            !empty($cliente->documento) &&
-            !empty(
+            ! empty($cliente->documento) &&
+            ! empty(
                 $cliente->tipo_documento
             ) &&
-            !empty(
+            ! empty(
                 $cliente->fecha_nacimiento
             ) &&
-            !empty(
+            ! empty(
                 $cliente->nacionalidad
             );
 
-        if (!$informacionCompleta) {
+        if (! $informacionCompleta) {
             return redirect()
                 ->route(
                     'clientes.edit',
                     [
-                        'id' =>
-                            $cliente->id,
+                        'id' => $cliente->id,
 
-                        'prereserva_id' =>
-                            $preReserva->id,
+                        'prereserva_id' => $preReserva->id,
 
-                        'destino_id' =>
-                            $destino->id,
+                        'destino_id' => $destino->id,
                     ]
                 )
                 ->with(
@@ -1096,14 +963,11 @@ class PreReservaController extends Controller
         }
 
         $parametros = [
-            'cliente_id' =>
-                $cliente->id,
+            'cliente_id' => $cliente->id,
 
-            'destino_id' =>
-                $destino->id,
+            'destino_id' => $destino->id,
 
-            'prereserva_id' =>
-                $preReserva->id,
+            'prereserva_id' => $preReserva->id,
         ];
 
         if (
@@ -1148,15 +1012,11 @@ class PreReservaController extends Controller
         }
 
         $preReserva->update([
-            'estado' =>
-                PreReserva::
-                    ESTADO_DESCARTADA,
+            'estado' => PreReserva::ESTADO_DESCARTADA,
 
-            'fecha_descarte' =>
-                now(),
+            'fecha_descarte' => now(),
 
-            'user_id' =>
-                Auth::id(),
+            'user_id' => Auth::id(),
         ]);
 
         return back()->with(
@@ -1168,7 +1028,7 @@ class PreReservaController extends Controller
     private function validarCedulaEcuatoriana(
         string $cedula
     ): bool {
-        if (!preg_match('/^\d{10}$/', $cedula)) {
+        if (! preg_match('/^\d{10}$/', $cedula)) {
             return false;
         }
 

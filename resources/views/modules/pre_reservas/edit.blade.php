@@ -84,6 +84,45 @@
         </div>
     </section>
 
+    @if ($preReserva->integrantes->isNotEmpty())
+        <section class="origen-prerreserva">
+            <div>
+                <span>Tipo de solicitud</span>
+                <strong>{{ ucfirst($preReserva->tipo_reserva) }}</strong>
+                <small>
+                    {{ $preReserva->tipo_grupo
+                        ? ucfirst($preReserva->tipo_grupo)
+                        : 'Un viajero' }}
+                </small>
+            </div>
+
+            <div>
+                <span>Cotización confirmada</span>
+                <strong>
+                    {{ $preReserva->moneda }}
+                    ${{ number_format((float) $preReserva->precio_estimado, 2) }}
+                </strong>
+                <small>{{ $preReserva->integrantes->count() }} viajero(s)</small>
+            </div>
+
+            <div>
+                <span>Viajeros</span>
+                @foreach ($preReserva->integrantes as $integrante)
+                    <strong>
+                        {{ $integrante->nombres }} {{ $integrante->apellidos }}
+                        @if ($integrante->es_lider) (líder) @endif
+                    </strong>
+                    <small>
+                        {{ $integrante->documento }} —
+                        {{ $integrante->categoria_tarifa }} —
+                        {{ $preReserva->moneda }}
+                        ${{ number_format((float) $integrante->precio_calculado, 2) }}
+                    </small>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <form
         id="formularioPrerreserva"
         method="POST"

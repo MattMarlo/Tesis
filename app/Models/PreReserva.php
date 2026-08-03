@@ -43,26 +43,36 @@ class PreReserva extends Model
         'observaciones',
         'user_id',
         'reserva_id',
+        'tipo_reserva',
+        'tipo_grupo',
+        'nombre_grupo',
+        'precio_estimado',
+        'moneda',
+        'acepta_condiciones',
+        'confirmada_por_cliente_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'fecha_viaje' =>
-                'date',
+            'fecha_viaje' => 'date',
 
-            'fecha_reserva' =>
-                'datetime',
+            'fecha_reserva' => 'datetime',
 
-            'cantidad_personas' =>
-                'integer',
+            'cantidad_personas' => 'integer',
 
-            'fecha_contacto' =>
-                'datetime',
+            'fecha_contacto' => 'datetime',
 
-            'fecha_descarte' =>
-                'datetime',
+            'fecha_descarte' => 'datetime',
+            'precio_estimado' => 'decimal:2',
+            'acepta_condiciones' => 'boolean',
+            'confirmada_por_cliente_at' => 'datetime',
         ];
+    }
+
+    public function integrantes()
+    {
+        return $this->hasMany(PreReservaIntegrante::class, 'pre_reserva_id');
     }
 
     public function user()
@@ -94,7 +104,7 @@ class PreReserva extends Model
         return
             $this->estado ===
                 self::ESTADO_CONVERTIDA ||
-            !empty($this->reserva_id);
+            ! empty($this->reserva_id);
     }
 
     public function estaDescartada(): bool
@@ -106,8 +116,8 @@ class PreReserva extends Model
     public function puedeGestionarse(): bool
     {
         return
-            !$this->estaConvertida() &&
-            !$this->estaDescartada();
+            ! $this->estaConvertida() &&
+            ! $this->estaDescartada();
     }
 
     public function scopePendientes(

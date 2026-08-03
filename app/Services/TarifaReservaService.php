@@ -14,13 +14,13 @@ class TarifaReservaService
         Cliente $cliente,
         Destino $destino
     ): array {
-        if (!$cliente->fecha_nacimiento) {
+        if (! $cliente->fecha_nacimiento) {
             throw new InvalidArgumentException(
                 "El cliente {$cliente->nombre_completo} no tiene registrada su fecha de nacimiento."
             );
         }
 
-        if (!$destino->fecha_salida) {
+        if (! $destino->fecha_salida) {
             throw new InvalidArgumentException(
                 'El paquete seleccionado no tiene fecha de salida.'
             );
@@ -84,6 +84,38 @@ class TarifaReservaService
         }
 
         return round($precioBase, 2);
+    }
+
+    public function calcularPorFechaNacimiento(
+        string $fechaNacimiento,
+        Destino $destino
+    ): array {
+        if (! $destino->fecha_salida) {
+            throw new InvalidArgumentException(
+                'El paquete seleccionado no tiene fecha de salida.'
+            );
+        }
+
+        $nacimiento = Carbon::parse($fechaNacimiento)->startOfDay();
+        $fechaViaje = Carbon::parse($destino->fecha_salida)->startOfDay();
+
+        if ($nacimiento->greaterThanOrEqualTo($fechaViaje)) {
+            throw new InvalidArgumentException(
+                'La fecha de nacimiento no es válida para este viaje.'
+            );
+        }
+
+        $edad = $nacimiento->diffInYears($fechaViaje);
+        [$categoria, $porcentaje] = $this->determinarCategoria($edad);
+        $precioBase = $this->obtenerPrecioBase($destino);
+
+        return [
+            'edad' => $edad,
+            'categoria' => $categoria,
+            'porcentaje' => $porcentaje,
+            'precio_base' => $precioBase,
+            'precio_final' => round($precioBase * ($porcentaje / 100), 2),
+        ];
     }
 
     private function determinarCategoria(

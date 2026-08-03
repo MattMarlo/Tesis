@@ -36,14 +36,19 @@ return [
     ],
 
     'n8n' => [
-        'notification_url' =>
-            env('N8N_NOTIFICATION_URL'),
+        'notification_url' => env('N8N_NOTIFICATION_URL'),
 
-        'payment_notification_url' =>
-            'http://passiontravelviajes.de:5678/webhook/confirmacion-pago-registrado',
+        'payment_notification_url' => 'http://passiontravelviajes.de:5678/webhook/confirmacion-pago-registrado',
 
-        'webhook_secret' =>
-            env('N8N_WEBHOOK_SECRET'),
+        'webhook_secret' => env('N8N_WEBHOOK_SECRET'),
+
+    ],
+
+    'telegram' => [
+        'bot_username' => env(
+            'TELEGRAM_BOT_USERNAME',
+            'ReservasPassionTravelBot'
+        ),
     ],
 
 ];

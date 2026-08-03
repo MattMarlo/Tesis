@@ -420,6 +420,17 @@
                                 <i class="fa fa-arrow-right"></i>
                             </a>
 
+                            <a
+                                href="https://t.me/{{ ltrim((string) config('services.telegram.bot_username'), '@') }}?start=destino_{{ $paquete->id }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="boton-ver-paquete"
+                                aria-label="Reservar {{ $paquete->nombre_paquete }} por Telegram"
+                            >
+                                Reservar por Telegram
+                                <i class="fa fa-telegram"></i>
+                            </a>
+
                         </div>
 
                     </div>

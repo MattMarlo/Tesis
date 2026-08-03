@@ -55,4 +55,9 @@ class Destino extends Model
     {
         return $this->hasMany(Reserva::class, 'destino_id');
     }
+
+    public function preReservas()
+    {
+        return $this->hasMany(PreReserva::class, 'destino_id');
+    }
 }

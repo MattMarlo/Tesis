@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckUserPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -7,6 +8,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -16,11 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Añade esta regla para ignorar el token de seguridad en la ruta de n8n
         $middleware->validateCsrfTokens(except: [
-            'prereservas/webhook'
+            'prereservas/webhook',
         ]);
 
         $middleware->alias([
-            'check.permission' => \App\Http\Middleware\CheckUserPermission::class,
+            'check.permission' => CheckUserPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

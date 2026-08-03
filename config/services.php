@@ -42,6 +42,8 @@ return [
 
         'webhook_secret' => env('N8N_WEBHOOK_SECRET'),
 
+        'api_secret' => env('N8N_API_SECRET'),
+
     ],
 
     'telegram' => [

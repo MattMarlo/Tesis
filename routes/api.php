@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\TelegramReservaController;
+use App\Http\Controllers\Api\ConsultaReservaTelegramController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('telegram')
@@ -11,4 +12,7 @@ Route::prefix('telegram')
         Route::post('/cupos', [TelegramReservaController::class, 'cupos']);
         Route::post('/cotizar', [TelegramReservaController::class, 'cotizar']);
         Route::post('/prerreservas', [TelegramReservaController::class, 'store']);
+        Route::post('/reservas/buscar',[ConsultaReservaTelegramController::class, 'buscar']);
+        Route::post('/reservas/{reserva}/verificar',[ConsultaReservaTelegramController::class, 'verificar']);
+
     });

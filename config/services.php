@@ -47,7 +47,7 @@ return [
     'telegram' => [
         'bot_username' => env(
             'TELEGRAM_BOT_USERNAME',
-            'ReservasPassionTravelBot'
+            'PassionTravelBot'
         ),
     ],
 

@@ -1007,7 +1007,7 @@
                     </a>
 
                     <a
-                        href="https://t.me/ReservasPassionTravelBot"
+                        href="https://t.me/PassionTravelBot"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="boton-contacto-directo"

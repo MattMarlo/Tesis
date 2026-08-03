@@ -33,7 +33,7 @@
     | Si el usuario de tu bot es diferente, solamente debes
     | modificar esta dirección.
     */
-    $telegramGeneral = 'https://t.me/ReservasPassionTravelBot';
+    $telegramGeneral = 'https://t.me/PassionTravelBot';
 @endphp
 
 <header class="encabezado-principal" id="encabezadoPrincipal">

@@ -7,7 +7,7 @@ Laravel es la fuente oficial de destinos, cupos, tarifas y prerreservas. El agen
 Definir en `.env`:
 
 ```dotenv
-TELEGRAM_BOT_USERNAME=ReservasPassionTravelBot
+TELEGRAM_BOT_USERNAME=PassionTravelBot
 N8N_WEBHOOK_SECRET=otro_secreto_largo_y_aleatorio
 N8N_NOTIFICATION_URL=https://n8n.example/webhook/notificar-prereserva
 ```

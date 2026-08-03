@@ -426,7 +426,7 @@ $(function () {
                 title: 'Revisa la información',
                 text: 'Selecciona un cliente y un paquete válidos.',
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             $('.input-error').first().trigger('focus');
@@ -456,7 +456,7 @@ $(function () {
                 ? 'Sí, guardar cambios'
                 : 'Sí, registrar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#093D77',
+            confirmButtonColor: '#094c90',
             cancelButtonColor: '#6C7780',
             reverseButtons: true
         }).then(function (resultado) {
@@ -505,7 +505,7 @@ $(function () {
                 title: 'Revisa la información',
                 text: mensajes.join('\n'),
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
         } else if (configuracion.mensajeError) {
             Swal.fire({
@@ -515,7 +515,7 @@ $(function () {
                     : 'No se pudo registrar la reserva',
                 text: configuracion.mensajeError,
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
         }
     }

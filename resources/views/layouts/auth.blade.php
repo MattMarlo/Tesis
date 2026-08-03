@@ -18,14 +18,14 @@
 
     <style>
         :root {
-            --azul-principal: #093D77;
-            --azul-secundario: #3A7CA5;
+            --azul-principal: #094c90;
+            --azul-secundario: #097188;
             --blanco: #F8F9FA;
             --oscuro: #2B2B2B;
             --dorado: #DAA520;
             --gris: #6B7280;
             --borde: #DCE3EA;
-            --error: #B42318;
+            --error: #90091d;
         }
 
         * {
@@ -75,9 +75,9 @@
                 ),
                 linear-gradient(
                     145deg,
-                    #093D77 0%,
-                    #0B4B89 55%,
-                    #3A7CA5 100%
+                    #094c90 0%,
+                    #052c53 55%,
+                    #097188 100%
                 );
         }
 
@@ -121,6 +121,14 @@
             background: rgba(255, 255, 255, 0.12);
             color: var(--dorado);
             font-size: 1.45rem;
+        }
+
+        .brand-icon img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: inherit;
+            object-fit: cover;
         }
 
         .brand-name {
@@ -273,7 +281,7 @@
 
         .form-control:focus {
             border-color: var(--azul-secundario);
-            box-shadow: 0 0 0 0.22rem rgba(58, 124, 165, 0.14);
+            box-shadow: 0 0 0 0.22rem rgba(9, 113, 136, 0.14);
         }
 
         .form-control.input-error {
@@ -342,12 +350,12 @@
             font-size: 0.92rem;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 0.65rem 1.5rem rgba(9, 61, 119, 0.18);
+            box-shadow: 0 0.65rem 1.5rem rgba(5, 44, 83, 0.18);
             transition: 0.2s;
         }
 
         .btn-primary:hover {
-            background: #0B4B89;
+            background: #052c53;
             transform: translateY(-1px);
         }
 
@@ -413,8 +421,8 @@
             .mobile-brand .brand-icon {
                 width: 2.65rem;
                 height: 2.65rem;
-                border-color: rgba(9, 61, 119, 0.15);
-                background: rgba(9, 61, 119, 0.07);
+                border-color: rgba(5, 44, 83, 0.15);
+                background: rgba(5, 44, 83, 0.07);
             }
 
             .mobile-brand .brand-caption {
@@ -431,7 +439,10 @@
 
             <a class="brand-mark" href="{{ url('/') }}">
                 <span class="brand-icon">
-                    <i class="bi bi-airplane-fill"></i>
+                    <img
+                        src="{{ asset('assets/logo/logo_passion.png') }}"
+                        alt="Logo de Passion Travel"
+                    >
                 </span>
 
                 <span>
@@ -468,7 +479,10 @@
 
                 <a class="mobile-brand" href="{{ url('/') }}">
                     <span class="brand-icon">
-                        <i class="bi bi-airplane-fill"></i>
+                        <img
+                            src="{{ asset('assets/logo/logo_passion.png') }}"
+                            alt="Logo de Passion Travel"
+                        >
                     </span>
 
                     <span>
@@ -511,7 +525,7 @@
                     title: 'Revisa tu correo',
                     text: @json(session('status')),
                     confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
             @endif
 
@@ -521,7 +535,7 @@
                     title: 'No se pudo completar la solicitud',
                     text: @json(session('error')),
                     confirmButtonText: 'Intentar nuevamente',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
             @endif
 
@@ -552,7 +566,7 @@
                     title: @json($tituloError),
                     text: @json(implode("\n", $errors->all())),
                     confirmButtonText: 'Corregir',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
             @endif
         });

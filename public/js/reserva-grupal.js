@@ -311,7 +311,7 @@ $(function () {
                     title: 'Cliente ya agregado',
                     text: 'Este cliente ya forma parte del grupo.',
                     confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
             }
 
@@ -328,7 +328,7 @@ $(function () {
                     `<a href="${cliente.editarUrl}" ` +
                     'target="_blank">Editar cliente</a>',
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -643,7 +643,7 @@ $(function () {
                     title: 'Selecciona un cliente',
                     text: 'Elige un cliente antes de agregarlo.',
                     confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
 
                 return;
@@ -825,7 +825,7 @@ $(function () {
                 title: 'Revisa la información',
                 text: 'Corrige los datos señalados antes de continuar.',
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -857,7 +857,7 @@ $(function () {
                 ? 'Sí, guardar cambios'
                 : 'Sí, registrar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#093D77',
+            confirmButtonColor: '#094c90',
             cancelButtonColor: '#6C7780',
             reverseButtons: true
         }).then(function (resultado) {
@@ -970,7 +970,7 @@ $(function () {
                 title: 'Revisa la información',
                 text: mensajes.join('\n'),
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
         } else if (configuracion.mensajeError) {
             Swal.fire({
@@ -980,7 +980,7 @@ $(function () {
                     : 'No se pudo registrar la reserva',
                 text: configuracion.mensajeError,
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
         }
     }

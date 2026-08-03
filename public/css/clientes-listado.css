@@ -1,10 +1,10 @@
 :root {
-    --clientes-azul: #093D77;
-    --clientes-celeste: #3A7CA5;
+    --clientes-azul: #094c90;
+    --clientes-celeste: #097188;
     --clientes-texto: #2B2B2B;
     --clientes-borde: #DCE3E8;
     --clientes-verde: #178A52;
-    --clientes-rojo: #C83D48;
+    --clientes-rojo: #962234;
 }
 
 .pagina-clientes {
@@ -61,8 +61,8 @@
 }
 
 .btn-nuevo-cliente:hover {
-    border-color: #0B4B89;
-    background: #0B4B89;
+    border-color: #052c53;
+    background: #052c53;
     color: #FFFFFF;
 }
 
@@ -134,7 +134,7 @@
 .clientes-buscador input:focus,
 .clientes-filtro select:focus {
     border-color: var(--clientes-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.12);
 }
 
 .clientes-filtro {

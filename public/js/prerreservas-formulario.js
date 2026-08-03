@@ -327,7 +327,7 @@ $(function () {
                 title: 'Revisa la información ingresada',
                 text: 'Corrige los campos señalados antes de continuar.',
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -352,8 +352,8 @@ $(function () {
                 : 'Sí, guardar',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: seraDescartada
-                ? '#C0392B'
-                : '#093D77',
+                ? '#90091d'
+                : '#094c90',
             cancelButtonColor: '#65717E',
             reverseButtons: true
         }).then(function (resultado) {
@@ -397,7 +397,7 @@ $(function () {
                 })
                 .join('<br>'),
             confirmButtonText: 'Corregir',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 
@@ -407,7 +407,7 @@ $(function () {
             title: 'Cambios guardados',
             text: configuracion.mensajeExito,
             confirmButtonText: 'Entendido',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 });

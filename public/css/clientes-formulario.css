@@ -1,12 +1,12 @@
 :root {
-    --clientes-azul: #093D77;
-    --clientes-celeste: #3A7CA5;
+    --clientes-azul: #094c90;
+    --clientes-celeste: #097188;
     --clientes-dorado: #DAA520;
     --clientes-texto: #2B2B2B;
     --clientes-secundario: #68747E;
     --clientes-fondo: #F8F9FA;
     --clientes-borde: #DCE3E8;
-    --clientes-error: #C83D48;
+    --clientes-error: #962234;
 }
 
 .pagina-formulario-clientes {
@@ -150,7 +150,7 @@
 
 .control-formulario:focus {
     border-color: var(--clientes-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.12);
 }
 
 .control-formulario.input-error {
@@ -279,8 +279,8 @@
 }
 
 .btn-guardar:hover {
-    border-color: #0B4B89;
-    background: #0B4B89;
+    border-color: #052c53;
+    background: #052c53;
 }
 
 .btn-guardar:disabled {

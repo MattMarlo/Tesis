@@ -573,7 +573,7 @@ $(function () {
                 title: 'Revisa la información',
                 text: 'Corrige los campos señalados antes de continuar.',
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -600,7 +600,7 @@ $(function () {
                     ? 'Sí, guardar'
                     : 'Sí, registrar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#093D77',
+            confirmButtonColor: '#094c90',
             cancelButtonColor: '#6C7780',
             reverseButtons: true
         }).then(function (resultado) {
@@ -649,7 +649,7 @@ $(function () {
                 title: 'Revisa la información ingresada',
                 text: mensajes.join('\n'),
                 confirmButtonText: 'Corregir',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
         } else if (configuracion.mensajeError) {
             Swal.fire({
@@ -657,7 +657,7 @@ $(function () {
                 title: 'No se pudo completar la acción',
                 text: configuracion.mensajeError,
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
         }
     }

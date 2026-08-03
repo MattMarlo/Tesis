@@ -1,10 +1,10 @@
 :root {
-    --grupo-azul: #093D77;
-    --grupo-celeste: #3A7CA5;
+    --grupo-azul: #094c90;
+    --grupo-celeste: #097188;
     --grupo-dorado: #DAA520;
     --grupo-texto: #2B2B2B;
     --grupo-borde: #DCE3E8;
-    --grupo-error: #C83D48;
+    --grupo-error: #962234;
     --grupo-verde: #178A52;
 }
 
@@ -153,7 +153,7 @@
 
 .control-grupal:focus {
     border-color: var(--grupo-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.12);
 }
 
 .control-grupal.input-error {
@@ -225,7 +225,7 @@
 .opcion-tipo input:checked + span {
     border-color: var(--grupo-azul);
     background: #F1F6FA;
-    box-shadow: 0 0 0 2px rgba(9, 61, 119, 0.08);
+    box-shadow: 0 0 0 2px rgba(5, 44, 83, 0.08);
 }
 
 .resumen-paquete-grupal {

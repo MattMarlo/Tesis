@@ -1,12 +1,12 @@
 :root {
-    --usuarios-azul: #093D77;
-    --usuarios-celeste: #3A7CA5;
+    --usuarios-azul: #094c90;
+    --usuarios-celeste: #097188;
     --usuarios-dorado: #DAA520;
     --usuarios-texto: #2B2B2B;
     --usuarios-fondo: #F8F9FA;
     --usuarios-borde: #DCE3E8;
     --usuarios-verde: #178A52;
-    --usuarios-rojo: #C83D48;
+    --usuarios-rojo: #962234;
 }
 
 .usuarios-pagina {
@@ -64,8 +64,8 @@
 }
 
 .btn-nuevo-usuario:hover {
-    border-color: #0B4B89;
-    background: #0B4B89;
+    border-color: #052c53;
+    background: #052c53;
     color: #FFFFFF;
 }
 
@@ -142,7 +142,7 @@
 
 .campo-busqueda input:focus {
     border-color: var(--usuarios-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.12);
 }
 
 .filtro-estado {
@@ -171,7 +171,7 @@
 
 .filtro-estado select:focus {
     border-color: var(--usuarios-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.12);
 }
 
 .tabla-responsive {

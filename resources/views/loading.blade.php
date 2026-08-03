@@ -410,6 +410,7 @@
                                 </strong>
 
                                 <span>por persona</span>
+                                <span>aplica descuento para niños y tercera edad</span>
                             </div>
 
                             <a
@@ -473,7 +474,7 @@
 
             <div class="imagen-nosotros imagen-principal">
                 <img
-                    src="{{ asset('assets/images/gallary/g1.jpg') }}"
+                    src="{{ asset('assets/images/gallary/landing_yate.jpg') }}"
                     alt="Experiencias de viaje"
                     loading="lazy"
                 >
@@ -481,7 +482,7 @@
 
             <div class="imagen-nosotros imagen-secundaria">
                 <img
-                    src="{{ asset('assets/images/gallary/g2.jpg') }}"
+                    src="{{ asset('assets/images/gallary/landig_viaje.jpg') }}"
                     alt="Destinos turísticos"
                     loading="lazy"
                 >

@@ -41,10 +41,10 @@ document.addEventListener(
                                         .datos || [],
 
                                 backgroundColor:
-                                    'rgba(58, 124, 165, 0.72)',
+                                    'rgba(9, 113, 136, 0.72)',
 
                                 borderColor:
-                                    '#093D77',
+                                    '#094c90',
 
                                 borderWidth: 1,
 
@@ -176,7 +176,7 @@ document.addEventListener(
                 confirmButtonText:
                     'Corregir',
                 confirmButtonColor:
-                    '#093D77',
+                    '#094c90',
             });
 
             return;
@@ -196,7 +196,7 @@ document.addEventListener(
                 confirmButtonText:
                     'Entendido',
                 confirmButtonColor:
-                    '#093D77',
+                    '#094c90',
             });
         }
     }

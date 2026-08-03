@@ -1,10 +1,10 @@
 :root {
-    --reservas-azul: #093D77;
-    --reservas-celeste: #3A7CA5;
+    --reservas-azul: #094c90;
+    --reservas-celeste: #097188;
     --reservas-texto: #2B2B2B;
     --reservas-borde: #DCE3E8;
     --reservas-verde: #178A52;
-    --reservas-rojo: #C83D48;
+    --reservas-rojo: #962234;
     --reservas-dorado: #A87808;
 }
 
@@ -150,7 +150,7 @@
 .buscador-reservas input:focus,
 .filtros-reservas select:focus {
     border-color: var(--reservas-celeste);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.1);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.1);
 }
 
 .filtros-reservas > button {
@@ -613,13 +613,13 @@
 }
 
 .accion-reserva.editar {
-    color: #3A7CA5;
-    border-color: rgba(58, 124, 165, 0.3);
-    background: rgba(58, 124, 165, 0.08);
+    color: #097188;
+    border-color: rgba(9, 113, 136, 0.3);
+    background: rgba(9, 113, 136, 0.08);
 }
 
 .accion-reserva.editar:hover {
     color: #FFFFFF;
-    border-color: #3A7CA5;
-    background: #3A7CA5;
+    border-color: #097188;
+    background: #097188;
 }

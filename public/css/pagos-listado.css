@@ -1,13 +1,13 @@
 :root {
-    --pagos-azul: #093D77;
-    --pagos-azul-claro: #3A7CA5;
+    --pagos-azul: #094c90;
+    --pagos-azul-claro: #097188;
     --pagos-fondo: #F8F9FA;
     --pagos-texto: #2B2B2B;
     --pagos-gris: #65717E;
     --pagos-borde: #DCE4EA;
     --pagos-dorado: #DAA520;
     --pagos-verde: #218B5A;
-    --pagos-rojo: #C53B45;
+    --pagos-rojo: #962234;
     --pagos-blanco: #FFFFFF;
 }
 
@@ -148,7 +148,7 @@
 .buscar-pagos input:focus,
 .filtros-pagos select:focus {
     border-color: var(--pagos-azul-claro);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.1);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.1);
 }
 
 .filtros-pagos > button,
@@ -249,7 +249,7 @@
     display: inline-flex;
     padding: 0.35rem 0.55rem;
     border-radius: 0.45rem;
-    background: rgba(58, 124, 165, 0.1);
+    background: rgba(9, 113, 136, 0.1);
     color: var(--pagos-azul);
     font-size: 0.72rem;
     font-weight: 700;
@@ -509,7 +509,7 @@
 .campo-pago textarea:focus,
 .campo-pago select:focus {
     border-color: var(--pagos-azul-claro);
-    box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.1);
+    box-shadow: 0 0 0 3px rgba(9, 113, 136, 0.1);
 }
 
 .campo-pago small {

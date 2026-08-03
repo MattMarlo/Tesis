@@ -330,7 +330,7 @@ $(function () {
                 title: 'No se pudo consultar la reserva',
                 text: 'No se encontró la dirección del detalle.',
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -381,7 +381,7 @@ $(function () {
                     title: 'No se pudo cargar el detalle',
                     text: error.message,
                     confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#093D77'
+                    confirmButtonColor: '#094c90'
                 });
             });
     });
@@ -395,7 +395,7 @@ $(function () {
                 title: 'No se pudo cancelar',
                 text: 'No se encontró la dirección para cancelar la reserva.',
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -415,7 +415,7 @@ $(function () {
             showCancelButton: true,
             confirmButtonText: 'Sí, cancelar reserva',
             cancelButtonText: 'Volver',
-            confirmButtonColor: '#C93D3D',
+            confirmButtonColor: '#90091d',
             cancelButtonColor: '#65717E',
             reverseButtons: true,
             showLoaderOnConfirm: true,
@@ -496,7 +496,7 @@ $(function () {
                 text: resultado.value?.message ||
                     'La reserva fue cancelada correctamente.',
                 confirmButtonText: 'Entendido',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             }).then(function () {
                 window.location.reload();
             });
@@ -509,7 +509,7 @@ $(function () {
             title: 'Proceso completado',
             text: configuracion.mensajeExito,
             confirmButtonText: 'Entendido',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 
@@ -519,7 +519,7 @@ $(function () {
             title: 'No se pudo completar la acción',
             text: configuracion.mensajeError,
             confirmButtonText: 'Corregir',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 });

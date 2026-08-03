@@ -81,7 +81,7 @@ $(function () {
                 showCancelButton: true,
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#C83D48',
+                confirmButtonColor: '#962234',
                 cancelButtonColor: '#6C7780',
                 reverseButtons: true,
                 focusCancel: true
@@ -115,7 +115,7 @@ $(function () {
             title: 'Proceso completado',
             text: mensajes.exito,
             confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 
@@ -125,7 +125,7 @@ $(function () {
             title: 'No se pudo completar la acción',
             text: mensajes.error,
             confirmButtonText: 'Entendido',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 });

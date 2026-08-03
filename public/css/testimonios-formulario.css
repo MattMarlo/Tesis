@@ -1,11 +1,11 @@
 :root {
-    --testimonio-azul: #093d77;
-    --testimonio-celeste: #3a7ca5;
+    --testimonio-azul: #094c90;
+    --testimonio-celeste: #097188;
     --testimonio-fondo: #f8f9fa;
     --testimonio-texto: #2b2b2b;
     --testimonio-dorado: #daa520;
     --testimonio-borde: #dce5ec;
-    --testimonio-error: #d93025;
+    --testimonio-error: #90091d;
     --testimonio-blanco: #ffffff;
 }
 
@@ -31,7 +31,7 @@
         ),
         linear-gradient(
             135deg,
-            #062d59,
+            #052c53,
             var(--testimonio-azul),
             var(--testimonio-celeste)
         );
@@ -87,7 +87,7 @@
     background: var(--testimonio-blanco);
     border: 1px solid var(--testimonio-borde);
     border-radius: 17px;
-    box-shadow: 0 8px 24px rgba(9, 61, 119, 0.06);
+    box-shadow: 0 8px 24px rgba(5, 44, 83, 0.06);
 }
 
 .titulo-seccion-formulario {
@@ -186,7 +186,7 @@
 .grupo-testimonio select:focus {
     background: var(--testimonio-blanco);
     border-color: var(--testimonio-celeste);
-    box-shadow: 0 0 0 4px rgba(58, 124, 165, 0.12);
+    box-shadow: 0 0 0 4px rgba(9, 113, 136, 0.12);
 }
 
 .grupo-testimonio.campo-error input,
@@ -447,7 +447,7 @@
     color: var(--testimonio-blanco);
     background: var(--testimonio-azul);
     border: 0;
-    box-shadow: 0 8px 18px rgba(9, 61, 119, 0.18);
+    box-shadow: 0 8px 18px rgba(5, 44, 83, 0.18);
 }
 
 .boton-guardar-testimonio:hover {

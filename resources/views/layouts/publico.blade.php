@@ -12,7 +12,7 @@
 
     <link rel="shortcut icon"
           type="image/png"
-          href="{{ asset('assets/logo/favicon.png') }}">
+          href="{{ asset('assets/logo/logo_passion-removebg-preview.png') }}">
 
     <link rel="stylesheet"
           href="{{ asset('assets/css/font-awesome.min.css') }}">
@@ -41,7 +41,10 @@
 
         <a href="{{ url('/') }}" class="logo-publico" aria-label="Passion Travel">
             <span class="logo-icono">
-                <i class="fa fa-plane"></i>
+                <img
+                    src="{{ asset('assets/logo/logo_passion-removebg-preview.png') }}"
+                    alt="Logo de Passion Travel"
+                >
             </span>
 
             <span class="logo-texto">
@@ -150,7 +153,10 @@
             <div class="pie-marca">
                 <a href="{{ url('/') }}" class="logo-publico logo-pie">
                     <span class="logo-icono">
-                        <i class="fa fa-plane"></i>
+                        <img
+                            src="{{ asset('assets/logo/logo_passion.png') }}"
+                            alt="Logo de Passion Travel"
+                        >
                     </span>
 
                     <span class="logo-texto">
@@ -164,11 +170,14 @@
                 </p>
 
                 <div class="redes-sociales">
-                    <a href="#" aria-label="Facebook">
-                        <i class="fa fa-facebook"></i>
+                    <a href="https://www.facebook.com/passiontravelS.A?locale=es_LA"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Facebook de Passion Travel">
+                            <i class="fa fa-facebook"></i>
                     </a>
 
-                    <a href="#" aria-label="Instagram">
+                    <a href="https://www.instagram.com/passiontravel.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                         <i class="fa fa-instagram"></i>
                     </a>
 

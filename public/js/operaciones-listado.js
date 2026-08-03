@@ -60,7 +60,7 @@ $(function () {
                 cancelButtonText:
                     'Cancelar',
                 confirmButtonColor:
-                    '#093D77',
+                    '#094c90',
                 cancelButtonColor:
                     '#65717E',
                 reverseButtons: true,
@@ -89,7 +89,7 @@ $(function () {
             confirmButtonText:
                 'Entendido',
             confirmButtonColor:
-                '#093D77',
+                '#094c90',
         });
 
         return;
@@ -107,7 +107,7 @@ $(function () {
             confirmButtonText:
                 'Entendido',
             confirmButtonColor:
-                '#093D77',
+                '#094c90',
         });
     }
 });

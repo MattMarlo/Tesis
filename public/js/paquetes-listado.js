@@ -200,7 +200,7 @@ $(function () {
                 title: 'Paquete no encontrado',
                 text: 'No se pudo cargar la información del paquete.',
                 confirmButtonText: 'Cerrar',
-                confirmButtonColor: '#093D77'
+                confirmButtonColor: '#094c90'
             });
 
             return;
@@ -330,7 +330,7 @@ $(function () {
                 showCancelButton: true,
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#B42318',
+                confirmButtonColor: '#90091d',
                 cancelButtonColor: '#6B7280',
                 reverseButtons: true
             }).then(function (resultado) {

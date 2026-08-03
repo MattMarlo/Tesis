@@ -971,7 +971,7 @@ $(function () {
                     confirmButtonText:
                         'Corregir',
                     confirmButtonColor:
-                        '#093D77'
+                        '#094c90'
                 });
 
                 return;
@@ -1021,7 +1021,7 @@ $(function () {
                             text:
                                 'Ingresa el número del vuelo cuando está confirmado.',
                             confirmButtonText: 'Corregir',
-                            confirmButtonColor: '#093D77'
+                            confirmButtonColor: '#094c90'
                         });
 
                         return;
@@ -1045,7 +1045,7 @@ $(function () {
                             text:
                                 'La ciudad de origen y la ciudad de destino deben ser diferentes.',
                             confirmButtonText: 'Corregir',
-                            confirmButtonColor: '#093D77'
+                            confirmButtonColor: '#094c90'
                         });
 
                         return;
@@ -1071,7 +1071,7 @@ $(function () {
                             text:
                                 'La llegada debe ser posterior a la salida.',
                             confirmButtonText: 'Corregir',
-                            confirmButtonColor: '#093D77'
+                            confirmButtonColor: '#094c90'
                         });
 
                         return;
@@ -1121,7 +1121,7 @@ $(function () {
                         text:
                             'Ingresa el código cuando el alojamiento está confirmado.',
                         confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#093D77'
+                        confirmButtonColor: '#094c90'
                     });
 
                     return;
@@ -1145,7 +1145,7 @@ $(function () {
                         text:
                             'Ingresa una cantidad entre 1 y 100 habitaciones.',
                         confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#093D77'
+                        confirmButtonColor: '#094c90'
                     });
 
                     return;
@@ -1174,7 +1174,7 @@ $(function () {
                         text:
                             'La salida del hotel debe ser posterior a la entrada.',
                         confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#093D77'
+                        confirmButtonColor: '#094c90'
                     });
 
                     return;
@@ -1228,7 +1228,7 @@ $(function () {
                         text:
                             'El nombre del guía solo puede contener letras, espacios, puntos, apóstrofes y guiones.',
                         confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#093D77'
+                        confirmButtonColor: '#094c90'
                     });
 
                     return;
@@ -1247,7 +1247,7 @@ $(function () {
                         text:
                             'Ingresa un número de teléfono válido.',
                         confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#093D77'
+                        confirmButtonColor: '#094c90'
                     });
 
                     return;
@@ -1271,7 +1271,7 @@ $(function () {
                         text:
                             'La fecha de finalización no puede ser anterior a la fecha de inicio.',
                         confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#093D77'
+                        confirmButtonColor: '#094c90'
                     });
 
                     return;
@@ -1312,7 +1312,7 @@ $(function () {
                         text:
                             'Un boleto emitido debe tener su número registrado.',
                         confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#093D77'
+                        confirmButtonColor: '#094c90'
                     });
 
                     return;
@@ -1352,7 +1352,7 @@ $(function () {
                             confirmButtonText:
                                 'Corregir',
                             confirmButtonColor:
-                                '#093D77'
+                                '#094c90'
                         });
 
                         return;
@@ -1373,7 +1373,7 @@ $(function () {
                             confirmButtonText:
                                 'Corregir',
                             confirmButtonColor:
-                                '#093D77'
+                                '#094c90'
                         });
 
                         return;
@@ -1396,7 +1396,7 @@ $(function () {
                 cancelButtonText:
                     'Cancelar',
                 confirmButtonColor:
-                    '#093D77',
+                    '#094c90',
                 cancelButtonColor:
                     '#65717E',
                 reverseButtons: true
@@ -1446,7 +1446,7 @@ $(function () {
                 cancelButtonText:
                     'Cancelar',
                 confirmButtonColor:
-                    '#093D77',
+                    '#094c90',
                 cancelButtonColor:
                     '#65717E',
                 reverseButtons: true
@@ -1480,7 +1480,7 @@ $(function () {
                 cancelButtonText:
                     'Cancelar',
                 confirmButtonColor:
-                    '#C53B45',
+                    '#962234',
                 cancelButtonColor:
                     '#65717E',
                 reverseButtons: true
@@ -1523,7 +1523,7 @@ $(function () {
             title: 'Revisa la información',
             text: mensajes.join('\n'),
             confirmButtonText: 'Corregir',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     } else if (
         configuracion.mensajeError
@@ -1535,7 +1535,7 @@ $(function () {
             text:
                 configuracion.mensajeError,
             confirmButtonText: 'Entendido',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     } else if (
         configuracion.mensajeExito
@@ -1546,7 +1546,7 @@ $(function () {
             text:
                 configuracion.mensajeExito,
             confirmButtonText: 'Entendido',
-            confirmButtonColor: '#093D77'
+            confirmButtonColor: '#094c90'
         });
     }
 });

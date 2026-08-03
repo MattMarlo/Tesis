@@ -173,7 +173,7 @@
     top: 82px;
     background: var(--blanco);
     border-bottom: 1px solid var(--borde);
-    box-shadow: 0 7px 20px rgba(9, 61, 119, 0.06);
+    box-shadow: 0 7px 20px rgba(5, 44, 83, 0.06);
 }
 
 .detalle-navegacion-interna .contenedor {
@@ -276,7 +276,7 @@
         var(--azul-secundario)
     );
     border-radius: 13px;
-    box-shadow: 0 8px 19px rgba(9, 61, 119, 0.2);
+    box-shadow: 0 8px 19px rgba(5, 44, 83, 0.2);
     font-size: 19px;
 }
 
@@ -745,7 +745,7 @@
     background: var(--azul-principal);
     border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0 10px 22px rgba(9, 61, 119, 0.2);
+    box-shadow: 0 10px 22px rgba(5, 44, 83, 0.2);
     transition:
         background 0.2s ease,
         transform 0.2s ease;

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class ReservaGrupalController extends Controller
@@ -186,6 +187,29 @@ class ReservaGrupalController extends Controller
         Request $request,
         string $id
     ) {
+        $reservaActual = Reserva::with('grupo')
+            ->findOrFail($id);
+
+        $familiaHistorica =
+            $reservaActual->grupo?->esFamiliar() &&
+            !$reservaActual->grupo?->usaCategoriasFamiliares();
+
+        if (
+            $familiaHistorica &&
+            $request->input('tipo_grupo') !==
+                Grupo::TIPO_FAMILIAR
+        ) {
+            return back()->withInput()->with(
+                'error',
+                'Una familia histórica debe conservar su modalidad por integrantes.'
+            );
+        }
+
+        $usaCategoriasFamiliares =
+            !$familiaHistorica &&
+            $request->input('tipo_grupo') ===
+                Grupo::TIPO_FAMILIAR;
+
         $datos = $request->validate([
             'nombre_grupo' => [
                 'required',
@@ -202,9 +226,47 @@ class ReservaGrupalController extends Controller
             ],
             'responsable_pago_id' => [
                 'nullable',
-                'required_if:tipo_grupo,familiar',
+                Rule::requiredIf(
+                    $request->input('tipo_grupo') ===
+                        Grupo::TIPO_FAMILIAR &&
+                    !$usaCategoriasFamiliares
+                ),
                 'integer',
                 'exists:clientes,id',
+            ],
+            'titular_id' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'exists:clientes,id',
+            ],
+            'cantidad_infantes' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
+            ],
+            'cantidad_ninos' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
+            ],
+            'cantidad_adultos' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
+            ],
+            'cantidad_adultos_mayores' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
             ],
             'destino_id' => [
                 'required',
@@ -212,7 +274,8 @@ class ReservaGrupalController extends Controller
                 'exists:destinos,id',
             ],
             'integrantes' => [
-                'required',
+                'nullable',
+                Rule::requiredIf(!$usaCategoriasFamiliares),
                 'array',
                 'min:2',
             ],
@@ -269,6 +332,9 @@ class ReservaGrupalController extends Controller
                 'El líder seleccionado no es válido.',
         ]);
 
+        $datos['usa_categorias_familiares'] =
+            $usaCategoriasFamiliares;
+
         try {
             $reserva = $this->reservaService
                 ->actualizar(
@@ -292,6 +358,8 @@ class ReservaGrupalController extends Controller
                 'success',
                 'Reserva grupal actualizada correctamente.'
             );
+        } catch (ValidationException $error) {
+            throw $error;
         } catch (InvalidArgumentException $error) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -338,6 +406,10 @@ class ReservaGrupalController extends Controller
 
     public function store(Request $request)
     {
+        $usaCategoriasFamiliares =
+            $request->input('tipo_grupo') ===
+                Grupo::TIPO_FAMILIAR;
+
         $datos = $request->validate([
             'nombre_grupo' => [
                 'required',
@@ -354,9 +426,47 @@ class ReservaGrupalController extends Controller
             ],
             'responsable_pago_id' => [
                 'nullable',
-                'required_if:tipo_grupo,familiar',
+                Rule::requiredIf(
+                    $request->input('tipo_grupo') ===
+                        Grupo::TIPO_FAMILIAR &&
+                    !$usaCategoriasFamiliares
+                ),
                 'integer',
                 'exists:clientes,id',
+            ],
+            'titular_id' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'exists:clientes,id',
+            ],
+            'cantidad_infantes' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
+            ],
+            'cantidad_ninos' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
+            ],
+            'cantidad_adultos' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
+            ],
+            'cantidad_adultos_mayores' => [
+                'nullable',
+                Rule::requiredIf($usaCategoriasFamiliares),
+                'integer',
+                'min:0',
+                'max:1000',
             ],
             'destino_id' => [
                 'required',
@@ -369,7 +479,8 @@ class ReservaGrupalController extends Controller
                 'exists:pre_reservas,id',
             ],
             'integrantes' => [
-                'required',
+                'nullable',
+                Rule::requiredIf(!$usaCategoriasFamiliares),
                 'array',
                 'min:2',
             ],
@@ -428,6 +539,9 @@ class ReservaGrupalController extends Controller
             'integrantes.*.es_lider.boolean' =>
                 'El líder seleccionado no es válido.',
         ]);
+
+        $datos['usa_categorias_familiares'] =
+            $usaCategoriasFamiliares;
 
         $usuarioId = Auth::id();
 
@@ -544,6 +658,8 @@ class ReservaGrupalController extends Controller
                 'Reserva grupal registrada correctamente. Código: ' .
                 $reserva->codigo_reserva
             );
+        } catch (ValidationException $error) {
+            throw $error;
         } catch (InvalidArgumentException $error) {
             if ($request->expectsJson()) {
                 return response()->json([

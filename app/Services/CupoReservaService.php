@@ -40,21 +40,7 @@ class CupoReservaService
             )
             ->count();
 
-        $integrantesGrupales = DB::table(
-            'reservas as r'
-        )
-            ->join(
-                'reservas_grupos as rg',
-                'rg.reserva_id',
-                '=',
-                'r.id'
-            )
-            ->join(
-                'grupos_clientes as gc',
-                'gc.grupo_id',
-                '=',
-                'rg.grupo_id'
-            )
+        $reservasGrupales = DB::table('reservas as r')
             ->where('r.destino_id', $destino->id)
             ->where('r.tipo', Reserva::TIPO_GRUPAL)
             ->whereIn('r.estado', $estadosActivos)
@@ -68,7 +54,34 @@ class CupoReservaService
                     );
                 }
             )
-            ->count('gc.id');
+            ->select([
+                'r.id',
+                'r.cantidad_viajeros',
+            ])
+            ->selectSub(
+                DB::table('reservas_grupos as rg')
+                    ->join(
+                        'grupos_clientes as gc',
+                        'gc.grupo_id',
+                        '=',
+                        'rg.grupo_id'
+                    )
+                    ->whereColumn('rg.reserva_id', 'r.id')
+                    ->selectRaw('COUNT(gc.id)'),
+                'cantidad_relaciones'
+            )
+            ->get();
+
+        $integrantesGrupales = $reservasGrupales->sum(
+            function ($reserva) {
+                $cantidadGuardada =
+                    (int) ($reserva->cantidad_viajeros ?? 0);
+
+                return $cantidadGuardada > 0
+                    ? $cantidadGuardada
+                    : (int) $reserva->cantidad_relaciones;
+            }
+        );
 
         return max(
             0,

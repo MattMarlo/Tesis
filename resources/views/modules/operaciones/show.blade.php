@@ -77,7 +77,9 @@
 
         <article>
             <span>Viajeros</span>
-            <strong>{{ $viajeros->count() }}</strong>
+            <strong>
+                {{ $totalViajerosEsperados }}
+            </strong>
         </article>
 
         <article>
@@ -95,6 +97,24 @@
             <strong>{{ $operacion->guias->count() }}</strong>
         </article>
     </section>
+
+    @if ($composicionFamiliar)
+        <div class="aviso-expediente-bloqueado">
+            <i class="bi bi-info-circle"></i>
+            <span>
+                Esta familia incluye
+                <strong>{{ $composicionFamiliar['cantidad_infantes'] }}</strong>
+                infantes,
+                <strong>{{ $composicionFamiliar['cantidad_ninos'] }}</strong>
+                niños,
+                <strong>{{ $composicionFamiliar['cantidad_adultos'] }}</strong>
+                adultos y
+                <strong>{{ $composicionFamiliar['cantidad_adultos_mayores'] }}</strong>
+                adultos mayores. Los datos personales de los acompañantes
+                todavía deben recopilarse antes de emitir sus boletos.
+            </span>
+        </div>
+    @endif
 
     @if (!$editable)
         <div class="aviso-expediente-bloqueado">
@@ -216,7 +236,11 @@
         <div class="bloque-expediente-titulo">
             <div>
                 <span>Personas incluidas</span>
-                <h2>Viajeros</h2>
+                <h2>
+                    {{ $composicionFamiliar
+                        ? 'Titular registrado'
+                        : 'Viajeros' }}
+                </h2>
             </div>
         </div>
 
@@ -382,7 +406,7 @@
                                         'emitido'
                                     )
                                     ->count() }}
-                                de {{ $viajeros->count() }} emitidos
+                                de {{ $totalViajerosEsperados }} boletos emitidos
                             </span>
                         </div>
 

@@ -519,6 +519,11 @@
                             <span id="detalleCantidad">0</span>
                         </div>
 
+                        <div
+                            id="detalleComposicionFamiliar"
+                            class="detalle-composicion-familiar oculto"
+                        ></div>
+
                         <div class="detalle-tabla-responsive">
                             <table class="tabla-viajeros">
                                 <thead>

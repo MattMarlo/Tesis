@@ -238,6 +238,15 @@ class OperacionViajeController extends Controller
                 $reserva->cliente
             ])->filter();
 
+        $composicionFamiliar =
+            $reserva->grupo?->usaCategoriasFamiliares()
+                ? $reserva->grupo->composicionFamiliar()
+                : null;
+
+        $totalViajerosEsperados = $composicionFamiliar
+            ? (int) $reserva->cantidad_viajeros
+            : $viajeros->count();
+
         return view(
             'modules.operaciones.show',
             [
@@ -249,6 +258,10 @@ class OperacionViajeController extends Controller
                     $reserva->operacionViaje,
                 'viajeros' =>
                     $viajeros,
+                'composicionFamiliar' =>
+                    $composicionFamiliar,
+                'totalViajerosEsperados' =>
+                    $totalViajerosEsperados,
             ]
         );
     }
@@ -351,6 +364,14 @@ class OperacionViajeController extends Controller
         ]);
 
         $reserva = $operacion->reserva;
+
+        if (
+            $reserva->grupo?->usaCategoriasFamiliares() &&
+            (int) $reserva->cantidad_viajeros >
+                $reserva->grupo->clientes->count()
+        ) {
+            return 'Faltan los datos personales de los acompañantes antes de completar la documentación del viaje.';
+        }
 
         $viajeros = $reserva->esGrupal()
             ? (

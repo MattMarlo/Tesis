@@ -490,13 +490,42 @@ $(function () {
         if (datos.responsable_pago) {
             resumen += `
                 <br>
-                Responsable del pago:
+                ${datos.modalidad === 'familiar'
+                    ? 'Saldo familiar total a cargo del titular:'
+                    : 'Responsable del pago:'}
                 <strong>
                     ${escapar(
                         datos.responsable_pago
                             .nombre
                     )}
                 </strong>
+            `;
+        }
+
+        if (datos.composicion_familiar) {
+            const composicion = datos.composicion_familiar;
+            const desglose = datos.desglose_familiar;
+            resumen += `
+                <br>
+                Composición: ${composicion.cantidad_infantes} infantes,
+                ${composicion.cantidad_ninos} niños,
+                ${composicion.cantidad_adultos} adultos y
+                ${composicion.cantidad_adultos_mayores} adultos mayores.
+                <strong>${composicion.cantidad_viajeros} viajeros en total.</strong>
+                ${desglose ? `
+                    <br>
+                    Desglose: infantes (0 %)
+                    ${escapar(formatearDinero(desglose.subtotal_infantes, moneda))};
+                    niños (50 %)
+                    ${escapar(formatearDinero(desglose.subtotal_ninos, moneda))};
+                    adultos (100 %)
+                    ${escapar(formatearDinero(desglose.subtotal_adultos, moneda))};
+                    adultos mayores (50 %)
+                    ${escapar(formatearDinero(desglose.subtotal_adultos_mayores, moneda))}.
+                    <strong>Total familiar:
+                        ${escapar(formatearDinero(desglose.precio_total, moneda))}
+                    </strong>
+                ` : ''}
             `;
         }
 
@@ -613,24 +642,21 @@ $(function () {
                     </td>
 
                     <td>
-                        ${escapar(
-                            nombreCategoria(
-                                integrante.categoria
-                            )
-                        )}
-                        <small class="d-block text-muted">
-                            ${integrante.edad ?? '—'} años
-                            · ${integrante.porcentaje ?? '—'}%
-                        </small>
+                        ${integrante.es_titular_familiar
+                            ? 'Titular y responsable del pago'
+                            : `
+                                ${escapar(nombreCategoria(integrante.categoria))}
+                                <small class="d-block text-muted">
+                                    ${integrante.edad ?? '—'} años
+                                    · ${integrante.porcentaje ?? '—'}%
+                                </small>
+                            `}
                     </td>
 
                     <td>
-                        ${escapar(
-                            formatearDinero(
-                                integrante.asignado,
-                                moneda
-                            )
-                        )}
+                        ${integrante.es_titular_familiar
+                            ? 'Pago familiar colectivo'
+                            : escapar(formatearDinero(integrante.asignado, moneda))}
                     </td>
 
                     <td>${escapar(pagado)}</td>

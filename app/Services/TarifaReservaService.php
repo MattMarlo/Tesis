@@ -118,6 +118,71 @@ class TarifaReservaService
         ];
     }
 
+    public function calcularPorCantidadesFamiliares(
+        Destino $destino,
+        array $cantidades
+    ): array {
+        $claves = [
+            'cantidad_infantes',
+            'cantidad_ninos',
+            'cantidad_adultos',
+            'cantidad_adultos_mayores',
+        ];
+
+        $valores = [];
+
+        foreach ($claves as $clave) {
+            $valor = filter_var(
+                $cantidades[$clave] ?? null,
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 0]]
+            );
+
+            if ($valor === false) {
+                throw new InvalidArgumentException(
+                    'Las cantidades de viajeros deben ser números enteros iguales o mayores que cero.'
+                );
+            }
+
+            $valores[$clave] = $valor;
+        }
+
+        $precioBase = $this->obtenerPrecioBase($destino);
+        $cantidadViajeros = array_sum($valores);
+
+        $subtotalInfantes = 0.0;
+        $subtotalNinos = round(
+            $precioBase * 0.50 * $valores['cantidad_ninos'],
+            2
+        );
+        $subtotalAdultos = round(
+            $precioBase * $valores['cantidad_adultos'],
+            2
+        );
+        $subtotalAdultosMayores = round(
+            $precioBase * 0.50 *
+                $valores['cantidad_adultos_mayores'],
+            2
+        );
+
+        return [
+            ...$valores,
+            'cantidad_viajeros' => $cantidadViajeros,
+            'precio_base' => $precioBase,
+            'subtotal_infantes' => $subtotalInfantes,
+            'subtotal_ninos' => $subtotalNinos,
+            'subtotal_adultos' => $subtotalAdultos,
+            'subtotal_adultos_mayores' =>
+                $subtotalAdultosMayores,
+            'precio_total' => round(
+                $subtotalNinos +
+                $subtotalAdultos +
+                $subtotalAdultosMayores,
+                2
+            ),
+        ];
+    }
+
     private function determinarCategoria(
         int $edad
     ): array {

@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reserva;
+use App\Services\TarifaReservaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ReservaController extends Controller
 {
+    public function __construct(
+        private readonly TarifaReservaService $tarifaService
+    ) {
+    }
+
     public function index(Request $request)
     {
         $query = Reserva::query()
@@ -167,11 +173,14 @@ class ReservaController extends Controller
         );
 
         $viajeros = [];
+        $usaCategoriasFamiliares =
+            $reserva->grupo?->usaCategoriasFamiliares() ?? false;
 
         if ($reserva->esGrupal() && $reserva->grupo) {
             foreach ($reserva->grupo->clientes as $cliente) {
-                $montoAsignado =
-                    (float) $cliente->pivot->monto_asignado;
+                $montoAsignado = $usaCategoriasFamiliares
+                    ? null
+                    : (float) $cliente->pivot->monto_asignado;
 
                 $pagadoIntegrante = $reserva
                     ->pagos
@@ -191,17 +200,20 @@ class ReservaController extends Controller
                         $cliente->nombre_completo,
                     'documento' =>
                         $cliente->documento,
-                    'edad' =>
-                        $cliente->pivot->edad_al_viajar,
-                    'categoria' =>
-                        $this->nombreCategoria(
-                            $cliente->pivot
-                                ->categoria_tarifa
+                    'edad' => $usaCategoriasFamiliares
+                        ? null
+                        : $cliente->pivot->edad_al_viajar,
+                    'categoria' => $usaCategoriasFamiliares
+                        ? 'Titular y responsable del pago'
+                        : $this->nombreCategoria(
+                            $cliente->pivot->categoria_tarifa
                         ),
-                    'porcentaje' =>
-                        (float) $cliente->pivot
-                            ->porcentaje_tarifa,
+                    'porcentaje' => $usaCategoriasFamiliares
+                        ? null
+                        : (float) $cliente->pivot->porcentaje_tarifa,
                     'precio' => $montoAsignado,
+                    'es_titular_familiar' =>
+                        $usaCategoriasFamiliares,
                     'es_lider' =>
                         (bool) $cliente->pivot
                             ->es_lider,
@@ -320,6 +332,25 @@ class ReservaController extends Controller
                             $reserva->grupo
                                 ->responsablePago
                                 ?->nombre_completo,
+                        'usa_categorias_familiares' =>
+                            $reserva->grupo
+                                ->usaCategoriasFamiliares(),
+                        'composicion_familiar' =>
+                            $reserva->grupo
+                                ->usaCategoriasFamiliares()
+                                ? $reserva->grupo
+                                    ->composicionFamiliar()
+                                : null,
+                        'desglose_familiar' =>
+                            $reserva->grupo
+                                ->usaCategoriasFamiliares()
+                                ? $this->tarifaService
+                                    ->calcularPorCantidadesFamiliares(
+                                        $reserva->destino,
+                                        $reserva->grupo
+                                            ->composicionFamiliar()
+                                    )
+                                : null,
                     ]
                     : null,
                 'viajeros' => $viajeros,

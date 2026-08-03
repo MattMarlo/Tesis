@@ -53,8 +53,9 @@
                     Esta reserva proviene de una prerreserva de Telegram
                     para aproximadamente
                     <strong>{{ $cantidadPersonas }}</strong>
-                    personas. Agrega y verifica todos los integrantes
-                    antes de continuar.
+                    personas. Distribuye manualmente esa cantidad entre
+                    las categorías o verifica los integrantes, según el
+                    tipo de grupo seleccionado.
                 </span>
             </div>
         @endif
@@ -231,7 +232,29 @@
             </div>
         </section>
 
-        <section class="grupal-seccion">
+        @include(
+            'modules.reservas.grupal.partials.categorias-familiares',
+            [
+                'titularSeleccionado' => old(
+                    'titular_id',
+                    $clienteSeleccionado
+                ),
+                'cantidadesFamiliares' => [
+                    'cantidad_infantes' => old('cantidad_infantes', 0),
+                    'cantidad_ninos' => old('cantidad_ninos', 0),
+                    'cantidad_adultos' => old('cantidad_adultos', 1),
+                    'cantidad_adultos_mayores' => old(
+                        'cantidad_adultos_mayores',
+                        0
+                    ),
+                ],
+            ]
+        )
+
+        <section
+            id="seccionIntegrantesRegistrados"
+            class="grupal-seccion"
+        >
             <div class="seccion-titulo seccion-con-accion">
                 <div>
                     <h2>2. Integrantes</h2>

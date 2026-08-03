@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\BoletoVuelo;
 use App\Models\OperacionViaje;
 use App\Models\VueloReserva;
+use App\Models\ViajeroReserva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class BoletoVueloController extends Controller
@@ -20,6 +23,7 @@ class BoletoVueloController extends Controller
         $vuelo->load([
             'operacion.reserva.cliente',
             'operacion.reserva.grupo.clientes',
+            'operacion.reserva.viajerosReserva',
         ]);
 
         try {
@@ -37,9 +41,14 @@ class BoletoVueloController extends Controller
 
         $datos = $request->validate([
             'cliente_id' => [
-                'required',
+                'nullable',
                 'integer',
                 'exists:clientes,id',
+            ],
+            'viajero_reserva_id' => [
+                'nullable',
+                'integer',
+                'exists:viajeros_reserva,id',
             ],
             'numero_boleto' => [
                 'nullable',
@@ -96,26 +105,71 @@ class BoletoVueloController extends Controller
                 'El archivo no puede superar 5 MB.',
         ]);
 
-        $clienteId = (int)
-            $datos['cliente_id'];
+        $clienteId = filled($datos['cliente_id'] ?? null)
+            ? (int) $datos['cliente_id'] : null;
+        $viajeroId = filled($datos['viajero_reserva_id'] ?? null)
+            ? (int) $datos['viajero_reserva_id'] : null;
+
+        if (($clienteId === null) === ($viajeroId === null)) {
+            return back()->with('error', 'Selecciona exactamente una persona viajera.');
+        }
+
+        $familiaNueva = $vuelo->operacion->reserva
+            ->grupo?->usaCategoriasFamiliares() ?? false;
 
         if (
-            !$this->clientePerteneceReserva(
-                $vuelo,
-                $clienteId
-            )
+            ($familiaNueva && !$viajeroId) ||
+            (!$familiaNueva && !$clienteId)
         ) {
             return back()->with(
                 'error',
-                'El cliente seleccionado no pertenece a esta reserva.'
+                'El tipo de persona seleccionado no corresponde a esta reserva.'
             );
         }
 
+        $personaValida = $viajeroId
+            ? $vuelo->operacion->reserva->viajerosReserva->contains('id', $viajeroId)
+            : $this->clientePerteneceReserva($vuelo, $clienteId);
+        if (!$personaValida) {
+            return back()->with('error', 'La persona seleccionada no pertenece a esta reserva.');
+        }
+
+        $viajero = $viajeroId
+            ? $vuelo->operacion->reserva->viajerosReserva->firstWhere('id', $viajeroId)
+            : null;
+        $cliente = $clienteId
+            ? ($vuelo->operacion->reserva->esIndividual()
+                ? $vuelo->operacion->reserva->cliente
+                : $vuelo->operacion->reserva->grupo->clientes->firstWhere('id', $clienteId))
+            : null;
+
+        $categoriaPersona = $viajero?->categoria_tarifa;
+        if ($cliente) {
+            $categoriaPersona = $vuelo->operacion->reserva->esIndividual()
+                ? $vuelo->operacion->reserva->categoria_tarifa
+                : $cliente->pivot?->categoria_tarifa;
+        }
+
+        if ($categoriaPersona === \App\Models\Reserva::TARIFA_INFANTE) {
+            throw ValidationException::withMessages([
+                'viajero_reserva_id' =>
+                    'Los infantes menores de 2 años no requieren boleto de avión.',
+            ]);
+        }
+        if (
+            ($datos['estado_emision'] ?? null) === BoletoVuelo::ESTADO_EMITIDO &&
+            (!filled($viajero?->tipo_documento ?? $cliente?->tipo_documento) ||
+             !filled($viajero?->documento ?? $cliente?->documento))
+        ) {
+            return back()->with('error', 'Registra el tipo y número de documento antes de emitir el boleto.');
+        }
+
+        $clavePersona = $viajeroId
+            ? ['viajero_reserva_id' => $viajeroId]
+            : ['cliente_id' => $clienteId];
         $boleto = BoletoVuelo::firstOrNew([
-            'vuelo_reserva_id' =>
-                $vuelo->id,
-            'cliente_id' =>
-                $clienteId,
+            'vuelo_reserva_id' => $vuelo->id,
+            ...$clavePersona,
         ]);
 
         $archivoAnterior =
@@ -141,7 +195,7 @@ class BoletoVueloController extends Controller
             );
         }
 
-        unset($datos['cliente_id']);
+        unset($datos['cliente_id'], $datos['viajero_reserva_id']);
 
         $boleto->fill(
             $datos
@@ -150,10 +204,10 @@ class BoletoVueloController extends Controller
         $boleto->vuelo_reserva_id =
             $vuelo->id;
 
-        $boleto->cliente_id =
-            $clienteId;
+        $boleto->cliente_id = $clienteId;
+        $boleto->viajero_reserva_id = $viajeroId;
 
-        $boleto->save();
+        DB::transaction(fn () => $boleto->save());
 
         if (
             !empty($datos['archivo_boleto']) &&

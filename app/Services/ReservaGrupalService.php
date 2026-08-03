@@ -16,7 +16,8 @@ class ReservaGrupalService
 {
     public function __construct(
         private TarifaReservaService $tarifaService,
-        private CupoReservaService $cupoService
+        private CupoReservaService $cupoService,
+        private ViajeroReservaService $viajeroService
     ) {
     }
 
@@ -704,6 +705,8 @@ class ReservaGrupalService
             )
         );
 
+        $this->viajeroService->sincronizarTitular($reserva);
+
         return $reserva;
     }
 
@@ -754,6 +757,12 @@ class ReservaGrupalService
             $reserva->id
         );
 
+        $this->viajeroService->validarComposicionParaActualizacion(
+            $reserva,
+            $calculo,
+            Carbon::parse($destino->fecha_salida)->toDateString()
+        );
+
         $grupo->update([
             'nombre_grupo' => trim($datos['nombre_grupo']),
             'descripcion' => 'Reserva de grupo familiar por cantidades',
@@ -795,6 +804,8 @@ class ReservaGrupalService
                 $calculo['precio_total']
             )
         );
+
+        $this->viajeroService->sincronizarTitular($reserva);
 
         return $reserva->fresh([
             'grupo.clientes',

@@ -184,4 +184,11 @@ class Reserva extends Model
             'reserva_id'
         );
     }
+
+    public function viajerosReserva()
+    {
+        return $this->hasMany(ViajeroReserva::class, 'reserva_id')
+            ->orderByDesc('es_titular')
+            ->orderBy('id');
+    }
 }

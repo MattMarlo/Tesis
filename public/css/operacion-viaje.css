@@ -650,6 +650,74 @@
     display: none !important;
 }
 
+.metricas-progreso {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+}
+
+.metricas-progreso article,
+.habitacion-operativa {
+    border: 1px solid #dbe4ee;
+    border-radius: 12px;
+    padding: 12px;
+    background: #f8fafc;
+}
+
+.metricas-progreso span,
+.metricas-progreso strong,
+.habitacion-operativa small {
+    display: block;
+}
+
+.porcentaje-progreso {
+    color: #094c90;
+    font-size: 1.5rem;
+}
+
+.motivos-progreso {
+    margin: 16px 0 0;
+    color: #962234;
+}
+
+.etiqueta-infante-operacion {
+    color: #097188 !important;
+    font-weight: 700;
+}
+
+.advertencia-registro-historico {
+    color: #962234 !important;
+}
+
+.distribucion-habitaciones {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 18px;
+    padding-top: 18px;
+}
+
+.habitacion-operativa,
+.formulario-nueva-habitacion,
+.formulario-asignacion-habitacion,
+.ocupantes-habitacion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ocupantes-habitacion span {
+    display: inline-flex;
+    gap: 6px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #e8f1fb;
+}
+
+.ocupantes-habitacion form {
+    display: inline;
+}
+
 @media (max-width: 1000px) {
     .resumen-expediente {
         grid-template-columns: repeat(3, minmax(0, 1fr));

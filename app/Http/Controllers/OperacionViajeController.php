@@ -4,12 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\OperacionViaje;
 use App\Models\Reserva;
+use App\Services\ProgresoOperacionService;
+use App\Services\ViajeroReservaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class OperacionViajeController extends Controller
 {
+    public function __construct(
+        private readonly ProgresoOperacionService $progresoService,
+        private readonly ViajeroReservaService $viajeroService
+    ) {
+    }
+
     public function index(Request $request)
     {
         $consulta = Reserva::query()
@@ -197,8 +206,12 @@ class OperacionViajeController extends Controller
             'destino',
             'grupo.clientes',
             'grupo.responsablePago',
+            'viajerosReserva',
             'operacionViaje.vuelos.boletos.cliente',
-            'operacionViaje.alojamientos',
+            'operacionViaje.vuelos.boletos.viajeroReserva',
+            'operacionViaje.alojamientos.habitaciones.asignaciones.viajeroReserva',
+            'operacionViaje.alojamientos.habitaciones.asignaciones.cliente',
+            'operacionViaje.alojamientos.asignacionesHabitacion',
             'operacionViaje.guias',
         ])->findOrFail($id);
 
@@ -215,20 +228,10 @@ class OperacionViajeController extends Controller
         }
 
         if (!$reserva->operacionViaje) {
-            OperacionViaje::create([
-                'reserva_id' =>
-                    $reserva->id,
-                'estado' =>
-                    OperacionViaje::ESTADO_PENDIENTE,
-                'creado_por_user_id' =>
-                    Auth::id(),
-            ]);
-
-            $reserva->load([
-                'operacionViaje.vuelos.boletos.cliente',
-                'operacionViaje.alojamientos',
-                'operacionViaje.guias',
-            ]);
+            return to_route('operaciones.index')->with(
+                'error',
+                'Primero inicia la preparación mediante la acción correspondiente.'
+            );
         }
 
         $viajeros = $reserva->esGrupal()
@@ -247,6 +250,10 @@ class OperacionViajeController extends Controller
             ? (int) $reserva->cantidad_viajeros
             : $viajeros->count();
 
+        $progreso = $this->progresoService->calcular(
+            $reserva->operacionViaje
+        );
+
         return view(
             'modules.operaciones.show',
             [
@@ -262,7 +269,40 @@ class OperacionViajeController extends Controller
                     $composicionFamiliar,
                 'totalViajerosEsperados' =>
                     $totalViajerosEsperados,
+                'progreso' => $progreso,
             ]
+        );
+    }
+
+    public function iniciar(Reserva $reserva)
+    {
+        if ($reserva->estaCancelada()) {
+            return back()->with('error', 'No se puede iniciar una reserva cancelada.');
+        }
+
+        $operacion = DB::transaction(function () use ($reserva) {
+            $reserva = Reserva::query()->with('grupo')
+                ->lockForUpdate()->findOrFail($reserva->id);
+            $operacion = OperacionViaje::firstOrCreate(
+                ['reserva_id' => $reserva->id],
+                [
+                    'estado' => OperacionViaje::ESTADO_PENDIENTE,
+                    'creado_por_user_id' => Auth::id(),
+                ]
+            );
+
+            if ($reserva->grupo?->usaCategoriasFamiliares()) {
+                $this->viajeroService->sincronizarTitular($reserva);
+            }
+
+            return $operacion;
+        });
+
+        return to_route('operaciones.show', $reserva->id)->with(
+            'success',
+            $operacion->wasRecentlyCreated
+                ? 'Preparación iniciada correctamente.'
+                : 'La preparación ya estaba iniciada.'
         );
     }
 
@@ -354,114 +394,11 @@ class OperacionViajeController extends Controller
     private function validarDocumentacionCompleta(
         OperacionViaje $operacion
     ): ?string {
-        $operacion->load([
-            'reserva.destino',
-            'reserva.cliente',
-            'reserva.grupo.clientes',
-            'vuelos.boletos',
-            'alojamientos',
-            'guias',
-        ]);
+        $progreso = $this->progresoService->calcular($operacion);
 
-        $reserva = $operacion->reserva;
-
-        if (
-            $reserva->grupo?->usaCategoriasFamiliares() &&
-            (int) $reserva->cantidad_viajeros >
-                $reserva->grupo->clientes->count()
-        ) {
-            return 'Faltan los datos personales de los acompañantes antes de completar la documentación del viaje.';
-        }
-
-        $viajeros = $reserva->esGrupal()
-            ? (
-                $reserva->grupo?->clientes
-                ?? collect()
-            )
-            : collect([
-                $reserva->cliente,
-            ])->filter();
-
-        $viajerosIds = $viajeros
-            ->pluck('id')
-            ->filter()
-            ->unique();
-
-        $servicios = collect(
-            $reserva->destino?->incluye ?? []
-        )
-            ->map(
-                fn ($servicio) =>
-                    mb_strtolower(
-                        (string) $servicio
-                    )
-            )
-            ->implode(' ');
-
-        $requiereVuelo =
-            str_contains($servicios, 'vuelo') ||
-            str_contains($servicios, 'aéreo') ||
-            str_contains($servicios, 'aereo') ||
-            str_contains($servicios, 'boleto');
-
-        $requiereAlojamiento =
-            str_contains($servicios, 'hotel') ||
-            str_contains($servicios, 'alojamiento') ||
-            str_contains($servicios, 'hospedaje');
-
-        $requiereGuia =
-            str_contains($servicios, 'guía') ||
-            str_contains($servicios, 'guia');
-
-        if ($requiereVuelo) {
-            $vuelosActivos = $operacion
-                ->vuelos
-                ->where('estado', '!=', 'cancelado');
-
-            if ($vuelosActivos->isEmpty()) {
-                return 'El paquete incluye transporte aéreo. Registra al menos un vuelo.';
-            }
-
-            foreach ($vuelosActivos as $vuelo) {
-                if ($vuelo->estado !== 'confirmado') {
-                    return 'Todos los vuelos deben estar confirmados antes de completar el expediente.';
-                }
-
-                $viajerosConBoleto = $vuelo
-                    ->boletos
-                    ->where(
-                        'estado_emision',
-                        'emitido'
-                    )
-                    ->pluck('cliente_id')
-                    ->unique();
-
-                if (
-                    $viajerosIds
-                        ->diff($viajerosConBoleto)
-                        ->isNotEmpty()
-                ) {
-                    return 'Faltan boletos emitidos para uno o más viajeros.';
-                }
-            }
-        }
-
-        if (
-            $requiereAlojamiento &&
-            !$operacion->alojamientos
-                ->contains('estado', 'confirmado')
-        ) {
-            return 'El paquete incluye alojamiento. Registra y confirma el hotel.';
-        }
-
-        if (
-            $requiereGuia &&
-            !$operacion->guias
-                ->contains('estado', 'confirmado')
-        ) {
-            return 'El paquete incluye guía. Registra y confirma sus datos.';
-        }
-
-        return null;
+        return $progreso['puede_completar']
+            ? null
+            : ($progreso['motivos_pendientes'][0] ??
+                'El expediente todavía tiene tareas pendientes.');
     }
 }

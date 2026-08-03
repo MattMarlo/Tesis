@@ -66,4 +66,25 @@ class TarifaReservaServiceTest extends TestCase
                 ]
             );
     }
+
+    public function test_clasifica_limites_de_edad_en_fecha_del_viaje(): void
+    {
+        $servicio = new TarifaReservaService();
+        $viaje = '2030-06-15';
+
+        $casos = [
+            ['2028-06-16', 1, 'infante'],
+            ['2028-06-15', 2, 'nino'],
+            ['2018-06-16', 11, 'nino'],
+            ['2018-06-15', 12, 'adulto'],
+            ['1969-06-16', 60, 'adulto'],
+            ['1969-06-15', 61, 'adulto_mayor'],
+        ];
+
+        foreach ($casos as [$nacimiento, $edad, $categoria]) {
+            $resultado = $servicio->clasificarPorFechaNacimiento($nacimiento, $viaje);
+            $this->assertSame($edad, $resultado['edad']);
+            $this->assertSame($categoria, $resultado['categoria']);
+        }
+    }
 }

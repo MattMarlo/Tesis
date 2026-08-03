@@ -40,7 +40,7 @@ class TarifaReservaService
             );
         }
 
-        $edad = $fechaNacimiento->diffInYears(
+        $edad = (int) $fechaNacimiento->diffInYears(
             $fechaViaje
         );
 
@@ -96,25 +96,42 @@ class TarifaReservaService
             );
         }
 
-        $nacimiento = Carbon::parse($fechaNacimiento)->startOfDay();
-        $fechaViaje = Carbon::parse($destino->fecha_salida)->startOfDay();
+        $clasificacion = $this->clasificarPorFechaNacimiento(
+            $fechaNacimiento,
+            (string) $destino->fecha_salida
+        );
+        $precioBase = $this->obtenerPrecioBase($destino);
 
-        if ($nacimiento->greaterThanOrEqualTo($fechaViaje)) {
+        return [
+            ...$clasificacion,
+            'precio_base' => $precioBase,
+            'precio_final' => round(
+                $precioBase * ($clasificacion['porcentaje'] / 100),
+                2
+            ),
+        ];
+    }
+
+    public function clasificarPorFechaNacimiento(
+        string $fechaNacimiento,
+        string $fechaViaje
+    ): array {
+        $nacimiento = Carbon::parse($fechaNacimiento)->startOfDay();
+        $viaje = Carbon::parse($fechaViaje)->startOfDay();
+
+        if ($nacimiento->greaterThanOrEqualTo($viaje)) {
             throw new InvalidArgumentException(
                 'La fecha de nacimiento no es válida para este viaje.'
             );
         }
 
-        $edad = $nacimiento->diffInYears($fechaViaje);
+        $edad = (int) $nacimiento->diffInYears($viaje);
         [$categoria, $porcentaje] = $this->determinarCategoria($edad);
-        $precioBase = $this->obtenerPrecioBase($destino);
 
         return [
             'edad' => $edad,
             'categoria' => $categoria,
             'porcentaje' => $porcentaje,
-            'precio_base' => $precioBase,
-            'precio_final' => round($precioBase * ($porcentaje / 100), 2),
         ];
     }
 

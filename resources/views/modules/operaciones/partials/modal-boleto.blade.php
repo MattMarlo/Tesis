@@ -20,6 +20,7 @@
                 name="cliente_id"
                 id="boletoClienteId"
             >
+            <input type="hidden" name="viajero_reserva_id" id="boletoViajeroReservaId">
 
             <div class="modal-header">
                 <div>

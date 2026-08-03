@@ -17,13 +17,11 @@
     $precioActual = $destino->precio_promocional
         ?: $destino->precio;
 
-    $telegramBot = ltrim(
-        (string) config('services.telegram.bot_username'),
-        '@'
-    );
+    $mensajeTelegram = 'Hola, deseo recibir información sobre el paquete: '
+        . $destino->nombre_paquete;
 
-    $enlaceTelegram = 'https://t.me/' . $telegramBot .
-        '?start=destino_' . $destino->id;
+    $enlaceTelegram = 'https://t.me/ReservasPassionTravelBot?text=' .
+        urlencode($mensajeTelegram);
 @endphp
 
 {{-- Navegación secundaria --}}

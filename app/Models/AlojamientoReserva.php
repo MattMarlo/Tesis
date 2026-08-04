@@ -61,4 +61,20 @@ class AlojamientoReserva extends Model
             'operacion_viaje_id'
         );
     }
+
+    public function habitaciones()
+    {
+        return $this->hasMany(
+            HabitacionAlojamiento::class,
+            'alojamiento_reserva_id'
+        );
+    }
+
+    public function asignacionesHabitacion()
+    {
+        return $this->hasMany(
+            AsignacionHabitacion::class,
+            'alojamiento_reserva_id'
+        );
+    }
 }

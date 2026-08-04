@@ -77,7 +77,9 @@
 
         <article>
             <span>Viajeros</span>
-            <strong>{{ $viajeros->count() }}</strong>
+            <strong>
+                {{ $totalViajerosEsperados }}
+            </strong>
         </article>
 
         <article>
@@ -95,6 +97,61 @@
             <strong>{{ $operacion->guias->count() }}</strong>
         </article>
     </section>
+
+    <section class="bloque-expediente resumen-progreso-operacion">
+        <div class="bloque-expediente-titulo">
+            <div><span>Seguimiento</span><h2>Resumen de progreso</h2></div>
+            <strong class="porcentaje-progreso">{{ $progreso['porcentaje_general'] }}%</strong>
+        </div>
+        <div class="metricas-progreso">
+            @foreach ([
+                'Viajeros identificados' => $progreso['viajeros_identificados'],
+                'Documentos registrados' => $progreso['documentos_registrados'],
+                'Boletos emitidos' => $progreso['boletos_emitidos'],
+                'Asientos asignados' => $progreso['asientos_asignados'],
+                'Viajeros con habitación' => $progreso['viajeros_con_habitacion'],
+            ] as $etiqueta => $metrica)
+                @if (($metrica['aplica'] ?? true))
+                    <article><span>{{ $etiqueta }}</span>
+                        <strong>{{ $metrica['actual'] }} de {{ $metrica['total'] }}</strong>
+                    </article>
+                @endif
+            @endforeach
+            <article><span>Estado del pago</span><strong>{{ ucfirst($progreso['estado_pago']) }}</strong></article>
+            <article><span>Saldo pendiente</span><strong>{{ $reserva->moneda }} {{ number_format($progreso['saldo_pendiente'], 2) }}</strong></article>
+        </div>
+        @if ($progreso['motivos_pendientes'])
+            <ul class="motivos-progreso">
+                @foreach ($progreso['motivos_pendientes'] as $motivo)<li>{{ $motivo }}</li>@endforeach
+            </ul>
+        @endif
+    </section>
+
+    @if ($composicionFamiliar)
+        <div class="aviso-expediente-bloqueado">
+            <i class="bi bi-info-circle"></i>
+            <span>
+                Esta familia incluye
+                <strong>{{ $composicionFamiliar['cantidad_infantes'] }}</strong>
+                infantes,
+                <strong>{{ $composicionFamiliar['cantidad_ninos'] }}</strong>
+                niños,
+                <strong>{{ $composicionFamiliar['cantidad_adultos'] }}</strong>
+                adultos y
+                <strong>{{ $composicionFamiliar['cantidad_adultos_mayores'] }}</strong>
+                adultos mayores. Los datos personales de los acompañantes
+                todavía deben recopilarse antes de emitir sus boletos.
+            </span>
+        </div>
+        @if ($editable && !$reserva->viajerosReserva->contains('es_titular', true))
+            <form method="POST" action="{{ route('operaciones.viajeros.titular', $reserva) }}"
+                  class="aviso-expediente-bloqueado">
+                @csrf
+                <span>Esta reserva todavía no tiene al titular inicializado en el seguimiento.</span>
+                <button type="submit" class="btn-agregar-expediente">Inicializar integrantes del viaje</button>
+            </form>
+        @endif
+    @endif
 
     @if (!$editable)
         <div class="aviso-expediente-bloqueado">
@@ -216,33 +273,54 @@
         <div class="bloque-expediente-titulo">
             <div>
                 <span>Personas incluidas</span>
-                <h2>Viajeros</h2>
+                <h2>Integrantes del viaje</h2>
             </div>
+            @if ($editable && $composicionFamiliar)
+                <button type="button" class="btn-agregar-expediente" id="btnNuevoViajero">
+                    <i class="bi bi-person-plus"></i> Agregar acompañante
+                </button>
+            @endif
         </div>
 
         <div class="lista-viajeros-expediente">
-            @foreach ($viajeros as $viajero)
+            @foreach ($progreso['personas'] as $persona)
                 <article>
                     <div class="viajero-inicial">
-                        {{ mb_strtoupper(
-                            mb_substr(
-                                $viajero->nombres,
-                                0,
-                                1
-                            )
-                        ) }}
+                        {{ mb_strtoupper(mb_substr($persona['nombre'], 0, 1)) }}
                     </div>
 
                     <div>
-                        <strong>
-                            {{ $viajero->nombre_completo }}
-                        </strong>
-
-                        <small>
-                            {{ $viajero->tipo_documento }}
-                            {{ $viajero->documento }}
-                        </small>
+                        <strong>{{ $persona['nombre'] }}</strong>
+                        <small>{{ ucfirst(str_replace('_', ' ', $persona['categoria'] ?? 'Sin categoría')) }} · {{ $persona['edad'] }} años</small>
+                        <small>{{ $persona['tipo_documento'] ? ucfirst($persona['tipo_documento']) : 'Documento' }}: {{ $persona['documento_enmascarado'] }}</small>
+                        @if ($persona['es_titular'])<small><strong>Titular</strong></small>@endif
+                        @if (!$persona['requiere_boleto'])
+                            <small class="etiqueta-infante-operacion">Infante — no requiere boleto ni habitación</small>
+                            @php
+                                $registroHistoricoInfante = $operacion->vuelos->contains(fn ($vuelo) =>
+                                    $vuelo->boletos->contains(fn ($boleto) =>
+                                        $persona['tipo'] === 'viajero'
+                                            ? (int) $boleto->viajero_reserva_id === (int) $persona['id']
+                                            : (int) $boleto->cliente_id === (int) $persona['id']
+                                    )
+                                ) || $operacion->alojamientos->contains(fn ($alojamiento) =>
+                                    $alojamiento->asignacionesHabitacion->contains(fn ($asignacion) =>
+                                        $persona['tipo'] === 'viajero'
+                                            ? (int) $asignacion->viajero_reserva_id === (int) $persona['id']
+                                            : (int) $asignacion->cliente_id === (int) $persona['id']
+                                    )
+                                );
+                            @endphp
+                            @if ($registroHistoricoInfante)
+                                <small class="advertencia-registro-historico">Existe un boleto o asignación histórica; se conserva sin modificar.</small>
+                            @endif
+                        @endif
                     </div>
+                    @if ($editable && $persona['tipo'] === 'viajero' && !$persona['es_titular'])
+                        <button type="button" class="btn-gestionar-boleto btnEditarViajero"
+                            data-viajero-id="{{ $persona['id'] }}">Editar</button>
+                    @endif
+
                 </article>
             @endforeach
         </div>
@@ -376,13 +454,8 @@
                         <div class="boletos-titulo">
                             <h4>Boletos de viajeros</h4>
                             <span>
-                                {{ $vuelo->boletos
-                                    ->where(
-                                        'estado_emision',
-                                        'emitido'
-                                    )
-                                    ->count() }}
-                                de {{ $viajeros->count() }} emitidos
+                                {{ $progreso['boletos_por_vuelo'][$vuelo->id]['actual'] }}
+                                de {{ $progreso['boletos_por_vuelo'][$vuelo->id]['total'] }} boletos emitidos
                             </span>
                         </div>
 
@@ -400,26 +473,28 @@
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($viajeros as $viajero)
+                                    @foreach ($progreso['personas'] as $persona)
                                         @php
                                             $boleto = $vuelo
                                                 ->boletos
-                                                ->firstWhere(
-                                                    'cliente_id',
-                                                    $viajero->id
-                                                );
+                                                ->first(function ($item) use ($persona) {
+                                                    return $persona['tipo'] === 'viajero'
+                                                        ? (int) $item->viajero_reserva_id === (int) $persona['id']
+                                                        : (int) $item->cliente_id === (int) $persona['id'];
+                                                });
                                         @endphp
 
                                         <tr>
                                             <td>
-                                                {{ $viajero
-                                                    ->nombre_completo }}
+                                                {{ $persona['nombre'] }}
                                             </td>
 
                                             <td>
-                                                {{ $boleto
+                                                {{ !$persona['requiere_boleto']
+                                                    ? 'No requiere boleto'
+                                                    : ($boleto
                                                     ?->numero_boleto
-                                                    ?? 'Pendiente' }}
+                                                    ?? 'Pendiente') }}
                                             </td>
 
                                             <td>
@@ -461,12 +536,13 @@
                                             </td>
 
                                             <td>
-                                                @if ($editable)
+                                                @if ($editable && $persona['requiere_boleto'])
                                                     <button
                                                         type="button"
                                                         class="btn-gestionar-boleto btnGestionarBoleto"
                                                         data-vuelo-id="{{ $vuelo->id }}"
-                                                        data-cliente-id="{{ $viajero->id }}"
+                                                        data-persona-id="{{ $persona['id'] }}"
+                                                        data-persona-tipo="{{ $persona['tipo'] }}"
                                                     >
                                                         {{ $boleto
                                                             ? 'Editar'
@@ -626,6 +702,60 @@
                                 ->distribucion_habitaciones }}
                         </p>
                     @endif
+
+                    <div class="distribucion-habitaciones">
+                        <div class="boletos-titulo">
+                            <h4>Distribución de habitaciones</h4>
+                            <span>{{ $progreso['habitaciones_por_alojamiento'][$alojamiento->id]['actual'] }} de {{ $progreso['habitaciones_por_alojamiento'][$alojamiento->id]['total'] }} viajeros con habitación</span>
+                        </div>
+                        @php
+                            $sinHabitacion = $progreso['personas']->filter(fn ($persona) => $persona['requiere_habitacion'])->reject(fn ($persona) =>
+                                $alojamiento->asignacionesHabitacion->contains(
+                                    $progreso['familia_nueva'] ? 'viajero_reserva_id' : 'cliente_id',
+                                    $persona['id']
+                                )
+                            );
+                        @endphp
+                        <p class="detalle-adicional"><strong>Sin habitación:</strong>
+                            {{ $sinHabitacion->isEmpty() ? 'Ninguno' : $sinHabitacion->pluck('nombre')->join(', ') }}
+                        </p>
+                        @foreach ($alojamiento->habitaciones as $habitacion)
+                            <article class="habitacion-operativa">
+                                <div><strong>{{ ucfirst($habitacion->tipo) }} {{ $habitacion->referencia ? '· '.$habitacion->referencia : '' }}</strong>
+                                    <small>{{ $habitacion->asignaciones->count() }} de {{ $habitacion->capacidad }} ocupantes</small></div>
+                                <div class="ocupantes-habitacion">
+                                    @foreach ($habitacion->asignaciones as $asignacion)
+                                        @php $ocupante = $asignacion->viajeroReserva ?: $asignacion->cliente; @endphp
+                                        <span>{{ $ocupante?->nombre_completo }}
+                                            @if ($editable)<form method="POST" action="{{ route('operaciones.habitaciones.retirar', $asignacion) }}">@csrf @method('DELETE')<button type="submit" aria-label="Retirar">×</button></form>@endif
+                                        </span>
+                                    @endforeach
+                                </div>
+                                @if ($editable && $habitacion->asignaciones->count() < $habitacion->capacidad)
+                                    <form method="POST" action="{{ route('operaciones.habitaciones.asignar', $habitacion) }}" class="formulario-asignacion-habitacion">
+                                        @csrf
+                                        <select name="{{ $progreso['familia_nueva'] ? 'viajero_reserva_id' : 'cliente_id' }}" required>
+                                            <option value="">Seleccionar viajero</option>
+                                            @foreach ($progreso['personas'] as $persona)
+                                                @php $yaAsignado = $alojamiento->asignacionesHabitacion->contains($progreso['familia_nueva'] ? 'viajero_reserva_id' : 'cliente_id', $persona['id']); @endphp
+                                                @if ($persona['requiere_habitacion'] && !$yaAsignado)<option value="{{ $persona['id'] }}">{{ $persona['nombre'] }}</option>@endif
+                                            @endforeach
+                                        </select><button type="submit">Asignar</button>
+                                    </form>
+                                @endif
+                            </article>
+                        @endforeach
+                        @if ($editable)
+                            <form method="POST" action="{{ route('operaciones.habitaciones.store', $alojamiento) }}" class="formulario-nueva-habitacion">
+                                @csrf
+                                <select name="tipo" required><option value="">Tipo de habitación</option>
+                                    @foreach (\App\Models\HabitacionAlojamiento::CAPACIDADES as $tipo => $capacidad)<option value="{{ $tipo }}">{{ ucfirst($tipo) }} ({{ $capacidad }})</option>@endforeach
+                                </select>
+                                <input name="referencia" maxlength="100" placeholder="Número o referencia (opcional)">
+                                <button type="submit">Agregar habitación</button>
+                            </form>
+                        @endif
+                    </div>
                 </article>
             @empty
                 <div class="sin-elementos-expediente">
@@ -764,6 +894,8 @@
     'modules.operaciones.partials.modal-vuelo'
 )
 
+@include('modules.operaciones.partials.modal-viajero')
+
 @include(
     'modules.operaciones.partials.modal-boleto'
 )
@@ -789,6 +921,7 @@
             $operacion->alojamientos->values()
         ),
         guias: @json($operacion->guias->values()),
+        viajerosReserva: @json($reserva->viajerosReserva->values()),
 
         datosPaquete: {
             aerolinea: @json(

@@ -40,7 +40,7 @@ class TarifaReservaService
             );
         }
 
-        $edad = $fechaNacimiento->diffInYears(
+        $edad = (int) $fechaNacimiento->diffInYears(
             $fechaViaje
         );
 
@@ -96,25 +96,107 @@ class TarifaReservaService
             );
         }
 
-        $nacimiento = Carbon::parse($fechaNacimiento)->startOfDay();
-        $fechaViaje = Carbon::parse($destino->fecha_salida)->startOfDay();
+        $clasificacion = $this->clasificarPorFechaNacimiento(
+            $fechaNacimiento,
+            (string) $destino->fecha_salida
+        );
+        $precioBase = $this->obtenerPrecioBase($destino);
 
-        if ($nacimiento->greaterThanOrEqualTo($fechaViaje)) {
+        return [
+            ...$clasificacion,
+            'precio_base' => $precioBase,
+            'precio_final' => round(
+                $precioBase * ($clasificacion['porcentaje'] / 100),
+                2
+            ),
+        ];
+    }
+
+    public function clasificarPorFechaNacimiento(
+        string $fechaNacimiento,
+        string $fechaViaje
+    ): array {
+        $nacimiento = Carbon::parse($fechaNacimiento)->startOfDay();
+        $viaje = Carbon::parse($fechaViaje)->startOfDay();
+
+        if ($nacimiento->greaterThanOrEqualTo($viaje)) {
             throw new InvalidArgumentException(
                 'La fecha de nacimiento no es válida para este viaje.'
             );
         }
 
-        $edad = $nacimiento->diffInYears($fechaViaje);
+        $edad = (int) $nacimiento->diffInYears($viaje);
         [$categoria, $porcentaje] = $this->determinarCategoria($edad);
-        $precioBase = $this->obtenerPrecioBase($destino);
 
         return [
             'edad' => $edad,
             'categoria' => $categoria,
             'porcentaje' => $porcentaje,
+        ];
+    }
+
+    public function calcularPorCantidadesFamiliares(
+        Destino $destino,
+        array $cantidades
+    ): array {
+        $claves = [
+            'cantidad_infantes',
+            'cantidad_ninos',
+            'cantidad_adultos',
+            'cantidad_adultos_mayores',
+        ];
+
+        $valores = [];
+
+        foreach ($claves as $clave) {
+            $valor = filter_var(
+                $cantidades[$clave] ?? null,
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 0]]
+            );
+
+            if ($valor === false) {
+                throw new InvalidArgumentException(
+                    'Las cantidades de viajeros deben ser números enteros iguales o mayores que cero.'
+                );
+            }
+
+            $valores[$clave] = $valor;
+        }
+
+        $precioBase = $this->obtenerPrecioBase($destino);
+        $cantidadViajeros = array_sum($valores);
+
+        $subtotalInfantes = 0.0;
+        $subtotalNinos = round(
+            $precioBase * 0.50 * $valores['cantidad_ninos'],
+            2
+        );
+        $subtotalAdultos = round(
+            $precioBase * $valores['cantidad_adultos'],
+            2
+        );
+        $subtotalAdultosMayores = round(
+            $precioBase * 0.50 *
+                $valores['cantidad_adultos_mayores'],
+            2
+        );
+
+        return [
+            ...$valores,
+            'cantidad_viajeros' => $cantidadViajeros,
             'precio_base' => $precioBase,
-            'precio_final' => round($precioBase * ($porcentaje / 100), 2),
+            'subtotal_infantes' => $subtotalInfantes,
+            'subtotal_ninos' => $subtotalNinos,
+            'subtotal_adultos' => $subtotalAdultos,
+            'subtotal_adultos_mayores' =>
+                $subtotalAdultosMayores,
+            'precio_total' => round(
+                $subtotalNinos +
+                $subtotalAdultos +
+                $subtotalAdultosMayores,
+                2
+            ),
         ];
     }
 

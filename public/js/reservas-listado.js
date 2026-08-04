@@ -131,6 +131,10 @@ $(function () {
     }
 
     function construirPrecioViajero(viajero, moneda) {
+        if (viajero.es_titular_familiar) {
+            return '<span class="text-muted">Pago familiar colectivo</span>';
+        }
+
         let contenido = `
             <span class="fw-semibold">
                 ${escaparHtml(formatearMoneda(viajero.precio, moneda))}
@@ -273,6 +277,32 @@ $(function () {
             datos.cantidad_viajeros,
             viajeros.length || 1
         );
+
+        const composicion = grupo?.composicion_familiar;
+        const desglose = grupo?.desglose_familiar;
+        $('#detalleComposicionFamiliar')
+            .toggleClass('oculto', !composicion)
+            .html(
+                composicion
+                    ? `
+                        <strong>Composición familiar:</strong>
+                        ${Number(composicion.cantidad_infantes || 0)} infantes,
+                        ${Number(composicion.cantidad_ninos || 0)} niños,
+                        ${Number(composicion.cantidad_adultos || 0)} adultos y
+                        ${Number(composicion.cantidad_adultos_mayores || 0)} adultos mayores.
+                        Solo el titular está registrado como cliente.
+                        ${desglose ? `
+                            <div class="mt-2">
+                                Infantes (0 %): ${escaparHtml(formatearMoneda(desglose.subtotal_infantes, moneda))} ·
+                                Niños (50 %): ${escaparHtml(formatearMoneda(desglose.subtotal_ninos, moneda))} ·
+                                Adultos (100 %): ${escaparHtml(formatearMoneda(desglose.subtotal_adultos, moneda))} ·
+                                Adultos mayores (50 %): ${escaparHtml(formatearMoneda(desglose.subtotal_adultos_mayores, moneda))}.
+                                <strong>Total familiar: ${escaparHtml(formatearMoneda(desglose.precio_total, moneda))}</strong>
+                            </div>
+                        ` : ''}
+                    `
+                    : ''
+            );
 
         let filas = '';
 

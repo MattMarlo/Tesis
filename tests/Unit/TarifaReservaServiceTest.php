@@ -1,0 +1,90 @@
+<?php
+
+namespace Tests\Unit;
+
+use App\Models\Destino;
+use App\Services\TarifaReservaService;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+
+class TarifaReservaServiceTest extends TestCase
+{
+    public function test_calcula_familia_por_cantidades(): void
+    {
+        $destino = new Destino([
+            'precio' => 1000,
+            'precio_promocional' => 800,
+        ]);
+
+        $resultado = (new TarifaReservaService())
+            ->calcularPorCantidadesFamiliares($destino, [
+                'cantidad_infantes' => 1,
+                'cantidad_ninos' => 2,
+                'cantidad_adultos' => 2,
+                'cantidad_adultos_mayores' => 1,
+            ]);
+
+        $this->assertSame(6, $resultado['cantidad_viajeros']);
+        $this->assertSame(0.0, $resultado['subtotal_infantes']);
+        $this->assertSame(800.0, $resultado['subtotal_ninos']);
+        $this->assertSame(1600.0, $resultado['subtotal_adultos']);
+        $this->assertSame(
+            400.0,
+            $resultado['subtotal_adultos_mayores']
+        );
+        $this->assertSame(2800.0, $resultado['precio_total']);
+    }
+
+    public function test_rechaza_cantidades_negativas_o_decimales(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new TarifaReservaService())
+            ->calcularPorCantidadesFamiliares(
+                new Destino(['precio' => 100]),
+                [
+                    'cantidad_infantes' => -1,
+                    'cantidad_ninos' => 0,
+                    'cantidad_adultos' => 1,
+                    'cantidad_adultos_mayores' => 0,
+                ]
+            );
+    }
+
+    public function test_rechaza_una_cantidad_decimal(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new TarifaReservaService())
+            ->calcularPorCantidadesFamiliares(
+                new Destino(['precio' => 100]),
+                [
+                    'cantidad_infantes' => 0,
+                    'cantidad_ninos' => '1.5',
+                    'cantidad_adultos' => 1,
+                    'cantidad_adultos_mayores' => 0,
+                ]
+            );
+    }
+
+    public function test_clasifica_limites_de_edad_en_fecha_del_viaje(): void
+    {
+        $servicio = new TarifaReservaService();
+        $viaje = '2030-06-15';
+
+        $casos = [
+            ['2028-06-16', 1, 'infante'],
+            ['2028-06-15', 2, 'nino'],
+            ['2018-06-16', 11, 'nino'],
+            ['2018-06-15', 12, 'adulto'],
+            ['1969-06-16', 60, 'adulto'],
+            ['1969-06-15', 61, 'adulto_mayor'],
+        ];
+
+        foreach ($casos as [$nacimiento, $edad, $categoria]) {
+            $resultado = $servicio->clasificarPorFechaNacimiento($nacimiento, $viaje);
+            $this->assertSame($edad, $resultado['edad']);
+            $this->assertSame($categoria, $resultado['categoria']);
+        }
+    }
+}

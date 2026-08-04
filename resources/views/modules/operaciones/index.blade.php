@@ -279,19 +279,22 @@
                             </td>
 
                             <td>
-                                <a
-                                    href="{{ route(
-                                        'operaciones.show',
-                                        $reserva->id
-                                    ) }}"
-                                    class="btn-gestionar-operacion"
-                                >
-                                    <i class="bi bi-folder2-open"></i>
-
-                                    {{ $operacion
-                                        ? 'Abrir expediente'
-                                        : 'Iniciar preparación' }}
-                                </a>
+                                @if ($operacion)
+                                    <a href="{{ route('operaciones.show', $reserva->id) }}"
+                                       class="btn-gestionar-operacion">
+                                        <i class="bi bi-folder2-open"></i>
+                                        Abrir expediente
+                                    </a>
+                                @else
+                                    <form method="POST"
+                                          action="{{ route('operaciones.iniciar', $reserva->id) }}">
+                                        @csrf
+                                        <button type="submit" class="btn-gestionar-operacion">
+                                            <i class="bi bi-play-circle"></i>
+                                            Iniciar preparación
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

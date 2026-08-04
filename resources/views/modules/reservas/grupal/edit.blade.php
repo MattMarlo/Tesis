@@ -228,7 +228,40 @@
             </div>
         </section>
 
-        <section class="grupal-seccion">
+        @include(
+            'modules.reservas.grupal.partials.categorias-familiares',
+            [
+                'titularSeleccionado' => old(
+                    'titular_id',
+                    $grupo->usaCategoriasFamiliares()
+                        ? $grupo->responsable_pago_id
+                        : null
+                ),
+                'cantidadesFamiliares' => [
+                    'cantidad_infantes' => old(
+                        'cantidad_infantes',
+                        $grupo->cantidad_infantes ?? 0
+                    ),
+                    'cantidad_ninos' => old(
+                        'cantidad_ninos',
+                        $grupo->cantidad_ninos ?? 0
+                    ),
+                    'cantidad_adultos' => old(
+                        'cantidad_adultos',
+                        $grupo->cantidad_adultos ?? 1
+                    ),
+                    'cantidad_adultos_mayores' => old(
+                        'cantidad_adultos_mayores',
+                        $grupo->cantidad_adultos_mayores ?? 0
+                    ),
+                ],
+            ]
+        )
+
+        <section
+            id="seccionIntegrantesRegistrados"
+            class="grupal-seccion"
+        >
             <div class="seccion-titulo seccion-con-accion">
                 <div>
                     <h2>2. Integrantes</h2>
@@ -432,6 +465,13 @@
                 'responsable_pago_id',
                 $grupo->responsable_pago_id
             )
+        ),
+        familiaPorCategorias: @json(
+            $grupo->usaCategoriasFamiliares()
+        ),
+        familiaHistorica: @json(
+            $grupo->esFamiliar() &&
+            !$grupo->usaCategoriasFamiliares()
         )
     };
 </script>

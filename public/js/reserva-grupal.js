@@ -4,6 +4,7 @@ $(function () {
     const $selectorCliente = $('#selectorCliente');
     const $lista = $('#listaIntegrantes');
     const $responsable = $('#responsable_pago_id');
+    const $titular = $('#titular_id');
 
     const configuracion =
         window.configuracionReservaGrupal || {};
@@ -13,6 +14,78 @@ $(function () {
 
     let integrantes = [];
     let enviando = false;
+
+    function usaCategoriasFamiliares() {
+        const tipo = $(
+            'input[name="tipo_grupo"]:checked'
+        ).val();
+
+        return tipo === 'familiar' &&
+            !configuracion.familiaHistorica;
+    }
+
+    function cantidadesFamiliares() {
+        const leer = id => {
+            const valor = Number($('#' + id).val());
+            return Number.isInteger(valor) && valor >= 0
+                ? valor
+                : 0;
+        };
+
+        return {
+            cantidadInfantes: leer('cantidad_infantes'),
+            cantidadNinos: leer('cantidad_ninos'),
+            cantidadAdultos: leer('cantidad_adultos'),
+            cantidadAdultosMayores: leer(
+                'cantidad_adultos_mayores'
+            )
+        };
+    }
+
+    function validarCantidadFamiliar(id) {
+        const texto = String($('#' + id).val() ?? '').trim();
+        const esEntero = /^\d+$/.test(texto);
+        const valor = esEntero ? Number(texto) : NaN;
+        let mensaje = '';
+
+        if (!texto) {
+            mensaje = 'Este campo es obligatorio.';
+        } else if (
+            !esEntero ||
+            !Number.isInteger(valor)
+        ) {
+            mensaje = 'Ingresa una cantidad entera.';
+        } else if (valor < 0 || valor > 1000) {
+            mensaje = 'Ingresa una cantidad entre 0 y 1000.';
+        }
+
+        return mostrarError(id, mensaje);
+    }
+
+    function calculoFamiliarVistaPrevia() {
+        const paquete = datosPaquete();
+        const cantidades = cantidadesFamiliares();
+        const viajeros =
+            cantidades.cantidadInfantes +
+            cantidades.cantidadNinos +
+            cantidades.cantidadAdultos +
+            cantidades.cantidadAdultosMayores;
+        const precioBase = paquete?.precio || 0;
+        const precioSinDescuento = precioBase * viajeros;
+        const total =
+            precioBase * cantidades.cantidadAdultos +
+            precioBase * 0.5 * cantidades.cantidadNinos +
+            precioBase * 0.5 *
+                cantidades.cantidadAdultosMayores;
+
+        return {
+            ...cantidades,
+            viajeros: viajeros,
+            precioSinDescuento: precioSinDescuento,
+            descuento: precioSinDescuento - total,
+            total: total
+        };
+    }
 
     function mostrarError(campo, mensaje) {
         $('#' + campo)
@@ -532,6 +605,43 @@ $(function () {
     function actualizarResumen() {
         const paquete = datosPaquete();
 
+        if (usaCategoriasFamiliares()) {
+            const calculo = calculoFamiliarVistaPrevia();
+
+            $('#totalViajerosFamiliares').text(
+                calculo.viajeros
+            );
+            $('#resumenCantidad').text(calculo.viajeros);
+            $('#resumenPrecioBase').text(
+                paquete
+                    ? formatearDinero(
+                        calculo.precioSinDescuento,
+                        paquete.moneda
+                    )
+                    : '—'
+            );
+            $('#resumenDescuento').text(
+                paquete
+                    ? formatearDinero(
+                        calculo.descuento,
+                        paquete.moneda
+                    )
+                    : '—'
+            );
+            $('#resumenTotal').text(
+                paquete
+                    ? formatearDinero(
+                        calculo.total,
+                        paquete.moneda
+                    )
+                    : '—'
+            );
+            $('#textoModalidadPago').text(
+                'El titular es líder y responsable de pagar el total familiar.'
+            );
+            return;
+        }
+
         const precioSinDescuento = paquete
             ? paquete.precio * integrantes.length
             : 0;
@@ -602,16 +712,29 @@ $(function () {
         ).val();
 
         const esFamiliar = tipo === 'familiar';
+        const esFamiliaNueva = usaCategoriasFamiliares();
+
+        $('#seccionFamiliaCategorias').toggleClass(
+            'oculto',
+            !esFamiliaNueva
+        );
+
+        $('#seccionIntegrantesRegistrados').toggleClass(
+            'oculto',
+            esFamiliaNueva
+        );
 
         $('#seccionResponsablePago').toggleClass(
             'oculto',
-            !esFamiliar
+            !esFamiliar || esFamiliaNueva
         );
 
         $responsable.prop(
             'required',
-            esFamiliar
+            esFamiliar && !esFamiliaNueva
         );
+
+        $titular.prop('required', esFamiliaNueva);
 
         if (!esFamiliar) {
             $responsable.val('');
@@ -720,6 +843,24 @@ $(function () {
         );
     });
 
+    $titular.on('change', function () {
+        mostrarError(
+            'titular_id',
+            $(this).val()
+                ? ''
+                : 'Selecciona al titular del grupo familiar.'
+        );
+        actualizarResumen();
+    });
+
+    $('.cantidad-familiar').on(
+        'input change',
+        function () {
+            validarCantidadFamiliar(this.id);
+            actualizarResumen();
+        }
+    );
+
     function validarFormulario() {
         const nombre = $.trim(
             $('#nombre_grupo').val()
@@ -766,6 +907,76 @@ $(function () {
                 ? ''
                 : 'Selecciona un paquete válido.'
         ) && valido;
+
+        if (usaCategoriasFamiliares()) {
+            [
+                'cantidad_infantes',
+                'cantidad_ninos',
+                'cantidad_adultos',
+                'cantidad_adultos_mayores'
+            ].forEach(function (campo) {
+                valido = validarCantidadFamiliar(campo) && valido;
+            });
+
+            const calculo = calculoFamiliarVistaPrevia();
+            const $opcionTitular = $titular.find(
+                'option:selected'
+            );
+            const edadTitular = calcularEdad(
+                $opcionTitular.data('fecha-nacimiento'),
+                paquete?.fechaSalida
+            );
+            let errorTitular = '';
+
+            if (!$titular.val()) {
+                errorTitular =
+                    'Selecciona al titular del grupo familiar.';
+            } else if (
+                String($opcionTitular.data('completo')) !== '1'
+            ) {
+                errorTitular =
+                    'El titular debe tener información completa.';
+            } else if (edadTitular === null || edadTitular < 18) {
+                errorTitular =
+                    'El titular debe ser mayor de edad en la fecha del viaje.';
+            } else if (
+                edadTitular <= 60 &&
+                calculo.cantidadAdultos < 1
+            ) {
+                errorTitular =
+                    'Incluye al titular en la cantidad de adultos.';
+            } else if (
+                edadTitular >= 61 &&
+                calculo.cantidadAdultosMayores < 1
+            ) {
+                errorTitular =
+                    'Incluye al titular en adultos mayores.';
+            }
+
+            valido = mostrarError(
+                'titular_id',
+                errorTitular
+            ) && valido;
+
+            if (calculo.viajeros < 2) {
+                valido = mostrarError(
+                    'cantidad_infantes',
+                    'La familia debe incluir al menos dos viajeros.'
+                ) && valido;
+            }
+
+            if (
+                paquete &&
+                calculo.viajeros > paquete.capacidad
+            ) {
+                valido = mostrarError(
+                    'cantidad_infantes',
+                    'La cantidad de viajeros supera la capacidad total del paquete.'
+                ) && valido;
+            }
+
+            return valido;
+        }
 
         let errorIntegrantes = '';
 
@@ -833,12 +1044,21 @@ $(function () {
 
         const paquete = datosPaquete();
 
-        const total = integrantes.reduce(
-            (suma, integrante) =>
-                suma +
-                Number(integrante.precioFinal || 0),
-            0
-        );
+        const calculoFamiliar =
+            usaCategoriasFamiliares()
+                ? calculoFamiliarVistaPrevia()
+                : null;
+        const cantidadConfirmada = calculoFamiliar
+            ? calculoFamiliar.viajeros
+            : integrantes.length;
+        const total = calculoFamiliar
+            ? calculoFamiliar.total
+            : integrantes.reduce(
+                (suma, integrante) =>
+                    suma +
+                    Number(integrante.precioFinal || 0),
+                0
+            );
 
         Swal.fire({
             icon: 'question',
@@ -847,7 +1067,7 @@ $(function () {
                 : '¿Registrar la reserva grupal?',
             html:
                 `${escapar($('#nombre_grupo').val())}<br>` +
-                `${integrantes.length} integrantes<br>` +
+                `${cantidadConfirmada} viajeros<br>` +
                 `Total: <strong>${formatearDinero(
                     total,
                     paquete.moneda
@@ -890,6 +1110,10 @@ $(function () {
     });
 
     function restaurarIntegrantes() {
+        if (configuracion.familiaPorCategorias) {
+            return;
+        }
+
         const anteriores =
             configuracion.integrantesAnteriores || [];
 
@@ -983,6 +1207,13 @@ $(function () {
                 confirmButtonColor: '#094c90'
             });
         }
+    }
+
+    if (configuracion.familiaHistorica) {
+        $('input[name="tipo_grupo"][value="familiar"]')
+            .prop('checked', true);
+        $('input[name="tipo_grupo"][value="independiente"]')
+            .prop('disabled', true);
     }
 
     actualizarPaquete();

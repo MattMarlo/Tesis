@@ -21,6 +21,8 @@ use App\Http\Controllers\VueloReservaController;
 use App\Http\Controllers\BoletoVueloController;
 use App\Http\Controllers\AlojamientoReservaController;
 use App\Http\Controllers\GuiaReservaController;
+use App\Http\Controllers\ViajeroReservaController;
+use App\Http\Controllers\HabitacionAlojamientoController;
 use App\Http\Middleware\CheckUserPermission;
 use App\Models\Testimonio;
 
@@ -131,7 +133,12 @@ Route::middleware('auth')->group(function() {
         ->group(function () {
             Route::get('/',[OperacionViajeController::class, 'index'])->name('index');
             Route::get('/reserva/{id}',[OperacionViajeController::class, 'show'])->name('show');
+            Route::post('/reserva/{reserva}/iniciar',[OperacionViajeController::class, 'iniciar'])->name('iniciar');
             Route::put('/expediente/{operacion}',[OperacionViajeController::class, 'update'])->name('update');
+            Route::post('/reserva/{reserva}/viajeros/titular',[ViajeroReservaController::class, 'sincronizarTitular'])->name('viajeros.titular');
+            Route::post('/expediente/{operacion}/viajeros',[ViajeroReservaController::class, 'store'])->name('viajeros.store');
+            Route::put('/viajeros/{viajero}',[ViajeroReservaController::class, 'update'])->name('viajeros.update');
+            Route::delete('/viajeros/{viajero}',[ViajeroReservaController::class, 'destroy'])->name('viajeros.destroy');
             Route::post('/expediente/{operacion}/vuelos',[VueloReservaController::class, 'store'])->name('vuelos.store');
             Route::put('/vuelos/{vuelo}',[VueloReservaController::class, 'update'])->name('vuelos.update');
             Route::delete('/vuelos/{vuelo}',[VueloReservaController::class, 'destroy'])->name('vuelos.destroy');
@@ -140,6 +147,11 @@ Route::middleware('auth')->group(function() {
             Route::post('/expediente/{operacion}/alojamientos',[AlojamientoReservaController::class, 'store'])->name('alojamientos.store');
             Route::put('/alojamientos/{alojamiento}',[AlojamientoReservaController::class, 'update'])->name('alojamientos.update');
             Route::delete('/alojamientos/{alojamiento}',[AlojamientoReservaController::class, 'destroy'])->name('alojamientos.destroy');
+            Route::post('/alojamientos/{alojamiento}/habitaciones',[HabitacionAlojamientoController::class, 'store'])->name('habitaciones.store');
+            Route::put('/habitaciones/{habitacion}',[HabitacionAlojamientoController::class, 'update'])->name('habitaciones.update');
+            Route::delete('/habitaciones/{habitacion}',[HabitacionAlojamientoController::class, 'destroy'])->name('habitaciones.destroy');
+            Route::post('/habitaciones/{habitacion}/asignaciones',[HabitacionAlojamientoController::class, 'asignar'])->name('habitaciones.asignar');
+            Route::delete('/asignaciones-habitacion/{asignacion}',[HabitacionAlojamientoController::class, 'retirar'])->name('habitaciones.retirar');
             Route::post('/expediente/{operacion}/guias',[GuiaReservaController::class, 'store'])->name('guias.store');
             Route::put('/guias/{guia}',[GuiaReservaController::class, 'update'])->name('guias.update');
             Route::delete('/guias/{guia}',[GuiaReservaController::class, 'destroy'])->name('guias.destroy');
@@ -198,8 +210,4 @@ Route::middleware('auth')->group(function() {
         Route::delete('/{id}',[PreReservaController::class, 'destroy'])->name('prereservas.destroy');
     });
 });
-
-
-
-
 

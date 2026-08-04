@@ -16,7 +16,23 @@ class Grupo extends Model
         'descripcion',
         'tipo_grupo',
         'responsable_pago_id',
+        'usa_categorias_familiares',
+        'cantidad_infantes',
+        'cantidad_ninos',
+        'cantidad_adultos',
+        'cantidad_adultos_mayores',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'usa_categorias_familiares' => 'boolean',
+            'cantidad_infantes' => 'integer',
+            'cantidad_ninos' => 'integer',
+            'cantidad_adultos' => 'integer',
+            'cantidad_adultos_mayores' => 'integer',
+        ];
+    }
 
     public function reserva()
     {
@@ -61,5 +77,30 @@ class Grupo extends Model
     public function esIndependiente(): bool
     {
         return $this->tipo_grupo === self::TIPO_INDEPENDIENTE;
+    }
+
+    public function usaCategoriasFamiliares(): bool
+    {
+        return $this->esFamiliar() &&
+            (bool) $this->usa_categorias_familiares;
+    }
+
+    public function getCantidadViajerosPorCategoriasAttribute(): int
+    {
+        return (int) $this->cantidad_infantes +
+            (int) $this->cantidad_ninos +
+            (int) $this->cantidad_adultos +
+            (int) $this->cantidad_adultos_mayores;
+    }
+
+    public function composicionFamiliar(): array
+    {
+        return [
+            'cantidad_infantes' => (int) $this->cantidad_infantes,
+            'cantidad_ninos' => (int) $this->cantidad_ninos,
+            'cantidad_adultos' => (int) $this->cantidad_adultos,
+            'cantidad_adultos_mayores' =>
+                (int) $this->cantidad_adultos_mayores,
+        ];
     }
 }

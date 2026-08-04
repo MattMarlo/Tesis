@@ -327,9 +327,19 @@ class ClienteController extends Controller
         $reglasDocumento = $request->tipo_documento === 'cedula'
             ? [
                 'required',
-                'digits:10',
+                'string',
                 function ($atributo, $valor, $fallar) {
-                    if (!$this->cedulaEcuatorianaValida($valor)) {
+                    $cedula = (string) $valor;
+
+                    if (!preg_match('/^\d{10}$/', $cedula)) {
+                        $fallar(
+                            'La cédula debe contener exactamente 10 números.'
+                        );
+
+                        return;
+                    }
+
+                    if (!$this->cedulaEcuatorianaValida($cedula)) {
                         $fallar(
                             'La cédula ecuatoriana ingresada no es válida.'
                         );

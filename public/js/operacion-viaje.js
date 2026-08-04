@@ -15,6 +15,9 @@ $(function () {
     const guias =
         configuracion.guias || [];
 
+    const viajerosReserva =
+        configuracion.viajerosReserva || [];
+
     const datosPaquete =
         configuracion.datosPaquete || {};
 
@@ -46,6 +49,11 @@ $(function () {
             )
         );
 
+    const modalViajero = bootstrap.Modal
+        .getOrCreateInstance(
+            document.getElementById('modalViajero')
+        );
+
     const $formVuelo =
         $('#formularioVuelo');
 
@@ -58,11 +66,14 @@ $(function () {
     const $formGuia =
         $('#formularioGuia');
 
+    const $formViajero = $('#formularioViajero');
+
     const accionesIniciales = {
         vuelo: $formVuelo.attr('action'),
         alojamiento:
             $formAlojamiento.attr('action'),
-        guia: $formGuia.attr('action')
+        guia: $formGuia.attr('action'),
+        viajero: $formViajero.attr('action')
     };
 
     let enviando = false;
@@ -809,9 +820,8 @@ $(function () {
                 $(this).data('vuelo-id')
             );
 
-            const clienteId = Number(
-                $(this).data('cliente-id')
-            );
+            const personaId = Number($(this).data('persona-id'));
+            const personaTipo = String($(this).data('persona-tipo'));
 
             const vuelo = vuelos.find(
                 elemento =>
@@ -822,10 +832,9 @@ $(function () {
             const boleto = (
                 vuelo?.boletos || []
             ).find(
-                elemento =>
-                    Number(
-                        elemento.cliente_id
-                    ) === clienteId
+                elemento => personaTipo === 'viajero'
+                    ? Number(elemento.viajero_reserva_id) === personaId
+                    : Number(elemento.cliente_id) === personaId
             );
 
             limpiarFormulario($formBoleto);
@@ -835,9 +844,8 @@ $(function () {
                 `${base}/vuelos/${vueloId}/boletos`
             );
 
-            $('#boletoClienteId').val(
-                clienteId
-            );
+            $('#boletoClienteId').val(personaTipo === 'cliente' ? personaId : '');
+            $('#boletoViajeroReservaId').val(personaTipo === 'viajero' ? personaId : '');
 
             const nombreViajero =
                 $(this)
@@ -898,6 +906,32 @@ $(function () {
         }
     );
 
+    $('#btnNuevoViajero').on('click', function () {
+        limpiarFormulario($formViajero);
+        $formViajero.attr('action', accionesIniciales.viajero);
+        $('#viajeroMetodo').prop('disabled', true);
+        $('#tituloModalViajero').text('Agregar acompañante');
+        modalViajero.show();
+    });
+
+    $(document).on('click', '.btnEditarViajero', function () {
+        const viajeroId = Number($(this).data('viajero-id'));
+        const viajero = viajerosReserva.find(
+            elemento => Number(elemento.id) === viajeroId
+        );
+        if (!viajero) return;
+        limpiarFormulario($formViajero);
+        $formViajero.attr('action', `${base}/viajeros/${viajero.id}`);
+        $('#viajeroMetodo').prop('disabled', false);
+        $('#tituloModalViajero').text('Editar acompañante');
+        colocar('#viajeroNombres', viajero.nombres);
+        colocar('#viajeroApellidos', viajero.apellidos);
+        colocar('#viajeroNacimiento', String(viajero.fecha_nacimiento || '').slice(0, 10));
+        colocar('#viajeroTipoDocumento', viajero.tipo_documento);
+        colocar('#viajeroDocumento', viajero.documento);
+        modalViajero.show();
+    });
+
     function validarFormulario(
         $formulario
     ) {
@@ -923,6 +957,15 @@ $(function () {
                 }
             });
 
+        if ($formulario.is('#formularioViajero')) {
+            const tipo = String($('#viajeroTipoDocumento').val() || '').trim();
+            const documento = String($('#viajeroDocumento').val() || '').trim();
+            const parejaValida = Boolean(tipo) === Boolean(documento);
+            $('#viajeroTipoDocumento, #viajeroDocumento')
+                .toggleClass('input-error', !parejaValida);
+            valido = valido && parejaValida;
+        }
+
         return valido;
     }
 
@@ -934,7 +977,8 @@ $(function () {
             formularioBoleto: 'el boleto',
             formularioAlojamiento:
                 'el alojamiento',
-            formularioGuia: 'el guía'
+            formularioGuia: 'el guía',
+            formularioViajero: 'el viajero'
         };
 
         return nombres[formulario.id] ||
@@ -945,7 +989,8 @@ $(function () {
         '#formularioVuelo, ' +
         '#formularioBoleto, ' +
         '#formularioAlojamiento, ' +
-        '#formularioGuia'
+        '#formularioGuia, ' +
+        '#formularioViajero'
     ).on(
         'submit',
         function (evento) {

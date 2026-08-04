@@ -11,6 +11,11 @@ use Carbon\Carbon;
 
 class PagoService
 {
+    public function __construct(
+        private readonly TarifaReservaService $tarifaService
+    ) {
+    }
+
     public function getMetricasGenerales(): array
     {
         $reservas = Reserva::query()
@@ -321,6 +326,7 @@ class PagoService
                 'grupo.responsablePago',
                 'grupo.clientes',
                 'pagos',
+                'destino',
             ])
             ->findOrFail($reservaId);
 
@@ -335,6 +341,8 @@ class PagoService
 
         $grupo = $reserva->grupo;
         $esFamiliar = $grupo->esFamiliar();
+        $usaCategoriasFamiliares =
+            $grupo->usaCategoriasFamiliares();
 
         $totalPagado = (float) $reserva
             ->pagos
@@ -350,7 +358,8 @@ class PagoService
             ->clientes
             ->map(function ($cliente) use (
                 $reserva,
-                $esFamiliar
+                $esFamiliar,
+                $usaCategoriasFamiliares
             ) {
                 $montoAsignado = (float) (
                     $cliente->pivot
@@ -404,17 +413,20 @@ class PagoService
                             $reserva->grupo
                                 ->responsable_pago_id ?? 0
                         ),
-                    'edad' =>
-                        $cliente->pivot
-                            ->edad_al_viajar,
-                    'categoria' =>
-                        $cliente->pivot
-                            ->categoria_tarifa,
-                    'porcentaje' =>
-                        $cliente->pivot
-                            ->porcentaje_tarifa,
-                    'asignado' =>
-                        $montoAsignado,
+                    'edad' => $usaCategoriasFamiliares
+                        ? null
+                        : $cliente->pivot->edad_al_viajar,
+                    'categoria' => $usaCategoriasFamiliares
+                        ? 'Titular y responsable del pago'
+                        : $cliente->pivot->categoria_tarifa,
+                    'porcentaje' => $usaCategoriasFamiliares
+                        ? null
+                        : $cliente->pivot->porcentaje_tarifa,
+                    'asignado' => $usaCategoriasFamiliares
+                        ? null
+                        : $montoAsignado,
+                    'es_titular_familiar' =>
+                        $usaCategoriasFamiliares,
                     'pagado' =>
                         $pagado,
                     'pendiente' =>
@@ -468,6 +480,23 @@ class PagoService
                 $esFamiliar &&
                 !$reserva->estaCancelada() &&
                 $saldoTotal > 0,
+            'composicion_familiar' =>
+                $grupo->usaCategoriasFamiliares()
+                    ? [
+                        ...$grupo->composicionFamiliar(),
+                        'cantidad_viajeros' =>
+                            $grupo
+                                ->cantidad_viajeros_por_categorias,
+                    ]
+                    : null,
+            'desglose_familiar' =>
+                $usaCategoriasFamiliares
+                    ? $this->tarifaService
+                        ->calcularPorCantidadesFamiliares(
+                            $reserva->destino,
+                            $grupo->composicionFamiliar()
+                        )
+                    : null,
             'integrantes' =>
                 $integrantes,
         ];

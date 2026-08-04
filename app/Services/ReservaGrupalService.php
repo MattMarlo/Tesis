@@ -9,13 +9,15 @@ use App\Models\Reserva;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class ReservaGrupalService
 {
     public function __construct(
         private TarifaReservaService $tarifaService,
-        private CupoReservaService $cupoService
+        private CupoReservaService $cupoService,
+        private ViajeroReservaService $viajeroService
     ) {
     }
 
@@ -43,6 +45,16 @@ class ReservaGrupalService
             ) {
                 throw new InvalidArgumentException(
                     'La fecha de salida del paquete ya pasó o no está registrada.'
+                );
+            }
+
+            $this->validarModoCategorias($datos);
+
+            if ($this->solicitaCategoriasFamiliares($datos)) {
+                return $this->guardarFamiliarPorCategorias(
+                    $datos,
+                    $usuarioId,
+                    $destino
                 );
             }
 
@@ -330,6 +342,10 @@ class ReservaGrupalService
                 ->lockForUpdate()
                 ->findOrFail($grupoId);
 
+            $eraFamiliaHistorica =
+                $grupo->esFamiliar() &&
+                !$grupo->usaCategoriasFamiliares();
+
             $destino = Destino::query()
                 ->lockForUpdate()
                 ->findOrFail($datos['destino_id']);
@@ -349,6 +365,31 @@ class ReservaGrupalService
             ) {
                 throw new InvalidArgumentException(
                     'La fecha de salida del paquete ya pasó o no está registrada.'
+                );
+            }
+
+            $this->validarModoCategorias($datos);
+
+            if (
+                $eraFamiliaHistorica &&
+                (
+                    ($datos['tipo_grupo'] ?? null) !==
+                        Grupo::TIPO_FAMILIAR ||
+                    $this->solicitaCategoriasFamiliares($datos)
+                )
+            ) {
+                throw ValidationException::withMessages([
+                    'tipo_grupo' =>
+                        'Una familia histórica debe conservar su modalidad por integrantes.',
+                ]);
+            }
+
+            if ($this->solicitaCategoriasFamiliares($datos)) {
+                return $this->actualizarFamiliarPorCategorias(
+                    $reserva,
+                    $grupo,
+                    $destino,
+                    $datos
                 );
             }
 
@@ -531,6 +572,11 @@ class ReservaGrupalService
                 'tipo_grupo' => $tipoGrupo,
                 'responsable_pago_id' =>
                     $responsablePagoId,
+                'usa_categorias_familiares' => false,
+                'cantidad_infantes' => null,
+                'cantidad_ninos' => null,
+                'cantidad_adultos' => null,
+                'cantidad_adultos_mayores' => null,
             ]);
 
             $reserva->update([
@@ -555,6 +601,23 @@ class ReservaGrupalService
                     Reserva::PAGO_PENDIENTE,
             ]);
 
+            if ($eraFamiliaHistorica) {
+                $idsHistoricos = DB::table('grupos_clientes')
+                    ->where('grupo_id', $grupo->id)
+                    ->pluck('cliente_id')
+                    ->map(fn ($id) => (int) $id);
+
+                $idsRecibidos = $idsIntegrantes
+                    ->map(fn ($id) => (int) $id);
+
+                if ($idsHistoricos->diff($idsRecibidos)->isNotEmpty()) {
+                    throw ValidationException::withMessages([
+                        'integrantes' =>
+                            'Una reserva familiar histórica no puede eliminar integrantes mediante esta edición.',
+                    ]);
+                }
+            }
+
             DB::table('grupos_clientes')
                 ->where('grupo_id', $grupo->id)
                 ->delete();
@@ -569,6 +632,275 @@ class ReservaGrupalService
                 'destino',
             ]);
         });
+    }
+
+    private function guardarFamiliarPorCategorias(
+        array $datos,
+        int $usuarioId,
+        Destino $destino
+    ): Reserva {
+        [$titular, $tarifaTitular, $calculo] =
+            $this->prepararFamiliarPorCategorias(
+                $datos,
+                $destino
+            );
+
+        $this->validarReservaDuplicada(
+            $titular,
+            $destino
+        );
+
+        $this->cupoService->validar(
+            $destino,
+            $calculo['cantidad_viajeros']
+        );
+
+        $grupo = Grupo::create([
+            'nombre_grupo' => trim($datos['nombre_grupo']),
+            'descripcion' => 'Reserva de grupo familiar por cantidades',
+            'tipo_grupo' => Grupo::TIPO_FAMILIAR,
+            'responsable_pago_id' => $titular->id,
+            'usa_categorias_familiares' => true,
+            'cantidad_infantes' => $calculo['cantidad_infantes'],
+            'cantidad_ninos' => $calculo['cantidad_ninos'],
+            'cantidad_adultos' => $calculo['cantidad_adultos'],
+            'cantidad_adultos_mayores' =>
+                $calculo['cantidad_adultos_mayores'],
+        ]);
+
+        $reserva = Reserva::create([
+            'codigo_reserva' => $this->generarCodigo(),
+            'cliente_id' => $titular->id,
+            'destino_id' => $destino->id,
+            'user_id' => $usuarioId,
+            'tipo' => Reserva::TIPO_GRUPAL,
+            'fecha_reserva' => now()->toDateString(),
+            'fecha_viaje' => Carbon::parse(
+                $destino->fecha_salida
+            )->toDateString(),
+            'precio_total_viaje' => $calculo['precio_total'],
+            'moneda' => strtoupper($destino->moneda ?: 'USD'),
+            'precio_base_persona' => $calculo['precio_base'],
+            'cantidad_viajeros' => $calculo['cantidad_viajeros'],
+            'edad_viajero' => null,
+            'categoria_tarifa' => null,
+            'porcentaje_tarifa' => null,
+            'estado' => Reserva::ESTADO_PENDIENTE,
+            'estado_pago' => Reserva::PAGO_PENDIENTE,
+        ]);
+
+        DB::table('reservas_grupos')->insert([
+            'reserva_id' => $reserva->id,
+            'grupo_id' => $grupo->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('grupos_clientes')->insert(
+            $this->detalleTitularFamiliar(
+                $grupo->id,
+                $titular,
+                $tarifaTitular,
+                $calculo['precio_total']
+            )
+        );
+
+        $this->viajeroService->sincronizarTitular($reserva);
+
+        return $reserva;
+    }
+
+    private function solicitaCategoriasFamiliares(array $datos): bool
+    {
+        return ($datos['tipo_grupo'] ?? null) ===
+                Grupo::TIPO_FAMILIAR &&
+            !empty($datos['usa_categorias_familiares']);
+    }
+
+    private function validarModoCategorias(array $datos): void
+    {
+        $tipoFamiliar = ($datos['tipo_grupo'] ?? null) ===
+            Grupo::TIPO_FAMILIAR;
+        $usaCategorias = !empty(
+            $datos['usa_categorias_familiares']
+        );
+
+        if ($usaCategorias && !$tipoFamiliar) {
+            throw ValidationException::withMessages([
+                'tipo_grupo' =>
+                    'Las categorías familiares solo pueden utilizarse en un grupo familiar.',
+            ]);
+        }
+    }
+
+    private function actualizarFamiliarPorCategorias(
+        Reserva $reserva,
+        Grupo $grupo,
+        Destino $destino,
+        array $datos
+    ): Reserva {
+        [$titular, $tarifaTitular, $calculo] =
+            $this->prepararFamiliarPorCategorias(
+                $datos,
+                $destino
+            );
+
+        $this->validarReservaDuplicada(
+            $titular,
+            $destino,
+            $reserva->id
+        );
+
+        $this->cupoService->validar(
+            $destino,
+            $calculo['cantidad_viajeros'],
+            $reserva->id
+        );
+
+        $this->viajeroService->validarComposicionParaActualizacion(
+            $reserva,
+            $calculo,
+            Carbon::parse($destino->fecha_salida)->toDateString()
+        );
+
+        $grupo->update([
+            'nombre_grupo' => trim($datos['nombre_grupo']),
+            'descripcion' => 'Reserva de grupo familiar por cantidades',
+            'tipo_grupo' => Grupo::TIPO_FAMILIAR,
+            'responsable_pago_id' => $titular->id,
+            'usa_categorias_familiares' => true,
+            'cantidad_infantes' => $calculo['cantidad_infantes'],
+            'cantidad_ninos' => $calculo['cantidad_ninos'],
+            'cantidad_adultos' => $calculo['cantidad_adultos'],
+            'cantidad_adultos_mayores' =>
+                $calculo['cantidad_adultos_mayores'],
+        ]);
+
+        $reserva->update([
+            'cliente_id' => $titular->id,
+            'destino_id' => $destino->id,
+            'fecha_viaje' => Carbon::parse(
+                $destino->fecha_salida
+            )->toDateString(),
+            'precio_total_viaje' => $calculo['precio_total'],
+            'moneda' => strtoupper($destino->moneda ?: 'USD'),
+            'precio_base_persona' => $calculo['precio_base'],
+            'cantidad_viajeros' => $calculo['cantidad_viajeros'],
+            'edad_viajero' => null,
+            'categoria_tarifa' => null,
+            'porcentaje_tarifa' => null,
+            'estado_pago' => Reserva::PAGO_PENDIENTE,
+        ]);
+
+        DB::table('grupos_clientes')
+            ->where('grupo_id', $grupo->id)
+            ->delete();
+
+        DB::table('grupos_clientes')->insert(
+            $this->detalleTitularFamiliar(
+                $grupo->id,
+                $titular,
+                $tarifaTitular,
+                $calculo['precio_total']
+            )
+        );
+
+        $this->viajeroService->sincronizarTitular($reserva);
+
+        return $reserva->fresh([
+            'grupo.clientes',
+            'grupo.responsablePago',
+            'destino',
+        ]);
+    }
+
+    private function prepararFamiliarPorCategorias(
+        array $datos,
+        Destino $destino
+    ): array {
+        $titular = Cliente::query()
+            ->lockForUpdate()
+            ->findOrFail((int) ($datos['titular_id'] ?? 0));
+
+        if (!$titular->estaActivo()) {
+            throw new InvalidArgumentException(
+                'El titular seleccionado está inactivo.'
+            );
+        }
+
+        if (
+            !$titular->fecha_nacimiento ||
+            !$titular->tipo_documento ||
+            !$titular->documento ||
+            !$titular->nacionalidad
+        ) {
+            throw new InvalidArgumentException(
+                'El titular debe tener información completa antes de reservar.'
+            );
+        }
+
+        $tarifaTitular = $this->tarifaService->calcular(
+            $titular,
+            $destino
+        );
+
+        if ((int) $tarifaTitular['edad'] < 18) {
+            throw new InvalidArgumentException(
+                'El titular del grupo familiar debe ser mayor de edad.'
+            );
+        }
+
+        $calculo = $this->tarifaService
+            ->calcularPorCantidadesFamiliares(
+                $destino,
+                $datos
+            );
+
+        if ($calculo['cantidad_viajeros'] < 2) {
+            throw new InvalidArgumentException(
+                'Una reserva grupal debe incluir al menos dos viajeros.'
+            );
+        }
+
+        if (
+            (int) $tarifaTitular['edad'] <= 60 &&
+            $calculo['cantidad_adultos'] < 1
+        ) {
+            throw new InvalidArgumentException(
+                'Incluye al titular en la cantidad de adultos.'
+            );
+        }
+
+        if (
+            (int) $tarifaTitular['edad'] >= 61 &&
+            $calculo['cantidad_adultos_mayores'] < 1
+        ) {
+            throw new InvalidArgumentException(
+                'Incluye al titular en la cantidad de adultos mayores.'
+            );
+        }
+
+        return [$titular, $tarifaTitular, $calculo];
+    }
+
+    private function detalleTitularFamiliar(
+        int $grupoId,
+        Cliente $titular,
+        array $tarifaTitular,
+        float $precioTotal
+    ): array {
+        return [
+            'grupo_id' => $grupoId,
+            'cliente_id' => $titular->id,
+            'edad_al_viajar' => $tarifaTitular['edad'],
+            'categoria_tarifa' => $tarifaTitular['categoria'],
+            'porcentaje_tarifa' => $tarifaTitular['porcentaje'],
+            'precio_base' => $tarifaTitular['precio_base'],
+            'monto_asignado' => round($precioTotal, 2),
+            'es_lider' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
     }
 
     private function validarReservaDuplicada(

@@ -21,6 +21,7 @@ class BoletoVuelo extends Model
     protected $fillable = [
         'vuelo_reserva_id',
         'cliente_id',
+        'viajero_reserva_id',
         'numero_boleto',
         'asiento',
         'clase',
@@ -43,5 +44,18 @@ class BoletoVuelo extends Model
             Cliente::class,
             'cliente_id'
         );
+    }
+
+    public function viajeroReserva()
+    {
+        return $this->belongsTo(
+            ViajeroReserva::class,
+            'viajero_reserva_id'
+        );
+    }
+
+    public function personaViajera(): Cliente|ViajeroReserva|null
+    {
+        return $this->viajeroReserva ?: $this->cliente;
     }
 }

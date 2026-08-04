@@ -522,6 +522,17 @@
     overflow-x: auto;
 }
 
+.detalle-composicion-familiar {
+    margin: 12px 0 16px;
+    padding: 12px 14px;
+    border: 1px solid rgba(9, 113, 136, 0.3);
+    border-radius: 8px;
+    color: #23647B;
+    background: rgba(9, 113, 136, 0.08);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
 .tabla-viajeros {
     width: 100%;
     min-width: 680px;

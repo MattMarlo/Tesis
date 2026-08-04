@@ -33,8 +33,15 @@
     | Si el usuario de tu bot es diferente, solamente debes
     | modificar esta dirección.
     */
-    $telegramGeneral = 'https://t.me/ReservasPassionTravelBot';
-@endphp
+    $telegramBot = ltrim(
+        (string) config('services.telegram.bot_username'),
+        '@'
+    );
+
+    $telegramGeneral = 'https://t.me/' . $telegramBot;
+    $telegramAyuda = $telegramGeneral . '?start=ayuda';
+    $telegramAsesor = $telegramGeneral . '?start=asesor';
+    @endphp
 
 <header class="encabezado-principal" id="encabezadoPrincipal">
     <div class="contenedor navegacion">
@@ -95,7 +102,7 @@
             </a>
 
             <a
-                href="{{ $telegramGeneral }}"
+                href="{{ $telegramAsesor }}"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="boton-telegram-menu"
@@ -129,7 +136,7 @@
         </div>
 
         <a
-            href="{{ $telegramGeneral }}"
+            href="{{ $telegramAyuda }}"
             target="_blank"
             rel="noopener noreferrer"
             class="boton-contacto-telegram"
@@ -246,7 +253,7 @@
 </footer>
 
 <a
-    href="{{ $telegramGeneral }}"
+    href="{{ $telegramAyuda }}"
     target="_blank"
     rel="noopener noreferrer"
     class="telegram-flotante"

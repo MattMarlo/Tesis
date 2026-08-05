@@ -20,7 +20,7 @@
     $mensajeTelegram = 'Hola, deseo recibir información sobre el paquete: '
         . $destino->nombre_paquete;
 
-    $enlaceTelegram = 'https://t.me/PassionTravelBot?text=' .
+    $enlaceTelegram = 'https://t.me/AsistentePassionTravelVJBot?text=' .
         urlencode($mensajeTelegram);
 @endphp
 

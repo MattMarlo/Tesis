@@ -996,7 +996,7 @@
                     </a>
 
                     <a
-                        href="https://t.me/PassionTravelBot"
+                        href="https://t.me/AsistentePassionTravelVJBot"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="boton-contacto-directo"

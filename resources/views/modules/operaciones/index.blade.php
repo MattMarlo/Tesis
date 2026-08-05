@@ -286,8 +286,11 @@
                                         Abrir expediente
                                     </a>
                                 @else
-                                    <form method="POST"
-                                          action="{{ route('operaciones.iniciar', $reserva->id) }}">
+                                    <form
+                                            method="POST"
+                                            action="{{ route('operaciones.iniciar', $reserva->id) }}"
+                                            class="form-iniciar-operacion"
+                                        >
                                         @csrf
                                         <button type="submit" class="btn-gestionar-operacion">
                                             <i class="bi bi-play-circle"></i>

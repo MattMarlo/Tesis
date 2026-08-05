@@ -24,56 +24,28 @@ $(function () {
     );
 
     $(document).on(
-        'click',
-        '.btn-gestionar-operacion',
+        'submit',
+        '.form-iniciar-operacion',
         function (evento) {
-            const $enlace = $(this);
-
-            const texto =
-                $.trim(
-                    $enlace.text()
-                ).toLowerCase();
-
-            const iniciaPreparacion =
-                texto.includes(
-                    'iniciar preparación'
-                );
-
-            if (!iniciaPreparacion) {
-                return;
-            }
-
             evento.preventDefault();
 
-            const destino =
-                $enlace.attr('href');
+            const formulario = this;
 
             Swal.fire({
                 icon: 'question',
-                title:
-                    '¿Iniciar la preparación del viaje?',
-                text:
-                    'Se creará el expediente para registrar vuelos, boletos, alojamiento y guía cuando corresponda.',
+                title: '¿Iniciar la preparación del viaje?',
+                text: 'Se creará el expediente para registrar vuelos, boletos, alojamiento y guía cuando corresponda.',
                 showCancelButton: true,
-                confirmButtonText:
-                    'Sí, iniciar',
-                cancelButtonText:
-                    'Cancelar',
-                confirmButtonColor:
-                    '#094c90',
-                cancelButtonColor:
-                    '#65717E',
+                confirmButtonText: 'Sí, iniciar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#094c90',
+                cancelButtonColor: '#65717E',
                 reverseButtons: true,
-            }).then(
-                function (resultado) {
-                    if (
-                        resultado.isConfirmed
-                    ) {
-                        window.location.href =
-                            destino;
-                    }
+            }).then(function (resultado) {
+                if (resultado.isConfirmed) {
+                    formulario.submit();
                 }
-            );
+            });
         }
     );
 

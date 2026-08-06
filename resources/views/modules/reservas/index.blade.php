@@ -62,6 +62,22 @@
             <span>Canceladas</span>
             <strong>{{ $resumen['canceladas'] }}</strong>
         </div>
+
+        <div>
+            <span>Pago final próximo</span>
+            <strong>{{ $resumen['pago_final_proximo'] }}</strong>
+            <small>En los próximos 30 días</small>
+        </div>
+
+        <div>
+            <span>Reservas en riesgo</span>
+            <strong>{{ $resumen['reservas_en_riesgo'] }}</strong>
+            <small>
+                <a href="{{ route('reservas.riesgo') }}">
+                    Ver listado
+                </a>
+            </small>
+        </div>
     </section>
 
     <form
@@ -316,6 +332,16 @@
                                     <span class="estado-pago {{ $reserva->estado_pago }}">
                                         {{ ucfirst($reserva->estado_pago) }}
                                     </span>
+
+                                    @if ($reserva->pago_final_vencido)
+                                        <span class="badge badge-danger">
+                                            Pago final vencido
+                                        </span>
+                                    @elseif ($reserva->pago_final_proximo)
+                                        <span class="badge badge-warning">
+                                            Falta ≤ 30 días para pago final
+                                        </span>
+                                    @endif
                                 </div>
                             </td>
 

@@ -345,6 +345,128 @@
     line-height: 1.5;
 }
 
+.politica-reglas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+}
+
+.politica-regla {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.9rem;
+    border: 1px solid #D8E4EC;
+    border-radius: 0.6rem;
+    background: #F7FAFC;
+}
+
+.politica-regla > i {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #E5F0F7;
+    color: var(--reserva-azul);
+    font-size: 1rem;
+}
+
+.politica-regla span,
+.politica-regla strong,
+.politica-regla small {
+    display: block;
+}
+
+.politica-regla span {
+    color: #75808A;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.politica-regla strong {
+    margin-top: 0.12rem;
+    color: #303A42;
+    font-size: 0.83rem;
+}
+
+.politica-regla small {
+    margin-top: 0.28rem;
+    color: #65727C;
+    font-size: 0.69rem;
+    line-height: 1.5;
+}
+
+.politica-regla-riesgo {
+    border-color: #E8D8A7;
+    background: #FFFBF0;
+}
+
+.politica-regla-riesgo > i {
+    background: #FFF1C9;
+    color: #8B6810;
+}
+
+.politica-regla-reembolso {
+    border-color: #CFE4D8;
+    background: #F4FAF6;
+}
+
+.politica-regla-reembolso > i {
+    background: #DFF1E6;
+    color: #247448;
+}
+
+.politica-campos {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 0.85rem;
+}
+
+.politica-campos .campo-reserva {
+    max-width: none;
+}
+
+.politica-aceptacion {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin-top: 1rem;
+    padding: 0.9rem;
+    border: 1px solid #BFD5E4;
+    border-radius: 0.6rem;
+    background: #F1F7FB;
+    color: #465761;
+    cursor: pointer;
+}
+
+.politica-aceptacion input {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: 0 0 1.1rem;
+    margin-top: 0.12rem;
+    accent-color: var(--reserva-azul);
+}
+
+.politica-aceptacion span {
+    font-size: 0.72rem;
+    line-height: 1.5;
+}
+
+.politica-aceptacion strong {
+    display: block;
+    margin-bottom: 0.12rem;
+    color: var(--reserva-azul);
+    font-size: 0.75rem;
+}
+
+#politica_aceptada.input-error + span {
+    color: var(--reserva-error);
+}
+
 .oculto {
     display: none !important;
 }
@@ -434,6 +556,11 @@
         width: 100%;
         max-width: none;
         margin-left: 0;
+    }
+
+    .politica-reglas,
+    .politica-campos {
+        grid-template-columns: 1fr;
     }
 }
 

@@ -5,9 +5,21 @@ $(function () {
     const $cliente = $('#cliente_id');
     const $destino = $('#destino_id');
 
+    const $canalAceptacion =
+        $('#canal_aceptacion_politica');
+
+    const $referenciaAceptacion =
+        $('#referencia_aceptacion_politica');
+
+    const $politicaAceptada =
+        $('#politica_aceptada');
+
     const configuracion =
         window.configuracionReservaIndividual || {};
-    const esEdicion = configuracion.modo === 'editar';
+
+    const esEdicion =
+        configuracion.modo === 'editar';
+
     let enviando = false;
     let calculoActual = null;
 
@@ -36,7 +48,9 @@ $(function () {
             return null;
         }
 
-        const partes = valor.split('-').map(Number);
+        const partes = valor
+            .split('-')
+            .map(Number);
 
         if (partes.length !== 3) {
             return null;
@@ -91,7 +105,8 @@ $(function () {
         const nacimiento =
             crearFecha(fechaNacimientoTexto);
 
-        const viaje = crearFecha(fechaViajeTexto);
+        const viaje =
+            crearFecha(fechaViajeTexto);
 
         if (!nacimiento || !viaje) {
             return null;
@@ -144,43 +159,61 @@ $(function () {
     }
 
     function actualizarCliente() {
-        const $opcion = obtenerOpcion($cliente);
-        const id = $cliente.val();
+        const $opcion =
+            obtenerOpcion($cliente);
+
+        const id =
+            $cliente.val();
 
         if (!id) {
-            $('#resumenCliente').addClass('oculto');
-            $('#avisoClienteIncompleto').addClass(
-                'oculto'
-            );
+            $('#resumenCliente')
+                .addClass('oculto');
+
+            $('#avisoClienteIncompleto')
+                .addClass('oculto');
 
             calculoActual = null;
             actualizarCalculo();
+
             return;
         }
 
-        const nombre = $opcion.data('nombre');
-        const documento = $opcion.data('documento');
+        const nombre =
+            $opcion.data('nombre');
+
+        const documento =
+            $opcion.data('documento');
+
         const tipoDocumento =
             $opcion.data('tipo-documento');
+
         const completo =
-            String($opcion.data('completo')) === '1';
+            String(
+                $opcion.data('completo')
+            ) === '1';
 
-        $('#resumenClienteNombre').text(nombre);
-        $('#resumenClienteDocumento').text(
-            `${tipoDocumento || 'Documento'}: ${documento}`
-        );
+        $('#resumenClienteNombre')
+            .text(nombre);
 
-        $('#resumenCliente').removeClass('oculto');
+        $('#resumenClienteDocumento')
+            .text(
+                `${tipoDocumento || 'Documento'}: ${documento}`
+            );
 
-        $('#avisoClienteIncompleto').toggleClass(
-            'oculto',
-            completo
-        );
+        $('#resumenCliente')
+            .removeClass('oculto');
 
-        $('#editarClienteSeleccionado').attr(
-            'href',
-            $opcion.data('editar-url') || '#'
-        );
+        $('#avisoClienteIncompleto')
+            .toggleClass(
+                'oculto',
+                completo
+            );
+
+        $('#editarClienteSeleccionado')
+            .attr(
+                'href',
+                $opcion.data('editar-url') || '#'
+            );
 
         mostrarError(
             'cliente_id',
@@ -193,18 +226,25 @@ $(function () {
     }
 
     function actualizarPaquete() {
-        const $opcion = obtenerOpcion($destino);
-        const id = $destino.val();
+        const $opcion =
+            obtenerOpcion($destino);
+
+        const id =
+            $destino.val();
 
         if (!id) {
-            $('#resumenPaquete').addClass('oculto');
+            $('#resumenPaquete')
+                .addClass('oculto');
+
             calculoActual = null;
             actualizarCalculo();
+
             return;
         }
 
         const origen =
-            $opcion.data('origen') || 'Sin origen';
+            $opcion.data('origen') ||
+            'Sin origen';
 
         const ciudadDestino =
             $opcion.data('destino') ||
@@ -222,7 +262,8 @@ $(function () {
         );
 
         const moneda =
-            $opcion.data('moneda') || 'USD';
+            $opcion.data('moneda') ||
+            'USD';
 
         const capacidad =
             $opcion.data('capacidad');
@@ -240,7 +281,10 @@ $(function () {
         );
 
         $('#paquetePrecio').text(
-            formatearDinero(precio, moneda)
+            formatearDinero(
+                precio,
+                moneda
+            )
         );
 
         $('#paqueteCapacidad').text(
@@ -249,7 +293,8 @@ $(function () {
                 : 'Sin configurar'
         );
 
-        $('#resumenPaquete').removeClass('oculto');
+        $('#resumenPaquete')
+            .removeClass('oculto');
 
         mostrarError(
             'destino_id',
@@ -268,8 +313,11 @@ $(function () {
         const $opcionDestino =
             obtenerOpcion($destino);
 
-        const clienteId = $cliente.val();
-        const destinoId = $destino.val();
+        const clienteId =
+            $cliente.val();
+
+        const destinoId =
+            $destino.val();
 
         const completo =
             String(
@@ -281,8 +329,11 @@ $(function () {
             !destinoId ||
             !completo
         ) {
-            $('#seccionCalculo').addClass('oculto');
+            $('#seccionCalculo')
+                .addClass('oculto');
+
             calculoActual = null;
+
             return;
         }
 
@@ -292,14 +343,17 @@ $(function () {
             );
 
         const fechaSalida =
-            $opcionDestino.data('fecha-salida');
+            $opcionDestino.data(
+                'fecha-salida'
+            );
 
         const precioBase = Number(
             $opcionDestino.data('precio') || 0
         );
 
         const moneda =
-            $opcionDestino.data('moneda') || 'USD';
+            $opcionDestino.data('moneda') ||
+            'USD';
 
         const edad = calcularEdad(
             fechaNacimiento,
@@ -311,12 +365,16 @@ $(function () {
             edad < 0 ||
             precioBase <= 0
         ) {
-            $('#seccionCalculo').addClass('oculto');
+            $('#seccionCalculo')
+                .addClass('oculto');
+
             calculoActual = null;
+
             return;
         }
 
-        const tarifa = determinarTarifa(edad);
+        const tarifa =
+            determinarTarifa(edad);
 
         const total =
             precioBase *
@@ -332,7 +390,11 @@ $(function () {
         };
 
         $('#tarifaEdad').text(
-            `${edad} ${edad === 1 ? 'año' : 'años'}`
+            `${edad} ${
+                edad === 1
+                    ? 'año'
+                    : 'años'
+            }`
         );
 
         $('#tarifaCategoria').text(
@@ -344,10 +406,14 @@ $(function () {
         );
 
         $('#tarifaTotal').text(
-            formatearDinero(total, moneda)
+            formatearDinero(
+                total,
+                moneda
+            )
         );
 
-        $('#seccionCalculo').removeClass('oculto');
+        $('#seccionCalculo')
+            .removeClass('oculto');
     }
 
     function validarFormulario() {
@@ -359,6 +425,9 @@ $(function () {
 
         let clienteValido = true;
         let destinoValido = true;
+        let canalValido = true;
+        let referenciaValida = true;
+        let politicaValida = true;
 
         if (!$cliente.val()) {
             clienteValido = mostrarError(
@@ -387,9 +456,13 @@ $(function () {
                 'Selecciona el paquete turístico.'
             );
         } else if (
-            !$opcionDestino.data('fecha-salida') ||
+            !$opcionDestino.data(
+                'fecha-salida'
+            ) ||
             Number(
-                $opcionDestino.data('precio') || 0
+                $opcionDestino.data(
+                    'precio'
+                ) || 0
             ) <= 0
         ) {
             destinoValido = mostrarError(
@@ -403,119 +476,237 @@ $(function () {
             );
         }
 
+        if ($canalAceptacion.length) {
+            canalValido = mostrarError(
+                'canal_aceptacion_politica',
+                $canalAceptacion.val()
+                    ? ''
+                    : 'Selecciona cómo aceptó el cliente la política.'
+            );
+        }
+
+        if ($referenciaAceptacion.length) {
+            const referencia =
+                String(
+                    $referenciaAceptacion.val() ||
+                    ''
+                ).trim();
+
+            referenciaValida = mostrarError(
+                'referencia_aceptacion_politica',
+                referencia.length >= 5
+                    ? ''
+                    : 'Registra una referencia de al menos 5 caracteres.'
+            );
+        }
+
+        if ($politicaAceptada.length) {
+            politicaValida = mostrarError(
+                'politica_aceptada',
+                $politicaAceptada.is(':checked')
+                    ? ''
+                    : 'Confirma que el cliente aceptó la política.'
+            );
+        }
+
         return (
             clienteValido &&
             destinoValido &&
+            canalValido &&
+            referenciaValida &&
+            politicaValida &&
             Boolean(calculoActual)
         );
     }
 
-    $cliente.on('change', actualizarCliente);
-    $destino.on('change', actualizarPaquete);
+    $cliente.on(
+        'change',
+        actualizarCliente
+    );
 
-    $formulario.on('submit', function (evento) {
-        evento.preventDefault();
+    $destino.on(
+        'change',
+        actualizarPaquete
+    );
 
-        if (enviando) {
-            return;
+    $canalAceptacion.on(
+        'change',
+        function () {
+            mostrarError(
+                'canal_aceptacion_politica',
+                this.value
+                    ? ''
+                    : 'Selecciona el canal de aceptación.'
+            );
         }
+    );
 
-        if (!validarFormulario()) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Revisa la información',
-                text: 'Selecciona un cliente y un paquete válidos.',
-                confirmButtonText: 'Corregir',
-                confirmButtonColor: '#094c90'
-            });
-
-            $('.input-error').first().trigger('focus');
-            return;
+    $referenciaAceptacion.on(
+        'input',
+        function () {
+            if (
+                String(this.value)
+                    .trim()
+                    .length >= 5
+            ) {
+                mostrarError(
+                    'referencia_aceptacion_politica',
+                    ''
+                );
+            }
         }
+    );
 
-        const nombreCliente =
-            obtenerOpcion($cliente).data('nombre');
+    $politicaAceptada.on(
+        'change',
+        function () {
+            mostrarError(
+                'politica_aceptada',
+                this.checked
+                    ? ''
+                    : 'Confirma que el cliente aceptó la política.'
+            );
+        }
+    );
 
-        const nombrePaquete =
-            obtenerOpcion($destino).data('nombre');
+    $formulario.on(
+        'submit',
+        function (evento) {
+            evento.preventDefault();
 
-        Swal.fire({
-            icon: 'question',
-            title: esEdicion
-                ? '¿Guardar los cambios?'
-                : '¿Registrar la reserva?',
-            html:
-                `<strong>${nombreCliente}</strong><br>` +
-                `${nombrePaquete}<br>` +
-                `Total: <strong>${formatearDinero(
-                    calculoActual.total,
-                    calculoActual.moneda
-                )}</strong>`,
-            showCancelButton: true,
-            confirmButtonText: esEdicion
-                ? 'Sí, guardar cambios'
-                : 'Sí, registrar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#094c90',
-            cancelButtonColor: '#6C7780',
-            reverseButtons: true
-        }).then(function (resultado) {
-            if (!resultado.isConfirmed) {
+            if (enviando) {
                 return;
             }
 
-            enviando = true;
+            if (!validarFormulario()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Revisa la información',
+                    text:
+                        'Completa los datos de la reserva y confirma la política de pagos.',
+                    confirmButtonText:
+                        'Corregir',
+                    confirmButtonColor:
+                        '#094c90'
+                });
 
-            const $boton = $formulario.find(
-                'button[type="submit"]'
-            );
+                $('.input-error')
+                    .first()
+                    .trigger('focus');
 
-            $boton
-                .prop('disabled', true)
-                .addClass('cargando');
+                return;
+            }
 
-            $boton.find('span').text(
-                esEdicion
-                    ? 'Guardando cambios...'
-                    : 'Registrando reserva...'
-            );
+            const nombreCliente =
+                obtenerOpcion($cliente)
+                    .data('nombre');
 
-            $boton.find('i')
-                .removeClass()
-                .addClass('bi bi-arrow-repeat');
+            const nombrePaquete =
+                obtenerOpcion($destino)
+                    .data('nombre');
 
-            $formulario[0].submit();
-        });
-    });
+            Swal.fire({
+                icon: 'question',
+                title: esEdicion
+                    ? '¿Guardar los cambios?'
+                    : '¿Registrar la reserva?',
+                html:
+                    `<strong>${nombreCliente}</strong><br>` +
+                    `${nombrePaquete}<br>` +
+                    `Total: <strong>${
+                        formatearDinero(
+                            calculoActual.total,
+                            calculoActual.moneda
+                        )
+                    }</strong>`,
+                showCancelButton: true,
+                confirmButtonText:
+                    esEdicion
+                        ? 'Sí, guardar cambios'
+                        : 'Sí, registrar',
+                cancelButtonText:
+                    'Cancelar',
+                confirmButtonColor:
+                    '#094c90',
+                cancelButtonColor:
+                    '#6C7780',
+                reverseButtons: true
+            }).then(function (resultado) {
+                if (!resultado.isConfirmed) {
+                    return;
+                }
+
+                enviando = true;
+
+                const $boton =
+                    $formulario.find(
+                        'button[type="submit"]'
+                    );
+
+                $boton
+                    .prop('disabled', true)
+                    .addClass('cargando');
+
+                $boton.find('span').text(
+                    esEdicion
+                        ? 'Guardando cambios...'
+                        : 'Registrando reserva...'
+                );
+
+                $boton.find('i')
+                    .removeClass()
+                    .addClass(
+                        'bi bi-arrow-repeat'
+                    );
+
+                $formulario[0].submit();
+            });
+        }
+    );
 
     function mostrarErroresServidor() {
-        const errores = configuracion.errores || {};
+        const errores =
+            configuracion.errores || {};
+
         const mensajes = [];
 
-        Object.keys(errores).forEach(function (campo) {
-            const mensaje = errores[campo][0];
+        Object.keys(errores)
+            .forEach(function (campo) {
+                const mensaje =
+                    errores[campo][0];
 
-            mostrarError(campo, mensaje);
-            mensajes.push(mensaje);
-        });
+                mostrarError(
+                    campo,
+                    mensaje
+                );
+
+                mensajes.push(mensaje);
+            });
 
         if (mensajes.length) {
             Swal.fire({
                 icon: 'error',
                 title: 'Revisa la información',
                 text: mensajes.join('\n'),
-                confirmButtonText: 'Corregir',
-                confirmButtonColor: '#094c90'
+                confirmButtonText:
+                    'Corregir',
+                confirmButtonColor:
+                    '#094c90'
             });
-        } else if (configuracion.mensajeError) {
+        } else if (
+            configuracion.mensajeError
+        ) {
             Swal.fire({
                 icon: 'error',
                 title: esEdicion
                     ? 'No se pudo actualizar la reserva'
                     : 'No se pudo registrar la reserva',
-                text: configuracion.mensajeError,
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#094c90'
+                text:
+                    configuracion.mensajeError,
+                confirmButtonText:
+                    'Entendido',
+                confirmButtonColor:
+                    '#094c90'
             });
         }
     }

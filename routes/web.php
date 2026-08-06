@@ -2,12 +2,14 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DestinoController;
 use App\Http\Controllers\PreReservaController;
 use App\Models\Destino;
 use App\Http\Controllers\GrupoController;
+use App\Http\Controllers\GastoCancelacionController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReservaIndividualController;
 use App\Http\Controllers\ReservaGrupalController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\TestimonioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OperacionViajeController;
+use App\Http\Controllers\ReservaRiesgoController;
 use App\Http\Controllers\VueloReservaController;
 use App\Http\Controllers\BoletoVueloController;
 use App\Http\Controllers\AlojamientoReservaController;
@@ -124,8 +127,60 @@ Route::middleware('auth')->group(function() {
     
     Route::prefix('reservas')->group(function () {
         Route::get('/',[ReservaController::class, 'index'])->name('reservas');
+        Route::get('/riesgo',[ReservaRiesgoController::class, 'index'])->name('reservas.riesgo');
         Route::get('/{reserva}/detalle',[ReservaController::class, 'detalleJson'])->name('reservas.detalle');
         Route::patch('/{reserva}/cancelar',[ReservaController::class, 'cancelar'])->name('reservas.cancelar');
+    });
+    Route::prefix('gastos-cancelacion')
+    ->name('gastos-cancelacion.')
+    ->group(function () {
+        Route::get(
+            '/',
+            [
+                GastoCancelacionController::class,
+                'index',
+            ]
+        )->name('index');
+
+        Route::post(
+            '/reservas/{reserva}',
+            [
+                GastoCancelacionController::class,
+                'store',
+            ]
+        )->name('store');
+
+        Route::get(
+            '/{gasto}/descargar',
+            [
+                GastoCancelacionController::class,
+                'descargar',
+            ]
+        )->name('descargar');
+
+        Route::patch(
+            '/{gasto}/aprobar',
+            [
+                GastoCancelacionController::class,
+                'aprobar',
+            ]
+        )->name('aprobar');
+
+        Route::patch(
+            '/{gasto}/rechazar',
+            [
+                GastoCancelacionController::class,
+                'rechazar',
+            ]
+        )->name('rechazar');
+
+        Route::patch(
+            '/{gasto}/anular',
+            [
+                GastoCancelacionController::class,
+                'anular',
+            ]
+        )->name('anular');
     });
 
     Route::prefix('operaciones')
@@ -208,6 +263,24 @@ Route::middleware('auth')->group(function() {
         Route::patch('/{id}',[PreReservaController::class, 'update'])->name('prereservas.update');
         Route::post('/{id}/convertir',[PreReservaController::class, 'convertToReserva'])->name('prereservas.convertir');
         Route::delete('/{id}',[PreReservaController::class, 'destroy'])->name('prereservas.destroy');
+    });
+    Route::prefix('devoluciones')
+    ->name('devoluciones.')
+    ->group(function () {
+        Route::get(
+            '/',
+            [DevolucionController::class, 'index']
+        )->name('index');
+
+        Route::post(
+            '/',
+            [DevolucionController::class, 'store']
+        )->name('store');
+
+        Route::patch(
+            '/{devolucion}/anular',
+            [DevolucionController::class, 'anular']
+        )->name('anular');
     });
 });
 

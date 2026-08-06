@@ -308,11 +308,19 @@
                 <i class="bi bi-info-circle"></i>
 
                 <span>
-                    La reserva se registrará con pago pendiente. Los
-                    depósitos se administrarán desde el módulo Pagos.
+                    La reserva se crea de forma provisional y te llevará
+                    directamente al cobro del anticipo obligatorio.
                 </span>
             </div>
         </section>
+
+        @include(
+            'modules.reservas.partials.politica-pagos',
+            [
+                'claseSeccion' => 'reserva-seccion',
+                'claseCampo' => 'campo-reserva',
+            ]
+        )
 
         <div class="acciones-reserva">
             <a

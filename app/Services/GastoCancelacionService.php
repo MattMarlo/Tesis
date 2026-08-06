@@ -13,15 +13,47 @@ use Throwable;
 
 class GastoCancelacionService
 {
-    private const DISCO = 'local';
+    /*
+     * Los comprobantes se guardan en:
+     *
+     * storage/app/private
+     */
+    private const DISCO =
+        'local';
 
+    /*
+     * Tamaño máximo permitido:
+     * 10 megabytes.
+     */
+    private const TAMANO_MAXIMO =
+        10 * 1024 * 1024;
+
+    /*
+     * Tipos de archivos aceptados.
+     */
     private const TIPOS_PERMITIDOS = [
-        'application/pdf' => 'pdf',
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp',
+        'application/pdf' =>
+            'pdf',
+
+        'image/jpeg' =>
+            'jpg',
+
+        'image/png' =>
+            'png',
+
+        'image/webp' =>
+            'webp',
     ];
 
+    /**
+     * Registra un gasto y su comprobante.
+     *
+     * Se permite registrar cuando:
+     *
+     * - La reserva ya está cancelada.
+     * - La reserva tiene una solicitud de
+     *   cancelación pendiente.
+     */
     public function registrar(
         Reserva $reserva,
         array $datos,
@@ -30,20 +62,24 @@ class GastoCancelacionService
     ): GastoCancelacion {
         $reserva->refresh();
 
-        if (!$reserva->estaCancelada()) {
+        if (
+            !$this->puedeDocumentarGastos(
+                $reserva
+            )
+        ) {
             throw new InvalidArgumentException(
-                'Los gastos documentados solamente pueden registrarse después de cancelar la reserva.'
+                'Los gastos solamente pueden registrarse cuando la reserva está cancelada o tiene una solicitud de cancelación pendiente.'
             );
         }
 
-        if (!$archivo->isValid()) {
-            throw new InvalidArgumentException(
-                'El comprobante no se recibió correctamente.'
-            );
-        }
+        $this->validarArchivo(
+            $archivo
+        );
 
         $monto = round(
-            (float) ($datos['monto'] ?? 0),
+            (float) (
+                $datos['monto'] ?? 0
+            ),
             2
         );
 
@@ -53,37 +89,42 @@ class GastoCancelacionService
             );
         }
 
-        $mime = (string) $archivo->getMimeType();
+        $proveedor = trim(
+            (string) (
+                $datos['proveedor'] ?? ''
+            )
+        );
 
         if (
-            !array_key_exists(
-                $mime,
-                self::TIPOS_PERMITIDOS
-            )
+            mb_strlen($proveedor) < 2
         ) {
             throw new InvalidArgumentException(
-                'El comprobante debe ser PDF, JPG, PNG o WEBP.'
+                'Debes registrar el proveedor relacionado con el gasto.'
             );
         }
 
-        $tamano = (int) $archivo->getSize();
+        $concepto = trim(
+            (string) (
+                $datos['concepto'] ?? ''
+            )
+        );
 
-        if ($tamano <= 0) {
+        if (
+            mb_strlen($concepto) < 3
+        ) {
             throw new InvalidArgumentException(
-                'El comprobante está vacío.'
+                'Debes registrar el concepto del gasto.'
             );
         }
 
-        /*
-         * Límite defensivo de 10 MB.
-         */
-        if ($tamano > 10 * 1024 * 1024) {
-            throw new InvalidArgumentException(
-                'El comprobante no puede superar los 10 MB.'
-            );
-        }
+        $mime = (string)
+            $archivo->getMimeType();
 
-        $rutaTemporal = $archivo->getRealPath();
+        $tamano = (int)
+            $archivo->getSize();
+
+        $rutaTemporal =
+            $archivo->getRealPath();
 
         if (!$rutaTemporal) {
             throw new InvalidArgumentException(
@@ -103,7 +144,9 @@ class GastoCancelacionService
         }
 
         $extension =
-            self::TIPOS_PERMITIDOS[$mime];
+            self::TIPOS_PERMITIDOS[
+                $mime
+            ];
 
         $directorio =
             'reservas/' .
@@ -115,15 +158,12 @@ class GastoCancelacionService
             '.' .
             $extension;
 
-        /*
-         * Se utiliza el disco local, cuya raíz en Laravel
-         * está en storage/app/private.
-         */
-        $rutaGuardada = $archivo->storeAs(
-            $directorio,
-            $nombreArchivo,
-            self::DISCO
-        );
+        $rutaGuardada =
+            $archivo->storeAs(
+                $directorio,
+                $nombreArchivo,
+                self::DISCO
+            );
 
         if (!$rutaGuardada) {
             throw new InvalidArgumentException(
@@ -139,24 +179,43 @@ class GastoCancelacionService
                     $archivo,
                     $usuarioId,
                     $monto,
+                    $proveedor,
+                    $concepto,
                     $mime,
                     $tamano,
                     $hash,
                     $rutaGuardada
                 ) {
-                    $reservaBloqueada = Reserva::query()
-                        ->lockForUpdate()
-                        ->findOrFail($reserva->id);
+                    /*
+                     * Bloqueamos la reserva para impedir
+                     * que sea modificada simultáneamente.
+                     */
+                    $reservaBloqueada =
+                        Reserva::query()
+                            ->lockForUpdate()
+                            ->findOrFail(
+                                $reserva->id
+                            );
 
                     if (
-                        !$reservaBloqueada
-                            ->estaCancelada()
+                        !$this
+                            ->puedeDocumentarGastos(
+                                $reservaBloqueada
+                            )
                     ) {
                         throw new InvalidArgumentException(
-                            'La reserva debe estar cancelada para registrar gastos.'
+                            'La reserva ya no se encuentra disponible para registrar gastos.'
                         );
                     }
 
+                    /*
+                     * El total de gastos registrados puede
+                     * superar temporalmente lo pagado mientras
+                     * están pendientes.
+                     *
+                     * El límite definitivo se aplica cuando
+                     * el administrador aprueba cada gasto.
+                     */
                     return GastoCancelacion::create([
                         'reserva_id' =>
                             $reservaBloqueada->id,
@@ -165,21 +224,19 @@ class GastoCancelacionService
                             $usuarioId,
 
                         'proveedor' =>
-                            trim(
-                                (string) $datos['proveedor']
-                            ),
+                            $proveedor,
 
                         'concepto' =>
-                            trim(
-                                (string) $datos['concepto']
-                            ),
+                            $concepto,
 
                         'monto' =>
                             $monto,
 
                         'numero_documento' =>
                             !empty(
-                                $datos['numero_documento']
+                                $datos[
+                                    'numero_documento'
+                                ]
                             )
                                 ? trim(
                                     (string) $datos[
@@ -215,7 +272,9 @@ class GastoCancelacionService
 
                         'observaciones' =>
                             !empty(
-                                $datos['observaciones']
+                                $datos[
+                                    'observaciones'
+                                ]
                             )
                                 ? trim(
                                     (string) $datos[
@@ -228,17 +287,23 @@ class GastoCancelacionService
             );
         } catch (Throwable $error) {
             /*
-             * Si falla la base de datos, eliminamos el
-             * archivo para evitar documentos huérfanos.
+             * Si falla la transacción, eliminamos
+             * el archivo para no dejar documentos
+             * huérfanos.
              */
             Storage::disk(
                 self::DISCO
-            )->delete($rutaGuardada);
+            )->delete(
+                $rutaGuardada
+            );
 
             throw $error;
         }
     }
 
+    /**
+     * Aprueba un gasto documentado.
+     */
     public function aprobar(
         GastoCancelacion $gasto,
         int $usuarioId,
@@ -250,57 +315,81 @@ class GastoCancelacionService
                 $usuarioId,
                 $observacion
             ) {
-                $gasto = GastoCancelacion::query()
-                    ->lockForUpdate()
-                    ->findOrFail($gasto->id);
+                $gasto =
+                    GastoCancelacion::query()
+                        ->lockForUpdate()
+                        ->findOrFail(
+                            $gasto->id
+                        );
 
-                if (!$gasto->estaPendiente()) {
+                if (
+                    !$gasto->estaPendiente()
+                ) {
                     throw new InvalidArgumentException(
                         'Solamente se pueden aprobar gastos pendientes.'
                     );
                 }
 
-                $reserva = Reserva::query()
-                    ->lockForUpdate()
-                    ->findOrFail($gasto->reserva_id);
+                $reserva =
+                    Reserva::query()
+                        ->lockForUpdate()
+                        ->findOrFail(
+                            $gasto->reserva_id
+                        );
 
-                if (!$reserva->estaCancelada()) {
+                if (
+                    !$this
+                        ->puedeDocumentarGastos(
+                            $reserva
+                        )
+                ) {
                     throw new InvalidArgumentException(
-                        'La reserva debe estar cancelada.'
+                        'La reserva debe estar cancelada o tener una solicitud de cancelación pendiente.'
                     );
                 }
 
-                $basePagada = round(
-                    (float) (
+                /*
+                 * Para reservas ya canceladas usamos
+                 * la fotografía financiera guardada al
+                 * cancelar.
+                 *
+                 * Para solicitudes pendientes usamos
+                 * todos los pagos registrados.
+                 */
+                $basePagada =
+                    $this->obtenerBasePagada(
                         $reserva
-                            ->monto_pagado_al_cancelar ??
-                        $reserva->total_pagado
-                    ),
-                    2
-                );
+                    );
 
-                $otrosGastosAprobados = round(
-                    (float) GastoCancelacion::query()
-                        ->aprobados()
-                        ->where(
-                            'reserva_id',
-                            $reserva->id
-                        )
-                        ->where(
-                            'id',
-                            '!=',
-                            $gasto->id
-                        )
-                        ->sum('monto'),
-                    2
-                );
+                $otrosGastosAprobados =
+                    round(
+                        (float)
+                            GastoCancelacion::query()
+                                ->aprobados()
+                                ->where(
+                                    'reserva_id',
+                                    $reserva->id
+                                )
+                                ->where(
+                                    'id',
+                                    '!=',
+                                    $gasto->id
+                                )
+                                ->sum('monto'),
+                        2
+                    );
 
-                $totalConEsteGasto = round(
-                    $otrosGastosAprobados +
-                    (float) $gasto->monto,
-                    2
-                );
+                $totalConEsteGasto =
+                    round(
+                        $otrosGastosAprobados +
+                        (float) $gasto->monto,
+                        2
+                    );
 
+                /*
+                 * Los gastos aprobados nunca pueden
+                 * superar el dinero pagado.
+                 */
                 if (
                     $totalConEsteGasto >
                     $basePagada
@@ -311,24 +400,27 @@ class GastoCancelacionService
                 }
 
                 $yaDevuelto = round(
-                    (float) $reserva
-                        ->devoluciones()
-                        ->sum('monto'),
+                    (float)
+                        $reserva
+                            ->devoluciones()
+                            ->sum('monto'),
                     2
                 );
 
-                $nuevoReembolsable = round(
-                    max(
-                        0,
-                        $basePagada -
-                        $totalConEsteGasto
-                    ),
-                    2
-                );
+                $nuevoReembolsable =
+                    round(
+                        max(
+                            0,
+                            $basePagada -
+                            $totalConEsteGasto
+                        ),
+                        2
+                    );
 
                 /*
-                 * No se puede aprobar un gasto si ya se
-                 * devolvió más dinero del que quedaría autorizado.
+                 * Una aprobación no puede reducir el
+                 * reembolso por debajo de lo que ya fue
+                 * devuelto.
                  */
                 if (
                     $yaDevuelto >
@@ -349,13 +441,23 @@ class GastoCancelacionService
 
                     'motivo_revision' =>
                         $observacion
-                            ? trim($observacion)
+                            ? trim(
+                                $observacion
+                            )
                             : 'Comprobante revisado y aprobado.',
 
                     'revisado_at' =>
                         now(),
                 ]);
 
+                /*
+                 * Si la reserva ya está cancelada,
+                 * actualizamos su liquidación.
+                 *
+                 * Si aún está en revisión, el cálculo
+                 * definitivo ocurrirá cuando se apruebe
+                 * la cancelación.
+                 */
                 $this->recalcularLiquidacion(
                     $reserva
                 );
@@ -369,14 +471,21 @@ class GastoCancelacionService
         );
     }
 
+    /**
+     * Rechaza un gasto pendiente.
+     */
     public function rechazar(
         GastoCancelacion $gasto,
         string $motivo,
         int $usuarioId
     ): GastoCancelacion {
-        $motivo = trim($motivo);
+        $motivo = trim(
+            $motivo
+        );
 
-        if (mb_strlen($motivo) < 10) {
+        if (
+            mb_strlen($motivo) < 10
+        ) {
             throw new InvalidArgumentException(
                 'El motivo del rechazo debe tener al menos 10 caracteres.'
             );
@@ -388,11 +497,16 @@ class GastoCancelacionService
                 $motivo,
                 $usuarioId
             ) {
-                $gasto = GastoCancelacion::query()
-                    ->lockForUpdate()
-                    ->findOrFail($gasto->id);
+                $gasto =
+                    GastoCancelacion::query()
+                        ->lockForUpdate()
+                        ->findOrFail(
+                            $gasto->id
+                        );
 
-                if (!$gasto->estaPendiente()) {
+                if (
+                    !$gasto->estaPendiente()
+                ) {
                     throw new InvalidArgumentException(
                         'Solamente se pueden rechazar gastos pendientes.'
                     );
@@ -422,14 +536,21 @@ class GastoCancelacionService
         );
     }
 
+    /**
+     * Anula un gasto.
+     */
     public function anular(
         GastoCancelacion $gasto,
         string $motivo,
         int $usuarioId
     ): GastoCancelacion {
-        $motivo = trim($motivo);
+        $motivo = trim(
+            $motivo
+        );
 
-        if (mb_strlen($motivo) < 10) {
+        if (
+            mb_strlen($motivo) < 10
+        ) {
             throw new InvalidArgumentException(
                 'El motivo de anulación debe tener al menos 10 caracteres.'
             );
@@ -441,11 +562,16 @@ class GastoCancelacionService
                 $motivo,
                 $usuarioId
             ) {
-                $gasto = GastoCancelacion::query()
-                    ->lockForUpdate()
-                    ->findOrFail($gasto->id);
+                $gasto =
+                    GastoCancelacion::query()
+                        ->lockForUpdate()
+                        ->findOrFail(
+                            $gasto->id
+                        );
 
-                if ($gasto->estaAnulado()) {
+                if (
+                    $gasto->estaAnulado()
+                ) {
                     throw new InvalidArgumentException(
                         'El gasto ya está anulado.'
                     );
@@ -470,11 +596,12 @@ class GastoCancelacionService
                 ]);
 
                 if ($estabaAprobado) {
-                    $reserva = Reserva::query()
-                        ->lockForUpdate()
-                        ->findOrFail(
-                            $gasto->reserva_id
-                        );
+                    $reserva =
+                        Reserva::query()
+                            ->lockForUpdate()
+                            ->findOrFail(
+                                $gasto->reserva_id
+                            );
 
                     $this->recalcularLiquidacion(
                         $reserva
@@ -490,6 +617,10 @@ class GastoCancelacionService
         );
     }
 
+    /**
+     * Verifica que el archivo exista y que
+     * conserve el mismo hash.
+     */
     public function verificarIntegridad(
         GastoCancelacion $gasto
     ): bool {
@@ -505,22 +636,28 @@ class GastoCancelacionService
             return false;
         }
 
-        $rutaAbsoluta = $disco->path(
-            $gasto->archivo_path
-        );
+        $rutaAbsoluta =
+            $disco->path(
+                $gasto->archivo_path
+            );
 
         $hashActual = hash_file(
             'sha256',
             $rutaAbsoluta
         );
 
-        return is_string($hashActual) &&
+        return
+            is_string($hashActual) &&
             hash_equals(
-                $gasto->archivo_hash,
+                (string)
+                    $gasto->archivo_hash,
                 $hashActual
             );
     }
 
+    /**
+     * Obtiene la ruta privada del comprobante.
+     */
     public function obtenerRutaAbsoluta(
         GastoCancelacion $gasto
     ): string {
@@ -541,33 +678,120 @@ class GastoCancelacionService
         );
     }
 
+    /**
+     * Determina si una reserva puede recibir
+     * documentos de gastos.
+     */
+    private function puedeDocumentarGastos(
+        Reserva $reserva
+    ): bool {
+        if (
+            $reserva->estaCancelada()
+        ) {
+            return true;
+        }
+
+        return $reserva
+            ->tieneSolicitudCancelacionPendiente();
+    }
+
+    /**
+     * Obtiene el dinero pagado antes de aplicar
+     * devoluciones.
+     *
+     * Para registros antiguos con una fotografía
+     * financiera incorrecta, utiliza el mayor valor
+     * entre el campo guardado y los pagos registrados.
+     */
+    private function obtenerBasePagada(
+        Reserva $reserva
+    ): float {
+        $pagadoBruto = round(
+            (float)
+                $reserva
+                    ->pagos()
+                    ->sum(
+                        'monto_depositado'
+                    ),
+            2
+        );
+
+        if (
+            !$reserva->estaCancelada()
+        ) {
+            return $pagadoBruto;
+        }
+
+        $pagadoAlCancelar = round(
+            (float) (
+                $reserva
+                    ->monto_pagado_al_cancelar ??
+                0
+            ),
+            2
+        );
+
+        /*
+         * En una reserva cancelada correctamente,
+         * ambos valores deberían coincidir.
+         *
+         * max() permite recuperar casos antiguos
+         * que guardaron cero por error.
+         */
+        return max(
+            $pagadoAlCancelar,
+            $pagadoBruto
+        );
+    }
+
+    /**
+     * Recalcula la liquidación de una reserva
+     * que ya se encuentra cancelada.
+     */
     private function recalcularLiquidacion(
         Reserva $reserva
     ): void {
         $reserva->refresh();
 
-        if (!$reserva->estaCancelada()) {
+        /*
+         * Durante una solicitud pendiente no
+         * modificamos todavía la liquidación.
+         */
+        if (
+            !$reserva->estaCancelada()
+        ) {
             return;
         }
 
-        $basePagada = round(
-            (float) (
-                $reserva->monto_pagado_al_cancelar ??
-                $reserva->total_pagado
-            ),
+        $basePagada =
+            $this->obtenerBasePagada(
+                $reserva
+            );
+
+        $totalGastos = round(
+            (float)
+                GastoCancelacion::query()
+                    ->aprobados()
+                    ->where(
+                        'reserva_id',
+                        $reserva->id
+                    )
+                    ->sum('monto'),
             2
         );
 
-        $totalGastos = round(
-            (float) GastoCancelacion::query()
-                ->aprobados()
-                ->where(
-                    'reserva_id',
-                    $reserva->id
-                )
-                ->sum('monto'),
-            2
-        );
+        /*
+         * Protección adicional para datos
+         * antiguos o manipulados.
+         */
+        if (
+            $totalGastos >
+            $basePagada
+        ) {
+            throw new InvalidArgumentException(
+                'Los gastos aprobados superan el monto pagado por el cliente.'
+            );
+        }
 
         $reembolsable = round(
             max(
@@ -579,28 +803,45 @@ class GastoCancelacionService
         );
 
         $devuelto = round(
-            (float) $reserva
-                ->devoluciones()
-                ->sum('monto'),
+            (float)
+                $reserva
+                    ->devoluciones()
+                    ->sum('monto'),
             2
         );
 
-        $estadoReembolso = match (true) {
-            $basePagada <= 0 =>
-                Reserva::REEMBOLSO_NO_APLICA,
+        if (
+            $devuelto >
+            $reembolsable
+        ) {
+            throw new InvalidArgumentException(
+                'Las devoluciones procesadas superan el monto reembolsable documentado.'
+            );
+        }
 
-            $reembolsable <= 0 =>
-                Reserva::REEMBOLSO_SIN_REEMBOLSO,
+        $estadoReembolso =
+            match (true) {
+                $basePagada <= 0 =>
+                    Reserva::
+                        REEMBOLSO_NO_APLICA,
 
-            $devuelto >= $reembolsable =>
-                Reserva::REEMBOLSO_COMPLETADO,
+                $reembolsable <= 0 =>
+                    Reserva::
+                        REEMBOLSO_SIN_REEMBOLSO,
 
-            $devuelto > 0 =>
-                Reserva::REEMBOLSO_PARCIAL,
+                $devuelto >=
+                    $reembolsable =>
+                    Reserva::
+                        REEMBOLSO_COMPLETADO,
 
-            default =>
-                Reserva::REEMBOLSO_PENDIENTE,
-        };
+                $devuelto > 0 =>
+                    Reserva::
+                        REEMBOLSO_PARCIAL,
+
+                default =>
+                    Reserva::
+                        REEMBOLSO_PENDIENTE,
+            };
 
         $cantidadAprobada =
             GastoCancelacion::query()
@@ -612,6 +853,13 @@ class GastoCancelacionService
                 ->count();
 
         $reserva->forceFill([
+            /*
+             * Corrige también fotografías
+             * antiguas que quedaron en cero.
+             */
+            'monto_pagado_al_cancelar' =>
+                $basePagada,
+
             'gastos_no_reembolsables' =>
                 $totalGastos,
 
@@ -628,5 +876,53 @@ class GastoCancelacionService
                         ' gasto(s) documentado(s) y aprobado(s).'
                     : null,
         ])->save();
+    }
+
+    /**
+     * Valida formato, contenido y tamaño
+     * del comprobante.
+     */
+    private function validarArchivo(
+        UploadedFile $archivo
+    ): void {
+        if (
+            !$archivo->isValid()
+        ) {
+            throw new InvalidArgumentException(
+                'El comprobante no se recibió correctamente.'
+            );
+        }
+
+        $mime = (string)
+            $archivo->getMimeType();
+
+        if (
+            !array_key_exists(
+                $mime,
+                self::TIPOS_PERMITIDOS
+            )
+        ) {
+            throw new InvalidArgumentException(
+                'El comprobante debe ser PDF, JPG, PNG o WEBP.'
+            );
+        }
+
+        $tamano = (int)
+            $archivo->getSize();
+
+        if ($tamano <= 0) {
+            throw new InvalidArgumentException(
+                'El comprobante está vacío.'
+            );
+        }
+
+        if (
+            $tamano >
+            self::TAMANO_MAXIMO
+        ) {
+            throw new InvalidArgumentException(
+                'El comprobante no puede superar los 10 MB.'
+            );
+        }
     }
 }

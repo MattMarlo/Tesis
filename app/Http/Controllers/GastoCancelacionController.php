@@ -4,126 +4,204 @@ namespace App\Http\Controllers;
 
 use App\Models\GastoCancelacion;
 use App\Models\Reserva;
+use App\Models\SolicitudCancelacion;
+use App\Models\User;
 use App\Services\GastoCancelacionService;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 
 class GastoCancelacionController extends Controller
 {
     public function __construct(
-        private GastoCancelacionService $servicio
+        private GastoCancelacionService
+            $servicio
     ) {
     }
 
-    public function index(Request $request)
-    {
+    /**
+     * Muestra reservas canceladas o con
+     * cancelación pendiente.
+     */
+    public function index(
+        Request $request
+    ) {
+        $this->usuarioAutenticado(
+            $request
+        );
+
         $busqueda = trim(
-            (string) $request->query(
-                'buscar',
-                ''
-            )
+            $request
+                ->string('buscar')
+                ->toString()
         );
 
-        $estado = $request->query(
-            'estado'
+        $estadoSeleccionado = trim(
+            $request
+                ->string('estado')
+                ->toString()
         );
 
-        $reservas = Reserva::query()
-            ->where(
-                'estado',
-                Reserva::ESTADO_CANCELADA
+        $estadosPermitidos = [
+            GastoCancelacion::
+                ESTADO_PENDIENTE,
+
+            GastoCancelacion::
+                ESTADO_APROBADO,
+
+            GastoCancelacion::
+                ESTADO_RECHAZADO,
+
+            GastoCancelacion::
+                ESTADO_ANULADO,
+        ];
+
+        if (
+            !in_array(
+                $estadoSeleccionado,
+                $estadosPermitidos,
+                true
             )
+        ) {
+            $estadoSeleccionado = '';
+        }
+
+        $consulta = Reserva::query()
             ->with([
                 'cliente',
                 'destino',
                 'grupo',
+
+                'solicitudCancelacionPendiente' =>
+                    function ($consulta) {
+                        $consulta->with([
+                            'solicitadoPor',
+                            'revisadoPor',
+                        ]);
+                    },
+
                 'gastosCancelacion' =>
-                    function ($consulta) use ($estado) {
+                    function ($consulta) {
                         $consulta
                             ->with([
                                 'registradoPor',
                                 'revisadoPor',
                             ])
-                            ->when(
-                                in_array(
-                                    $estado,
-                                    [
-                                        GastoCancelacion::
-                                            ESTADO_PENDIENTE,
-
-                                        GastoCancelacion::
-                                            ESTADO_APROBADO,
-
-                                        GastoCancelacion::
-                                            ESTADO_RECHAZADO,
-
-                                        GastoCancelacion::
-                                            ESTADO_ANULADO,
-                                    ],
-                                    true
-                                ),
-                                fn ($consulta) =>
-                                    $consulta->where(
-                                        'estado',
-                                        $estado
-                                    )
-                            )
-                            ->latest('id');
+                            ->latest();
                     },
             ])
-            ->when(
-                $busqueda !== '',
-                function ($consulta) use ($busqueda) {
-                    $consulta->where(
-                        function ($subconsulta) use (
-                            $busqueda
-                        ) {
-                            $subconsulta
-                                ->where(
-                                    'codigo_reserva',
-                                    'like',
-                                    '%' .
-                                    $busqueda .
-                                    '%'
-                                )
-                                ->orWhereHas(
-                                    'cliente',
-                                    function ($clientes) use (
-                                        $busqueda
-                                    ) {
-                                        $clientes
-                                            ->where(
-                                                'nombres',
-                                                'like',
-                                                '%' .
-                                                $busqueda .
-                                                '%'
-                                            )
-                                            ->orWhere(
-                                                'apellidos',
-                                                'like',
-                                                '%' .
-                                                $busqueda .
-                                                '%'
-                                            )
-                                            ->orWhere(
-                                                'documento',
-                                                'like',
-                                                '%' .
-                                                $busqueda .
-                                                '%'
-                                            );
-                                    }
-                                );
-                        }
+            ->where(
+                function ($consulta) {
+                    $consulta
+                        ->where(
+                            'estado',
+                            Reserva::
+                                ESTADO_CANCELADA
+                        )
+                        ->orWhereHas(
+                            'solicitudesCancelacion',
+                            function (
+                                $consultaSolicitud
+                            ) {
+                                $consultaSolicitud
+                                    ->where(
+                                        'estado',
+                                        SolicitudCancelacion::
+                                            ESTADO_PENDIENTE
+                                    );
+                            }
+                        );
+                }
+            );
+
+        if ($busqueda !== '') {
+            $consulta->where(
+                function (
+                    $consultaBusqueda
+                ) use (
+                    $busqueda
+                ) {
+                    $consultaBusqueda
+                        ->where(
+                            'codigo_reserva',
+                            'like',
+                            '%' .
+                                $busqueda .
+                                '%'
+                        )
+                        ->orWhereHas(
+                            'cliente',
+                            function (
+                                $consultaCliente
+                            ) use (
+                                $busqueda
+                            ) {
+                                $consultaCliente
+                                    ->where(
+                                        'nombres',
+                                        'like',
+                                        '%' .
+                                            $busqueda .
+                                            '%'
+                                    )
+                                    ->orWhere(
+                                        'apellidos',
+                                        'like',
+                                        '%' .
+                                            $busqueda .
+                                            '%'
+                                    )
+                                    ->orWhere(
+                                        'documento',
+                                        'like',
+                                        '%' .
+                                            $busqueda .
+                                            '%'
+                                    );
+                            }
+                        )
+                        ->orWhereHas(
+                            'grupo',
+                            function (
+                                $consultaGrupo
+                            ) use (
+                                $busqueda
+                            ) {
+                                $consultaGrupo
+                                    ->where(
+                                        'nombre_grupo',
+                                        'like',
+                                        '%' .
+                                            $busqueda .
+                                            '%'
+                                    );
+                            }
+                        );
+                }
+            );
+        }
+
+        if (
+            $estadoSeleccionado !== ''
+        ) {
+            $consulta->whereHas(
+                'gastosCancelacion',
+                function (
+                    $consultaGasto
+                ) use (
+                    $estadoSeleccionado
+                ) {
+                    $consultaGasto->where(
+                        'estado',
+                        $estadoSeleccionado
                     );
                 }
-            )
-            ->orderByDesc(
-                'fecha_cancelacion'
-            )
-            ->orderByDesc('id')
-            ->paginate(10)
+            );
+        }
+
+        $reservas = $consulta
+            ->latest('id')
+            ->paginate(8)
             ->withQueryString();
 
         $metricas = [
@@ -138,44 +216,52 @@ class GastoCancelacionController extends Controller
                     ->count(),
 
             'total_aprobado' =>
-                (float) GastoCancelacion::query()
-                    ->aprobados()
-                    ->sum('monto'),
+                round(
+                    (float)
+                        GastoCancelacion::query()
+                            ->aprobados()
+                            ->sum('monto'),
+                    2
+                ),
 
             'reservas_canceladas' =>
                 Reserva::query()
                     ->where(
                         'estado',
-                        Reserva::ESTADO_CANCELADA
+                        Reserva::
+                            ESTADO_CANCELADA
                     )
+                    ->count(),
+
+            'en_revision' =>
+                SolicitudCancelacion::query()
+                    ->pendientes()
                     ->count(),
         ];
 
         return view(
             'modules.reservas.gastos-cancelacion',
-            [
-                'titulo' =>
-                    'Gastos documentados',
-
-                'reservas' =>
-                    $reservas,
-
-                'metricas' =>
-                    $metricas,
-
-                'busqueda' =>
-                    $busqueda,
-
-                'estadoSeleccionado' =>
-                    $estado,
-            ]
+            compact(
+                'reservas',
+                'metricas',
+                'busqueda',
+                'estadoSeleccionado'
+            )
         );
     }
 
+    /**
+     * Registra un comprobante.
+     */
     public function store(
         Request $request,
         Reserva $reserva
     ) {
+        $usuario =
+            $this->usuarioAutenticado(
+                $request
+            );
+
         $datos = $request->validate(
             [
                 'proveedor' => [
@@ -188,14 +274,14 @@ class GastoCancelacionController extends Controller
                 'concepto' => [
                     'required',
                     'string',
-                    'min:5',
+                    'min:3',
                     'max:200',
                 ],
 
                 'monto' => [
                     'required',
                     'numeric',
-                    'gt:0',
+                    'min:0.01',
                     'max:9999999999.99',
                 ],
 
@@ -214,7 +300,7 @@ class GastoCancelacionController extends Controller
                 'archivo' => [
                     'required',
                     'file',
-                    'mimes:pdf,jpg,jpeg,png,webp',
+                    'mimetypes:application/pdf,image/jpeg,image/png,image/webp',
                     'max:10240',
                 ],
 
@@ -223,30 +309,30 @@ class GastoCancelacionController extends Controller
                     'string',
                     'max:2000',
                 ],
+
+                'solicitud_id' => [
+                    'nullable',
+                    'integer',
+                    'exists:solicitudes_cancelacion,id',
+                ],
             ],
             [
                 'proveedor.required' =>
-                    'Ingresa el nombre del proveedor.',
+                    'Debes indicar el proveedor.',
 
                 'concepto.required' =>
-                    'Describe el concepto del gasto.',
-
-                'concepto.min' =>
-                    'El concepto debe tener al menos 5 caracteres.',
+                    'Debes indicar el concepto del gasto.',
 
                 'monto.required' =>
-                    'Ingresa el monto del gasto.',
+                    'Debes indicar el monto del gasto.',
 
-                'monto.gt' =>
+                'monto.min' =>
                     'El monto debe ser mayor que cero.',
 
-                'fecha_documento.before_or_equal' =>
-                    'La fecha del comprobante no puede ser futura.',
-
                 'archivo.required' =>
-                    'Adjunta el comprobante del gasto.',
+                    'Debes adjuntar el comprobante.',
 
-                'archivo.mimes' =>
+                'archivo.mimetypes' =>
                     'El comprobante debe ser PDF, JPG, PNG o WEBP.',
 
                 'archivo.max' =>
@@ -255,71 +341,106 @@ class GastoCancelacionController extends Controller
         );
 
         try {
+            $this->validarSolicitudReserva(
+                $request,
+                $reserva->id
+            );
+
             $this->servicio->registrar(
                 $reserva,
                 $datos,
                 $request->file('archivo'),
-                (int) $request->user()->id
+                $usuario->id
             );
 
-            return back()->with(
+            return $this->redirigirResultado(
+                $request,
+                $reserva->id,
                 'success',
-                'El gasto fue registrado y quedó pendiente de aprobación.'
+                'El comprobante fue registrado y quedó pendiente de revisión.'
             );
-        } catch (InvalidArgumentException $error) {
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    $error->getMessage()
-                );
+        } catch (
+            InvalidArgumentException $error
+        ) {
+            return $this->redirigirResultado(
+                $request,
+                $reserva->id,
+                'error',
+                $error->getMessage(),
+                true
+            );
         }
     }
 
+    /**
+     * Aprueba un gasto.
+     */
     public function aprobar(
         Request $request,
         GastoCancelacion $gasto
     ) {
-        $this->comprobarAdministrador(
-            $request
-        );
+        $administrador =
+            $this->comprobarAdministrador(
+                $request
+            );
 
         $datos = $request->validate([
             'observacion_revision' => [
                 'nullable',
                 'string',
-                'max:1000',
+                'max:2000',
+            ],
+
+            'solicitud_id' => [
+                'nullable',
+                'integer',
+                'exists:solicitudes_cancelacion,id',
             ],
         ]);
 
         try {
+            $this->validarSolicitudReserva(
+                $request,
+                $gasto->reserva_id
+            );
+
             $this->servicio->aprobar(
                 $gasto,
-                (int) $request->user()->id,
+                $administrador->id,
                 $datos[
                     'observacion_revision'
                 ] ?? null
             );
 
-            return back()->with(
+            return $this->redirigirResultado(
+                $request,
+                $gasto->reserva_id,
                 'success',
-                'El gasto fue aprobado y el reembolso fue recalculado.'
+                'El gasto fue aprobado.'
             );
-        } catch (InvalidArgumentException $error) {
-            return back()->with(
+        } catch (
+            InvalidArgumentException $error
+        ) {
+            return $this->redirigirResultado(
+                $request,
+                $gasto->reserva_id,
                 'error',
                 $error->getMessage()
             );
         }
     }
 
+    /**
+     * Rechaza un gasto pendiente.
+     */
     public function rechazar(
         Request $request,
         GastoCancelacion $gasto
     ) {
-        $this->comprobarAdministrador(
-            $request
-        );
+        $administrador =
+            $this->comprobarAdministrador(
+                $request
+            );
 
         $datos = $request->validate(
             [
@@ -328,6 +449,12 @@ class GastoCancelacionController extends Controller
                     'string',
                     'min:10',
                     'max:2000',
+                ],
+
+                'solicitud_id' => [
+                    'nullable',
+                    'integer',
+                    'exists:solicitudes_cancelacion,id',
                 ],
             ],
             [
@@ -340,31 +467,46 @@ class GastoCancelacionController extends Controller
         );
 
         try {
+            $this->validarSolicitudReserva(
+                $request,
+                $gasto->reserva_id
+            );
+
             $this->servicio->rechazar(
                 $gasto,
                 $datos['motivo_revision'],
-                (int) $request->user()->id
+                $administrador->id
             );
 
-            return back()->with(
+            return $this->redirigirResultado(
+                $request,
+                $gasto->reserva_id,
                 'success',
                 'El gasto fue rechazado.'
             );
-        } catch (InvalidArgumentException $error) {
-            return back()->with(
+        } catch (
+            InvalidArgumentException $error
+        ) {
+            return $this->redirigirResultado(
+                $request,
+                $gasto->reserva_id,
                 'error',
                 $error->getMessage()
             );
         }
     }
 
+    /**
+     * Anula un gasto.
+     */
     public function anular(
         Request $request,
         GastoCancelacion $gasto
     ) {
-        $this->comprobarAdministrador(
-            $request
-        );
+        $administrador =
+            $this->comprobarAdministrador(
+                $request
+            );
 
         $datos = $request->validate(
             [
@@ -373,6 +515,12 @@ class GastoCancelacionController extends Controller
                     'string',
                     'min:10',
                     'max:2000',
+                ],
+
+                'solicitud_id' => [
+                    'nullable',
+                    'integer',
+                    'exists:solicitudes_cancelacion,id',
                 ],
             ],
             [
@@ -385,32 +533,48 @@ class GastoCancelacionController extends Controller
         );
 
         try {
+            $this->validarSolicitudReserva(
+                $request,
+                $gasto->reserva_id
+            );
+
             $this->servicio->anular(
                 $gasto,
                 $datos['motivo_anulacion'],
-                (int) $request->user()->id
+                $administrador->id
             );
 
-            return back()->with(
+            return $this->redirigirResultado(
+                $request,
+                $gasto->reserva_id,
                 'success',
                 'El gasto fue anulado y la liquidación fue recalculada.'
             );
-        } catch (InvalidArgumentException $error) {
-            return back()->with(
+        } catch (
+            InvalidArgumentException $error
+        ) {
+            return $this->redirigirResultado(
+                $request,
+                $gasto->reserva_id,
                 'error',
                 $error->getMessage()
             );
         }
     }
 
+    /**
+     * Descarga privada del comprobante.
+     */
     public function descargar(
         Request $request,
         GastoCancelacion $gasto
     ) {
-        if (
-            !$request->user() ||
-            !$request->user()->estaActivo()
-        ) {
+        $usuario =
+            $this->usuarioAutenticado(
+                $request
+            );
+
+        if (!$usuario->estaActivo()) {
             abort(
                 403,
                 'No tienes autorización para descargar el comprobante.'
@@ -418,15 +582,12 @@ class GastoCancelacionController extends Controller
         }
 
         try {
-            $ruta = $this->servicio
-                ->obtenerRutaAbsoluta(
-                    $gasto
-                );
+            $ruta =
+                $this->servicio
+                    ->obtenerRutaAbsoluta(
+                        $gasto
+                    );
 
-            /*
-             * Eliminamos separadores del nombre original
-             * para evitar nombres de descarga peligrosos.
-             */
             $nombre = str_replace(
                 [
                     '\\',
@@ -443,7 +604,8 @@ class GastoCancelacionController extends Controller
                 $nombre,
                 [
                     'Content-Type' =>
-                        $gasto->archivo_mime,
+                        $gasto
+                            ->archivo_mime,
 
                     'X-Content-Type-Options' =>
                         'nosniff',
@@ -452,7 +614,9 @@ class GastoCancelacionController extends Controller
                         'private, no-store, max-age=0',
                 ]
             );
-        } catch (InvalidArgumentException $error) {
+        } catch (
+            InvalidArgumentException $error
+        ) {
             return back()->with(
                 'error',
                 $error->getMessage()
@@ -460,17 +624,136 @@ class GastoCancelacionController extends Controller
         }
     }
 
+    /**
+     * Comprueba que solicitud y reserva
+     * correspondan entre sí.
+     */
+    private function validarSolicitudReserva(
+        Request $request,
+        int $reservaId
+    ): ?SolicitudCancelacion {
+        $solicitudId = (int)
+            $request->input(
+                'solicitud_id',
+                0
+            );
+
+        if ($solicitudId <= 0) {
+            return null;
+        }
+
+        $solicitud =
+            SolicitudCancelacion::query()
+                ->find(
+                    $solicitudId
+                );
+
+        if (!$solicitud) {
+            throw new InvalidArgumentException(
+                'La solicitud de cancelación no existe.'
+            );
+        }
+
+        if (
+            $solicitud->reserva_id !==
+            $reservaId
+        ) {
+            throw new InvalidArgumentException(
+                'La solicitud no corresponde con la reserva seleccionada.'
+            );
+        }
+
+        return $solicitud;
+    }
+
+    /**
+     * Regresa al expediente cuando la acción
+     * fue realizada desde ese apartado.
+     */
+    private function redirigirResultado(
+        Request $request,
+        int $reservaId,
+        string $tipoMensaje,
+        string $mensaje,
+        bool $conInput = false
+    ) {
+        $solicitud =
+            $this->validarSolicitudReserva(
+                $request,
+                $reservaId
+            );
+
+        if ($solicitud) {
+            $respuesta = redirect()
+                ->route(
+                    'cancelaciones.solicitudes.show',
+                    $solicitud
+                )
+                ->with(
+                    $tipoMensaje,
+                    $mensaje
+                );
+
+            if ($conInput) {
+                $respuesta->withInput();
+            }
+
+            return $respuesta;
+        }
+
+        $respuesta = back()->with(
+            $tipoMensaje,
+            $mensaje
+        );
+
+        if ($conInput) {
+            $respuesta->withInput();
+        }
+
+        return $respuesta;
+    }
+
+    /**
+     * Obtiene el usuario autenticado con
+     * el modelo correcto.
+     */
+    private function usuarioAutenticado(
+        Request $request
+    ): User {
+        $usuario =
+            $request->user();
+
+        if (!$usuario instanceof User) {
+            throw new AuthenticationException(
+                'Debes iniciar sesión para continuar.'
+            );
+        }
+
+        return $usuario;
+    }
+
+    /**
+     * Limita decisiones financieras
+     * a administradores.
+     */
     private function comprobarAdministrador(
         Request $request
-    ): void {
+    ): User {
+        $usuario =
+            $this->usuarioAutenticado(
+                $request
+            );
+
         if (
-            !$request->user() ||
-            !$request->user()->isAdmin()
+            !$usuario->estaActivo() ||
+            !$usuario->isAdmin()
         ) {
             abort(
                 403,
-                'Solamente un administrador puede aprobar, rechazar o anular gastos.'
+                'Solamente un administrador activo puede aprobar, rechazar o anular gastos.'
             );
         }
+
+        return $usuario;
     }
 }

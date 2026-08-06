@@ -16,6 +16,7 @@ use App\Models\ViajeroReserva;
 use App\Models\User;
 use App\Services\CupoReservaService;
 use App\Services\PagoService;
+use App\Services\PoliticaPagoReservaService;
 use App\Services\ReservaGrupalService;
 use App\Services\ViajeroReservaService;
 use App\Services\DistribucionHabitacionService;
@@ -272,23 +273,46 @@ class ReservaGrupalFamiliarTest extends TestCase
         $titular = $this->cliente(35);
         $ajeno = $this->cliente(30);
         $usuario = $this->usuario();
+
         $reserva = app(ReservaGrupalService::class)->guardar(
             $this->datosFamilia($destino, $titular),
             $usuario->id
+        );
+
+        $reserva = app(
+            PoliticaPagoReservaService::class
+        )->inicializar($reserva);
+
+        /*
+         * El test no usa un valor fijo. El anticipo se obtiene de la
+         * política que acaba de copiarse a la reserva.
+         */
+        $montoAnticipo = (float) $reserva->monto_anticipo;
+
+        $this->assertGreaterThan(
+            0,
+            $montoAnticipo,
+            'La reserva grupal debe tener un anticipo obligatorio.'
         );
 
         $pagoId = app(PagoService::class)->registrarPago([
             'reserva_id' => $reserva->id,
             'cliente_id' => $ajeno->id,
             'user_id' => $usuario->id,
-            'monto_depositado' => 300,
+            'monto_depositado' => $montoAnticipo,
             'metodo_pago' => Pago::METODO_EFECTIVO,
         ]);
 
         $this->assertDatabaseHas('pagos', [
             'id' => $pagoId,
+            'reserva_id' => $reserva->id,
             'cliente_id' => $titular->id,
-            'monto_depositado' => 300,
+            'monto_depositado' => $montoAnticipo,
+        ]);
+
+        $this->assertDatabaseMissing('pagos', [
+            'id' => $pagoId,
+            'cliente_id' => $ajeno->id,
         ]);
     }
 

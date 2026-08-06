@@ -1,27 +1,19 @@
 $(function () {
-    const configuracion =
-        window.configuracionReservas || {};
-
-    const modalElemento =
-        document.getElementById('modalDetalleReserva');
+    const configuracion = window.configuracionReservas || {};
+    const modalElemento = document.getElementById('modalDetalleReserva');
 
     let modalDetalle = null;
 
-    if (
-        modalElemento &&
-        typeof bootstrap !== 'undefined'
-    ) {
-        modalDetalle =
-            bootstrap.Modal.getOrCreateInstance(
-                modalElemento
-            );
+    if (modalElemento && typeof bootstrap !== 'undefined') {
+        modalDetalle = bootstrap.Modal.getOrCreateInstance(
+            modalElemento
+        );
     }
 
     function escaparHtml(valor) {
         return $('<div>')
             .text(
-                valor === null ||
-                valor === undefined
+                valor === null || valor === undefined
                     ? ''
                     : valor
             )
@@ -50,14 +42,11 @@ $(function () {
         const numero = Number(valor || 0);
 
         try {
-            return new Intl.NumberFormat(
-                'es-EC',
-                {
-                    style: 'currency',
-                    currency: moneda || 'USD',
-                    minimumFractionDigits: 2
-                }
-            ).format(numero);
+            return new Intl.NumberFormat('es-EC', {
+                style: 'currency',
+                currency: moneda || 'USD',
+                minimumFractionDigits: 2
+            }).format(numero);
         } catch (error) {
             return '$' + numero.toFixed(2);
         }
@@ -71,20 +60,18 @@ $(function () {
             return 'Sin información';
         }
 
-        const fechaNormalizada =
-            String(fecha).includes('T')
-                ? fecha
-                : fecha + 'T00:00:00';
+        const textoFecha = String(fecha);
 
-        const objetoFecha =
-            new Date(fechaNormalizada);
+        const fechaNormalizada = textoFecha.includes('T')
+            ? textoFecha
+            : textoFecha + 'T00:00:00';
 
-        if (
-            Number.isNaN(
-                objetoFecha.getTime()
-            )
-        ) {
-            return fecha;
+        const objetoFecha = new Date(
+            fechaNormalizada
+        );
+
+        if (Number.isNaN(objetoFecha.getTime())) {
+            return textoFecha;
         }
 
         const opciones = {
@@ -110,10 +97,7 @@ $(function () {
         alternativo = 'Sin información'
     ) {
         $(selector).text(
-            textoSeguro(
-                valor,
-                alternativo
-            )
+            textoSeguro(valor, alternativo)
         );
     }
 
@@ -133,23 +117,7 @@ $(function () {
         establecerTexto('#detalleTotal', '');
         establecerTexto('#detallePagado', '');
         establecerTexto('#detalleSaldo', '');
-        establecerTexto('#detalleAnticipo', '');
-        establecerTexto(
-            '#detalleLimiteAnticipo',
-            ''
-        );
-        establecerTexto(
-            '#detalleVencimientoSaldo',
-            ''
-        );
-        establecerTexto(
-            '#detalleUltimoPago',
-            ''
-        );
-        establecerTexto(
-            '#detalleCantidad',
-            ''
-        );
+        establecerTexto('#detalleCantidad', '');
 
         $('#detalleViajeros').empty();
 
@@ -175,15 +143,13 @@ $(function () {
     ) {
         const etiquetas = [];
 
-        const nombreViajero =
-            String(
-                viajero.nombre || ''
-            ).trim();
+        const nombreViajero = String(
+            viajero.nombre || ''
+        ).trim();
 
-        const responsable =
-            String(
-                grupo?.responsable_pago || ''
-            ).trim();
+        const responsable = String(
+            grupo?.responsable_pago || ''
+        ).trim();
 
         if (viajero.es_lider) {
             etiquetas.push(
@@ -256,12 +222,11 @@ $(function () {
                     )}
                 </small>
 
-                <small
-                    class="d-block
-                    ${obtenerClaseEstadoPago(
+                <small class="d-block ${
+                    obtenerClaseEstadoPago(
                         viajero.saldo
-                    )}"
-                >
+                    )
+                }">
                     Saldo:
                     ${escaparHtml(
                         formatearMoneda(
@@ -290,9 +255,7 @@ $(function () {
         const porcentaje =
             viajero.porcentaje !== null &&
             viajero.porcentaje !== undefined
-                ? Number(
-                    viajero.porcentaje
-                ) + '%'
+                ? Number(viajero.porcentaje) + '%'
                 : '—';
 
         return `
@@ -300,9 +263,7 @@ $(function () {
                 <td>
                     <div class="viajero-nombre">
                         ${escaparHtml(
-                            textoSeguro(
-                                viajero.nombre
-                            )
+                            textoSeguro(viajero.nombre)
                         )}
                     </div>
 
@@ -330,9 +291,7 @@ $(function () {
                 </td>
 
                 <td>
-                    ${escaparHtml(
-                        porcentaje
-                    )}
+                    ${escaparHtml(porcentaje)}
                 </td>
 
                 <td>
@@ -353,16 +312,15 @@ $(function () {
     }
 
     function mostrarDetalle(datos) {
-        const moneda =
-            datos.moneda || 'USD';
+        const moneda = datos.moneda || 'USD';
 
-        const grupo =
-            datos.grupo || null;
+        const grupo = datos.grupo || null;
 
-        const viajeros =
-            Array.isArray(datos.viajeros)
-                ? datos.viajeros
-                : [];
+        const viajeros = Array.isArray(
+            datos.viajeros
+        )
+            ? datos.viajeros
+            : [];
 
         let tipoReserva =
             datos.tipo === 'grupal'
@@ -370,8 +328,7 @@ $(function () {
                 : 'Reserva individual';
 
         if (grupo?.tipo) {
-            tipoReserva +=
-                ' · ' + grupo.tipo;
+            tipoReserva += ' · ' + grupo.tipo;
         }
 
         establecerTexto(
@@ -464,35 +421,6 @@ $(function () {
             );
 
         establecerTexto(
-            '#detalleAnticipo',
-            formatearMoneda(
-                datos.politica_pago?.anticipo,
-                moneda
-            )
-        );
-
-        establecerTexto(
-            '#detalleLimiteAnticipo',
-            datos.politica_pago
-                ?.fecha_limite_anticipo,
-            'Sin fecha'
-        );
-
-        establecerTexto(
-            '#detalleVencimientoSaldo',
-            datos.politica_pago
-                ?.fecha_vencimiento_saldo,
-            'Sin fecha'
-        );
-
-        establecerTexto(
-            '#detalleUltimoPago',
-            datos.politica_pago
-                ?.ultimo_pago,
-            'Sin pagos registrados'
-        );
-
-        establecerTexto(
             '#detalleCantidad',
             datos.cantidad_viajeros,
             viajeros.length || 1
@@ -551,6 +479,7 @@ $(function () {
                                                 moneda
                                             )
                                         )}
+
                                         · Niños (50 %):
                                         ${escaparHtml(
                                             formatearMoneda(
@@ -559,6 +488,7 @@ $(function () {
                                                 moneda
                                             )
                                         )}
+
                                         · Adultos (100 %):
                                         ${escaparHtml(
                                             formatearMoneda(
@@ -567,6 +497,7 @@ $(function () {
                                                 moneda
                                             )
                                         )}
+
                                         · Adultos mayores (50 %):
                                         ${escaparHtml(
                                             formatearMoneda(
@@ -574,7 +505,7 @@ $(function () {
                                                     .subtotal_adultos_mayores,
                                                 moneda
                                             )
-                                        )}.
+                                        )}
 
                                         <strong>
                                             Total familiar:
@@ -596,51 +527,43 @@ $(function () {
 
         let filas = '';
 
-        viajeros.forEach(
-            function (viajero) {
-                filas +=
-                    construirFilaViajero(
-                        viajero,
-                        grupo,
-                        moneda
-                    );
-            }
-        );
+        viajeros.forEach(function (viajero) {
+            filas += construirFilaViajero(
+                viajero,
+                grupo,
+                moneda
+            );
+        });
 
         if (!filas) {
             filas = `
                 <tr>
                     <td
                         colspan="6"
-                        class="text-center
-                        text-muted py-4"
+                        class="text-center text-muted py-4"
                     >
-                        No existe información
-                        de los viajeros.
+                        No existe información de los viajeros.
                     </td>
                 </tr>
             `;
         }
 
-        $('#detalleViajeros')
-            .html(filas);
+        $('#detalleViajeros').html(filas);
 
         if (datos.cancelacion) {
-            $('#detalleMotivoCancelacion')
-                .text(
-                    textoSeguro(
-                        datos.cancelacion.motivo,
-                        'No se registró un motivo.'
-                    )
-                );
+            $('#detalleMotivoCancelacion').text(
+                textoSeguro(
+                    datos.cancelacion.motivo,
+                    'No se registró un motivo.'
+                )
+            );
 
-            $('#detalleFechaCancelacion')
-                .text(
-                    formatearFecha(
-                        datos.cancelacion.fecha,
-                        true
-                    )
-                );
+            $('#detalleFechaCancelacion').text(
+                formatearFecha(
+                    datos.cancelacion.fecha,
+                    true
+                )
+            );
 
             $('#detalleCancelacion')
                 .removeClass('oculto');
@@ -656,14 +579,18 @@ $(function () {
             .removeClass('oculto');
     }
 
+    /*
+     * Consulta y muestra el detalle de una reserva.
+     */
     $(document).on(
         'click',
         '.btn-ver-reserva',
         function () {
             const boton = $(this);
 
-            const url =
-                boton.data('detalle-url');
+            const url = boton.data(
+                'detalle-url'
+            );
 
             if (!url) {
                 Swal.fire({
@@ -671,11 +598,10 @@ $(function () {
                     title:
                         'No se pudo consultar la reserva',
                     text:
-                        'No se encontró la dirección del detalle.',
-                    confirmButtonText:
-                        'Entendido',
-                    confirmButtonColor:
-                        '#094c90'
+                        'No se encontró la dirección ' +
+                        'del detalle.',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#094c90'
                 });
 
                 return;
@@ -690,422 +616,106 @@ $(function () {
             fetch(url, {
                 method: 'GET',
                 headers: {
-                    Accept:
-                        'application/json',
+                    Accept: 'application/json',
                     'X-Requested-With':
                         'XMLHttpRequest'
                 }
             })
-                .then(
-                    async function (
-                        respuesta
-                    ) {
-                        const datos =
-                            await respuesta
-                                .json()
-                                .catch(
-                                    function () {
-                                        return {};
-                                    }
-                                );
-
-                        if (!respuesta.ok) {
-                            throw new Error(
-                                datos.message ||
-                                'No fue posible consultar el detalle.'
-                            );
-                        }
-
-                        if (
-                            !datos.success ||
-                            !datos.data
-                        ) {
-                            throw new Error(
-                                datos.message ||
-                                'La respuesta de la reserva no contiene información.'
-                            );
-                        }
-
-                        return datos.data;
-                    }
-                )
-                .then(mostrarDetalle)
-                .catch(
-                    function (error) {
-                        if (modalDetalle) {
-                            modalDetalle.hide();
-                        }
-
-                        Swal.fire({
-                            icon: 'error',
-                            title:
-                                'No se pudo cargar el detalle',
-                            text:
-                                error.message,
-                            confirmButtonText:
-                                'Entendido',
-                            confirmButtonColor:
-                                '#094c90'
+                .then(async function (respuesta) {
+                    const datos = await respuesta
+                        .json()
+                        .catch(function () {
+                            return {};
                         });
+
+                    if (!respuesta.ok) {
+                        throw new Error(
+                            datos.message ||
+                            'No fue posible consultar ' +
+                            'el detalle.'
+                        );
                     }
-                );
+
+                    if (
+                        !datos.success ||
+                        !datos.data
+                    ) {
+                        throw new Error(
+                            datos.message ||
+                            'La respuesta no contiene ' +
+                            'información.'
+                        );
+                    }
+
+                    return datos.data;
+                })
+                .then(mostrarDetalle)
+                .catch(function (error) {
+                    if (modalDetalle) {
+                        modalDetalle.hide();
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title:
+                            'No se pudo cargar el detalle',
+                        text: error.message,
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#094c90'
+                    });
+                });
         }
     );
 
+    /*
+     * Ya no existe una petición PATCH para cancelar
+     * directamente desde este archivo.
+     *
+     * Si todavía queda un botón antiguo en una vista,
+     * este evento lo redirige de forma segura hacia la
+     * página de solicitud.
+     */
     $(document).on(
         'click',
-        '.btn-cancelar-reserva',
-        function () {
-            const url =
-                $(this).data(
-                    'cancelar-url'
-                );
+        '.btn-solicitar-cancelacion',
+        function (evento) {
+            evento.preventDefault();
 
-            if (!url) {
+            const boton = $(this);
+
+            const url =
+                boton.data('solicitud-url') ||
+                boton.attr('href');
+
+            if (
+                !url ||
+                url === '#'
+            ) {
                 Swal.fire({
                     icon: 'error',
                     title:
-                        'No se pudo cancelar',
+                        'No se pudo abrir la solicitud',
                     text:
-                        'No se encontró la dirección para cancelar la reserva.',
-                    confirmButtonText:
-                        'Entendido',
-                    confirmButtonColor:
-                        '#094c90'
+                        'No se encontró la dirección ' +
+                        'para solicitar la cancelación.',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#094c90'
                 });
 
                 return;
             }
 
-            Swal.fire({
-                icon: 'warning',
-                title:
-                    'Cancelar y liquidar reserva',
-
-                html: `
-                    <div class="cancelacion-formulario">
-                        <p class="cancelacion-ayuda">
-                            El reembolso será el dinero
-                            pagado menos únicamente los
-                            costos no recuperables que
-                            queden documentados.
-                        </p>
-
-                        <label for="swalTipoCancelacion">
-                            Tipo de cancelación
-                        </label>
-
-                        <select
-                            id="swalTipoCancelacion"
-                            class="swal2-select"
-                        >
-                            <option value="">
-                                Selecciona una opción
-                            </option>
-
-                            <option value="fuerza_mayor">
-                                Fuerza mayor
-                            </option>
-
-                            <option value="cliente">
-                                Decisión del cliente
-                            </option>
-
-                            <option value="agencia">
-                                Responsabilidad de la agencia
-                            </option>
-
-                            <option value="proveedor">
-                                Responsabilidad del proveedor
-                            </option>
-
-                            <option value="otro">
-                                Otro motivo
-                            </option>
-                        </select>
-
-                        <label for="swalMotivoCancelacion">
-                            Motivo
-                        </label>
-
-                        <textarea
-                            id="swalMotivoCancelacion"
-                            class="swal2-textarea"
-                            maxlength="500"
-                            placeholder="Describe lo ocurrido"
-                        ></textarea>
-
-                        <label for="swalGastosCancelacion">
-                            Costos no reembolsables
-                            comprobados
-                        </label>
-
-                        <input
-                            id="swalGastosCancelacion"
-                            class="swal2-input"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value="0"
-                        >
-
-                        <label for="swalDetalleGastos">
-                            Detalle de costos y proveedores
-                        </label>
-
-                        <textarea
-                            id="swalDetalleGastos"
-                            class="swal2-textarea"
-                            maxlength="1000"
-                            placeholder="Solo si existen costos no recuperables"
-                        ></textarea>
-
-                        <label for="swalEvidenciaCancelacion">
-                            Evidencia revisada
-                        </label>
-
-                        <textarea
-                            id="swalEvidenciaCancelacion"
-                            class="swal2-textarea"
-                            maxlength="1000"
-                            placeholder="Obligatoria para fuerza mayor"
-                        ></textarea>
-                    </div>
-                `,
-
-                showCancelButton: true,
-                confirmButtonText:
-                    'Sí, cancelar reserva',
-                cancelButtonText:
-                    'Volver',
-                confirmButtonColor:
-                    '#90091d',
-                cancelButtonColor:
-                    '#65717E',
-                reverseButtons: true,
-                showLoaderOnConfirm: true,
-                width: 620,
-
-                preConfirm: function () {
-                    const tipo =
-                        $('#swalTipoCancelacion')
-                            .val();
-
-                    const motivo = $.trim(
-                        $('#swalMotivoCancelacion')
-                            .val() || ''
-                    );
-
-                    const gastos = Number(
-                        $('#swalGastosCancelacion')
-                            .val() || 0
-                    );
-
-                    const detalle = $.trim(
-                        $('#swalDetalleGastos')
-                            .val() || ''
-                    );
-
-                    const evidencia = $.trim(
-                        $('#swalEvidenciaCancelacion')
-                            .val() || ''
-                    );
-
-                    if (!tipo) {
-                        Swal.showValidationMessage(
-                            'Selecciona el tipo de cancelación.'
-                        );
-
-                        return false;
-                    }
-
-                    if (
-                        motivo.length < 10
-                    ) {
-                        Swal.showValidationMessage(
-                            'El motivo debe tener al menos 10 caracteres.'
-                        );
-
-                        return false;
-                    }
-
-                    if (
-                        motivo.length > 500
-                    ) {
-                        Swal.showValidationMessage(
-                            'El motivo no puede superar los 500 caracteres.'
-                        );
-
-                        return false;
-                    }
-
-                    if (
-                        !Number.isFinite(gastos) ||
-                        gastos < 0
-                    ) {
-                        Swal.showValidationMessage(
-                            'El valor de costos no es válido.'
-                        );
-
-                        return false;
-                    }
-
-                    if (
-                        gastos > 0 &&
-                        detalle.length < 10
-                    ) {
-                        Swal.showValidationMessage(
-                            'Detalla los costos no reembolsables y sus respaldos.'
-                        );
-
-                        return false;
-                    }
-
-                    if (
-                        tipo ===
-                            'fuerza_mayor' &&
-                        evidencia.length < 10
-                    ) {
-                        Swal.showValidationMessage(
-                            'Registra la evidencia revisada para la fuerza mayor.'
-                        );
-
-                        return false;
-                    }
-
-                    return fetch(url, {
-                        method: 'PATCH',
-
-                        headers: {
-                            'Content-Type':
-                                'application/json',
-                            Accept:
-                                'application/json',
-                            'X-Requested-With':
-                                'XMLHttpRequest',
-                            'X-CSRF-TOKEN':
-                                configuracion.token
-                        },
-
-                        body: JSON.stringify({
-                            tipo_cancelacion:
-                                tipo,
-
-                            motivo_cancelacion:
-                                motivo,
-
-                            gastos_no_reembolsables:
-                                gastos,
-
-                            detalle_gastos_no_reembolsables:
-                                detalle,
-
-                            evidencia_cancelacion:
-                                evidencia
-                        })
-                    })
-                        .then(
-                            async function (
-                                respuesta
-                            ) {
-                                const datos =
-                                    await respuesta
-                                        .json()
-                                        .catch(
-                                            function () {
-                                                return {};
-                                            }
-                                        );
-
-                                if (
-                                    !respuesta.ok
-                                ) {
-                                    let mensaje =
-                                        datos.message ||
-                                        'No fue posible cancelar la reserva.';
-
-                                    if (
-                                        datos.errors
-                                    ) {
-                                        const primerGrupoErrores =
-                                            Object.values(
-                                                datos.errors
-                                            )[0];
-
-                                        if (
-                                            Array.isArray(
-                                                primerGrupoErrores
-                                            ) &&
-                                            primerGrupoErrores
-                                                .length
-                                        ) {
-                                            mensaje =
-                                                primerGrupoErrores[0];
-                                        }
-                                    }
-
-                                    throw new Error(
-                                        mensaje
-                                    );
-                                }
-
-                                return datos;
-                            }
-                        )
-                        .catch(
-                            function (error) {
-                                Swal.showValidationMessage(
-                                    error.message
-                                );
-                            }
-                        );
-                },
-
-                allowOutsideClick:
-                    function () {
-                        return !Swal.isLoading();
-                    }
-            }).then(
-                function (resultado) {
-                    if (
-                        !resultado.isConfirmed
-                    ) {
-                        return;
-                    }
-
-                    Swal.fire({
-                        icon: 'success',
-                        title:
-                            'Reserva cancelada',
-                        text:
-                            resultado.value
-                                ?.message ||
-                            'La reserva fue cancelada correctamente.',
-                        confirmButtonText:
-                            'Entendido',
-                        confirmButtonColor:
-                            '#094c90'
-                    }).then(
-                        function () {
-                            window.location.reload();
-                        }
-                    );
-                }
-            );
+            window.location.assign(url);
         }
     );
 
     if (configuracion.mensajeExito) {
         Swal.fire({
             icon: 'success',
-            title:
-                'Proceso completado',
-            text:
-                configuracion.mensajeExito,
-            confirmButtonText:
-                'Entendido',
-            confirmButtonColor:
-                '#094c90'
+            title: 'Proceso completado',
+            text: configuracion.mensajeExito,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#094c90'
         });
     }
 
@@ -1114,12 +724,9 @@ $(function () {
             icon: 'error',
             title:
                 'No se pudo completar la acción',
-            text:
-                configuracion.mensajeError,
-            confirmButtonText:
-                'Corregir',
-            confirmButtonColor:
-                '#094c90'
+            text: configuracion.mensajeError,
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#094c90'
         });
     }
 });

@@ -74,6 +74,7 @@ class Reserva extends Model
     public const TARIFA_INFANTE = 'infante';
     public const TARIFA_NINO = 'nino';
     public const TARIFA_ADULTO = 'adulto';
+
     public const TARIFA_ADULTO_MAYOR =
         'adulto_mayor';
 
@@ -312,7 +313,8 @@ class Reserva extends Model
     }
 
     /*
-     * Incluye devoluciones procesadas y anuladas.
+     * Incluye devoluciones procesadas
+     * y anuladas.
      */
     public function todasLasDevoluciones()
     {
@@ -377,12 +379,87 @@ class Reserva extends Model
     }
 
     /*
+     * Todas las solicitudes de cancelación,
+     * incluyendo aprobadas, rechazadas
+     * y anuladas.
+     */
+    public function solicitudesCancelacion()
+    {
+        return $this->hasMany(
+            SolicitudCancelacion::class,
+            'reserva_id'
+        )->orderByDesc(
+            'solicitado_at'
+        );
+    }
+
+    /*
+     * Última solicitud que todavía está
+     * pendiente de revisión.
+     */
+    public function solicitudCancelacionPendiente()
+    {
+        return $this->hasOne(
+            SolicitudCancelacion::class,
+            'reserva_id'
+        )
+            ->where(
+                'estado',
+                SolicitudCancelacion::
+                    ESTADO_PENDIENTE
+            )
+            ->latestOfMany(
+                'solicitado_at'
+            );
+    }
+
+    /*
+     * Comprueba si existe una solicitud
+     * pendiente sin cargar todos los registros.
+     */
+    public function tieneSolicitudCancelacionPendiente(): bool
+    {
+        if (
+            $this->relationLoaded(
+                'solicitudCancelacionPendiente'
+            )
+        ) {
+            return $this
+                ->solicitudCancelacionPendiente !==
+                null;
+        }
+
+        return $this
+            ->solicitudCancelacionPendiente()
+            ->exists();
+    }
+
+    /*
+     * Determina si la reserva está bajo
+     * revisión de cancelación.
+     */
+    public function estaEnRevisionCancelacion(): bool
+    {
+        if (
+            $this->estado_cobranza ===
+            self::COBRANZA_REVISION_CANCELACION
+        ) {
+            return true;
+        }
+
+        return $this
+            ->tieneSolicitudCancelacionPendiente();
+    }
+
+    /*
      * Cálculos financieros.
      */
 
     public function getTotalPagadoAttribute(): float
     {
-        if ($this->relationLoaded('pagos')) {
+        if (
+            $this->relationLoaded('pagos')
+        ) {
             $totalPagos = (float) $this
                 ->pagos
                 ->sum('monto_depositado');
@@ -392,7 +469,11 @@ class Reserva extends Model
                 ->sum('monto_depositado');
         }
 
-        if ($this->relationLoaded('devoluciones')) {
+        if (
+            $this->relationLoaded(
+                'devoluciones'
+            )
+        ) {
             $totalDevuelto = (float) $this
                 ->devoluciones
                 ->sum('monto');
@@ -405,7 +486,8 @@ class Reserva extends Model
         return max(
             0,
             round(
-                $totalPagos - $totalDevuelto,
+                $totalPagos -
+                $totalDevuelto,
                 2
             )
         );
@@ -416,8 +498,9 @@ class Reserva extends Model
         return max(
             0,
             round(
-                (float) $this->precio_total_viaje -
-                $this->total_pagado,
+                (float)
+                    $this->precio_total_viaje -
+                    $this->total_pagado,
                 2
             )
         );
@@ -425,10 +508,14 @@ class Reserva extends Model
 
     public function getUltimoPagoAttribute(): ?Pago
     {
-        if ($this->relationLoaded('pagos')) {
+        if (
+            $this->relationLoaded('pagos')
+        ) {
             return $this
                 ->pagos
-                ->sortByDesc('fecha_pago')
+                ->sortByDesc(
+                    'fecha_pago'
+                )
                 ->first();
         }
 
@@ -472,7 +559,8 @@ class Reserva extends Model
     {
         $basePagada = $this->estaCancelada()
             ? (float) (
-                $this->monto_pagado_al_cancelar ??
+                $this
+                    ->monto_pagado_al_cancelar ??
                 $this->total_pagado
             )
             : $this->total_pagado;
@@ -494,7 +582,9 @@ class Reserva extends Model
 
     public function getPagoFinalProximoAttribute(): bool
     {
-        if (!$this->fecha_vencimiento_saldo) {
+        if (
+            !$this->fecha_vencimiento_saldo
+        ) {
             return false;
         }
 
@@ -534,7 +624,9 @@ class Reserva extends Model
 
     public function getPagoFinalVencidoAttribute(): bool
     {
-        if (!$this->fecha_vencimiento_saldo) {
+        if (
+            !$this->fecha_vencimiento_saldo
+        ) {
             return false;
         }
 

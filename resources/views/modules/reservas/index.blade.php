@@ -18,12 +18,22 @@
             <h1>Reservas</h1>
 
             <p>
-                Consulta las reservas individuales y grupales,
-                sus viajeros, valores y estado de pago.
+                Consulta reservas, pagos, fechas límite,
+                solicitudes de cancelación y riesgos.
             </p>
         </div>
 
         <div class="acciones-nueva-reserva">
+            <a
+                href="{{ route(
+                    'cancelaciones.solicitudes.index'
+                ) }}"
+                class="btn-reserva grupal"
+            >
+                <i class="bi bi-clipboard-check"></i>
+                Solicitudes
+            </a>
+
             <a
                 href="{{ route('reservas_individual.create') }}"
                 class="btn-reserva individual"
@@ -45,33 +55,51 @@
     <section class="reservas-resumen">
         <div>
             <span>Total</span>
-            <strong>{{ $resumen['total'] }}</strong>
+            <strong>
+                {{ $resumen['total'] }}
+            </strong>
         </div>
 
         <div>
             <span>Pendientes</span>
-            <strong>{{ $resumen['pendientes'] }}</strong>
+            <strong>
+                {{ $resumen['pendientes'] }}
+            </strong>
         </div>
 
         <div>
             <span>Confirmadas</span>
-            <strong>{{ $resumen['confirmadas'] }}</strong>
+            <strong>
+                {{ $resumen['confirmadas'] }}
+            </strong>
         </div>
 
         <div>
             <span>Canceladas</span>
-            <strong>{{ $resumen['canceladas'] }}</strong>
+            <strong>
+                {{ $resumen['canceladas'] }}
+            </strong>
         </div>
 
         <div>
             <span>Pago final próximo</span>
-            <strong>{{ $resumen['pago_final_proximo'] }}</strong>
-            <small>En los próximos 30 días</small>
+
+            <strong>
+                {{ $resumen['pago_final_proximo'] }}
+            </strong>
+
+            <small>
+                En los próximos 30 días
+            </small>
         </div>
 
         <div>
             <span>Reservas en riesgo</span>
-            <strong>{{ $resumen['reservas_en_riesgo'] }}</strong>
+
+            <strong>
+                {{ $resumen['reservas_en_riesgo'] }}
+            </strong>
+
             <small>
                 <a href="{{ route('reservas.riesgo') }}">
                     Ver listado
@@ -79,6 +107,20 @@
             </small>
         </div>
     </section>
+
+    @if (session('success'))
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle me-1"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            {{ session('error') }}
+        </div>
+    @endif
 
     <form
         class="filtros-reservas"
@@ -97,43 +139,57 @@
         </div>
 
         <select name="tipo">
-            <option value="">Todos los tipos</option>
+            <option value="">
+                Todos los tipos
+            </option>
 
             <option
                 value="individual"
-                @selected(request('tipo') === 'individual')
+                @selected(
+                    request('tipo') === 'individual'
+                )
             >
                 Individuales
             </option>
 
             <option
                 value="grupal"
-                @selected(request('tipo') === 'grupal')
+                @selected(
+                    request('tipo') === 'grupal'
+                )
             >
                 Grupales
             </option>
         </select>
 
         <select name="estado">
-            <option value="">Todos los estados</option>
+            <option value="">
+                Todos los estados
+            </option>
 
             <option
                 value="pendiente"
-                @selected(request('estado') === 'pendiente')
+                @selected(
+                    request('estado') === 'pendiente'
+                )
             >
                 Pendientes
             </option>
 
             <option
                 value="confirmada"
-                @selected(request('estado') === 'confirmada')
+                @selected(
+                    request('estado') === 'confirmada'
+                )
             >
                 Confirmadas
             </option>
 
             <option
                 value="cancelada"
-                @selected(request('estado') === 'cancelada')
+                @selected(
+                    request('estado') === 'cancelada'
+                )
             >
                 Canceladas
             </option>
@@ -166,6 +222,7 @@
                         <th>Viajeros</th>
                         <th>Valores</th>
                         <th>Estados</th>
+
                         <th class="columna-acciones">
                             Acciones
                         </th>
@@ -214,16 +271,57 @@
                                             ?->nombre_completo
                                         ?: 'Cliente no disponible'
                                     );
+
+                            /*
+                             * Se consulta la solicitud pendiente.
+                             * Si existe, la reserva permanece activa
+                             * pero sus acciones sensibles se bloquean.
+                             */
+                            $solicitudPendiente =
+                                $reserva
+                                    ->solicitudCancelacionPendiente;
+
+                            $enRevisionCancelacion =
+                                $solicitudPendiente !== null ||
+                                $reserva->estado_cobranza ===
+                                    \App\Models\Reserva::
+                                        COBRANZA_REVISION_CANCELACION;
+
+                            $puedeEditar =
+                                !$reserva->estaCancelada() &&
+                                !$enRevisionCancelacion &&
+                                $reserva->estado ===
+                                    \App\Models\Reserva::
+                                        ESTADO_PENDIENTE &&
+                                $pagado <= 0;
+
+                            $puedeGestionarPagos =
+                                !$reserva->estaCancelada() &&
+                                !$enRevisionCancelacion;
+
+                            $puedeSolicitarCancelacion =
+                                !$reserva->estaCancelada() &&
+                                !$enRevisionCancelacion;
                         @endphp
 
-                        <tr>
+                        <tr
+                            @class([
+                                'reserva-en-revision' =>
+                                    $enRevisionCancelacion,
+                            ])
+                        >
                             <td>
                                 <div class="reserva-codigo">
                                     <strong>
                                         {{ $reserva->codigo_reserva }}
                                     </strong>
 
-                                    <span class="tipo-reserva {{ $reserva->tipo }}">
+                                    <span
+                                        class="
+                                            tipo-reserva
+                                            {{ $reserva->tipo }}
+                                        "
+                                    >
                                         {{ $reserva->tipo === 'grupal'
                                             ? 'Grupal'
                                             : 'Individual' }}
@@ -237,29 +335,41 @@
                                         {{ $nombreTitular }}
                                     </strong>
 
-                                    @if ($reserva->tipo === 'grupal')
+                                    @if (
+                                        $reserva->tipo === 'grupal'
+                                    )
                                         <small>
-                                            {{ $reserva->grupo?->tipo_grupo === 'familiar'
-                                                ? 'Grupo familiar'
-                                                : 'Personas independientes' }}
+                                            {{
+                                                $reserva->grupo
+                                                    ?->tipo_grupo ===
+                                                'familiar'
+                                                    ? 'Grupo familiar'
+                                                    : 'Personas independientes'
+                                            }}
                                         </small>
 
                                         @if (
-                                            $reserva->grupo?->tipo_grupo ===
+                                            $reserva->grupo
+                                                ?->tipo_grupo ===
                                             'familiar'
                                         )
                                             <small>
                                                 Paga:
-                                                {{ $reserva->grupo
-                                                    ?->responsablePago
-                                                    ?->nombre_completo
-                                                    ?: 'Sin asignar' }}
+
+                                                {{
+                                                    $reserva->grupo
+                                                        ?->responsablePago
+                                                        ?->nombre_completo
+                                                    ?: 'Sin asignar'
+                                                }}
                                             </small>
                                         @endif
                                     @else
                                         <small>
-                                            {{ $reserva->cliente
-                                                ?->documento }}
+                                            {{
+                                                $reserva->cliente
+                                                    ?->documento
+                                            }}
                                         </small>
                                     @endif
                                 </div>
@@ -268,26 +378,41 @@
                             <td>
                                 <div class="reserva-paquete">
                                     <strong>
-                                        {{ $reserva->destino
-                                            ?->nombre_paquete
-                                            ?: 'Paquete no disponible' }}
+                                        {{
+                                            $reserva->destino
+                                                ?->nombre_paquete
+                                            ?: 'Paquete no disponible'
+                                        }}
                                     </strong>
 
                                     <small>
-                                        {{ $reserva->destino
-                                            ?->ciudad_destino }},
-                                        {{ $reserva->destino?->pais }}
+                                        {{
+                                            $reserva->destino
+                                                ?->ciudad_destino
+                                        }},
+
+                                        {{
+                                            $reserva->destino
+                                                ?->pais
+                                        }}
                                     </small>
                                 </div>
                             </td>
 
                             <td>
                                 <div class="reserva-fecha">
-                                    <i class="bi bi-calendar-event"></i>
+                                    <i
+                                        class="
+                                            bi
+                                            bi-calendar-event
+                                        "
+                                    ></i>
 
                                     <span>
-                                        {{ $reserva->fecha_viaje
-                                            ?->format('d/m/Y') }}
+                                        {{
+                                            $reserva->fecha_viaje
+                                                ?->format('d/m/Y')
+                                        }}
                                     </span>
                                 </div>
                             </td>
@@ -295,6 +420,7 @@
                             <td>
                                 <span class="cantidad-viajeros">
                                     <i class="bi bi-people"></i>
+
                                     {{ $cantidadViajeros }}
                                 </span>
                             </td>
@@ -303,91 +429,187 @@
                                 <div class="reserva-montos">
                                     <span>
                                         Total:
+
                                         <strong>
                                             {{ $moneda }}
-                                            {{ number_format($total, 2) }}
+                                            {{
+                                                number_format(
+                                                    $total,
+                                                    2
+                                                )
+                                            }}
                                         </strong>
                                     </span>
 
                                     <span>
                                         Pagado:
+
                                         {{ $moneda }}
-                                        {{ number_format($pagado, 2) }}
+                                        {{
+                                            number_format(
+                                                $pagado,
+                                                2
+                                            )
+                                        }}
                                     </span>
 
                                     <span class="monto-pendiente">
                                         Saldo:
+
                                         {{ $moneda }}
-                                        {{ number_format($saldo, 2) }}
+                                        {{
+                                            number_format(
+                                                $saldo,
+                                                2
+                                            )
+                                        }}
                                     </span>
                                 </div>
                             </td>
 
                             <td>
                                 <div class="reserva-estados">
-                                    <span class="estado {{ $reserva->estado }}">
+                                    <span
+                                        class="
+                                            estado
+                                            {{ $reserva->estado }}
+                                        "
+                                    >
                                         {{ ucfirst($reserva->estado) }}
                                     </span>
 
-                                    <span class="estado-pago {{ $reserva->estado_pago }}">
-                                        {{ ucfirst($reserva->estado_pago) }}
+                                    <span
+                                        class="
+                                            estado-pago
+                                            {{ $reserva->estado_pago }}
+                                        "
+                                    >
+                                        {{
+                                            ucfirst(
+                                                $reserva->estado_pago
+                                            )
+                                        }}
                                     </span>
 
-                                    @if ($reserva->pago_final_vencido)
-                                        <span class="badge badge-danger">
+                                    @if ($enRevisionCancelacion)
+                                        <span
+                                            class="
+                                                badge
+                                                text-bg-warning
+                                            "
+                                        >
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-hourglass-split
+                                                "
+                                            ></i>
+
+                                            Cancelación en revisión
+                                        </span>
+                                    @elseif (
+                                        $reserva->pago_final_vencido
+                                    )
+                                        <span
+                                            class="
+                                                badge
+                                                text-bg-danger
+                                            "
+                                        >
                                             Pago final vencido
                                         </span>
-                                    @elseif ($reserva->pago_final_proximo)
-                                        <span class="badge badge-warning">
-                                            Falta ≤ 30 días para pago final
+                                    @elseif (
+                                        $reserva->pago_final_proximo
+                                    )
+                                        <span
+                                            class="
+                                                badge
+                                                text-bg-warning
+                                            "
+                                        >
+                                            Pago final próximo
                                         </span>
+
+                                        <small>
+                                            Límite:
+                                            {{
+                                                $reserva
+                                                    ->fecha_vencimiento_saldo
+                                                    ?->format('d/m/Y')
+                                            }}
+                                        </small>
                                     @endif
                                 </div>
                             </td>
 
                             <td>
-                                <div class="acciones-reserva-listado">
+                                <div
+                                    class="
+                                        acciones-reserva-listado
+                                    "
+                                >
                                     <button
                                         type="button"
-                                        class="accion-reserva ver btn-ver-reserva"
-                                        data-reserva-id="{{ $reserva->id }}"
-                                        data-detalle-url="{{ route(
-                                            'reservas.detalle',
-                                            $reserva->id,
-                                            false
-                                        ) }}"
+                                        class="
+                                            accion-reserva
+                                            ver
+                                            btn-ver-reserva
+                                        "
+                                        data-reserva-id="{{
+                                            $reserva->id
+                                        }}"
+                                        data-detalle-url="{{
+                                            route(
+                                                'reservas.detalle',
+                                                $reserva->id,
+                                                false
+                                            )
+                                        }}"
                                         title="Ver detalle"
+                                        aria-label="Ver detalle"
                                     >
                                         <i class="bi bi-eye"></i>
                                     </button>
 
-                                    @if (
-                                        $reserva->estado === \App\Models\Reserva::ESTADO_PENDIENTE &&
-                                        (float) ($reserva->total_pagado ?? 0) <= 0
-                                    )
+                                    @if ($puedeEditar)
                                         @php
-                                            $rutaEdicion = $reserva->esGrupal()
-                                                ? route(
-                                                    'reservas_grupal.edit',
-                                                    $reserva->id
-                                                )
-                                                : route(
-                                                    'reservas_individual.edit',
-                                                    $reserva->id
-                                                );
+                                            $rutaEdicion =
+                                                $reserva->esGrupal()
+                                                    ? route(
+                                                        'reservas_grupal.edit',
+                                                        $reserva->id
+                                                    )
+                                                    : route(
+                                                        'reservas_individual.edit',
+                                                        $reserva->id
+                                                    );
                                         @endphp
 
                                         <a
                                             href="{{ $rutaEdicion }}"
-                                            class="accion-reserva editar"
+                                            class="
+                                                accion-reserva
+                                                editar
+                                            "
                                             title="Editar reserva"
-                                            aria-label="Editar reserva {{ $reserva->codigo_reserva }}"
+                                            aria-label="
+                                                Editar reserva
+                                                {{
+                                                    $reserva
+                                                        ->codigo_reserva
+                                                }}
+                                            "
                                         >
-                                            <i class="bi bi-pencil-square"></i>
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-pencil-square
+                                                "
+                                            ></i>
                                         </a>
                                     @endif
 
-                                    @if (!$reserva->estaCancelada())
+                                    @if ($puedeGestionarPagos)
                                         <a
                                             href="{{ route(
                                                 'pagos',
@@ -396,25 +618,117 @@
                                                         $reserva->id
                                                 ]
                                             ) }}"
-                                            class="accion-reserva pago"
+                                            class="
+                                                accion-reserva
+                                                pago
+                                            "
                                             title="Gestionar pagos"
+                                            aria-label="
+                                                Gestionar pagos
+                                            "
                                         >
-                                            <i class="bi bi-cash-coin"></i>
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-cash-coin
+                                                "
+                                            ></i>
                                         </a>
+                                    @endif
 
-                                        <button
-                                            type="button"
-                                            class="accion-reserva cancelar btn-cancelar-reserva"
-                                            data-cancelar-url="{{ route(
-                                                'reservas.cancelar',
-                                                $reserva->id,
-                                                false
+                                    @if (
+                                        $puedeSolicitarCancelacion
+                                    )
+                                        <a
+                                            href="{{ route(
+                                                'cancelaciones.solicitudes.create',
+                                                [
+                                                    'reserva' =>
+                                                        $reserva->id
+                                                ]
                                             ) }}"
-                                            data-codigo="{{ $reserva->codigo_reserva }}"
-                                            title="Cancelar reserva"
+                                            data-solicitud-url="{{
+                                                route(
+                                                    'cancelaciones.solicitudes.create',
+                                                    [
+                                                        'reserva' =>
+                                                            $reserva->id
+                                                    ],
+                                                    false
+                                                )
+                                            }}"
+                                            class="
+                                                accion-reserva
+                                                cancelar
+                                                btn-solicitar-cancelacion
+                                            "
+                                            title="
+                                                Solicitar cancelación
+                                            "
+                                            aria-label="
+                                                Solicitar cancelación
+                                            "
                                         >
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-x-circle
+                                                "
+                                            ></i>
+                                        </a>
+                                    @endif
+
+                                    @if (
+                                        $enRevisionCancelacion &&
+                                        $solicitudPendiente
+                                    )
+                                        <a
+                                            href="{{ route(
+                                                'cancelaciones.solicitudes.show',
+                                                [
+                                                    'solicitud' =>
+                                                        $solicitudPendiente->id
+                                                ]
+                                            ) }}"
+                                            class="
+                                                accion-reserva
+                                                ver
+                                            "
+                                            title="
+                                                Abrir expediente
+                                            "
+                                            aria-label="
+                                                Abrir expediente
+                                                de cancelación
+                                            "
+                                        >
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-folder2-open
+                                                "
+                                            ></i>
+                                        </a>
+                                    @elseif (
+                                        $enRevisionCancelacion &&
+                                        !$solicitudPendiente
+                                    )
+                                        <span
+                                            class="
+                                                accion-reserva
+                                                deshabilitada
+                                            "
+                                            title="
+                                                Solicitud no disponible
+                                            "
+                                        >
+                                            <i
+                                                class="
+                                                    bi
+                                                    bi-hourglass-split
+                                                "
+                                            ></i>
+                                        </span>
                                     @endif
                                 </div>
                             </td>
@@ -423,15 +737,20 @@
                         <tr>
                             <td colspan="8">
                                 <div class="reservas-vacio">
-                                    <i class="bi bi-calendar2-x"></i>
+                                    <i
+                                        class="
+                                            bi
+                                            bi-calendar2-x
+                                        "
+                                    ></i>
 
                                     <strong>
                                         No se encontraron reservas
                                     </strong>
 
                                     <span>
-                                        Registra una reserva o modifica
-                                        los filtros.
+                                        Registra una reserva o
+                                        modifica los filtros.
                                     </span>
                                 </div>
                             </td>
@@ -455,11 +774,21 @@
     tabindex="-1"
     aria-hidden="true"
 >
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div
+        class="
+            modal-dialog
+            modal-xl
+            modal-dialog-centered
+            modal-dialog-scrollable
+        "
+    >
         <div class="modal-content detalle-reserva-modal">
             <div class="modal-header">
                 <div>
-                    <span id="detalleTipo" class="detalle-tipo">
+                    <span
+                        id="detalleTipo"
+                        class="detalle-tipo"
+                    >
                         Reserva
                     </span>
 
@@ -484,8 +813,14 @@
                     id="detalleCargando"
                     class="detalle-cargando"
                 >
-                    <div class="spinner-border" role="status"></div>
-                    <span>Cargando información...</span>
+                    <div
+                        class="spinner-border"
+                        role="status"
+                    ></div>
+
+                    <span>
+                        Cargando información...
+                    </span>
                 </div>
 
                 <div
@@ -493,48 +828,75 @@
                     class="oculto"
                 >
                     <section class="detalle-bloque">
-                        <h3>Información del viaje</h3>
+                        <h3>
+                            Información del viaje
+                        </h3>
 
                         <div class="detalle-grid">
                             <div>
                                 <span>Paquete</span>
-                                <strong id="detallePaquete">—</strong>
+
+                                <strong id="detallePaquete">
+                                    —
+                                </strong>
                             </div>
 
                             <div>
                                 <span>Ruta</span>
-                                <strong id="detalleRuta">—</strong>
+
+                                <strong id="detalleRuta">
+                                    —
+                                </strong>
                             </div>
 
                             <div>
                                 <span>Salida</span>
-                                <strong id="detalleSalida">—</strong>
+
+                                <strong id="detalleSalida">
+                                    —
+                                </strong>
                             </div>
 
                             <div>
                                 <span>Regreso</span>
-                                <strong id="detalleRegreso">—</strong>
+
+                                <strong id="detalleRegreso">
+                                    —
+                                </strong>
                             </div>
                         </div>
                     </section>
 
                     <section class="detalle-bloque">
-                        <h3>Resumen económico</h3>
+                        <h3>
+                            Resumen económico
+                        </h3>
 
                         <div class="detalle-valores">
                             <div>
                                 <span>Total</span>
-                                <strong id="detalleTotal">—</strong>
+
+                                <strong id="detalleTotal">
+                                    —
+                                </strong>
                             </div>
 
                             <div>
                                 <span>Pagado</span>
-                                <strong id="detallePagado">—</strong>
+
+                                <strong id="detallePagado">
+                                    —
+                                </strong>
                             </div>
 
                             <div>
-                                <span>Saldo pendiente</span>
-                                <strong id="detalleSaldo">—</strong>
+                                <span>
+                                    Saldo pendiente
+                                </span>
+
+                                <strong id="detalleSaldo">
+                                    —
+                                </strong>
                             </div>
                         </div>
                     </section>
@@ -542,15 +904,25 @@
                     <section class="detalle-bloque">
                         <div class="detalle-bloque-titulo">
                             <h3>Viajeros</h3>
-                            <span id="detalleCantidad">0</span>
+
+                            <span id="detalleCantidad">
+                                0
+                            </span>
                         </div>
 
                         <div
                             id="detalleComposicionFamiliar"
-                            class="detalle-composicion-familiar oculto"
+                            class="
+                                detalle-composicion-familiar
+                                oculto
+                            "
                         ></div>
 
-                        <div class="detalle-tabla-responsive">
+                        <div
+                            class="
+                                detalle-tabla-responsive
+                            "
+                        >
                             <table class="tabla-viajeros">
                                 <thead>
                                     <tr>
@@ -563,20 +935,31 @@
                                     </tr>
                                 </thead>
 
-                                <tbody id="detalleViajeros"></tbody>
+                                <tbody
+                                    id="detalleViajeros"
+                                ></tbody>
                             </table>
                         </div>
                     </section>
 
                     <section
                         id="detalleCancelacion"
-                        class="detalle-cancelacion oculto"
+                        class="
+                            detalle-cancelacion
+                            oculto
+                        "
                     >
-                        <h3>Información de cancelación</h3>
+                        <h3>
+                            Información de cancelación
+                        </h3>
 
-                        <p id="detalleMotivoCancelacion"></p>
+                        <p
+                            id="detalleMotivoCancelacion"
+                        ></p>
 
-                        <small id="detalleFechaCancelacion"></small>
+                        <small
+                            id="detalleFechaCancelacion"
+                        ></small>
                     </section>
                 </div>
             </div>
@@ -596,12 +979,19 @@
 
 <script>
     window.configuracionReservas = {
-        token: @json(csrf_token()),
-        mensajeExito: @json(session('success')),
-        mensajeError: @json(session('error'))
+        mensajeExito:
+            @json(session('success')),
+
+        mensajeError:
+            @json(session('error'))
     };
 </script>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="{{ asset('js/reservas-listado.js') }}"></script>
+<script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+></script>
+
+<script
+    src="{{ asset('js/reservas-listado.js') }}"
+></script>
 @endsection

@@ -52,7 +52,8 @@ class ClienteController extends Controller
     {
         return view('modules.clientes.create', [
             'titulo' => 'Registrar cliente',
-            'cliente' => new Cliente(),
+            'cliente' => new Cliente,
+            'paises' => config('paises'),
         ]);
     }
 
@@ -140,6 +141,7 @@ class ClienteController extends Controller
         return view('modules.clientes.edit', [
             'titulo' => 'Editar cliente',
             'cliente' => $cliente,
+            'paises' => config('paises'),
         ]);
     }
 
@@ -235,14 +237,14 @@ class ClienteController extends Controller
             $request->documento
         )->first();
 
-        if (!$cliente) {
+        if (! $cliente) {
             return response()->json([
                 'success' => false,
                 'message' => 'No se encontró un cliente con ese documento.',
             ], 404);
         }
 
-        if (!$cliente->estaActivo()) {
+        if (! $cliente->estaActivo()) {
             return response()->json([
                 'success' => false,
                 'message' => 'El cliente está inactivo. Actívalo antes de registrar una reserva.',
@@ -320,10 +322,6 @@ class ClienteController extends Controller
     ): array {
         $idCliente = $cliente?->id;
 
-        $esEcuatoriano = $this->esNacionalidadEcuatoriana(
-            $request->nacionalidad
-        );
-
         $reglasDocumento = $request->tipo_documento === 'cedula'
             ? [
                 'required',
@@ -331,7 +329,7 @@ class ClienteController extends Controller
                 function ($atributo, $valor, $fallar) {
                     $cedula = (string) $valor;
 
-                    if (!preg_match('/^\d{10}$/', $cedula)) {
+                    if (! preg_match('/^\d{10}$/', $cedula)) {
                         $fallar(
                             'La cédula debe contener exactamente 10 números.'
                         );
@@ -339,7 +337,7 @@ class ClienteController extends Controller
                         return;
                     }
 
-                    if (!$this->cedulaEcuatorianaValida($cedula)) {
+                    if (! $this->cedulaEcuatorianaValida($cedula)) {
                         $fallar(
                             'La cédula ecuatoriana ingresada no es válida.'
                         );
@@ -381,14 +379,14 @@ class ClienteController extends Controller
             'fecha_nacimiento' => [
                 'required',
                 'date',
-                'before:today',
+                'before_or_equal:'.now()->subYear()->format('Y-m-d'),
+                'after_or_equal:'.now()->subYears(100)->format('Y-m-d'),
             ],
             'nacionalidad' => [
                 'required',
                 'string',
-                'min:3',
                 'max:80',
-                "regex:/^[\pL\s'-]+$/u",
+                Rule::in(config('paises')),
             ],
             'fecha_caducidad_documento' => [
                 'nullable',
@@ -398,33 +396,25 @@ class ClienteController extends Controller
             ],
             'email' => [
                 'required',
-                'email',
+                'email:rfc',
                 'max:50',
+                function ($atributo, $valor, $fallar) {
+                    $dominio = substr(strrchr((string) $valor, '@') ?: '', 1);
+                    $partes = explode('.', $dominio);
+
+                    if (count($partes) < 2 || strlen($partes[0]) < 2) {
+                        $fallar('Ingresa un correo con un dominio válido.');
+                    }
+                },
                 Rule::unique('clientes', 'email')
                     ->ignore($idCliente),
             ],
             'telefono' => [
                 'required',
-                'digits_between:7,15',
-                function ($atributo, $valor, $fallar) use ($esEcuatoriano) {
-                    if (!$esEcuatoriano) {
-                        return;
-                    }
-
-                    $formatoLocal = preg_match(
-                        '/^09\d{8}$/',
-                        $valor
-                    );
-
-                    $formatoInternacional = preg_match(
-                        '/^5939\d{8}$/',
-                        $valor
-                    );
-
-                    if (!$formatoLocal && !$formatoInternacional) {
-                        $fallar(
-                            'El celular ecuatoriano debe tener el formato 09XXXXXXXX o 5939XXXXXXXX.'
-                        );
+                'regex:/^\+?\d{7,15}$/',
+                function ($atributo, $valor, $fallar) {
+                    if ($this->telefonoArtificial((string) $valor)) {
+                        $fallar('No se permiten teléfonos secuenciales ni formados por un mismo número repetido.');
                     }
                 },
             ],
@@ -438,7 +428,12 @@ class ClienteController extends Controller
             'telefono_emergencia' => [
                 'nullable',
                 'required_with:contacto_emergencia',
-                'digits_between:7,15',
+                'regex:/^\+?\d{7,15}$/',
+                function ($atributo, $valor, $fallar) {
+                    if ($this->telefonoArtificial((string) $valor)) {
+                        $fallar('No se permiten teléfonos secuenciales ni formados por un mismo número repetido.');
+                    }
+                },
             ],
             'estado' => [
                 'required',
@@ -478,12 +473,12 @@ class ClienteController extends Controller
 
             'fecha_nacimiento.required' => 'Ingresa la fecha de nacimiento.',
             'fecha_nacimiento.date' => 'La fecha de nacimiento no es válida.',
-            'fecha_nacimiento.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
+            'fecha_nacimiento.before_or_equal' => 'El cliente debe tener al menos 1 año de edad.',
+            'fecha_nacimiento.after_or_equal' => 'La edad del cliente no puede superar los 100 años.',
 
             'nacionalidad.required' => 'Ingresa la nacionalidad.',
-            'nacionalidad.min' => 'La nacionalidad debe tener al menos 3 caracteres.',
             'nacionalidad.max' => 'La nacionalidad no puede superar 80 caracteres.',
-            'nacionalidad.regex' => 'La nacionalidad solo puede contener letras.',
+            'nacionalidad.in' => 'Selecciona un país válido de la lista.',
 
             'fecha_caducidad_documento.required_if' => 'Ingresa la fecha de caducidad del pasaporte.',
             'fecha_caducidad_documento.date' => 'La fecha de caducidad no es válida.',
@@ -495,14 +490,14 @@ class ClienteController extends Controller
             'email.unique' => 'El correo ya pertenece a otro cliente.',
 
             'telefono.required' => 'Ingresa el número de teléfono.',
-            'telefono.digits_between' => 'El teléfono debe contener entre 7 y 15 números.',
+            'telefono.regex' => 'Ingresa un teléfono de 7 a 15 dígitos; puede comenzar con + y el código de país.',
 
             'contacto_emergencia.min' => 'El contacto de emergencia debe tener al menos 3 caracteres.',
             'contacto_emergencia.max' => 'El contacto de emergencia no puede superar 150 caracteres.',
             'contacto_emergencia.regex' => 'El contacto de emergencia solo puede contener letras.',
 
             'telefono_emergencia.required_with' => 'Ingresa el teléfono del contacto de emergencia.',
-            'telefono_emergencia.digits_between' => 'El teléfono de emergencia debe contener entre 7 y 15 números.',
+            'telefono_emergencia.regex' => 'Ingresa un teléfono de emergencia de 7 a 15 dígitos; puede comenzar con +.',
 
             'estado.required' => 'Selecciona el estado del cliente.',
             'estado.in' => 'El estado seleccionado no es válido.',
@@ -536,16 +531,10 @@ class ClienteController extends Controller
             'email' => mb_strtolower(
                 trim((string) $request->email)
             ),
-            'telefono' => preg_replace(
-                '/\D+/',
-                '',
+            'telefono' => $this->normalizarTelefono(
                 (string) $request->telefono
             ),
-            'nacionalidad' => mb_convert_case(
-                trim((string) $request->nacionalidad),
-                MB_CASE_TITLE,
-                'UTF-8'
-            ),
+            'nacionalidad' => trim((string) $request->nacionalidad),
             'contacto_emergencia' => $request->filled(
                 'contacto_emergencia'
             )
@@ -558,36 +547,44 @@ class ClienteController extends Controller
             'telefono_emergencia' => $request->filled(
                 'telefono_emergencia'
             )
-                ? preg_replace(
-                    '/\D+/',
-                    '',
+                ? $this->normalizarTelefono(
                     (string) $request->telefono_emergencia
                 )
                 : null,
-            'fecha_caducidad_documento' =>
-                $request->tipo_documento === 'pasaporte'
+            'fecha_caducidad_documento' => $request->tipo_documento === 'pasaporte'
                     ? $request->fecha_caducidad_documento
                     : null,
         ]);
     }
-    private function esNacionalidadEcuatoriana(
-        ?string $nacionalidad
-    ): bool {
-        $valor = mb_strtolower(
-            trim((string) $nacionalidad)
-        );
 
-        return in_array($valor, [
-            'ecuador',
-            'ecuatoriana',
-            'ecuatoriano',
-        ], true);
+    private function normalizarTelefono(string $telefono): string
+    {
+        $telefono = trim($telefono);
+
+        return preg_replace('/[\s\-()]+/', '', $telefono);
+    }
+
+    private function telefonoArtificial(string $telefono): bool
+    {
+        $digitos = ltrim($telefono, '+');
+
+        if (preg_match('/^(\d)\1+$/', $digitos)) {
+            return true;
+        }
+
+        foreach (['0123456789', '1234567890', '9876543210'] as $secuencia) {
+            if (str_contains($secuencia.$secuencia, $digitos)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function cedulaEcuatorianaValida(
         ?string $cedula
     ): bool {
-        if (!preg_match('/^\d{10}$/', (string) $cedula)) {
+        if (! preg_match('/^\d{10}$/', (string) $cedula)) {
             return false;
         }
 
@@ -598,7 +595,7 @@ class ClienteController extends Controller
             ($provincia >= 1 && $provincia <= 24) ||
             $provincia === 30;
 
-        if (!$provinciaValida || $tercerDigito > 5) {
+        if (! $provinciaValida || $tercerDigito > 5) {
             return false;
         }
 

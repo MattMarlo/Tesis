@@ -166,7 +166,8 @@
                         'fecha_nacimiento',
                         $cliente->fecha_nacimiento?->format('Y-m-d')
                     ) }}"
-                    max="{{ now()->subDay()->format('Y-m-d') }}"
+                    min="{{ now()->subYears(100)->format('Y-m-d') }}"
+                    max="{{ now()->subYear()->format('Y-m-d') }}"
                     required
                 >
 
@@ -181,19 +182,22 @@
                     Nacionalidad <span>*</span>
                 </label>
 
-                <input
+                <select
                     id="nacionalidad"
                     class="control-formulario"
-                    type="text"
                     name="nacionalidad"
-                    value="{{ old(
-                        'nacionalidad',
-                        $cliente->nacionalidad
-                    ) }}"
-                    placeholder="Ejemplo: Ecuatoriana"
-                    maxlength="80"
                     required
                 >
+                    <option value="">Selecciona un país</option>
+                    @foreach ($paises as $pais)
+                        <option
+                            value="{{ $pais }}"
+                            @selected(old('nacionalidad', $cliente->nacionalidad) === $pais)
+                        >
+                            {{ $pais }}
+                        </option>
+                    @endforeach
+                </select>
 
                 <small
                     id="nacionalidadError"
@@ -280,14 +284,14 @@
                     name="telefono"
                     value="{{ old('telefono', $cliente->telefono) }}"
                     placeholder="Ejemplo: 0987654321"
-                    maxlength="15"
-                    inputmode="numeric"
+                    maxlength="16"
+                    inputmode="tel"
                     autocomplete="tel"
                     required
                 >
 
                 <small class="mensaje-ayuda">
-                    Ingresa únicamente números.
+                    Puedes incluir el código del país, por ejemplo +593.
                 </small>
 
                 <small
@@ -339,8 +343,8 @@
                         $cliente->telefono_emergencia
                     ) }}"
                     placeholder="Ejemplo: 0991234567"
-                    maxlength="15"
-                    inputmode="numeric"
+                    maxlength="16"
+                    inputmode="tel"
                 >
 
                 <small

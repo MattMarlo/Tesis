@@ -909,10 +909,14 @@ class PreReservaController extends Controller
             ! $cliente &&
             $preReserva->telefono
         ) {
-            $cliente = Cliente::where(
-                'telefono',
-                $preReserva->telefono
-            )->first();
+            $telefonoOriginal = trim($preReserva->telefono);
+            $soloDigitos = preg_replace('/\D+/', '', $telefonoOriginal);
+
+            $cliente = Cliente::whereIn('telefono', array_unique([
+                $telefonoOriginal,
+                $soloDigitos,
+                '+'.$soloDigitos,
+            ]))->first();
         }
 
         if (! $cliente) {

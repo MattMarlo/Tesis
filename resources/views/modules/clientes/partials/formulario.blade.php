@@ -28,6 +28,12 @@
         @method('PUT')
     @endif
 
+    @if (isset($preReserva) && $preReserva)
+        <input type="hidden" name="prereserva_id" value="{{ $preReserva->id }}">
+    @elseif (request()->filled('prereserva_id'))
+        <input type="hidden" name="prereserva_id" value="{{ request('prereserva_id') }}">
+    @endif
+
     <section class="formulario-seccion">
         <div class="seccion-encabezado">
             <div>

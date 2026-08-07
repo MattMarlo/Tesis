@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use App\Models\PreReserva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -48,17 +49,60 @@ class ClienteController extends Controller
         );
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $cliente = new Cliente;
+        $preReserva = $this->preReservaDeConversion($request);
+
+        if ($preReserva) {
+            $integrante = $preReserva->integrantes
+                ->firstWhere('es_lider', true)
+                ?? $preReserva->integrantes->first();
+
+            if ($integrante) {
+                $cliente->forceFill([
+                    'nombres' => $integrante->nombres,
+                    'apellidos' => $integrante->apellidos,
+                    'tipo_documento' => $integrante->tipo_documento,
+                    'documento' => $integrante->documento,
+                    'fecha_nacimiento' => $integrante->fecha_nacimiento,
+                    'fecha_caducidad_documento' => $integrante->fecha_caducidad_documento,
+                    'nacionalidad' => $this->normalizarNacionalidad(
+                        $integrante->nacionalidad
+                    ),
+                    'email' => $integrante->email,
+                    'telefono' => $integrante->telefono,
+                    'contacto_emergencia' => $integrante->contacto_emergencia,
+                    'telefono_emergencia' => $integrante->telefono_emergencia,
+                ]);
+            } else {
+                [$nombres, $apellidos] = $this->separarNombreCompleto(
+                    $preReserva->cliente_nombre
+                );
+
+                $cliente->forceFill([
+                    'nombres' => $nombres,
+                    'apellidos' => $apellidos,
+                    'tipo_documento' => $preReserva->cedula ? 'cedula' : null,
+                    'documento' => $preReserva->cedula,
+                    'email' => $preReserva->email,
+                    'telefono' => $preReserva->telefono,
+                ]);
+            }
+        }
+
         return view('modules.clientes.create', [
             'titulo' => 'Registrar cliente',
-            'cliente' => new Cliente,
+            'cliente' => $cliente,
             'paises' => config('paises'),
+            'preReserva' => $preReserva,
         ]);
     }
 
     public function store(Request $request)
     {
+        $preReserva = $this->preReservaDeConversion($request);
+
         $this->normalizarSolicitud($request);
 
         $datos = $request->validate(
@@ -102,10 +146,11 @@ class ClienteController extends Controller
                 ], 201);
             }
 
-            return to_route('clientes')->with(
-                'success',
-                'Cliente registrado correctamente.'
-            );
+            if ($preReserva) {
+                return $this->continuarConversion($preReserva, $cliente);
+            }
+
+            return to_route('clientes')->with('success', 'Cliente registrado correctamente.');
         } catch (\Throwable $error) {
             if (
                 $rutaArchivo &&
@@ -134,20 +179,23 @@ class ClienteController extends Controller
         }
     }
 
-    public function edit(string $id)
+    public function edit(Request $request, string $id)
     {
         $cliente = Cliente::findOrFail($id);
+        $preReserva = $this->preReservaDeConversion($request);
 
         return view('modules.clientes.edit', [
             'titulo' => 'Editar cliente',
             'cliente' => $cliente,
             'paises' => config('paises'),
+            'preReserva' => $preReserva,
         ]);
     }
 
     public function update(Request $request, string $id)
     {
         $cliente = Cliente::findOrFail($id);
+        $preReserva = $this->preReservaDeConversion($request);
 
         $this->normalizarSolicitud($request);
 
@@ -181,6 +229,10 @@ class ClienteController extends Controller
                 Storage::disk('public')->exists($archivoAnterior)
             ) {
                 Storage::disk('public')->delete($archivoAnterior);
+            }
+
+            if ($preReserva) {
+                return $this->continuarConversion($preReserva, $cliente);
             }
 
             return to_route('clientes')->with(
@@ -446,6 +498,73 @@ class ClienteController extends Controller
                 'max:5120',
             ],
         ];
+    }
+
+    private function preReservaDeConversion(Request $request): ?PreReserva
+    {
+        if (! $request->filled('prereserva_id')) {
+            return null;
+        }
+
+        return PreReserva::query()
+            ->with(['integrantes', 'destinoRelacionado'])
+            ->whereKey($request->input('prereserva_id'))
+            ->whereNull('reserva_id')
+            ->whereNotIn('estado', [
+                PreReserva::ESTADO_CONVERTIDA,
+                PreReserva::ESTADO_DESCARTADA,
+            ])
+            ->firstOrFail();
+    }
+
+    private function continuarConversion(PreReserva $preReserva, Cliente $cliente)
+    {
+        $destino = $preReserva->destinoRelacionado;
+
+        if (! $destino) {
+            return to_route('prereservas.index')->with(
+                'error',
+                'No se encontro el paquete solicitado por la prerreserva.'
+            );
+        }
+
+        $parametros = [
+            'cliente_id' => $cliente->id,
+            'destino_id' => $destino->id,
+            'prereserva_id' => $preReserva->id,
+        ];
+
+        if ($preReserva->cantidad_personas > 1) {
+            $parametros['cantidad_personas'] = $preReserva->cantidad_personas;
+
+            return redirect()->route('reservas_grupal.create', $parametros)
+                ->with('success', 'Cliente registrado. Continua con la reserva.');
+        }
+
+        return redirect()->route('reservas_individual.create', $parametros)
+            ->with('success', 'Cliente registrado. Continua con la reserva.');
+    }
+
+    private function separarNombreCompleto(?string $nombreCompleto): array
+    {
+        $partes = preg_split('/\s+/u', trim((string) $nombreCompleto), -1, PREG_SPLIT_NO_EMPTY);
+
+        if (count($partes) < 2) {
+            return [$partes[0] ?? '', ''];
+        }
+
+        return [array_shift($partes), implode(' ', $partes)];
+    }
+
+    private function normalizarNacionalidad(?string $nacionalidad): ?string
+    {
+        if (in_array($nacionalidad, config('paises'), true)) {
+            return $nacionalidad;
+        }
+
+        return in_array(mb_strtolower(trim((string) $nacionalidad)), ['ecuatoriano', 'ecuatoriana'], true)
+            ? 'Ecuador'
+            : null;
     }
 
     private function mensajesValidacion(): array

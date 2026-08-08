@@ -550,6 +550,29 @@ $(function () {
         return valido;
     }
 
+    function validarSoloLetras(selector, mensaje) {
+        const campo = $(selector);
+        const valor = $.trim(campo.val());
+        const patron = /^[\p{L}\s.'’-]+$/u;
+
+        if (!valor || !patron.test(valor)) {
+            return colocarError(campo, mensaje);
+        }
+
+        return limpiarError(campo);
+    }
+
+    function validarNombreComercial(selector, mensaje) {
+        const campo = $(selector);
+        const valor = $.trim(campo.val());
+
+        if (valor && !/\p{L}/u.test(valor)) {
+            return colocarError(campo, mensaje);
+        }
+
+        return limpiarError(campo);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Validación de duración
@@ -879,6 +902,28 @@ $(function () {
     $('#fecha_salida, #fecha_regreso')
         .on('change', validarFechas);
 
+    $('#fecha_salida').on('change', function () {
+        $('#fecha_regreso').attr(
+            'min',
+            $(this).val() || obtenerFechaActual()
+        );
+    });
+
+    $('#ciudad_salida, #pais, #ciudad_destino')
+        .on('input blur', function () {
+            validarSoloLetras(
+                '#' + this.id,
+                'Este campo solo puede contener letras.'
+            );
+        });
+
+    $('#aerolinea, #hotel').on('input blur', function () {
+        validarNombreComercial(
+            '#' + this.id,
+            'Este campo debe incluir letras.'
+        );
+    });
+
     $('#dias, #noches')
         .on('input', validarDuracion);
 
@@ -918,19 +963,29 @@ $(function () {
                 'Ingresa la descripción completa.'
             ),
 
-            validarTexto(
+            validarSoloLetras(
                 '#ciudad_salida',
-                'Ingresa la ciudad de salida.'
+                'Ingresa una ciudad de salida válida, solo con letras.'
             ),
 
-            validarTexto(
+            validarSoloLetras(
                 '#pais',
-                'Ingresa el país de destino.'
+                'Ingresa un país de destino válido, solo con letras.'
             ),
 
-            validarTexto(
+            validarSoloLetras(
                 '#ciudad_destino',
-                'Ingresa la ciudad de destino.'
+                'Ingresa una ciudad de destino válida, solo con letras.'
+            ),
+
+            validarNombreComercial(
+                '#aerolinea',
+                'La aerolínea debe incluir letras.'
+            ),
+
+            validarNombreComercial(
+                '#hotel',
+                'El hotel o alojamiento debe incluir letras.'
             ),
 
             validarFechas(),

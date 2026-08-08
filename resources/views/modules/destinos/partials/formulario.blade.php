@@ -279,6 +279,7 @@
                         name="ciudad_salida"
                         id="ciudad_salida"
                         class="form-control"
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç\s.'’-]+"
                         value="{{ old(
                             'ciudad_salida',
                             $destino?->ciudad_salida
@@ -301,6 +302,7 @@
                         name="pais"
                         id="pais"
                         class="form-control"
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç\s.'’-]+"
                         value="{{ old(
                             'pais',
                             $destino?->pais
@@ -323,6 +325,7 @@
                         name="ciudad_destino"
                         id="ciudad_destino"
                         class="form-control"
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç\s.'’-]+"
                         value="{{ old(
                             'ciudad_destino',
                             $destino?->ciudad_destino
@@ -364,6 +367,7 @@
                         name="fecha_salida"
                         id="fecha_salida"
                         class="form-control"
+                        min="{{ now()->format('Y-m-d') }}"
                         value="{{ old(
                             'fecha_salida',
                             $destino?->fecha_salida?->format('Y-m-d')
@@ -384,6 +388,10 @@
                         name="fecha_regreso"
                         id="fecha_regreso"
                         class="form-control"
+                        min="{{ old(
+                            'fecha_salida',
+                            $destino?->fecha_salida?->format('Y-m-d')
+                        ) ?: now()->format('Y-m-d') }}"
                         value="{{ old(
                             'fecha_regreso',
                             $destino?->fecha_regreso?->format('Y-m-d')

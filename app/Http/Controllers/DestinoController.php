@@ -254,12 +254,14 @@ class DestinoController extends Controller
                     'required',
                     'string',
                     'max:100',
+                    "regex:/^[\\pL\\s.'’-]+$/u",
                 ],
 
                 'ciudad_destino' => [
                     'required',
                     'string',
                     'max:100',
+                    "regex:/^[\\pL\\s.'’-]+$/u",
                 ],
 
                 'categoria' => [
@@ -283,11 +285,13 @@ class DestinoController extends Controller
                     'required',
                     'string',
                     'max:150',
+                    "regex:/^[\\pL\\s.'’-]+$/u",
                 ],
 
                 'fecha_salida' => [
                     'required',
                     'date',
+                    'after_or_equal:today',
                 ],
 
                 'fecha_regreso' => [
@@ -332,12 +336,14 @@ class DestinoController extends Controller
                     'nullable',
                     'string',
                     'max:120',
+                    'regex:/\\pL/u',
                 ],
 
                 'hotel' => [
                     'nullable',
                     'string',
                     'max:150',
+                    'regex:/\\pL/u',
                 ],
 
                 'capacidad' => [
@@ -443,14 +449,32 @@ class DestinoController extends Controller
                 'ciudad_salida.required' =>
                     'La ciudad de salida es obligatoria.',
 
+                'ciudad_salida.regex' =>
+                    'La ciudad de salida solo puede contener letras.',
+
+                'pais.regex' =>
+                    'El país de destino solo puede contener letras.',
+
+                'ciudad_destino.regex' =>
+                    'La ciudad de destino solo puede contener letras.',
+
                 'fecha_salida.required' =>
                     'La fecha de salida es obligatoria.',
+
+                'fecha_salida.after_or_equal' =>
+                    'La fecha de salida no puede ser anterior a hoy.',
 
                 'fecha_regreso.required' =>
                     'La fecha de regreso es obligatoria.',
 
                 'fecha_regreso.after_or_equal' =>
                     'La fecha de regreso no puede ser anterior a la salida.',
+
+                'aerolinea.regex' =>
+                    'La aerolínea debe incluir letras.',
+
+                'hotel.regex' =>
+                    'El hotel o alojamiento debe incluir letras.',
 
                 'precio.required' =>
                     'El precio del paquete es obligatorio.',

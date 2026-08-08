@@ -35,6 +35,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+Route::view('/politica-de-privacidad', 'legal.politica-privacidad')
+    ->name('politica.privacidad');
+
 Route::get('/', function () {
     $destinos = Destino::query()
         ->where(

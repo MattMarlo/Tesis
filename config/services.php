@@ -44,7 +44,8 @@ return [
 
         'api_secret' => env('N8N_API_SECRET'),
 
-        'whatsapp_api_secret' => env('WHATSAPP_N8N_API_SECRET'),
+        'whatsapp_api_secret' => env('WHATSAPP_N8N_API_SECRET')
+        
 
     ],
 

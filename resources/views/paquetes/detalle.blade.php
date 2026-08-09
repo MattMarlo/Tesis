@@ -474,6 +474,10 @@
                                 $numeroDia =
                                     $dia['dia']
                                     ?? $indice + 1;
+
+                                $fechaDia = $destino->fecha_salida
+                                    ?->copy()
+                                    ->addDays($numeroDia - 1);
                             @endphp
 
                             <article class="dia-itinerario">
@@ -489,7 +493,22 @@
 
                                     <span class="nombre-dia">
                                         <small>
-                                            Día {{ $numeroDia }}
+                                            <span>Día {{ $numeroDia }}</span>
+
+                                            @if($fechaDia)
+                                                <span
+                                                    class="fecha-dia-itinerario"
+                                                >
+                                                    ·
+                                                    {{ mb_strtoupper(
+                                                        $fechaDia
+                                                            ->locale('es')
+                                                            ->translatedFormat(
+                                                                'd \d\e F \d\e Y'
+                                                            )
+                                                    ) }}
+                                                </span>
+                                            @endif
                                         </small>
 
                                         <strong>
@@ -542,36 +561,33 @@
                                                 $actividadesDia
                                                 as $actividad
                                             )
-                                                <article class="actividad-horario-publica">
+                                                @php
+                                                    $horaInicio =
+                                                        $actividad['hora_inicio']
+                                                        ?? null;
 
-                                                    <div class="hora-actividad-publica">
-                                                        @if(
-                                                            !empty(
-                                                                $actividad['hora_inicio']
-                                                                ?? null
-                                                            )
-                                                        )
-                                                            <strong>
-                                                                {{ $actividad['hora_inicio'] }}
-                                                            </strong>
+                                                    $horaFin =
+                                                        $actividad['hora_fin']
+                                                        ?? null;
+                                                @endphp
 
-                                                            @if(
-                                                                !empty(
-                                                                    $actividad['hora_fin']
-                                                                    ?? null
-                                                                )
-                                                            )
-                                                                <span>
-                                                                    a
-                                                                    {{ $actividad['hora_fin'] }}
-                                                                </span>
-                                                            @endif
-                                                        @else
+                                                <article
+                                                    class="actividad-horario-publica {{ !$horaInicio && !$horaFin ? 'actividad-sin-horario' : '' }}"
+                                                >
+
+                                                    @if($horaInicio || $horaFin)
+                                                        <div class="hora-actividad-publica">
                                                             <strong>
-                                                                Horario libre
+                                                                @if($horaInicio && $horaFin)
+                                                                    {{ $horaInicio }} – {{ $horaFin }}
+                                                                @elseif($horaInicio)
+                                                                    Desde las {{ $horaInicio }}
+                                                                @else
+                                                                    Hasta las {{ $horaFin }}
+                                                                @endif
                                                             </strong>
-                                                        @endif
-                                                    </div>
+                                                        </div>
+                                                    @endif
 
                                                     <div class="detalle-actividad-publica">
                                                         <h4>

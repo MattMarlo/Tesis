@@ -329,6 +329,56 @@ class DestinoItinerarioTest extends TestCase
         )->assertNotFound();
     }
 
+    public function test_detalle_publico_muestra_fechas_y_horario_del_itinerario(): void
+    {
+        $this->post(
+            route('destinos.store'),
+            $this->datosValidos([
+                'fecha_salida' => '2026-12-10',
+                'fecha_regreso' => '2026-12-11',
+            ])
+        )->assertSessionHasNoErrors();
+
+        $destino = Destino::firstOrFail();
+        $fechaOriginal = $destino->fecha_salida->copy();
+
+        $respuesta = $this->get(
+            route('paquetes.detalle', $destino->slug)
+        );
+
+        $respuesta
+            ->assertOk()
+            ->assertSeeTextInOrder([
+                'Día 1',
+                '10 DE DICIEMBRE DE 2026',
+                'Día 2',
+                '11 DE DICIEMBRE DE 2026',
+            ])
+            ->assertSeeText('08:00 – 09:30');
+
+        $this->assertTrue(
+            $destino->fecha_salida->equalTo($fechaOriginal)
+        );
+    }
+
+    public function test_detalle_publico_funciona_sin_fecha_de_salida(): void
+    {
+        $this->post(
+            route('destinos.store'),
+            $this->datosValidos()
+        )->assertSessionHasNoErrors();
+
+        $destino = Destino::firstOrFail();
+        $destino->update(['fecha_salida' => null]);
+
+        $this->get(
+            route('paquetes.detalle', $destino->slug)
+        )
+            ->assertOk()
+            ->assertSeeText('Día 1')
+            ->assertDontSeeText('Día 1 ·');
+    }
+
     private function datosValidos(
         array $cambios = []
     ): array {

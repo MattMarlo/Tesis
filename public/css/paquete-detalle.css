@@ -505,10 +505,17 @@
 }
 
 .nombre-dia small {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 4px;
     color: var(--dorado);
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.fecha-dia-itinerario {
+    color: var(--texto-suave);
 }
 
 .nombre-dia strong {
@@ -563,7 +570,7 @@
 
 .actividad-horario-publica {
     display: grid;
-    grid-template-columns: 105px minmax(0, 1fr);
+    grid-template-columns: minmax(125px, auto) minmax(0, 1fr);
     gap: 14px;
     padding: 13px;
     background: var(--blanco);
@@ -571,11 +578,15 @@
     border-radius: 11px;
 }
 
+.actividad-horario-publica.actividad-sin-horario {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .hora-actividad-publica {
     display: flex;
     align-items: flex-start;
-    flex-direction: column;
     color: var(--azul-principal);
+    white-space: nowrap;
 }
 
 .hora-actividad-publica strong {
@@ -1054,8 +1065,7 @@
     }
 
     .hora-actividad-publica {
-        flex-direction: row;
-        gap: 5px;
+        white-space: normal;
     }
 
     .fila-informacion {

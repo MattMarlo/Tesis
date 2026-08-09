@@ -7,6 +7,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DestinoController;
 use App\Http\Controllers\DevolucionController;
+use App\Http\Controllers\TareaOperacionViajeController;
 use App\Http\Controllers\GastoCancelacionController;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\GuiaReservaController;
@@ -653,6 +654,13 @@ Route::middleware('auth')
                         'update',
                     ]
                 )->name('update');
+                Route::patch(
+                    '/expediente/{operacion}/tareas/{tarea}',
+                    [
+                        TareaOperacionViajeController::class,
+                        'update',
+                    ]
+                )->name('tareas.update');
 
                 Route::post(
                     '/reserva/{reserva}/viajeros/titular',
@@ -1113,7 +1121,6 @@ Route::middleware('auth')
                     'prereservas.destroy'
                 );
             });
-
         /*
          * Devoluciones.
          */

@@ -126,7 +126,9 @@
             </ul>
         @endif
     </section>
-
+    @include(
+        'modules.operaciones.partials.tareas-itinerario'
+    )
     @if ($composicionFamiliar)
         <div class="aviso-expediente-bloqueado">
             <i class="bi bi-info-circle"></i>

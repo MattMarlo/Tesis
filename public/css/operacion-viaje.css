@@ -758,3 +758,302 @@
         flex-direction: column;
     }
 }
+/* =========================================================
+   Tareas gestionables del itinerario
+   ========================================================= */
+
+.bloque-tareas-itinerario {
+    display: grid;
+    gap: 1rem;
+}
+
+.descripcion-tareas-itinerario {
+    margin: 0.35rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.resumen-tareas-itinerario {
+    min-width: 115px;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #CFE0EC;
+    border-radius: 0.7rem;
+    background: #EEF5FA;
+    text-align: center;
+}
+
+.bloque-expediente-titulo
+.resumen-tareas-itinerario strong,
+.bloque-expediente-titulo
+.resumen-tareas-itinerario span {
+    display: block;
+}
+
+.bloque-expediente-titulo
+.resumen-tareas-itinerario strong {
+    color: var(--exp-azul);
+    font-size: 1rem;
+}
+
+.bloque-expediente-titulo
+.resumen-tareas-itinerario span {
+    margin: 0.15rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.barra-tareas-itinerario {
+    width: 100%;
+    height: 0.55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #E5EBF0;
+}
+
+.barra-tareas-itinerario span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--exp-azul),
+        var(--exp-celeste)
+    );
+    transition: width 0.25s ease;
+}
+
+.lista-tareas-itinerario {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.tarjeta-tarea-itinerario {
+    overflow: hidden;
+    border: 1px solid var(--exp-borde);
+    border-left: 4px solid #94A3B8;
+    border-radius: 0.75rem;
+    background: var(--exp-blanco);
+}
+
+.tarjeta-tarea-itinerario.tarea-estado-en_proceso {
+    border-left-color: var(--exp-dorado);
+}
+
+.tarjeta-tarea-itinerario.tarea-estado-completada {
+    border-left-color: var(--exp-verde);
+}
+
+.tarjeta-tarea-itinerario.tarea-estado-omitida {
+    border-left-color: var(--exp-gris);
+}
+
+.encabezado-tarea-itinerario {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid #EDF1F4;
+    background: #F8FAFC;
+}
+
+.identificacion-tarea {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.dia-tarea,
+.tipo-tarea,
+.estado-tarea-itinerario {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.dia-tarea {
+    color: var(--exp-azul);
+    background: #E7F1F8;
+}
+
+.tipo-tarea {
+    color: var(--exp-gris);
+    background: #E9EEF2;
+}
+
+.estado-tarea-pendiente {
+    color: #64748B;
+    background: #E2E8F0;
+}
+
+.estado-tarea-en_proceso {
+    color: #876600;
+    background: #FFF4D6;
+}
+
+.estado-tarea-completada {
+    color: #18734A;
+    background: #E5F6ED;
+}
+
+.estado-tarea-omitida {
+    color: #475569;
+    background: #E2E8F0;
+}
+
+.contenido-tarea-itinerario {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(280px, 360px);
+    gap: 1.3rem;
+    padding: 0.95rem;
+}
+
+.informacion-tarea-itinerario h3 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.informacion-tarea-itinerario p {
+    margin: 0.55rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.detalles-tarea-itinerario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+}
+
+.detalles-tarea-itinerario span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--exp-gris);
+    font-size: 0.74rem;
+}
+
+.detalles-tarea-itinerario i {
+    color: var(--exp-celeste);
+}
+
+.resolucion-tarea {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+    color: var(--exp-verde);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.formulario-tarea-itinerario {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.campo-tarea-itinerario {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.campo-tarea-itinerario label {
+    color: var(--exp-texto);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.campo-tarea-itinerario select,
+.campo-tarea-itinerario textarea {
+    width: 100%;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.55rem;
+    padding: 0.65rem 0.75rem;
+    color: var(--exp-texto);
+    background: var(--exp-blanco);
+    font: inherit;
+    font-size: 0.78rem;
+}
+
+.campo-tarea-itinerario textarea {
+    min-height: 5.5rem;
+    resize: vertical;
+}
+
+.campo-tarea-itinerario select:focus,
+.campo-tarea-itinerario textarea:focus {
+    border-color: var(--exp-celeste);
+    outline: 3px solid rgb(9 113 136 / 12%);
+}
+
+.campo-tarea-itinerario select:disabled,
+.campo-tarea-itinerario textarea:disabled {
+    cursor: not-allowed;
+    color: var(--exp-gris);
+    background: #F1F4F6;
+}
+
+.campo-tarea-itinerario small {
+    color: var(--exp-gris);
+    font-size: 0.65rem;
+    line-height: 1.4;
+}
+
+.btn-guardar-tarea {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 0;
+    border-radius: 0.55rem;
+    padding: 0 0.9rem;
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn-guardar-tarea:hover {
+    background: var(--exp-celeste);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 850px) {
+    .contenido-tarea-itinerario {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .encabezado-tarea-itinerario {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .resumen-tareas-itinerario {
+        width: 100%;
+    }
+
+    .btn-guardar-tarea {
+        width: 100%;
+    }
+}

@@ -20,10 +20,7 @@ class TareaOperacionViaje extends Model
         'omitida';
 
     /*
-     * Tipos anteriores.
-     *
-     * Se conservan para no perder compatibilidad
-     * con los itinerarios creados anteriormente.
+     * Tipos anteriores conservados por compatibilidad.
      */
     public const TIPO_RESERVA =
         'reserva';
@@ -32,7 +29,7 @@ class TareaOperacionViaje extends Model
         'actividad';
 
     /*
-     * Tipos específicos actuales.
+     * Tipos especializados y genéricos actuales.
      */
     public const TIPO_VUELO =
         'vuelo';
@@ -64,9 +61,8 @@ class TareaOperacionViaje extends Model
     public const TIPO_OTRO =
         'otro';
 
-    /*
-     * Estos son los tipos disponibles para actividades
-     * nuevas en el formulario de paquetes.
+    /**
+     * Tipos disponibles al crear o editar un paquete.
      */
     public const TIPOS_SELECCIONABLES = [
         self::TIPO_VUELO,
@@ -81,8 +77,9 @@ class TareaOperacionViaje extends Model
         self::TIPO_OTRO,
     ];
 
-    /*
-     * Tipos que pueden existir en paquetes antiguos.
+    /**
+     * Tipos anteriores que deben seguir siendo válidos para
+     * evitar perder itinerarios ya existentes.
      */
     public const TIPOS_LEGACY = [
         self::TIPO_RESERVA,
@@ -102,6 +99,8 @@ class TareaOperacionViaje extends Model
         'hora_fin',
         'ubicacion',
         'tipo_gestion',
+        'gestionable_type',
+        'gestionable_id',
         'estado',
         'vigente',
         'observaciones',
@@ -115,6 +114,9 @@ class TareaOperacionViaje extends Model
             'dia' =>
                 'integer',
 
+            'gestionable_id' =>
+                'integer',
+
             'vigente' =>
                 'boolean',
 
@@ -124,8 +126,8 @@ class TareaOperacionViaje extends Model
     }
 
     /**
-     * Devuelve todos los tipos aceptados por el servidor,
-     * incluidos los valores anteriores.
+     * Devuelve todos los tipos aceptados por el sistema,
+     * incluyendo los tipos anteriores.
      */
     public static function tiposPermitidos(): array
     {
@@ -138,7 +140,7 @@ class TareaOperacionViaje extends Model
     }
 
     /**
-     * Etiquetas visibles en formularios y tareas.
+     * Nombres legibles de los tipos de gestión.
      */
     public static function etiquetasTipoGestion(): array
     {
@@ -182,8 +184,7 @@ class TareaOperacionViaje extends Model
     }
 
     /**
-     * Texto que posteriormente utilizarán los botones
-     * contextuales de cada tarea.
+     * Texto del botón que deberá mostrar cada tarea.
      */
     public static function accionesContextuales(): array
     {
@@ -226,20 +227,9 @@ class TareaOperacionViaje extends Model
         ];
     }
 
-    public function nombreTipoGestion(): string
-    {
-        return self::etiquetasTipoGestion()[
-            $this->tipo_gestion
-        ] ?? 'Otra gestión';
-    }
-
-    public function accionContextual(): string
-    {
-        return self::accionesContextuales()[
-            $this->tipo_gestion
-        ] ?? 'Gestionar servicio';
-    }
-
+    /**
+     * Expediente operativo al que pertenece la tarea.
+     */
     public function operacion()
     {
         return $this->belongsTo(
@@ -248,6 +238,24 @@ class TareaOperacionViaje extends Model
         );
     }
 
+    /**
+     * Registro especializado o genérico relacionado.
+     *
+     * Puede devolver:
+     *
+     * - VueloReserva
+     * - AlojamientoReserva
+     * - GuiaReserva
+     * - GestionOperativa
+     */
+    public function gestionable()
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Usuario que completó u omitió la tarea.
+     */
     public function completadaPor()
     {
         return $this->belongsTo(
@@ -263,6 +271,57 @@ class TareaOperacionViaje extends Model
             'vigente',
             true
         );
+    }
+
+    public function scopeDelTipo(
+        Builder $consulta,
+        string $tipo
+    ): Builder {
+        return $consulta->where(
+            'tipo_gestion',
+            $tipo
+        );
+    }
+
+    public function scopePendientes(
+        Builder $consulta
+    ): Builder {
+        return $consulta->whereIn(
+            'estado',
+            [
+                self::ESTADO_PENDIENTE,
+                self::ESTADO_EN_PROCESO,
+            ]
+        );
+    }
+
+    /**
+     * Nombre legible del tipo de gestión.
+     */
+    public function etiquetaTipoGestion(): string
+    {
+        return self::etiquetasTipoGestion()[
+            $this->tipo_gestion
+        ] ?? 'Otra gestión';
+    }
+
+    /**
+     * Texto del botón contextual correspondiente.
+     */
+    public function accionContextual(): string
+    {
+        return self::accionesContextuales()[
+            $this->tipo_gestion
+        ] ?? 'Gestionar servicio';
+    }
+
+    /**
+     * Indica si la tarea ya está relacionada con un registro.
+     */
+    public function tieneGestionVinculada(): bool
+    {
+        return filled($this->gestionable_type)
+            && filled($this->gestionable_id);
     }
 
     public function estaPendiente(): bool

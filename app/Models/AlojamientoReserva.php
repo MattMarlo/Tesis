@@ -15,6 +15,12 @@ class AlojamientoReserva extends Model
     public const ESTADO_CANCELADO =
         'cancelado';
 
+    public const ESTADOS_PERMITIDOS = [
+        self::ESTADO_CONFIRMADO,
+        self::ESTADO_PENDIENTE,
+        self::ESTADO_CANCELADO,
+    ];
+
     protected $table =
         'alojamientos_reserva';
 
@@ -41,19 +47,29 @@ class AlojamientoReserva extends Model
         'observaciones',
     ];
 
-    protected $casts = [
-        'fecha_hora_entrada' =>
-            'datetime',
-        'fecha_hora_salida' =>
-            'datetime',
-        'fecha_compra' =>
-            'date',
-        'cantidad_habitaciones' =>
-            'integer',
-        'costo_total' =>
-            'decimal:2',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'fecha_hora_entrada' =>
+                'datetime',
 
+            'fecha_hora_salida' =>
+                'datetime',
+
+            'fecha_compra' =>
+                'date',
+
+            'cantidad_habitaciones' =>
+                'integer',
+
+            'costo_total' =>
+                'decimal:2',
+        ];
+    }
+
+    /**
+     * Operación a la que pertenece el alojamiento.
+     */
     public function operacion()
     {
         return $this->belongsTo(
@@ -62,6 +78,9 @@ class AlojamientoReserva extends Model
         );
     }
 
+    /**
+     * Habitaciones creadas dentro del alojamiento.
+     */
     public function habitaciones()
     {
         return $this->hasMany(
@@ -70,11 +89,108 @@ class AlojamientoReserva extends Model
         );
     }
 
+    /**
+     * Distribución individual de viajeros en habitaciones.
+     */
     public function asignacionesHabitacion()
     {
         return $this->hasMany(
             AsignacionHabitacion::class,
             'alojamiento_reserva_id'
         );
+    }
+
+    /**
+     * Viajeros asignados al alojamiento.
+     */
+    public function viajeros()
+    {
+        return $this->belongsToMany(
+            ViajeroReserva::class,
+            'asignaciones_habitacion',
+            'alojamiento_reserva_id',
+            'viajero_reserva_id'
+        )
+            ->withPivot([
+                'id',
+                'habitacion_alojamiento_id',
+                'cliente_id',
+            ])
+            ->withTimestamps();
+    }
+
+    /**
+     * Tareas del itinerario vinculadas a este alojamiento.
+     *
+     * Permite reutilizar el mismo hotel cuando varias tareas
+     * del itinerario corresponden a la misma estancia.
+     */
+    public function tareas()
+    {
+        return $this->morphMany(
+            TareaOperacionViaje::class,
+            'gestionable'
+        );
+    }
+
+    public function estaConfirmado(): bool
+    {
+        return $this->estado ===
+            self::ESTADO_CONFIRMADO;
+    }
+
+    public function estaPendiente(): bool
+    {
+        return $this->estado ===
+            self::ESTADO_PENDIENTE;
+    }
+
+    public function estaCancelado(): bool
+    {
+        return $this->estado ===
+            self::ESTADO_CANCELADO;
+    }
+
+    /**
+     * Número de viajeros actuales con una habitación asignada.
+     */
+    public function cantidadViajerosAsignados(): int
+    {
+        return $this->asignacionesHabitacion()
+            ->whereNotNull(
+                'viajero_reserva_id'
+            )
+            ->distinct()
+            ->count(
+                'viajero_reserva_id'
+            );
+    }
+
+    /**
+     * Verifica si todos los viajeros esperados tienen
+     * una habitación asignada.
+     */
+    public function tieneHabitacionPara(
+        int $cantidadViajeros
+    ): bool {
+        if ($cantidadViajeros < 1) {
+            return false;
+        }
+
+        return $this->cantidadViajerosAsignados()
+            >= $cantidadViajeros;
+    }
+
+    /**
+     * El alojamiento queda listo cuando está confirmado
+     * y todos los viajeros tienen habitación.
+     */
+    public function estaListoPara(
+        int $cantidadViajeros
+    ): bool {
+        return $this->estaConfirmado()
+            && $this->tieneHabitacionPara(
+                $cantidadViajeros
+            );
     }
 }

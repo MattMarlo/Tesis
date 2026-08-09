@@ -253,10 +253,10 @@ class TareasOperacionItinerarioTest extends TestCase
                     1,
 
                 'tipo_gestion' =>
-                    'otro',
+                    TareaOperacionViaje::TIPO_TRASLADO,
 
                 'estado' =>
-                    'pendiente',
+                    TareaOperacionViaje::ESTADO_PENDIENTE,
 
                 'vigente' =>
                     true,
@@ -276,10 +276,10 @@ class TareasOperacionItinerarioTest extends TestCase
                     2,
 
                 'tipo_gestion' =>
-                    'entrada',
+                    TareaOperacionViaje::TIPO_ENTRADA,
 
                 'estado' =>
-                    'pendiente',
+                    TareaOperacionViaje::ESTADO_PENDIENTE,
 
                 'vigente' =>
                     true,
@@ -377,7 +377,7 @@ class TareasOperacionItinerarioTest extends TestCase
 
         $tarea->update([
             'estado' =>
-                'completada',
+                TareaOperacionViaje::ESTADO_COMPLETADA,
 
             'observaciones' =>
                 'Traslado confirmado con el proveedor.',
@@ -429,7 +429,7 @@ class TareasOperacionItinerarioTest extends TestCase
         );
 
         $this->assertSame(
-            'completada',
+            TareaOperacionViaje::ESTADO_COMPLETADA,
             $tareaActualizada->estado
         );
 
@@ -589,7 +589,7 @@ class TareasOperacionItinerarioTest extends TestCase
             )
             ->update([
                 'estado' =>
-                    'completada',
+                    TareaOperacionViaje::ESTADO_COMPLETADA,
 
                 'observaciones' =>
                     'Gestión finalizada durante la prueba.',
@@ -640,6 +640,86 @@ class TareasOperacionItinerarioTest extends TestCase
         );
     }
 
+    public function test_sincroniza_todos_los_tipos_especificos_sin_convertirlos_en_otro(): void
+    {
+        $tipos = TareaOperacionViaje::TIPOS_SELECCIONABLES;
+
+        $itinerario = [
+            [
+                'dia' => 1,
+
+                'titulo' =>
+                    'Coordinaciones especializadas',
+
+                'descripcion' =>
+                    'Prueba de todos los tipos de gestión.',
+
+                'actividades' => collect($tipos)
+                    ->values()
+                    ->map(
+                        function (
+                            string $tipo,
+                            int $indice
+                        ) {
+                            return [
+                                'uuid' =>
+                                    sprintf(
+                                        'aaaaaaaa-aaaa-4aaa-8aaa-%012d',
+                                        $indice + 1
+                                    ),
+
+                                'nombre' =>
+                                    'Gestión ' . $tipo,
+
+                                'descripcion' =>
+                                    'Actividad de prueba.',
+
+                                'hora_inicio' =>
+                                    '08:00',
+
+                                'hora_fin' =>
+                                    '09:00',
+
+                                'ubicacion' =>
+                                    'Ubicación de prueba',
+
+                                'requiere_gestion' =>
+                                    true,
+
+                                'tipo_gestion' =>
+                                    $tipo,
+                            ];
+                        }
+                    )
+                    ->all(),
+            ],
+        ];
+
+        $this->destino->update([
+            'itinerario' => $itinerario,
+        ]);
+
+        $this->operacion->unsetRelation('reserva');
+
+        $tareas = app(
+            SincronizarTareasItinerarioService::class
+        )->sincronizar(
+            $this->operacion->fresh()
+        );
+
+        $this->assertCount(
+            count($tipos),
+            $tareas
+        );
+
+        $this->assertEqualsCanonicalizing(
+            $tipos,
+            $tareas
+                ->pluck('tipo_gestion')
+                ->all()
+        );
+    }
+
     private function itinerarioCompleto(): array
     {
         return [
@@ -677,7 +757,7 @@ class TareasOperacionItinerarioTest extends TestCase
                             true,
 
                         'tipo_gestion' =>
-                            'traslado',
+                            TareaOperacionViaje::TIPO_TRASLADO,
                     ],
 
                     [
@@ -742,7 +822,7 @@ class TareasOperacionItinerarioTest extends TestCase
                             true,
 
                         'tipo_gestion' =>
-                            'entrada',
+                            TareaOperacionViaje::TIPO_ENTRADA,
                     ],
                 ],
             ],

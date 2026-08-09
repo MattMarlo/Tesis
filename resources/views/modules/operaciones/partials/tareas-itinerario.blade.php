@@ -79,30 +79,11 @@
                             'Sin estado',
                     };
 
-                    $nombreTipoGestion = match (
-                        $tarea->tipo_gestion
-                    ) {
-                        'reserva' =>
-                            'Reserva',
-
-                        'entrada' =>
-                            'Entrada',
-
-                        'guia' =>
-                            'Guía',
-
-                        'alimentacion' =>
-                            'Alimentación',
-
-                        'alojamiento' =>
-                            'Alojamiento',
-
-                        'actividad' =>
-                            'Actividad',
-
-                        default =>
-                            'Otra gestión',
-                    };
+                    $nombreTipoGestion =
+                        \App\Models\TareaOperacionViaje::etiquetasTipoGestion()[
+                            $tarea->tipo_gestion
+                        ]
+                        ?? 'Otra gestión';
 
                     $horaInicio = $tarea->hora_inicio
                         ? substr(

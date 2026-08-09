@@ -52,9 +52,12 @@ class SincronizarTareasItinerarioService
                     /*
                      * updateOrCreate evita duplicar tareas.
                      *
-                     * Solo se actualizan los datos provenientes
-                     * del paquete. El estado y las observaciones
-                     * del agente se conservan.
+                     * Solo se actualizan los datos que provienen
+                     * del itinerario del paquete.
+                     *
+                     * El estado, las observaciones y los datos de
+                     * resolución registrados por el agente no se
+                     * sobrescriben.
                      */
                     $operacion
                         ->tareas()
@@ -129,8 +132,8 @@ class SincronizarTareasItinerarioService
         );
 
         /*
-         * Obliga a Eloquent a consultar nuevamente
-         * las tareas después de sincronizarlas.
+         * Obliga a Eloquent a consultar nuevamente las
+         * tareas después de sincronizarlas.
          */
         $operacion->unsetRelation(
             'tareas'
@@ -146,7 +149,7 @@ class SincronizarTareasItinerarioService
     }
 
     /**
-     * Extrae solamente actividades marcadas con
+     * Extrae solamente las actividades marcadas con
      * requiere_gestion=true.
      */
     private function extraerActividadesGestionables(
@@ -207,8 +210,8 @@ class SincronizarTareasItinerarioService
 
                                 /*
                                  * Los UUID inválidos se ignoran para
-                                 * no crear tareas que después puedan
-                                 * duplicarse durante la sincronización.
+                                 * no crear tareas que posteriormente
+                                 * puedan duplicarse.
                                  */
                                 if (
                                     !Str::isUuid(
@@ -308,25 +311,18 @@ class SincronizarTareasItinerarioService
     }
 
     /**
-     * Evita guardar tipos que no sean reconocidos
-     * por el módulo operativo.
+     * Mantiene únicamente tipos reconocidos.
+     *
+     * Los valores anteriores "reserva" y "actividad"
+     * siguen permitidos para no alterar los paquetes
+     * existentes.
      */
     private function normalizarTipoGestion(
         ?string $tipoGestion
     ): string {
-        $tiposPermitidos = [
-            TareaOperacionViaje::TIPO_RESERVA,
-            TareaOperacionViaje::TIPO_ENTRADA,
-            TareaOperacionViaje::TIPO_GUIA,
-            TareaOperacionViaje::TIPO_ALIMENTACION,
-            TareaOperacionViaje::TIPO_ALOJAMIENTO,
-            TareaOperacionViaje::TIPO_ACTIVIDAD,
-            TareaOperacionViaje::TIPO_OTRO,
-        ];
-
         return in_array(
             $tipoGestion,
-            $tiposPermitidos,
+            TareaOperacionViaje::tiposPermitidos(),
             true
         )
             ? $tipoGestion

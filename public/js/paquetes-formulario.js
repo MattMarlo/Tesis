@@ -6,6 +6,7 @@ $(function () {
     }
 
     let formularioEnviado = false;
+
     let contadorItinerario =
         $('#listaItinerario .dia-itinerario').length;
 
@@ -209,7 +210,9 @@ $(function () {
                 esListaIncluye &&
                 lista.find('.item-lista').length === 1
             ) {
-                item.find('input').val('').trigger('focus');
+                item.find('input')
+                    .val('')
+                    .trigger('focus');
 
                 Swal.fire({
                     icon: 'info',
@@ -273,8 +276,12 @@ $(function () {
                 Selecciona el tipo de gestión
             </option>
 
-            <option value="reserva">
-                Reserva
+            <option value="vuelo">
+                Vuelo
+            </option>
+
+            <option value="alojamiento">
+                Alojamiento
             </option>
 
             <option value="entrada">
@@ -285,20 +292,28 @@ $(function () {
                 Guía
             </option>
 
+            <option value="tren">
+                Tren
+            </option>
+
+            <option value="traslado">
+                Traslado
+            </option>
+
             <option value="alimentacion">
                 Alimentación
             </option>
 
-            <option value="alojamiento">
-                Alojamiento
+            <option value="actividad_reservada">
+                Actividad reservada
             </option>
 
-            <option value="actividad">
-                Actividad
+            <option value="seguro">
+                Seguro
             </option>
 
             <option value="otro">
-                Otro
+                Otro servicio
             </option>
         `;
     }
@@ -527,7 +542,10 @@ $(function () {
                             <p>
                                 Los horarios son opcionales. Marca
                                 únicamente las actividades que requieran
-                                preparación o coordinación.
+                                preparación o coordinación. Cada actividad
+                                gestionable debe representar una sola
+                                coordinación; separa, por ejemplo, el tren
+                                y el traslado al hotel.
                             </p>
                         </div>
 
@@ -709,6 +727,7 @@ $(function () {
                     .prop('disabled', true);
 
                 limpiarError(selector);
+
                 contenedor.prop('hidden', true);
             }
         }

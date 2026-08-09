@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Destino;
+use App\Models\TareaOperacionViaje;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -96,7 +97,7 @@ class DestinoItinerarioTest extends TestCase
         );
 
         $this->assertSame(
-            'reserva',
+            TareaOperacionViaje::TIPO_TRASLADO,
             $actividadGestionable['tipo_gestion']
         );
 
@@ -172,6 +173,73 @@ class DestinoItinerarioTest extends TestCase
             'destinos',
             0
         );
+    }
+
+    public function test_acepta_todos_los_tipos_de_gestion_especificos(): void
+    {
+        $itinerario = $this->itinerarioValido();
+        $actividadBase = $itinerario[0]['actividades'][0];
+
+        $itinerario[0]['actividades'] = collect(
+            TareaOperacionViaje::TIPOS_SELECCIONABLES
+        )
+            ->values()
+            ->map(
+                function (string $tipo, int $indice) use (
+                    $actividadBase
+                ) {
+                    return array_merge(
+                        $actividadBase,
+                        [
+                            'uuid' => null,
+
+                            'nombre' =>
+                                'Coordinación ' . ($indice + 1),
+
+                            'tipo_gestion' =>
+                                $tipo,
+                        ]
+                    );
+                }
+            )
+            ->all();
+
+        $this->post(
+            route('destinos.store'),
+            $this->datosValidos([
+                'itinerario' => $itinerario,
+            ])
+        )->assertSessionHasNoErrors();
+
+        $tiposGuardados = collect(
+            Destino::firstOrFail()
+                ->itinerario[0]['actividades']
+        )->pluck('tipo_gestion')->all();
+
+        $this->assertSame(
+            TareaOperacionViaje::TIPOS_SELECCIONABLES,
+            $tiposGuardados
+        );
+    }
+
+    public function test_rechaza_tipo_de_gestion_desconocido(): void
+    {
+        $itinerario = $this->itinerarioValido();
+
+        $itinerario[0]
+            ['actividades'][0]
+            ['tipo_gestion'] = 'crucero_especial';
+
+        $this->post(
+            route('destinos.store'),
+            $this->datosValidos([
+                'itinerario' => $itinerario,
+            ])
+        )->assertSessionHasErrors(
+            'itinerario.0.actividades.0.tipo_gestion'
+        );
+
+        $this->assertDatabaseCount('destinos', 0);
     }
 
     public function test_rechaza_dia_que_supera_duracion_del_paquete(): void
@@ -357,7 +425,9 @@ class DestinoItinerarioTest extends TestCase
             ->assertSeeText('08:00 – 09:30');
 
         $this->assertTrue(
-            $destino->fecha_salida->equalTo($fechaOriginal)
+            $destino->fecha_salida->equalTo(
+                $fechaOriginal
+            )
         );
     }
 
@@ -369,7 +439,10 @@ class DestinoItinerarioTest extends TestCase
         )->assertSessionHasNoErrors();
 
         $destino = Destino::firstOrFail();
-        $destino->update(['fecha_salida' => null]);
+
+        $destino->update([
+            'fecha_salida' => null,
+        ]);
 
         $this->get(
             route('paquetes.detalle', $destino->slug)
@@ -505,7 +578,7 @@ class DestinoItinerarioTest extends TestCase
                             '1',
 
                         'tipo_gestion' =>
-                            'reserva',
+                            TareaOperacionViaje::TIPO_TRASLADO,
                     ],
                     [
                         'uuid' =>
@@ -572,7 +645,7 @@ class DestinoItinerarioTest extends TestCase
                             '1',
 
                         'tipo_gestion' =>
-                            'entrada',
+                            TareaOperacionViaje::TIPO_ENTRADA,
                     ],
                 ],
             ],

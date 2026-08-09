@@ -23,6 +23,12 @@
             ]
         ]
     );
+
+    $etiquetasTipoGestion =
+        \App\Models\TareaOperacionViaje::etiquetasTipoGestion();
+
+    $tiposGestionSeleccionables =
+        \App\Models\TareaOperacionViaje::TIPOS_SELECCIONABLES;
 @endphp
 
 <link
@@ -802,6 +808,9 @@
                                         Los horarios son opcionales. Marca
                                         únicamente las actividades que requieran
                                         preparación o coordinación de la agencia.
+                                        Cada actividad gestionable debe representar
+                                        una sola coordinación; por ejemplo, separa
+                                        la reserva del tren y el traslado al hotel.
                                     </p>
                                 </div>
 
@@ -963,23 +972,33 @@
                                                         Selecciona el tipo de gestión
                                                     </option>
 
-                                                    @foreach([
-                                                        'reserva' => 'Reserva',
-                                                        'entrada' => 'Entrada',
-                                                        'guia' => 'Guía',
-                                                        'alimentacion' => 'Alimentación',
-                                                        'alojamiento' => 'Alojamiento',
-                                                        'actividad' => 'Actividad',
-                                                        'otro' => 'Otro',
-                                                    ] as $tipoValor => $tipoTexto)
+                                                    @php
+                                                        $tipoActual =
+                                                            $actividad['tipo_gestion']
+                                                            ?? '';
+                                                    @endphp
+
+                                                    @if(in_array(
+                                                        $tipoActual,
+                                                        \App\Models\TareaOperacionViaje::TIPOS_LEGACY,
+                                                        true
+                                                    ))
+                                                        <option
+                                                            value="{{ $tipoActual }}"
+                                                            selected
+                                                        >
+                                                            {{ $etiquetasTipoGestion[$tipoActual] }}
+                                                        </option>
+                                                    @endif
+
+                                                    @foreach($tiposGestionSeleccionables as $tipoValor)
                                                         <option
                                                             value="{{ $tipoValor }}"
                                                             @selected(
-                                                                ($actividad['tipo_gestion'] ?? '')
-                                                                === $tipoValor
+                                                                $tipoActual === $tipoValor
                                                             )
                                                         >
-                                                            {{ $tipoTexto }}
+                                                            {{ $etiquetasTipoGestion[$tipoValor] }}
                                                         </option>
                                                     @endforeach
                                                 </select>

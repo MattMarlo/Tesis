@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Destino;
+use App\Models\TareaOperacionViaje;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class DestinoController extends Controller
@@ -496,7 +498,9 @@ class DestinoController extends Controller
 
                 'itinerario.*.actividades.*.tipo_gestion' => [
                     'nullable',
-                    'in:reserva,entrada,guia,alimentacion,alojamiento,actividad,otro',
+                    Rule::in(
+                        TareaOperacionViaje::tiposPermitidos()
+                    ),
                 ],
 
                 'condiciones' => [

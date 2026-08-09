@@ -34,6 +34,7 @@ class OperacionViaje extends Model
     protected $casts = [
         'fecha_documentacion_completa' =>
             'datetime',
+
         'fecha_notificacion' =>
             'datetime',
     ];
@@ -67,7 +68,9 @@ class OperacionViaje extends Model
         return $this->hasMany(
             VueloReserva::class,
             'operacion_viaje_id'
-        )->orderBy('fecha_hora_salida');
+        )->orderBy(
+            'fecha_hora_salida'
+        );
     }
 
     public function alojamientos()
@@ -75,7 +78,9 @@ class OperacionViaje extends Model
         return $this->hasMany(
             AlojamientoReserva::class,
             'operacion_viaje_id'
-        )->orderBy('fecha_hora_entrada');
+        )->orderBy(
+            'fecha_hora_entrada'
+        );
     }
 
     public function guias()
@@ -83,7 +88,30 @@ class OperacionViaje extends Model
         return $this->hasMany(
             GuiaReserva::class,
             'operacion_viaje_id'
-        )->orderBy('fecha_inicio');
+        )->orderBy(
+            'fecha_inicio'
+        );
+    }
+
+    public function tareas()
+    {
+        return $this->hasMany(
+            TareaOperacionViaje::class,
+            'operacion_viaje_id'
+        )
+            ->orderBy('dia')
+            ->orderBy('id');
+    }
+
+    public function tareasVigentes()
+    {
+        return $this->hasMany(
+            TareaOperacionViaje::class,
+            'operacion_viaje_id'
+        )
+            ->where('vigente', true)
+            ->orderBy('dia')
+            ->orderBy('id');
     }
 
     public function estaCompleta(): bool

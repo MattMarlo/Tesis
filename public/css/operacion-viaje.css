@@ -758,3 +758,892 @@
         flex-direction: column;
     }
 }
+
+/* Modal de gestiones operativas genéricas */
+.modal-gestion-contextual .modal-dialog {
+    max-width: 1180px;
+    margin: 1.25rem auto;
+}
+
+.modal-gestion-contextual .modal-content {
+    overflow: hidden;
+    border: 0;
+    border-radius: 1rem;
+    background: #f5f8fb;
+    box-shadow: 0 1.5rem 4rem rgb(15 42 68 / 24%);
+}
+
+.modal-gestion-contextual .modal-header {
+    align-items: flex-start;
+    padding: 1.35rem 1.6rem 1.2rem;
+    border-bottom: 1px solid #dce6ee;
+    color: var(--exp-blanco);
+    background: linear-gradient(135deg, #073d70 0%, var(--exp-azul) 58%, #087b94 100%);
+}
+
+.modal-gestion-contextual .modal-header h2 {
+    margin: .25rem 0 .2rem;
+    color: inherit;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.modal-gestion-contextual .modal-header small {
+    color: rgb(255 255 255 / 76%);
+    font-size: .78rem;
+}
+
+.modal-etiqueta-contextual {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgb(255 255 255 / 22%);
+    border-radius: 999px;
+    padding: .3rem .65rem;
+    color: #dff7ff;
+    background: rgb(255 255 255 / 10%);
+    font-size: .67rem;
+    font-weight: 800;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+}
+
+.modal-gestion-contextual .btn-close {
+    margin-top: .1rem;
+    filter: brightness(0) invert(1);
+    opacity: .85;
+}
+
+.modal-gestion-contextual .modal-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    background: #f5f8fb;
+}
+
+.formulario-gestion-contextual {
+    display: grid;
+    gap: 1rem;
+}
+
+.contexto-actividad-gestion {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #bdd9e7;
+    border-radius: .8rem;
+    padding: .8rem .9rem;
+    color: #284b65;
+    background: linear-gradient(135deg, #edf7fb, #f7fbfd);
+}
+
+.contexto-actividad-icono {
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .65rem;
+    color: #fff;
+    background: var(--exp-celeste);
+}
+
+.contexto-actividad-gestion small,
+.contexto-actividad-gestion strong {
+    display: block;
+}
+
+.contexto-actividad-gestion small {
+    color: var(--exp-celeste);
+    font-size: .61rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.contexto-actividad-gestion strong {
+    margin-top: .15rem;
+    color: var(--exp-azul);
+    font-size: .8rem;
+}
+
+.contexto-actividad-gestion p {
+    margin: .18rem 0 0;
+    color: #61798d;
+    font-size: .69rem;
+}
+
+.seccion-formulario-gestion,
+.gestiones-existentes {
+    overflow: hidden;
+    border: 1px solid #dbe5ed;
+    border-radius: .85rem;
+    padding: 1rem 1.1rem 1.15rem;
+    background: var(--exp-blanco);
+    box-shadow: 0 .25rem .8rem rgb(28 66 96 / 5%);
+}
+
+.titulo-seccion-gestion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .9rem;
+    padding-bottom: .7rem;
+    border-bottom: 1px solid #e7eef3;
+}
+
+.titulo-seccion-gestion span {
+    display: block;
+    margin-bottom: .12rem;
+    color: var(--exp-celeste);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.titulo-seccion-gestion h3 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: .93rem;
+    font-weight: 800;
+}
+
+.campos-gestion-contextual {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem 1rem;
+}
+
+.campo-gestion {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+
+.campo-gestion-amplio {
+    grid-column: 1 / -1;
+}
+
+.campo-gestion label {
+    margin: 0;
+    color: #334b60;
+    font-size: .72rem;
+    font-weight: 750;
+}
+
+.campo-gestion input,
+.campo-gestion select,
+.campo-gestion textarea {
+    width: 100%;
+    min-height: 2.65rem;
+    border: 1px solid #c9d6e0;
+    border-radius: .55rem;
+    padding: .62rem .75rem;
+    color: var(--exp-texto);
+    background: #fbfdff;
+    font: inherit;
+    font-size: .78rem;
+    line-height: 1.35;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.campo-gestion textarea {
+    min-height: 5.6rem;
+    resize: vertical;
+}
+
+.campo-gestion input:focus,
+.campo-gestion select:focus,
+.campo-gestion textarea:focus {
+    outline: 0;
+    border-color: var(--exp-celeste);
+    background: var(--exp-blanco);
+    box-shadow: 0 0 0 .2rem rgb(9 113 136 / 12%);
+}
+
+.campo-gestion input[type="file"] {
+    padding: .45rem;
+    background: var(--exp-blanco);
+}
+
+.lista-gestiones-existentes,
+.lista-viajeros-gestion {
+    display: grid;
+    gap: .7rem;
+}
+
+.lista-gestiones-existentes article,
+.tarjeta-viajero-gestion {
+    border: 1px solid #dce7ef;
+    border-radius: .7rem;
+    padding: .8rem .9rem;
+    background: #f8fbfd;
+}
+
+.lista-gestiones-existentes article {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.lista-gestiones-existentes strong,
+.lista-gestiones-existentes span,
+.lista-gestiones-existentes small {
+    display: block;
+}
+
+.btn-vincular-gestion {
+    border: 1px solid var(--exp-azul);
+    border-radius: .5rem;
+    padding: .5rem .75rem;
+    color: var(--exp-azul);
+    background: var(--exp-blanco);
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+.modal-footer-gestion-contextual {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .9rem 1.5rem;
+    border-top: 1px solid #dce6ee;
+    background: var(--exp-blanco);
+    box-shadow: 0 -.35rem 1rem rgb(25 55 80 / 5%);
+}
+
+.acciones-secundarias-gestion,
+.acciones-principales-gestion {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+}
+
+.modal-footer-gestion-contextual .btn {
+    min-height: 2.55rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    border-radius: .55rem;
+    padding: .55rem .9rem;
+    font-size: .75rem;
+    font-weight: 800;
+}
+
+.modal-footer-gestion-contextual .btn-primary {
+    border-color: var(--exp-azul);
+    background: var(--exp-azul);
+}
+
+@media (max-width: 768px) {
+    .modal-gestion-contextual .modal-dialog { margin: .5rem; }
+    .modal-gestion-contextual .modal-header,
+    .modal-gestion-contextual .modal-body,
+    .modal-footer-gestion-contextual { padding-left: 1rem; padding-right: 1rem; }
+    .campos-gestion-contextual { grid-template-columns: 1fr; }
+    .campo-gestion-amplio { grid-column: auto; }
+    .modal-footer-gestion-contextual { align-items: stretch; flex-direction: column-reverse; }
+    .acciones-secundarias-gestion,
+    .acciones-principales-gestion { width: 100%; }
+    .acciones-principales-gestion .btn { flex: 1; }
+}
+/* =========================================================
+   Tareas gestionables del itinerario
+   ========================================================= */
+
+.bloque-tareas-itinerario {
+    display: grid;
+    gap: 1rem;
+}
+
+.descripcion-tareas-itinerario {
+    margin: 0.35rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.resumen-tareas-itinerario {
+    min-width: 115px;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #CFE0EC;
+    border-radius: 0.7rem;
+    background: #EEF5FA;
+    text-align: center;
+}
+
+.bloque-expediente-titulo
+.resumen-tareas-itinerario strong,
+.bloque-expediente-titulo
+.resumen-tareas-itinerario span {
+    display: block;
+}
+
+.bloque-expediente-titulo
+.resumen-tareas-itinerario strong {
+    color: var(--exp-azul);
+    font-size: 1rem;
+}
+
+.bloque-expediente-titulo
+.resumen-tareas-itinerario span {
+    margin: 0.15rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.barra-tareas-itinerario {
+    width: 100%;
+    height: 0.55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #E5EBF0;
+}
+
+.barra-tareas-itinerario span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--exp-azul),
+        var(--exp-celeste)
+    );
+    transition: width 0.25s ease;
+}
+
+.lista-tareas-itinerario {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.tarjeta-tarea-itinerario {
+    overflow: hidden;
+    border: 1px solid var(--exp-borde);
+    border-left: 4px solid #94A3B8;
+    border-radius: 0.75rem;
+    background: var(--exp-blanco);
+}
+
+.tarjeta-tarea-itinerario.tarea-estado-en_proceso {
+    border-left-color: var(--exp-dorado);
+}
+
+.tarjeta-tarea-itinerario.tarea-estado-completada {
+    border-left-color: var(--exp-verde);
+}
+
+.tarjeta-tarea-itinerario.tarea-estado-omitida {
+    border-left-color: var(--exp-gris);
+}
+
+.encabezado-tarea-itinerario {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid #EDF1F4;
+    background: #F8FAFC;
+}
+
+.identificacion-tarea {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.dia-tarea,
+.tipo-tarea,
+.estado-tarea-itinerario {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.dia-tarea {
+    color: var(--exp-azul);
+    background: #E7F1F8;
+}
+
+.tipo-tarea {
+    color: var(--exp-gris);
+    background: #E9EEF2;
+}
+
+.estado-tarea-pendiente {
+    color: #64748B;
+    background: #E2E8F0;
+}
+
+.estado-tarea-en_proceso {
+    color: #876600;
+    background: #FFF4D6;
+}
+
+.estado-tarea-completada {
+    color: #18734A;
+    background: #E5F6ED;
+}
+
+.estado-tarea-omitida {
+    color: #475569;
+    background: #E2E8F0;
+}
+
+.contenido-tarea-itinerario {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(280px, 360px);
+    gap: 1.3rem;
+    padding: 0.95rem;
+}
+
+.informacion-tarea-itinerario h3 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.informacion-tarea-itinerario p {
+    margin: 0.55rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.detalles-tarea-itinerario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+}
+
+.detalles-tarea-itinerario span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--exp-gris);
+    font-size: 0.74rem;
+}
+
+.detalles-tarea-itinerario i {
+    color: var(--exp-celeste);
+}
+
+.resolucion-tarea {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+    color: var(--exp-verde);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.formulario-tarea-itinerario {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.campo-tarea-itinerario {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.campo-tarea-itinerario label {
+    color: var(--exp-texto);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.campo-tarea-itinerario select,
+.campo-tarea-itinerario textarea {
+    width: 100%;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.55rem;
+    padding: 0.65rem 0.75rem;
+    color: var(--exp-texto);
+    background: var(--exp-blanco);
+    font: inherit;
+    font-size: 0.78rem;
+}
+
+.campo-tarea-itinerario textarea {
+    min-height: 5.5rem;
+    resize: vertical;
+}
+
+.campo-tarea-itinerario select:focus,
+.campo-tarea-itinerario textarea:focus {
+    border-color: var(--exp-celeste);
+    outline: 3px solid rgb(9 113 136 / 12%);
+}
+
+.campo-tarea-itinerario select:disabled,
+.campo-tarea-itinerario textarea:disabled {
+    cursor: not-allowed;
+    color: var(--exp-gris);
+    background: #F1F4F6;
+}
+
+.campo-tarea-itinerario small {
+    color: var(--exp-gris);
+    font-size: 0.65rem;
+    line-height: 1.4;
+}
+
+.btn-guardar-tarea {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 0;
+    border-radius: 0.55rem;
+    padding: 0 0.9rem;
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn-guardar-tarea:hover {
+    background: var(--exp-celeste);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 850px) {
+    .contenido-tarea-itinerario {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .encabezado-tarea-itinerario {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .resumen-tareas-itinerario {
+        width: 100%;
+    }
+
+    .btn-guardar-tarea {
+        width: 100%;
+    }
+}
+
+/*
+ * Gestión contextual del itinerario.
+ *
+ * Estas reglas están aisladas de los módulos generales de vuelos,
+ * alojamientos y guías para que cada tarea pueda mostrar su acción y el
+ * resumen de la gestión vinculada sin duplicar los formularios completos.
+ */
+.gestion-contextual-tarea {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+}
+
+.btn-gestion-contextual,
+.btn-ver-gestion-contextual {
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 1px solid var(--exp-azul);
+    border-radius: 0.55rem;
+    padding: 0.55rem 0.85rem;
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn-gestion-contextual {
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+}
+
+.btn-ver-gestion-contextual {
+    color: var(--exp-azul);
+    background: var(--exp-blanco);
+}
+
+.btn-gestion-contextual:hover,
+.btn-gestion-contextual:focus-visible {
+    color: var(--exp-blanco);
+    border-color: var(--exp-celeste);
+    background: var(--exp-celeste);
+    box-shadow: 0 0.45rem 1rem rgb(9 76 144 / 18%);
+    transform: translateY(-1px);
+}
+
+.btn-ver-gestion-contextual:hover,
+.btn-ver-gestion-contextual:focus-visible {
+    color: var(--exp-blanco);
+    border-color: var(--exp-azul);
+    background: var(--exp-azul);
+    box-shadow: 0 0.45rem 1rem rgb(9 76 144 / 15%);
+    transform: translateY(-1px);
+}
+
+.btn-gestion-contextual:focus-visible,
+.btn-ver-gestion-contextual:focus-visible {
+    outline: 3px solid rgb(9 113 136 / 18%);
+    outline-offset: 2px;
+}
+
+.contexto-tarea-modal {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #BFD9EA;
+    border-radius: 0.7rem;
+    padding: 0.85rem 0.95rem;
+    color: var(--exp-texto);
+    background: #F1F8FC;
+}
+
+.contexto-tarea-modal[hidden] {
+    display: none !important;
+}
+
+.contexto-tarea-modal-icono {
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.65rem;
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    font-size: 1rem;
+}
+
+.contexto-tarea-modal-contenido {
+    min-width: 0;
+}
+
+.contexto-tarea-modal-contenido small {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--exp-celeste);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.contexto-tarea-modal-contenido strong {
+    display: block;
+    color: var(--exp-azul);
+    font-size: 0.83rem;
+    line-height: 1.35;
+}
+
+.contexto-tarea-modal-contenido span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--exp-gris);
+    font-size: 0.72rem;
+    line-height: 1.45;
+}
+
+.resumen-vuelo-contextual {
+    margin-top: 0.95rem;
+    overflow: hidden;
+    border: 1px solid #CADAE7;
+    border-radius: 0.7rem;
+    background: #FBFDFE;
+    box-shadow: 0 0.3rem 0.8rem rgb(32 64 96 / 6%);
+}
+
+.resumen-vuelo-contextual-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid #DDE8F0;
+    background: #F2F7FA;
+}
+
+.resumen-vuelo-contextual-identidad {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.resumen-vuelo-icono {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--exp-azul);
+    background: #DCECF6;
+    font-size: 0.9rem;
+}
+
+.resumen-vuelo-contextual-identidad strong,
+.resumen-vuelo-contextual-identidad span {
+    display: block;
+}
+
+.resumen-vuelo-contextual-identidad strong {
+    overflow-wrap: anywhere;
+    color: var(--exp-azul);
+    font-size: 0.8rem;
+    line-height: 1.3;
+}
+
+.resumen-vuelo-contextual-identidad span {
+    margin-top: 0.15rem;
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+}
+
+.estado-vuelo-contextual {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: capitalize;
+}
+
+.estado-vuelo-confirmado {
+    color: #18734A;
+    background: #E5F6ED;
+}
+
+.estado-vuelo-pendiente {
+    color: #876600;
+    background: #FFF4D6;
+}
+
+.estado-vuelo-cancelado {
+    color: var(--exp-rojo);
+    background: #FBE7EA;
+}
+
+.datos-vuelo-contextual,
+.progreso-vuelo-contextual {
+    display: grid;
+    gap: 0.7rem;
+    padding: 0.75rem 0.85rem;
+}
+
+.datos-vuelo-contextual {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.progreso-vuelo-contextual {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid #E4EDF3;
+    background: var(--exp-blanco);
+}
+
+.datos-vuelo-contextual div,
+.progreso-vuelo-contextual div {
+    min-width: 0;
+}
+
+.datos-vuelo-contextual small,
+.progreso-vuelo-contextual small {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--exp-gris);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.datos-vuelo-contextual strong,
+.progreso-vuelo-contextual strong {
+    display: block;
+    overflow-wrap: anywhere;
+    color: var(--exp-texto);
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.acciones-vuelo-contextual {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding: 0 0.85rem 0.85rem;
+    background: var(--exp-blanco);
+}
+
+@media (max-width: 650px) {
+    .gestion-contextual-tarea,
+    .acciones-vuelo-contextual {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .btn-gestion-contextual,
+    .btn-ver-gestion-contextual {
+        width: 100%;
+    }
+
+    .contexto-tarea-modal {
+        padding: 0.75rem;
+    }
+
+    .resumen-vuelo-contextual-cabecera {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .estado-vuelo-contextual {
+        margin-left: 2.65rem;
+    }
+
+    .datos-vuelo-contextual,
+    .progreso-vuelo-contextual {
+        grid-template-columns: 1fr;
+    }
+}

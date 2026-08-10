@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reserva;
+use App\Models\ReservaRiesgo;
 use App\Services\TarifaReservaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -124,6 +125,17 @@ class ReservaController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        $diasSaldo = (int) config(
+            'reservas.dias_antes_saldo_final',
+            30
+        );
+
+        $fechaInicioAviso = now()->startOfDay();
+        $fechaFinAviso = $fechaInicioAviso
+            ->copy()
+            ->addDays($diasSaldo)
+            ->endOfDay();
+
         $resumen = [
             'total' => Reserva::count(),
             'pendientes' => Reserva::where(
@@ -138,6 +150,21 @@ class ReservaController extends Controller
                 'estado',
                 Reserva::ESTADO_CANCELADA
             )->count(),
+            'pago_final_proximo' => Reserva::query()
+                ->where('estado', '!=', Reserva::ESTADO_CANCELADA)
+                ->where('estado_pago', '!=', Reserva::PAGO_COMPLETO)
+                ->whereNotNull('fecha_vencimiento_saldo')
+                ->whereBetween(
+                    'fecha_vencimiento_saldo',
+                    [$fechaInicioAviso, $fechaFinAviso]
+                )
+                ->count(),
+            'reservas_en_riesgo' => ReservaRiesgo::query()
+                ->whereIn('estado', [
+                    ReservaRiesgo::ESTADO_ACTIVA,
+                    ReservaRiesgo::ESTADO_REVISION_CANCELACION,
+                ])
+                ->count(),
         ];
 
         return view(

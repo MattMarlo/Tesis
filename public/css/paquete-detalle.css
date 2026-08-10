@@ -201,9 +201,9 @@
 .enlace-detalle::after {
     content: '';
     position: absolute;
-    left: 18px;
     right: 18px;
     bottom: 0;
+    left: 18px;
     height: 3px;
     background: var(--dorado);
     border-radius: 4px 4px 0 0;
@@ -270,11 +270,12 @@
     justify-content: center;
     flex-shrink: 0;
     color: var(--blanco);
-    background: linear-gradient(
-        135deg,
-        var(--azul-principal),
-        var(--azul-secundario)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            var(--azul-principal),
+            var(--azul-secundario)
+        );
     border-radius: 13px;
     box-shadow: 0 8px 19px rgba(5, 44, 83, 0.2);
     font-size: 19px;
@@ -504,10 +505,17 @@
 }
 
 .nombre-dia small {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 4px;
     color: var(--dorado);
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.fecha-dia-itinerario {
+    color: var(--texto-suave);
 }
 
 .nombre-dia strong {
@@ -536,13 +544,82 @@
     padding: 0 22px 20px 77px;
 }
 
-.contenido-dia p {
+.contenido-dia > p {
     margin: 0;
     padding-top: 14px;
     color: var(--texto-suave);
     border-top: 1px solid var(--borde);
     font-size: 13px;
     line-height: 1.8;
+}
+
+.descripcion-dia-publica {
+    margin-bottom: 14px !important;
+}
+
+.lista-horarios-itinerario {
+    display: grid;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--borde);
+}
+
+.descripcion-dia-publica + .lista-horarios-itinerario {
+    margin-top: 14px;
+}
+
+.actividad-horario-publica {
+    display: grid;
+    grid-template-columns: minmax(125px, auto) minmax(0, 1fr);
+    gap: 14px;
+    padding: 13px;
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: 11px;
+}
+
+.actividad-horario-publica.actividad-sin-horario {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.hora-actividad-publica {
+    display: flex;
+    align-items: flex-start;
+    color: var(--azul-principal);
+    white-space: nowrap;
+}
+
+.hora-actividad-publica strong {
+    font-size: 13px;
+}
+
+.hora-actividad-publica span {
+    color: var(--texto-suave);
+    font-size: 11px;
+}
+
+.detalle-actividad-publica h4 {
+    margin: 0 0 4px;
+    color: var(--azul-principal);
+    font-size: 14px;
+}
+
+.ubicacion-actividad-publica {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--dorado);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.detalle-actividad-publica p {
+    margin: 7px 0 0;
+    padding: 0;
+    color: var(--texto-suave);
+    border: 0;
+    font-size: 12px;
+    line-height: 1.6;
 }
 
 /* =========================================================
@@ -980,6 +1057,15 @@
 
     .contenido-dia {
         padding: 0 17px 18px;
+    }
+
+    .actividad-horario-publica {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+
+    .hora-actividad-publica {
+        white-space: normal;
     }
 
     .fila-informacion {

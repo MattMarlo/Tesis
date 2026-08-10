@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Destino;
+use App\Models\TareaOperacionViaje;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class DestinoController extends Controller
 {
@@ -17,7 +20,7 @@ class DestinoController extends Controller
     {
         $titulo = 'Paquetes turísticos';
 
-        $destinos = Destino::orderBy('created_at', 'desc')->get();
+        $destinos = Destino::orderByDesc('created_at')->get();
 
         return view(
             'modules.destinos.index',
@@ -26,7 +29,7 @@ class DestinoController extends Controller
     }
 
     /**
-     * Muestra el formulario para crear un paquete.
+     * Muestra el formulario para crear un paquete turístico.
      */
     public function create()
     {
@@ -63,10 +66,14 @@ class DestinoController extends Controller
             $datos['itinerario'] ?? []
         );
 
+        $rutaImagen = null;
+
         try {
-            $datos['imagen'] = $request
+            $rutaImagen = $request
                 ->file('imagen')
                 ->store('destinos', 'public');
+
+            $datos['imagen'] = $rutaImagen;
 
             Destino::create($datos);
 
@@ -77,8 +84,11 @@ class DestinoController extends Controller
         } catch (Exception $e) {
             report($e);
 
-            if (!empty($datos['imagen'])) {
-                Storage::disk('public')->delete($datos['imagen']);
+            if (
+                $rutaImagen &&
+                Storage::disk('public')->exists($rutaImagen)
+            ) {
+                Storage::disk('public')->delete($rutaImagen);
             }
 
             return back()
@@ -97,6 +107,10 @@ class DestinoController extends Controller
     {
         $titulo = 'Editar paquete turístico';
 
+        /*
+         * Se conserva el nombre $destinos para mantener compatibilidad
+         * con la vista de edición que ya utiliza esa variable.
+         */
         $destinos = Destino::findOrFail($id);
 
         return view(
@@ -181,7 +195,7 @@ class DestinoController extends Controller
     }
 
     /**
-     * Elimina un paquete que no tenga reservas.
+     * Elimina un paquete que no tenga reservas asociadas.
      */
     public function destroy(string $id)
     {
@@ -221,22 +235,42 @@ class DestinoController extends Controller
     }
 
     /**
-     * Valida los datos recibidos desde los formularios.
+     * Muestra el detalle público de un paquete publicado.
+     */
+    public function detalle(string $slug)
+    {
+        $destino = Destino::where('slug', $slug)
+            ->where('estado_publicacion', 'publicado')
+            ->firstOrFail();
+
+        return view(
+            'paquetes.detalle',
+            compact('destino')
+        );
+    }
+
+    /**
+     * Valida los datos enviados desde crear y editar.
      */
     private function validarDatos(
-            Request $request,
-            bool $esCreacion
-        ): array {
-            $request->merge([
-                'incluye' => $this->limpiarLista(
-                    $request->input('incluye', [])
-                ),
+        Request $request,
+        bool $esCreacion
+    ): array {
+        /*
+         * Se eliminan primero las filas vacías de las listas dinámicas.
+         * Así no producen errores los inputs vacíos agregados por JS.
+         */
+        $request->merge([
+            'incluye' => $this->limpiarLista(
+                $request->input('incluye', [])
+            ),
 
-                'no_incluye' => $this->limpiarLista(
-                    $request->input('no_incluye', [])
-                ),
-            ]);
-            return $request->validate(
+            'no_incluye' => $this->limpiarLista(
+                $request->input('no_incluye', [])
+            ),
+        ]);
+
+        $datos = $request->validate(
             [
                 'nombre_paquete' => [
                     'required',
@@ -254,12 +288,14 @@ class DestinoController extends Controller
                     'required',
                     'string',
                     'max:100',
+                    "regex:/^[\\pL\\s.'’-]+$/u",
                 ],
 
                 'ciudad_destino' => [
                     'required',
                     'string',
                     'max:100',
+                    "regex:/^[\\pL\\s.'’-]+$/u",
                 ],
 
                 'categoria' => [
@@ -283,11 +319,13 @@ class DestinoController extends Controller
                     'required',
                     'string',
                     'max:150',
+                    "regex:/^[\\pL\\s.'’-]+$/u",
                 ],
 
                 'fecha_salida' => [
                     'required',
                     'date',
+                    'after_or_equal:today',
                 ],
 
                 'fecha_regreso' => [
@@ -328,16 +366,23 @@ class DestinoController extends Controller
                     'lte:dias',
                 ],
 
+                /*
+                 * El sistema manejará paquetes con transporte aéreo.
+                 * La aerolínea permanece nullable porque puede confirmarse
+                 * posteriormente durante la preparación del viaje.
+                 */
                 'aerolinea' => [
                     'nullable',
                     'string',
                     'max:120',
+                    'regex:/\\pL/u',
                 ],
 
                 'hotel' => [
                     'nullable',
                     'string',
                     'max:150',
+                    'regex:/\\pL/u',
                 ],
 
                 'capacidad' => [
@@ -369,6 +414,9 @@ class DestinoController extends Controller
                     'max:255',
                 ],
 
+                /*
+                 * Itinerario común del paquete.
+                 */
                 'itinerario' => [
                     'required',
                     'array',
@@ -379,7 +427,8 @@ class DestinoController extends Controller
                     'required',
                     'integer',
                     'min:1',
-                    'max:365',
+                    'lte:dias',
+                    'distinct',
                 ],
 
                 'itinerario.*.titulo' => [
@@ -391,6 +440,67 @@ class DestinoController extends Controller
                 'itinerario.*.descripcion' => [
                     'required',
                     'string',
+                ],
+
+                'itinerario.*.actividades' => [
+                    'nullable',
+                    'array',
+                ],
+
+                /*
+                 * Cada actividad conserva un UUID estable para poder
+                 * relacionarla posteriormente con tareas de preparación.
+                 */
+                'itinerario.*.actividades.*.uuid' => [
+                    'nullable',
+                    'uuid',
+                ],
+
+                'itinerario.*.actividades.*.nombre' => [
+                    'required',
+                    'string',
+                    'max:150',
+                ],
+
+                'itinerario.*.actividades.*.descripcion' => [
+                    'nullable',
+                    'string',
+                    'max:1000',
+                ],
+
+                /*
+                 * Los horarios son opcionales, como se acordó.
+                 */
+                'itinerario.*.actividades.*.hora_inicio' => [
+                    'nullable',
+                    'date_format:H:i',
+                ],
+
+                'itinerario.*.actividades.*.hora_fin' => [
+                    'nullable',
+                    'date_format:H:i',
+                ],
+
+                'itinerario.*.actividades.*.ubicacion' => [
+                    'nullable',
+                    'string',
+                    'max:180',
+                ],
+
+                /*
+                 * Solo se generarán tareas cuando la actividad
+                 * realmente requiera gestión.
+                 */
+                'itinerario.*.actividades.*.requiere_gestion' => [
+                    'nullable',
+                    'boolean',
+                ],
+
+                'itinerario.*.actividades.*.tipo_gestion' => [
+                    'nullable',
+                    Rule::in(
+                        TareaOperacionViaje::tiposPermitidos()
+                    ),
                 ],
 
                 'condiciones' => [
@@ -425,8 +535,14 @@ class DestinoController extends Controller
                 'pais.required' =>
                     'El país de destino es obligatorio.',
 
+                'pais.regex' =>
+                    'El país de destino solo puede contener letras.',
+
                 'ciudad_destino.required' =>
                     'La ciudad de destino es obligatoria.',
+
+                'ciudad_destino.regex' =>
+                    'La ciudad de destino solo puede contener letras.',
 
                 'categoria.required' =>
                     'Selecciona una categoría.',
@@ -443,8 +559,14 @@ class DestinoController extends Controller
                 'ciudad_salida.required' =>
                     'La ciudad de salida es obligatoria.',
 
+                'ciudad_salida.regex' =>
+                    'La ciudad de salida solo puede contener letras.',
+
                 'fecha_salida.required' =>
                     'La fecha de salida es obligatoria.',
+
+                'fecha_salida.after_or_equal' =>
+                    'La fecha de salida no puede ser anterior a hoy.',
 
                 'fecha_regreso.required' =>
                     'La fecha de regreso es obligatoria.',
@@ -454,6 +576,9 @@ class DestinoController extends Controller
 
                 'precio.required' =>
                     'El precio del paquete es obligatorio.',
+
+                'precio.numeric' =>
+                    'El precio del paquete debe ser un número válido.',
 
                 'precio_promocional.lt' =>
                     'El precio promocional debe ser menor al precio normal.',
@@ -466,6 +591,12 @@ class DestinoController extends Controller
 
                 'noches.lte' =>
                     'La cantidad de noches no puede superar los días.',
+
+                'aerolinea.regex' =>
+                    'La aerolínea debe incluir letras.',
+
+                'hotel.regex' =>
+                    'El hotel o alojamiento debe incluir letras.',
 
                 'capacidad.required' =>
                     'La capacidad del paquete es obligatoria.',
@@ -482,8 +613,50 @@ class DestinoController extends Controller
                 'itinerario.required' =>
                     'Agrega al menos un día al itinerario.',
 
+                'itinerario.min' =>
+                    'Agrega al menos un día al itinerario.',
+
+                'itinerario.*.dia.required' =>
+                    'Indica el número de día del itinerario.',
+
+                'itinerario.*.dia.lte' =>
+                    'El día del itinerario no puede superar la duración del paquete.',
+
+                'itinerario.*.dia.distinct' =>
+                    'No pueden existir días repetidos en el itinerario.',
+
+                'itinerario.*.titulo.required' =>
+                    'El título del día es obligatorio.',
+
+                'itinerario.*.descripcion.required' =>
+                    'La descripción del día es obligatoria.',
+
+                'itinerario.*.actividades.*.uuid.uuid' =>
+                    'El identificador de la actividad no es válido.',
+
+                'itinerario.*.actividades.*.nombre.required' =>
+                    'El nombre de la actividad es obligatorio.',
+
+                'itinerario.*.actividades.*.nombre.max' =>
+                    'El nombre de la actividad no debe superar 150 caracteres.',
+
+                'itinerario.*.actividades.*.hora_inicio.date_format' =>
+                    'La hora de inicio debe tener un formato válido.',
+
+                'itinerario.*.actividades.*.hora_fin.date_format' =>
+                    'La hora de finalización debe tener un formato válido.',
+
+                'itinerario.*.actividades.*.ubicacion.max' =>
+                    'La ubicación no debe superar 180 caracteres.',
+
+                'itinerario.*.actividades.*.tipo_gestion.in' =>
+                    'El tipo de gestión seleccionado no es válido.',
+
                 'estado_publicacion.required' =>
                     'Selecciona el estado de publicación.',
+
+                'estado_publicacion.in' =>
+                    'El estado de publicación seleccionado no es válido.',
 
                 'imagen.required' =>
                     'La imagen principal es obligatoria.',
@@ -498,47 +671,197 @@ class DestinoController extends Controller
                     'La imagen no debe superar los 5 MB.',
             ]
         );
+
+        $this->validarActividadesItinerario(
+            $datos['itinerario'] ?? []
+        );
+
+        return $datos;
     }
 
     /**
-     * Elimina elementos vacíos de una lista.
+     * Aplica validaciones que dependen de varios campos.
+     */
+    private function validarActividadesItinerario(
+        array $itinerario
+    ): void {
+        $errores = [];
+
+        foreach ($itinerario as $diaIndice => $dia) {
+            foreach (
+                $dia['actividades'] ?? []
+                as $actividadIndice => $actividad
+            ) {
+                $horaInicio = $actividad['hora_inicio'] ?? null;
+                $horaFin = $actividad['hora_fin'] ?? null;
+
+                if (
+                    $horaInicio &&
+                    $horaFin &&
+                    $horaFin <= $horaInicio
+                ) {
+                    $campo =
+                        "itinerario.$diaIndice.actividades."
+                        . "$actividadIndice.hora_fin";
+
+                    $errores[$campo] =
+                        'La hora de finalización debe ser posterior a la hora de inicio.';
+                }
+
+                $requiereGestion = filter_var(
+                    $actividad['requiere_gestion'] ?? false,
+                    FILTER_VALIDATE_BOOLEAN
+                );
+
+                if (
+                    $requiereGestion &&
+                    empty($actividad['tipo_gestion'])
+                ) {
+                    $campo =
+                        "itinerario.$diaIndice.actividades."
+                        . "$actividadIndice.tipo_gestion";
+
+                    $errores[$campo] =
+                        'Selecciona el tipo de gestión que requiere la actividad.';
+                }
+            }
+        }
+
+        if (!empty($errores)) {
+            throw ValidationException::withMessages($errores);
+        }
+    }
+
+    /**
+     * Elimina elementos vacíos de una lista dinámica.
      */
     private function limpiarLista(array $elementos): array
     {
         return array_values(
             array_filter(
-                $elementos,
-                fn ($elemento) =>
-                    is_string($elemento) &&
-                    trim($elemento) !== ''
+                array_map(
+                    fn ($elemento) =>
+                        is_string($elemento)
+                            ? trim($elemento)
+                            : '',
+                    $elementos
+                ),
+                fn ($elemento) => $elemento !== ''
             )
         );
     }
 
     /**
-     * Organiza los días válidos del itinerario.
+     * Normaliza, ordena y limpia el itinerario y sus actividades.
      */
     private function limpiarItinerario(array $itinerario): array
     {
-        return array_values(
-            array_filter(
-                $itinerario,
+        return collect($itinerario)
+            ->filter(
                 fn ($dia) =>
                     !empty($dia['dia']) &&
                     !empty($dia['titulo']) &&
                     !empty($dia['descripcion'])
             )
-        );
+            ->map(function ($dia) {
+                $actividades = collect(
+                    $dia['actividades'] ?? []
+                )
+                    ->filter(
+                        fn ($actividad) =>
+                            filled($actividad['nombre'] ?? null)
+                    )
+                    ->map(function ($actividad) {
+                        $requiereGestion = filter_var(
+                            $actividad['requiere_gestion'] ?? false,
+                            FILTER_VALIDATE_BOOLEAN
+                        );
+
+                        $uuid = filled($actividad['uuid'] ?? null)
+                            ? (string) $actividad['uuid']
+                            : (string) Str::uuid();
+
+                        return [
+                            'uuid' => $uuid,
+
+                            'nombre' => trim(
+                                (string) $actividad['nombre']
+                            ),
+
+                            'descripcion' => filled(
+                                $actividad['descripcion'] ?? null
+                            )
+                                ? trim(
+                                    (string) $actividad['descripcion']
+                                )
+                                : null,
+
+                            'hora_inicio' => filled(
+                                $actividad['hora_inicio'] ?? null
+                            )
+                                ? $actividad['hora_inicio']
+                                : null,
+
+                            'hora_fin' => filled(
+                                $actividad['hora_fin'] ?? null
+                            )
+                                ? $actividad['hora_fin']
+                                : null,
+
+                            'ubicacion' => filled(
+                                $actividad['ubicacion'] ?? null
+                            )
+                                ? trim(
+                                    (string) $actividad['ubicacion']
+                                )
+                                : null,
+
+                            'requiere_gestion' =>
+                                $requiereGestion,
+
+                            'tipo_gestion' => $requiereGestion
+                                ? (
+                                    $actividad['tipo_gestion']
+                                    ?? 'otro'
+                                )
+                                : null,
+                        ];
+                    })
+                    ->values()
+                    ->all();
+
+                return [
+                    'dia' => (int) $dia['dia'],
+
+                    'titulo' => trim(
+                        (string) $dia['titulo']
+                    ),
+
+                    'descripcion' => trim(
+                        (string) $dia['descripcion']
+                    ),
+
+                    'actividades' => $actividades,
+                ];
+            })
+            ->sortBy('dia')
+            ->values()
+            ->all();
     }
 
     /**
-     * Genera una dirección única para la página del paquete.
+     * Genera una dirección única para la página pública del paquete.
      */
     private function generarSlugUnico(
         string $nombre,
         ?int $destinoId = null
     ): string {
         $slugBase = Str::slug($nombre);
+
+        if ($slugBase === '') {
+            $slugBase = 'paquete';
+        }
+
         $slug = $slugBase;
         $numero = 2;
 
@@ -547,7 +870,11 @@ class DestinoController extends Controller
                 ->when(
                     $destinoId,
                     fn ($consulta) =>
-                        $consulta->where('id', '!=', $destinoId)
+                        $consulta->where(
+                            'id',
+                            '!=',
+                            $destinoId
+                        )
                 )
                 ->exists()
         ) {
@@ -556,14 +883,5 @@ class DestinoController extends Controller
         }
 
         return $slug;
-    }
-
-    public function detalle(string $slug)
-    {
-        $destino = Destino::where('slug', $slug)
-            ->where('estado_publicacion', 'publicado')
-            ->firstOrFail();
-
-        return view('paquetes.detalle', compact('destino'));
     }
 }

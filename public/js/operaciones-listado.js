@@ -43,7 +43,25 @@ $(function () {
                 reverseButtons: true,
             }).then(function (resultado) {
                 if (resultado.isConfirmed) {
-                    formulario.submit();
+                    const accion = formulario.getAttribute('action');
+
+                    if (
+                        !accion ||
+                        accion === 'undefined' ||
+                        accion.endsWith('/undefined')
+                    ) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'No se pudo iniciar la preparación',
+                            text: 'La reserva no tiene una ruta válida. Recarga la página e inténtalo nuevamente.',
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#094c90',
+                        });
+
+                        return;
+                    }
+
+                    HTMLFormElement.prototype.submit.call(formulario);
                 }
             });
         }

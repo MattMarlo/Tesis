@@ -2,9 +2,17 @@
     class="modal fade"
     id="modalVuelo"
     tabindex="-1"
+    aria-labelledby="tituloModalVuelo"
     aria-hidden="true"
 >
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div
+        class="
+            modal-dialog
+            modal-xl
+            modal-dialog-centered
+            modal-dialog-scrollable
+        "
+    >
         <form
             id="formularioVuelo"
             method="POST"
@@ -25,9 +33,21 @@
                 disabled
             >
 
+            {{--
+                Cuando el modal se abre desde una tarea, este campo
+                permite crear y vincular el vuelo automáticamente.
+            --}}
+            <input
+                type="hidden"
+                name="tarea_id"
+                id="vueloTareaId"
+                value=""
+            >
+
             <div class="modal-header">
                 <div>
                     <span>Transporte aéreo</span>
+
                     <h2 id="tituloModalVuelo">
                         Agregar vuelo
                     </h2>
@@ -42,6 +62,41 @@
             </div>
 
             <div class="modal-body">
+                {{--
+                    Este bloque permanecerá oculto cuando el vuelo se
+                    cree desde el módulo general. Se mostrará cuando
+                    el modal se abra desde una tarea del itinerario.
+                --}}
+                <div
+                    id="vueloContextoTarea"
+                    class="contexto-tarea-modal"
+                    hidden
+                >
+                    <div class="contexto-tarea-modal-icono">
+                        <i class="bi bi-airplane"></i>
+                    </div>
+
+                    <div class="contexto-tarea-modal-contenido">
+                        <span>
+                            Tarea del itinerario
+                        </span>
+
+                        <strong id="vueloContextoNombre">
+                            Vuelo
+                        </strong>
+
+                        <small id="vueloContextoProgramacion">
+                        </small>
+
+                        <p>
+                            El vuelo creado quedará vinculado con esta
+                            tarea. Su estado se actualizará según la
+                            confirmación del vuelo y los boletos
+                            emitidos para los viajeros.
+                        </p>
+                    </div>
+                </div>
+
                 <div class="formulario-expediente-grid">
                     <div class="campo-expediente">
                         <label for="vueloTipoTramo">
@@ -56,9 +111,18 @@
                             <option value="">
                                 Selecciona una opción
                             </option>
-                            <option value="ida">Ida</option>
-                            <option value="regreso">Regreso</option>
-                            <option value="conexion">Conexión</option>
+
+                            <option value="ida">
+                                Ida
+                            </option>
+
+                            <option value="regreso">
+                                Regreso
+                            </option>
+
+                            <option value="conexion">
+                                Conexión
+                            </option>
                         </select>
                     </div>
 
@@ -72,6 +136,7 @@
                             name="aerolinea"
                             type="text"
                             maxlength="120"
+                            autocomplete="organization"
                             required
                         >
                     </div>
@@ -86,7 +151,7 @@
                             name="numero_vuelo"
                             type="text"
                             maxlength="30"
-                            placeholder="Ejemplo: AV 1632"
+                            placeholder="Ejemplo: LA 1447"
                         >
                     </div>
 
@@ -103,9 +168,11 @@
                             <option value="confirmado">
                                 Confirmado
                             </option>
+
                             <option value="pendiente">
                                 Pendiente
                             </option>
+
                             <option value="cancelado">
                                 Cancelado
                             </option>
@@ -291,17 +358,31 @@
                             Moneda <strong>*</strong>
                         </label>
 
-                        <input
+                        <select
                             id="vueloMoneda"
                             name="moneda"
-                            type="text"
-                            value="USD"
-                            maxlength="3"
                             required
                         >
+                            <option value="USD">
+                                USD
+                            </option>
+
+                            <option value="EUR">
+                                EUR
+                            </option>
+
+                            <option value="PEN">
+                                PEN
+                            </option>
+                        </select>
                     </div>
 
-                    <div class="campo-expediente campo-completo">
+                    <div
+                        class="
+                            campo-expediente
+                            campo-completo
+                        "
+                    >
                         <label for="vueloObservaciones">
                             Observaciones
                         </label>
@@ -311,14 +392,16 @@
                             name="observaciones"
                             rows="3"
                             maxlength="1000"
+                            placeholder="Información adicional del vuelo..."
                         ></textarea>
                     </div>
                 </div>
 
                 <div class="nota-interna-expediente">
                     <i class="bi bi-info-circle"></i>
-                    El proveedor y costo son datos internos y no se
-                    enviarán al cliente.
+
+                    El proveedor y el costo son datos internos y no
+                    se enviarán al cliente.
                 </div>
             </div>
 

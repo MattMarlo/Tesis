@@ -4,13 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\AlojamientoReserva;
 use App\Models\OperacionViaje;
+use App\Models\TareaOperacionViaje;
+use App\Services\EstadoTareaContextualService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class AlojamientoReservaController extends Controller
 {
+    public function __construct(
+        private readonly EstadoTareaContextualService $estadoTareaContextual
+    ) {
+    }
+
     public function store(
         Request $request,
         OperacionViaje $operacion
@@ -32,17 +41,27 @@ class AlojamientoReservaController extends Controller
             $request
         );
 
-        $operacion
-            ->alojamientos()
-            ->create($datos);
+        $tarea = $this->obtenerTareaAlojamiento($request, $operacion);
 
-        $this->marcarEnPreparacion(
-            $operacion
-        );
+        DB::transaction(function () use ($operacion, $datos, $tarea, $request): void {
+            $alojamiento = $operacion->alojamientos()->create($datos);
+
+            if ($tarea) {
+                $this->estadoTareaContextual->vincular(
+                    $tarea,
+                    $alojamiento,
+                    $request->user()
+                );
+            }
+
+            $this->marcarEnPreparacion($operacion);
+        });
 
         return back()->with(
             'success',
-            'Alojamiento registrado correctamente.'
+            $tarea
+                ? 'Alojamiento registrado y vinculado con la tarea correctamente.'
+                : 'Alojamiento registrado correctamente.'
         );
     }
 
@@ -71,13 +90,32 @@ class AlojamientoReservaController extends Controller
             $request
         );
 
-        $alojamiento->update(
-            $datos
-        );
-
-        $this->marcarEnPreparacion(
+        $tarea = $this->obtenerTareaAlojamiento(
+            $request,
             $alojamiento->operacion
         );
+
+        DB::transaction(function () use ($alojamiento, $datos, $tarea, $request): void {
+            $alojamiento->update($datos);
+
+            if ($tarea) {
+                $this->estadoTareaContextual->vincular(
+                    $tarea,
+                    $alojamiento,
+                    $request->user()
+                );
+            }
+
+            $alojamiento->tareas()->vigentes()->get()->each(
+                fn (TareaOperacionViaje $tareaVinculada) =>
+                    $this->estadoTareaContextual->sincronizar(
+                        $tareaVinculada,
+                        $request->user()
+                    )
+            );
+
+            $this->marcarEnPreparacion($alojamiento->operacion);
+        });
 
         return back()->with(
             'success',
@@ -108,11 +146,14 @@ class AlojamientoReservaController extends Controller
         $operacion =
             $alojamiento->operacion;
 
-        $alojamiento->delete();
-
-        $this->marcarEnPreparacion(
-            $operacion
-        );
+        DB::transaction(function () use ($alojamiento, $operacion): void {
+            $alojamiento->tareas()->get()->each(
+                fn (TareaOperacionViaje $tarea) =>
+                    $this->estadoTareaContextual->desvincular($tarea)
+            );
+            $alojamiento->delete();
+            $this->marcarEnPreparacion($operacion);
+        });
 
         return back()->with(
             'success',
@@ -131,6 +172,11 @@ class AlojamientoReservaController extends Controller
                 'max:180',
             ],
             'ciudad' => [
+                'required',
+                'string',
+                'max:120',
+            ],
+            'pais' => [
                 'required',
                 'string',
                 'max:120',
@@ -154,11 +200,6 @@ class AlojamientoReservaController extends Controller
                 'required',
                 'date',
                 'after:fecha_hora_entrada',
-            ],
-            'codigo_confirmacion' => [
-                'nullable',
-                'string',
-                'max:100',
             ],
             'tipo_habitacion' => [
                 'required',
@@ -266,6 +307,43 @@ class AlojamientoReservaController extends Controller
             'tipo_habitacion.required' =>
                 'Ingresa el tipo de habitación.',
         ]);
+    }
+
+    private function obtenerTareaAlojamiento(
+        Request $request,
+        OperacionViaje $operacion
+    ): ?TareaOperacionViaje {
+        $request->validate([
+            'tarea_id' => ['nullable', 'integer'],
+        ]);
+
+        if (!$request->filled('tarea_id')) {
+            return null;
+        }
+
+        $tarea = $operacion->tareas()
+            ->whereKey((int) $request->input('tarea_id'))
+            ->first();
+
+        if (!$tarea) {
+            throw ValidationException::withMessages([
+                'tarea_id' => 'La tarea seleccionada no pertenece a este expediente.',
+            ]);
+        }
+
+        if (!$tarea->vigente) {
+            throw ValidationException::withMessages([
+                'tarea_id' => 'La tarea seleccionada ya no está vigente.',
+            ]);
+        }
+
+        if ($tarea->tipo_gestion !== TareaOperacionViaje::TIPO_ALOJAMIENTO) {
+            throw ValidationException::withMessages([
+                'tarea_id' => 'La tarea seleccionada no corresponde a una gestión de alojamiento.',
+            ]);
+        }
+
+        return $tarea;
     }
 
     private function validarExpedienteEditable(

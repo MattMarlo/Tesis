@@ -884,21 +884,9 @@ class PreReservaController extends Controller
 
         $cliente = null;
 
-        if ($preReserva->email) {
-            $cliente = Cliente::where(
-                'email',
-                mb_strtolower(
-                    trim(
-                        $preReserva->email
-                    )
-                )
-            )->first();
-        }
-
-        if (
-            ! $cliente &&
-            $preReserva->cedula
-        ) {
+        // El documento identifica al cliente. El correo o el telefono solo
+        // sirven como respaldo cuando la prerreserva no tiene documento.
+        if ($preReserva->cedula) {
             $cliente = Cliente::where(
                 'documento',
                 $preReserva->cedula
@@ -907,12 +895,28 @@ class PreReservaController extends Controller
 
         if (
             ! $cliente &&
-            $preReserva->telefono
+            ! $preReserva->cedula &&
+            $preReserva->email
         ) {
             $cliente = Cliente::where(
-                'telefono',
-                $preReserva->telefono
+                'email',
+                mb_strtolower(trim($preReserva->email))
             )->first();
+        }
+
+        if (
+            ! $cliente &&
+            ! $preReserva->cedula &&
+            $preReserva->telefono
+        ) {
+            $telefonoOriginal = trim($preReserva->telefono);
+            $soloDigitos = preg_replace('/\D+/', '', $telefonoOriginal);
+
+            $cliente = Cliente::whereIn('telefono', array_unique([
+                $telefonoOriginal,
+                $soloDigitos,
+                '+'.$soloDigitos,
+            ]))->first();
         }
 
         if (! $cliente) {

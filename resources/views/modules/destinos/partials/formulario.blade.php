@@ -19,9 +19,16 @@
                 'dia' => 1,
                 'titulo' => '',
                 'descripcion' => '',
+                'actividades' => [],
             ]
         ]
     );
+
+    $etiquetasTipoGestion =
+        \App\Models\TareaOperacionViaje::etiquetasTipoGestion();
+
+    $tiposGestionSeleccionables =
+        \App\Models\TareaOperacionViaje::TIPOS_SELECCIONABLES;
 @endphp
 
 <link
@@ -279,6 +286,7 @@
                         name="ciudad_salida"
                         id="ciudad_salida"
                         class="form-control"
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç\s.'’-]+"
                         value="{{ old(
                             'ciudad_salida',
                             $destino?->ciudad_salida
@@ -301,6 +309,7 @@
                         name="pais"
                         id="pais"
                         class="form-control"
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç\s.'’-]+"
                         value="{{ old(
                             'pais',
                             $destino?->pais
@@ -323,6 +332,7 @@
                         name="ciudad_destino"
                         id="ciudad_destino"
                         class="form-control"
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñÀÈÌÒÙàèìòùÇç\s.'’-]+"
                         value="{{ old(
                             'ciudad_destino',
                             $destino?->ciudad_destino
@@ -364,6 +374,7 @@
                         name="fecha_salida"
                         id="fecha_salida"
                         class="form-control"
+                        min="{{ now()->format('Y-m-d') }}"
                         value="{{ old(
                             'fecha_salida',
                             $destino?->fecha_salida?->format('Y-m-d')
@@ -384,6 +395,10 @@
                         name="fecha_regreso"
                         id="fecha_regreso"
                         class="form-control"
+                        min="{{ old(
+                            'fecha_salida',
+                            $destino?->fecha_salida?->format('Y-m-d')
+                        ) ?: now()->format('Y-m-d') }}"
                         value="{{ old(
                             'fecha_regreso',
                             $destino?->fecha_regreso?->format('Y-m-d')
@@ -771,7 +786,7 @@
 
                             <div class="campo campo-completo">
                                 <label>
-                                    Actividades
+                                    Descripción general del día
                                     <span>*</span>
                                 </label>
 
@@ -779,8 +794,220 @@
                                     name="itinerario[{{ $indice }}][descripcion]"
                                     class="form-control descripcion-dia"
                                     rows="3"
-                                    placeholder="Describe las actividades planificadas"
+                                    placeholder="Describe el objetivo y la planificación general del día"
                                 >{{ $dia['descripcion'] ?? '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="actividades-dia">
+                            <div class="actividades-cabecera">
+                                <div>
+                                    <h4>Actividades del día</h4>
+
+                                    <p>
+                                        Los horarios son opcionales. Marca
+                                        únicamente las actividades que requieran
+                                        preparación o coordinación de la agencia.
+                                        Cada actividad gestionable debe representar
+                                        una sola coordinación; por ejemplo, separa
+                                        la reserva del tren y el traslado al hotel.
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="btn-agregar btn-agregar-actividad"
+                                >
+                                    <i class="bi bi-plus-lg"></i>
+                                    Agregar actividad
+                                </button>
+                            </div>
+
+                            <div class="lista-actividades">
+                                @foreach(($dia['actividades'] ?? []) as $actividadIndice => $actividad)
+                                    @php
+                                        $requiereGestion = filter_var(
+                                            $actividad['requiere_gestion'] ?? false,
+                                            FILTER_VALIDATE_BOOLEAN
+                                        );
+
+                                        $uuidActividad = $actividad['uuid']
+                                            ?? (string) \Illuminate\Support\Str::uuid();
+                                    @endphp
+
+                                    <div class="actividad-itinerario">
+                                        <div class="actividad-cabecera">
+                                            <strong>
+                                                Actividad
+                                                <span class="numero-actividad">
+                                                    {{ $actividadIndice + 1 }}
+                                                </span>
+                                            </strong>
+
+                                            <button
+                                                type="button"
+                                                class="btn-eliminar-actividad"
+                                            >
+                                                <i class="bi bi-trash"></i>
+                                                Eliminar
+                                            </button>
+                                        </div>
+
+                                        <input
+                                            type="hidden"
+                                            name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][uuid]"
+                                            class="actividad-uuid"
+                                            value="{{ $uuidActividad }}"
+                                        >
+
+                                        <div class="campos-grid">
+                                            <div class="campo campo-completo">
+                                                <label>
+                                                    Nombre de la actividad
+                                                    <span>*</span>
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][nombre]"
+                                                    class="form-control actividad-nombre"
+                                                    value="{{ $actividad['nombre'] ?? '' }}"
+                                                    placeholder="Ej. Traslado del aeropuerto al hotel"
+                                                    maxlength="150"
+                                                >
+
+                                                <small class="mensaje-error"></small>
+                                            </div>
+
+                                            <div class="campo campo-completo">
+                                                <label>Descripción</label>
+
+                                                <textarea
+                                                    name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][descripcion]"
+                                                    class="form-control actividad-descripcion"
+                                                    rows="2"
+                                                    maxlength="1000"
+                                                    placeholder="Información adicional de la actividad"
+                                                >{{ $actividad['descripcion'] ?? '' }}</textarea>
+                                            </div>
+
+                                            <div class="campo">
+                                                <label>Hora de inicio</label>
+
+                                                <input
+                                                    type="time"
+                                                    name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][hora_inicio]"
+                                                    class="form-control actividad-hora-inicio"
+                                                    value="{{ $actividad['hora_inicio'] ?? '' }}"
+                                                >
+
+                                                <small class="mensaje-error"></small>
+                                            </div>
+
+                                            <div class="campo">
+                                                <label>Hora de finalización</label>
+
+                                                <input
+                                                    type="time"
+                                                    name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][hora_fin]"
+                                                    class="form-control actividad-hora-fin"
+                                                    value="{{ $actividad['hora_fin'] ?? '' }}"
+                                                >
+
+                                                <small class="mensaje-error"></small>
+                                            </div>
+
+                                            <div class="campo campo-completo">
+                                                <label>Ubicación</label>
+
+                                                <input
+                                                    type="text"
+                                                    name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][ubicacion]"
+                                                    class="form-control actividad-ubicacion"
+                                                    value="{{ $actividad['ubicacion'] ?? '' }}"
+                                                    placeholder="Ej. Aeropuerto Internacional Mariscal Sucre"
+                                                    maxlength="180"
+                                                >
+                                            </div>
+
+                                            <div class="campo campo-completo campo-gestion">
+                                                <input
+                                                    type="hidden"
+                                                    name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][requiere_gestion]"
+                                                    class="actividad-requiere-gestion-oculto"
+                                                    value="0"
+                                                >
+
+                                                <label class="opcion-check">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][requiere_gestion]"
+                                                        class="actividad-requiere-gestion"
+                                                        value="1"
+                                                        @checked($requiereGestion)
+                                                    >
+
+                                                    <span>
+                                                        Esta actividad requiere gestión
+                                                        o preparación de la agencia
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                            <div
+                                                class="campo campo-completo contenedor-tipo-gestion"
+                                                @if(!$requiereGestion) hidden @endif
+                                            >
+                                                <label>
+                                                    Tipo de gestión
+                                                    <span>*</span>
+                                                </label>
+
+                                                <select
+                                                    name="itinerario[{{ $indice }}][actividades][{{ $actividadIndice }}][tipo_gestion]"
+                                                    class="form-select actividad-tipo-gestion"
+                                                    @disabled(!$requiereGestion)
+                                                >
+                                                    <option value="">
+                                                        Selecciona el tipo de gestión
+                                                    </option>
+
+                                                    @php
+                                                        $tipoActual =
+                                                            $actividad['tipo_gestion']
+                                                            ?? '';
+                                                    @endphp
+
+                                                    @if(in_array(
+                                                        $tipoActual,
+                                                        \App\Models\TareaOperacionViaje::TIPOS_LEGACY,
+                                                        true
+                                                    ))
+                                                        <option
+                                                            value="{{ $tipoActual }}"
+                                                            selected
+                                                        >
+                                                            {{ $etiquetasTipoGestion[$tipoActual] }}
+                                                        </option>
+                                                    @endif
+
+                                                    @foreach($tiposGestionSeleccionables as $tipoValor)
+                                                        <option
+                                                            value="{{ $tipoValor }}"
+                                                            @selected(
+                                                                $tipoActual === $tipoValor
+                                                            )
+                                                        >
+                                                            {{ $etiquetasTipoGestion[$tipoValor] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+
+                                                <small class="mensaje-error"></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>

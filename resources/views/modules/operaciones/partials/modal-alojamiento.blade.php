@@ -25,6 +25,13 @@
                 disabled
             >
 
+            <input
+                type="hidden"
+                name="tarea_id"
+                id="alojamientoTareaId"
+                value=""
+            >
+
             <div class="modal-header">
                 <div>
                     <span>Hospedaje</span>
@@ -43,6 +50,19 @@
             </div>
 
             <div class="modal-body">
+                <div
+                    id="alojamientoContextoTarea"
+                    class="contexto-tarea-modal"
+                    hidden
+                >
+                    <i class="bi bi-signpost-split"></i>
+                    <div>
+                        <small>Alojamiento solicitado por el itinerario</small>
+                        <strong id="alojamientoContextoNombre"></strong>
+                        <span id="alojamientoContextoProgramacion"></span>
+                    </div>
+                </div>
+
                 <div class="formulario-expediente-grid">
                     <div class="campo-expediente">
                         <label for="alojamientoHotel">

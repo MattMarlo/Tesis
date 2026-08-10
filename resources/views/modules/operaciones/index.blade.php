@@ -338,5 +338,5 @@
 </script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="{{ asset('js/operaciones-listado.js') }}"></script>
+<script src="{{ asset('js/operaciones-listado.js') }}?v={{ filemtime(public_path('js/operaciones-listado.js')) }}"></script>
 @endsection

@@ -76,12 +76,12 @@
                 Inicio
             </a>
 
-            <a href="{{ url('/#nosotros') }}" class="enlace-menu">
-                Quiénes somos
-            </a>
-
             <a href="{{ url('/#paquetes') }}" class="enlace-menu">
                 Paquetes
+            </a>
+
+            <a href="{{ url('/#nosotros') }}" class="enlace-menu">
+                Quiénes somos
             </a>
 
             <a href="{{ url('/#destinos') }}" class="enlace-menu">
@@ -108,7 +108,7 @@
                 class="boton-telegram-menu"
             >
                 <i class="fa fa-telegram"></i>
-                Hablar con un asesor
+                Mas información
             </a>
         </nav>
 

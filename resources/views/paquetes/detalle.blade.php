@@ -2,26 +2,33 @@
 
 @section('title', $destino->nombre_paquete . ' | Passion Travel')
 
-@section('descripcion',
+@section(
+    'descripcion',
     $destino->descripcion_corta
         ?: 'Conoce todos los detalles de este paquete turístico.'
 )
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/paquete-detalle.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ asset('css/paquete-detalle.css') }}"
+    >
 @endsection
 
 @section('content')
 
 @php
-    $precioActual = $destino->precio_promocional
+    $precioActual =
+        $destino->precio_promocional
         ?: $destino->precio;
 
-    $mensajeTelegram = 'Hola, deseo recibir información sobre el paquete: '
+    $mensajeTelegram =
+        'Hola, deseo recibir información sobre el paquete: '
         . $destino->nombre_paquete;
 
-    $enlaceTelegram = 'https://t.me/AsistentePassionTravelVJBot?text=' .
-        urlencode($mensajeTelegram);
+    $enlaceTelegram =
+        'https://t.me/AsistentePassionTravelVJBot?text='
+        . urlencode($mensajeTelegram);
 @endphp
 
 {{-- Navegación secundaria --}}
@@ -41,7 +48,9 @@
 
         <i class="fa fa-angle-right"></i>
 
-        <span>{{ $destino->nombre_paquete }}</span>
+        <span>
+            {{ $destino->nombre_paquete }}
+        </span>
 
     </div>
 </section>
@@ -82,16 +91,20 @@
 
         </div>
 
-        <h1>{{ $destino->nombre_paquete }}</h1>
+        <h1>
+            {{ $destino->nombre_paquete }}
+        </h1>
 
         <p class="detalle-ruta">
             <i class="fa fa-map-marker"></i>
 
-            {{ $destino->ciudad_salida ?: 'Salida por confirmar' }}
+            {{ $destino->ciudad_salida
+                ?: 'Salida por confirmar' }}
 
             <i class="fa fa-long-arrow-right"></i>
 
-            {{ $destino->ciudad_destino ?: $destino->pais }}
+            {{ $destino->ciudad_destino
+                ?: $destino->pais }}
         </p>
 
         @if($destino->descripcion_corta)
@@ -105,7 +118,9 @@
             <span>
                 <i class="fa fa-clock-o"></i>
 
-                <strong>{{ $destino->dias }} días</strong>
+                <strong>
+                    {{ $destino->dias }} días
+                </strong>
 
                 @if($destino->noches)
                     / {{ $destino->noches }} noches
@@ -114,15 +129,24 @@
 
             <span>
                 <i class="fa fa-users"></i>
-                <strong>{{ $destino->capacidad }}</strong> cupos
+
+                <strong>
+                    {{ $destino->capacidad }}
+                </strong>
+
+                cupos
             </span>
 
             @if($destino->fecha_salida)
                 <span>
                     <i class="fa fa-calendar"></i>
+
                     Salida:
+
                     <strong>
-                        {{ $destino->fecha_salida->format('d/m/Y') }}
+                        {{ $destino
+                            ->fecha_salida
+                            ->format('d/m/Y') }}
                     </strong>
                 </span>
             @endif
@@ -134,31 +158,52 @@
 </section>
 
 {{-- Navegación interna --}}
-<nav class="detalle-navegacion-interna" id="navegacionDetalle">
+<nav
+    class="detalle-navegacion-interna"
+    id="navegacionDetalle"
+>
     <div class="contenedor">
 
-        <a href="#descripcion" class="enlace-detalle activo">
+        <a
+            href="#descripcion"
+            class="enlace-detalle activo"
+        >
             Descripción
         </a>
 
-        @if($destino->incluye || $destino->no_incluye)
-            <a href="#servicios" class="enlace-detalle">
+        @if(
+            $destino->incluye ||
+            $destino->no_incluye
+        )
+            <a
+                href="#servicios"
+                class="enlace-detalle"
+            >
                 Incluye
             </a>
         @endif
 
         @if($destino->itinerario)
-            <a href="#itinerario" class="enlace-detalle">
+            <a
+                href="#itinerario"
+                class="enlace-detalle"
+            >
                 Itinerario
             </a>
         @endif
 
-        <a href="#informacion" class="enlace-detalle">
+        <a
+            href="#informacion"
+            class="enlace-detalle"
+        >
             Información
         </a>
 
         @if($destino->condiciones)
-            <a href="#condiciones" class="enlace-detalle">
+            <a
+                href="#condiciones"
+                class="enlace-detalle"
+            >
                 Condiciones
             </a>
         @endif
@@ -172,8 +217,11 @@
 
         <div class="detalle-columna-principal">
 
-            {{-- Resumen --}}
-            <section class="tarjeta-detalle" id="descripcion">
+            {{-- Descripción --}}
+            <section
+                class="tarjeta-detalle"
+                id="descripcion"
+            >
 
                 <div class="titulo-tarjeta">
                     <span class="titulo-icono">
@@ -181,8 +229,13 @@
                     </span>
 
                     <div>
-                        <span>Conoce esta experiencia</span>
-                        <h2>Descripción del paquete</h2>
+                        <span>
+                            Conoce esta experiencia
+                        </span>
+
+                        <h2>
+                            Descripción del paquete
+                        </h2>
                     </div>
                 </div>
 
@@ -194,12 +247,14 @@
 
                 @if($destino->descripcion)
                     <div class="texto-detalle">
-                        {!! nl2br(e($destino->descripcion)) !!}
+                        {!! nl2br(
+                            e($destino->descripcion)
+                        ) !!}
                     </div>
                 @else
                     <div class="texto-detalle">
-                        Consulta todos los servicios, fechas y actividades
-                        disponibles para esta experiencia.
+                        Consulta todos los servicios, fechas y
+                        actividades disponibles para esta experiencia.
                     </div>
                 @endif
 
@@ -214,9 +269,13 @@
                     </span>
 
                     <div>
-                        <span>Ciudad de salida</span>
+                        <span>
+                            Ciudad de salida
+                        </span>
+
                         <strong>
-                            {{ $destino->ciudad_salida ?: 'Por confirmar' }}
+                            {{ $destino->ciudad_salida
+                                ?: 'Por confirmar' }}
                         </strong>
                     </div>
                 </article>
@@ -227,9 +286,13 @@
                     </span>
 
                     <div>
-                        <span>Destino</span>
+                        <span>
+                            Destino
+                        </span>
+
                         <strong>
-                            {{ $destino->ciudad_destino ?: $destino->pais }}
+                            {{ $destino->ciudad_destino
+                                ?: $destino->pais }}
                         </strong>
                     </div>
                 </article>
@@ -240,10 +303,15 @@
                     </span>
 
                     <div>
-                        <span>Fecha de salida</span>
+                        <span>
+                            Fecha de salida
+                        </span>
+
                         <strong>
                             {{ $destino->fecha_salida
-                                ? $destino->fecha_salida->format('d/m/Y')
+                                ? $destino
+                                    ->fecha_salida
+                                    ->format('d/m/Y')
                                 : 'Por confirmar' }}
                         </strong>
                     </div>
@@ -255,10 +323,15 @@
                     </span>
 
                     <div>
-                        <span>Fecha de regreso</span>
+                        <span>
+                            Fecha de regreso
+                        </span>
+
                         <strong>
                             {{ $destino->fecha_regreso
-                                ? $destino->fecha_regreso->format('d/m/Y')
+                                ? $destino
+                                    ->fecha_regreso
+                                    ->format('d/m/Y')
                                 : 'Por confirmar' }}
                         </strong>
                     </div>
@@ -267,8 +340,14 @@
             </section>
 
             {{-- Incluye y no incluye --}}
-            @if($destino->incluye || $destino->no_incluye)
-                <section class="tarjeta-detalle" id="servicios">
+            @if(
+                $destino->incluye ||
+                $destino->no_incluye
+            )
+                <section
+                    class="tarjeta-detalle"
+                    id="servicios"
+                >
 
                     <div class="titulo-tarjeta">
                         <span class="titulo-icono">
@@ -276,8 +355,13 @@
                         </span>
 
                         <div>
-                            <span>Servicios considerados</span>
-                            <h2>¿Qué incluye el viaje?</h2>
+                            <span>
+                                Servicios considerados
+                            </span>
+
+                            <h2>
+                                ¿Qué incluye el viaje?
+                            </h2>
                         </div>
                     </div>
 
@@ -292,11 +376,17 @@
                                 </h3>
 
                                 <ul>
-                                    @foreach($destino->incluye as $servicio)
+                                    @foreach(
+                                        $destino->incluye
+                                        as $servicio
+                                    )
                                         @if($servicio)
                                             <li>
                                                 <i class="fa fa-check"></i>
-                                                <span>{{ $servicio }}</span>
+
+                                                <span>
+                                                    {{ $servicio }}
+                                                </span>
                                             </li>
                                         @endif
                                     @endforeach
@@ -314,11 +404,17 @@
                                 </h3>
 
                                 <ul>
-                                    @foreach($destino->no_incluye as $servicio)
+                                    @foreach(
+                                        $destino->no_incluye
+                                        as $servicio
+                                    )
                                         @if($servicio)
                                             <li>
                                                 <i class="fa fa-times"></i>
-                                                <span>{{ $servicio }}</span>
+
+                                                <span>
+                                                    {{ $servicio }}
+                                                </span>
                                             </li>
                                         @endif
                                     @endforeach
@@ -334,7 +430,10 @@
 
             {{-- Itinerario --}}
             @if($destino->itinerario)
-                <section class="tarjeta-detalle" id="itinerario">
+                <section
+                    class="tarjeta-detalle"
+                    id="itinerario"
+                >
 
                     <div class="titulo-tarjeta">
                         <span class="titulo-icono">
@@ -342,14 +441,45 @@
                         </span>
 
                         <div>
-                            <span>Actividades programadas</span>
-                            <h2>Itinerario del viaje</h2>
+                            <span>
+                                Actividades programadas
+                            </span>
+
+                            <h2>
+                                Itinerario del viaje
+                            </h2>
                         </div>
                     </div>
 
                     <div class="linea-itinerario">
 
-                        @foreach($destino->itinerario as $indice => $dia)
+                        @foreach(
+                            $destino->itinerario
+                            as $indice => $dia
+                        )
+                            @php
+                                /*
+                                 * Los itinerarios nuevos tendrán un arreglo
+                                 * de actividades. Los itinerarios antiguos
+                                 * solamente tendrán una descripción.
+                                 */
+                                $actividadesDia =
+                                    isset($dia['actividades']) &&
+                                    is_array($dia['actividades'])
+                                        ? collect(
+                                            $dia['actividades']
+                                        )
+                                        : collect();
+
+                                $numeroDia =
+                                    $dia['dia']
+                                    ?? $indice + 1;
+
+                                $fechaDia = $destino->fecha_salida
+                                    ?->copy()
+                                    ->addDays($numeroDia - 1);
+                            @endphp
+
                             <article class="dia-itinerario">
 
                                 <button
@@ -358,11 +488,28 @@
                                     aria-expanded="{{ $indice === 0 ? 'true' : 'false' }}"
                                 >
                                     <span class="numero-dia">
-                                        {{ $indice + 1 }}
+                                        {{ $numeroDia }}
                                     </span>
 
                                     <span class="nombre-dia">
-                                        <small>Día {{ $indice + 1 }}</small>
+                                        <small>
+                                            <span>Día {{ $numeroDia }}</span>
+
+                                            @if($fechaDia)
+                                                <span
+                                                    class="fecha-dia-itinerario"
+                                                >
+                                                    ·
+                                                    {{ mb_strtoupper(
+                                                        $fechaDia
+                                                            ->locale('es')
+                                                            ->translatedFormat(
+                                                                'd \d\e F \d\e Y'
+                                                            )
+                                                    ) }}
+                                                </span>
+                                            @endif
+                                        </small>
 
                                         <strong>
                                             {{ $dia['titulo']
@@ -375,14 +522,124 @@
 
                                 <div
                                     class="contenido-dia"
-                                    @if($indice !== 0) style="display: none;" @endif
+                                    @if($indice !== 0)
+                                        style="display: none;"
+                                    @endif
                                 >
-                                    <p>
-                                        {!! nl2br(e(
+                                    @if(
+                                        !empty(
+                                            $dia['descripcion']
+                                            ?? null
+                                        )
+                                    )
+                                        <p class="descripcion-dia-publica">
+                                            {!! nl2br(
+                                                e(
+                                                    $dia['descripcion']
+                                                )
+                                            ) !!}
+                                        </p>
+                                    @elseif(
+                                        isset($dia['actividades']) &&
+                                        is_string(
                                             $dia['actividades']
-                                            ?? 'Actividades por confirmar.'
-                                        )) !!}
-                                    </p>
+                                        )
+                                    )
+                                        <p class="descripcion-dia-publica">
+                                            {!! nl2br(
+                                                e(
+                                                    $dia['actividades']
+                                                )
+                                            ) !!}
+                                        </p>
+                                    @endif
+
+                                    @if($actividadesDia->isNotEmpty())
+                                        <div class="lista-horarios-itinerario">
+
+                                            @foreach(
+                                                $actividadesDia
+                                                as $actividad
+                                            )
+                                                @php
+                                                    $horaInicio =
+                                                        $actividad['hora_inicio']
+                                                        ?? null;
+
+                                                    $horaFin =
+                                                        $actividad['hora_fin']
+                                                        ?? null;
+                                                @endphp
+
+                                                <article
+                                                    class="actividad-horario-publica {{ !$horaInicio && !$horaFin ? 'actividad-sin-horario' : '' }}"
+                                                >
+
+                                                    @if($horaInicio || $horaFin)
+                                                        <div class="hora-actividad-publica">
+                                                            <strong>
+                                                                @if($horaInicio && $horaFin)
+                                                                    {{ $horaInicio }} – {{ $horaFin }}
+                                                                @elseif($horaInicio)
+                                                                    Desde las {{ $horaInicio }}
+                                                                @else
+                                                                    Hasta las {{ $horaFin }}
+                                                                @endif
+                                                            </strong>
+                                                        </div>
+                                                    @endif
+
+                                                    <div class="detalle-actividad-publica">
+                                                        <h4>
+                                                            {{ $actividad['nombre']
+                                                                ?? 'Actividad programada' }}
+                                                        </h4>
+
+                                                        @if(
+                                                            !empty(
+                                                                $actividad['ubicacion']
+                                                                ?? null
+                                                            )
+                                                        )
+                                                            <span class="ubicacion-actividad-publica">
+                                                                <i class="fa fa-map-marker"></i>
+
+                                                                {{ $actividad['ubicacion'] }}
+                                                            </span>
+                                                        @endif
+
+                                                        @if(
+                                                            !empty(
+                                                                $actividad['descripcion']
+                                                                ?? null
+                                                            )
+                                                        )
+                                                            <p>
+                                                                {{ $actividad['descripcion'] }}
+                                                            </p>
+                                                        @endif
+                                                    </div>
+
+                                                </article>
+                                            @endforeach
+
+                                        </div>
+                                    @elseif(
+                                        empty(
+                                            $dia['descripcion']
+                                            ?? null
+                                        ) &&
+                                        !(
+                                            isset($dia['actividades']) &&
+                                            is_string(
+                                                $dia['actividades']
+                                            )
+                                        )
+                                    )
+                                        <p>
+                                            Actividades por confirmar.
+                                        </p>
+                                    @endif
                                 </div>
 
                             </article>
@@ -394,7 +651,10 @@
             @endif
 
             {{-- Información adicional --}}
-            <section class="tarjeta-detalle" id="informacion">
+            <section
+                class="tarjeta-detalle"
+                id="informacion"
+            >
 
                 <div class="titulo-tarjeta">
                     <span class="titulo-icono">
@@ -402,8 +662,13 @@
                     </span>
 
                     <div>
-                        <span>Datos importantes</span>
-                        <h2>Información del viaje</h2>
+                        <span>
+                            Datos importantes
+                        </span>
+
+                        <h2>
+                            Información del viaje
+                        </h2>
                     </div>
                 </div>
 
@@ -416,7 +681,8 @@
                         </span>
 
                         <strong>
-                            {{ $destino->pais ?: 'Por confirmar' }}
+                            {{ $destino->pais
+                                ?: 'Por confirmar' }}
                         </strong>
                     </div>
 
@@ -427,7 +693,8 @@
                         </span>
 
                         <strong>
-                            {{ $destino->categoria ?: 'General' }}
+                            {{ $destino->categoria
+                                ?: 'General' }}
                         </strong>
                     </div>
 
@@ -453,7 +720,9 @@
                                 Aerolínea
                             </span>
 
-                            <strong>{{ $destino->aerolinea }}</strong>
+                            <strong>
+                                {{ $destino->aerolinea }}
+                            </strong>
                         </div>
                     @endif
 
@@ -464,7 +733,9 @@
                                 Hospedaje
                             </span>
 
-                            <strong>{{ $destino->hotel }}</strong>
+                            <strong>
+                                {{ $destino->hotel }}
+                            </strong>
                         </div>
                     @endif
 
@@ -474,7 +745,9 @@
                             Cupos disponibles
                         </span>
 
-                        <strong>{{ $destino->capacidad }}</strong>
+                        <strong>
+                            {{ $destino->capacidad }}
+                        </strong>
                     </div>
 
                 </div>
@@ -483,7 +756,10 @@
 
             {{-- Condiciones --}}
             @if($destino->condiciones)
-                <section class="tarjeta-detalle" id="condiciones">
+                <section
+                    class="tarjeta-detalle"
+                    id="condiciones"
+                >
 
                     <div class="titulo-tarjeta">
                         <span class="titulo-icono">
@@ -491,8 +767,13 @@
                         </span>
 
                         <div>
-                            <span>Antes de reservar</span>
-                            <h2>Condiciones importantes</h2>
+                            <span>
+                                Antes de reservar
+                            </span>
+
+                            <h2>
+                                Condiciones importantes
+                            </h2>
                         </div>
                     </div>
 
@@ -500,13 +781,15 @@
                         <i class="fa fa-exclamation-circle"></i>
 
                         <p>
-                            Revisa esta información antes de iniciar el proceso
-                            de prerreserva.
+                            Revisa esta información antes de iniciar
+                            el proceso de prerreserva.
                         </p>
                     </div>
 
                     <div class="texto-detalle">
-                        {!! nl2br(e($destino->condiciones)) !!}
+                        {!! nl2br(
+                            e($destino->condiciones)
+                        ) !!}
                     </div>
 
                 </section>
@@ -514,13 +797,18 @@
 
         </div>
 
-        {{-- Columna de precio --}}
+        {{-- Columna lateral --}}
         <aside class="detalle-columna-lateral">
 
-            <div class="tarjeta-reserva" id="tarjetaReserva">
+            <div
+                class="tarjeta-reserva"
+                id="tarjetaReserva"
+            >
 
                 <div class="reserva-encabezado">
-                    <span>Precio por persona</span>
+                    <span>
+                        Precio por persona
+                    </span>
 
                     @if($destino->precio_promocional)
                         <span class="descuento-reserva">
@@ -532,18 +820,28 @@
                 @if($destino->precio_promocional)
                     <div class="precio-anterior">
                         Antes:
+
                         <del>
                             {{ $destino->moneda }}
-                            ${{ number_format($destino->precio, 2) }}
+
+                            ${{ number_format(
+                                $destino->precio,
+                                2
+                            ) }}
                         </del>
                     </div>
                 @endif
 
                 <div class="precio-reserva">
-                    <small>{{ $destino->moneda }}</small>
+                    <small>
+                        {{ $destino->moneda }}
+                    </small>
 
                     <strong>
-                        ${{ number_format($precioActual, 2) }}
+                        ${{ number_format(
+                            $precioActual,
+                            2
+                        ) }}
                     </strong>
                 </div>
 
@@ -557,9 +855,13 @@
                     <i class="fa fa-map-marker"></i>
 
                     <div>
-                        <span>Destino</span>
+                        <span>
+                            Destino
+                        </span>
+
                         <strong>
-                            {{ $destino->ciudad_destino ?: $destino->pais }}
+                            {{ $destino->ciudad_destino
+                                ?: $destino->pais }}
                         </strong>
                     </div>
                 </div>
@@ -568,10 +870,15 @@
                     <i class="fa fa-calendar"></i>
 
                     <div>
-                        <span>Fecha de salida</span>
+                        <span>
+                            Fecha de salida
+                        </span>
+
                         <strong>
                             {{ $destino->fecha_salida
-                                ? $destino->fecha_salida->format('d/m/Y')
+                                ? $destino
+                                    ->fecha_salida
+                                    ->format('d/m/Y')
                                 : 'Por confirmar' }}
                         </strong>
                     </div>
@@ -581,9 +888,13 @@
                     <i class="fa fa-users"></i>
 
                     <div>
-                        <span>Disponibilidad</span>
+                        <span>
+                            Disponibilidad
+                        </span>
+
                         <strong>
-                            {{ $destino->capacidad }} cupos
+                            {{ $destino->capacidad }}
+                            cupos
                         </strong>
                     </div>
                 </div>
@@ -598,7 +909,10 @@
                     <i class="fa fa-telegram"></i>
 
                     <span>
-                        <small>Consulta disponibilidad</small>
+                        <small>
+                            Consulta disponibilidad
+                        </small>
+
                         Solicitar información
                     </span>
                 </button>
@@ -617,11 +931,13 @@
                 </span>
 
                 <div>
-                    <strong>¿Tienes alguna duda?</strong>
+                    <strong>
+                        ¿Tienes alguna duda?
+                    </strong>
 
                     <p>
-                        Nuestro asistente puede ayudarte con la información
-                        de este paquete.
+                        Nuestro asistente puede ayudarte con la
+                        información de este paquete.
                     </p>
 
                     <a
@@ -630,13 +946,17 @@
                         rel="noopener noreferrer"
                     >
                         Iniciar conversación
+
                         <i class="fa fa-arrow-right"></i>
                     </a>
                 </div>
 
             </div>
 
-            <a href="{{ url('/#paquetes') }}" class="volver-paquetes">
+            <a
+                href="{{ url('/#paquetes') }}"
+                class="volver-paquetes"
+            >
                 <i class="fa fa-arrow-left"></i>
                 Volver a todos los paquetes
             </a>
@@ -649,5 +969,7 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/paquete-detalle.js') }}"></script>
+    <script
+        src="{{ asset('js/paquete-detalle.js') }}"
+    ></script>
 @endsection

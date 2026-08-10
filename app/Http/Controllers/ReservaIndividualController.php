@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cliente;
 use App\Models\Destino;
 use App\Services\ReservaIndividualService;
+use App\Services\PoliticaPagoReservaService;
 use App\Models\Reserva;
 use App\Models\PreReserva;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ use InvalidArgumentException;
 class ReservaIndividualController extends Controller
 {
     public function __construct(
-        private ReservaIndividualService $reservaService
+        private ReservaIndividualService $reservaService,
+        private PoliticaPagoReservaService $politicaPago
     ) {
     }
 
@@ -144,6 +146,20 @@ class ReservaIndividualController extends Controller
                 (int) $datos['destino_id']
             );
 
+            if ($reserva->politica_aceptada_at) {
+                $reserva = $this->politicaPago
+                    ->inicializar($reserva, true);
+                $this->politicaPago->registrarAceptacion(
+                    $reserva,
+                    [
+                        'canal_aceptacion_politica' =>
+                            $reserva->canal_aceptacion_politica,
+                        'referencia_aceptacion_politica' =>
+                            $reserva->referencia_aceptacion_politica,
+                    ]
+                );
+            }
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
@@ -216,6 +232,19 @@ class ReservaIndividualController extends Controller
                 'integer',
                 'exists:pre_reservas,id',
             ],
+            'politica_aceptada' => [
+                'accepted',
+            ],
+            'canal_aceptacion_politica' => [
+                'required',
+                'in:presencial,correo,whatsapp,telegram,otro',
+            ],
+            'referencia_aceptacion_politica' => [
+                'required',
+                'string',
+                'min:5',
+                'max:255',
+            ],
         ], [
             'cliente_id.required' =>
                 'Selecciona el cliente que realizará el viaje.',
@@ -227,6 +256,12 @@ class ReservaIndividualController extends Controller
                 'El paquete seleccionado no existe.',
             'prereserva_id.exists' =>
                 'La prerreserva seleccionada no existe.',
+            'politica_aceptada.accepted' =>
+                'Confirma que el cliente aceptó la política de pagos y cancelación.',
+            'canal_aceptacion_politica.required' =>
+                'Selecciona el canal por el que el cliente aceptó la política.',
+            'referencia_aceptacion_politica.required' =>
+                'Registra una referencia que permita comprobar la aceptación.',
         ]);
 
         $usuarioId = Auth::id();
@@ -269,6 +304,10 @@ class ReservaIndividualController extends Controller
                     (int) $datos['destino_id'],
                     (int) $usuarioId
                 );
+                $reserva = $this->politicaPago
+                    ->inicializar($reserva);
+                $reserva = $this->politicaPago
+                    ->registrarAceptacion($reserva, $datos);
 
                 if ($preReserva) {
                     $preReserva->update([
@@ -294,14 +333,23 @@ class ReservaIndividualController extends Controller
                     'codigo' =>
                         $reserva->codigo_reserva,
                     'redirect' =>
-                        route('reservas'),
+                        route('pagos', [
+                            'reserva_id' => $reserva->id,
+                            'abrir_cobro' => 1,
+                        ]),
                 ], 201);
             }
 
-            return to_route('reservas')->with(
+            return to_route('pagos', [
+                'reserva_id' => $reserva->id,
+                'abrir_cobro' => 1,
+            ])->with(
                 'success',
-                'Reserva registrada correctamente. Código: ' .
-                $reserva->codigo_reserva
+                'Reserva provisional creada. Registra ahora el anticipo obligatorio de ' .
+                ($reserva->moneda ?: 'USD') . ' ' .
+                number_format((float) $reserva->monto_anticipo, 2, '.', ',') .
+                ' antes del ' .
+                $reserva->fecha_limite_anticipo?->format('d/m/Y H:i') . '.'
             );
         } catch (InvalidArgumentException $error) {
             if ($request->expectsJson()) {

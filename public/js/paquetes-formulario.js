@@ -6,12 +6,13 @@ $(function () {
     }
 
     let formularioEnviado = false;
+
     let contadorItinerario =
         $('#listaItinerario .dia-itinerario').length;
 
     /*
     |--------------------------------------------------------------------------
-    | Errores recibidos desde Laravel
+    | Errores enviados por Laravel
     |--------------------------------------------------------------------------
     */
 
@@ -42,7 +43,7 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Funciones para mostrar y retirar errores
+    | Manejo visual de errores
     |--------------------------------------------------------------------------
     */
 
@@ -172,7 +173,7 @@ $(function () {
             crearCampoServicio(
                 'incluye',
                 'campo-incluye',
-                'Ej. Traslado aeropuerto - hotel'
+                'Ej. Boleto aéreo de ida y regreso'
             )
         );
 
@@ -209,7 +210,9 @@ $(function () {
                 esListaIncluye &&
                 lista.find('.item-lista').length === 1
             ) {
-                item.find('input').val('').trigger('focus');
+                item.find('input')
+                    .val('')
+                    .trigger('focus');
 
                 Swal.fire({
                     icon: 'info',
@@ -241,11 +244,237 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Itinerario
+    | Itinerario y actividades
     |--------------------------------------------------------------------------
     */
 
-    function crearDiaItinerario(indice, numeroDia) {
+    function generarUuid() {
+        if (
+            window.crypto &&
+            typeof window.crypto.randomUUID === 'function'
+        ) {
+            return window.crypto.randomUUID();
+        }
+
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+            .replace(/[xy]/g, function (caracter) {
+                const aleatorio = Math.floor(
+                    Math.random() * 16
+                );
+
+                const valor = caracter === 'x'
+                    ? aleatorio
+                    : (aleatorio & 0x3) | 0x8;
+
+                return valor.toString(16);
+            });
+    }
+
+    function opcionesTipoGestion() {
+        return `
+            <option value="">
+                Selecciona el tipo de gestión
+            </option>
+
+            <option value="vuelo">
+                Vuelo
+            </option>
+
+            <option value="alojamiento">
+                Alojamiento
+            </option>
+
+            <option value="entrada">
+                Entrada
+            </option>
+
+            <option value="guia">
+                Guía
+            </option>
+
+            <option value="tren">
+                Tren
+            </option>
+
+            <option value="traslado">
+                Traslado
+            </option>
+
+            <option value="alimentacion">
+                Alimentación
+            </option>
+
+            <option value="actividad_reservada">
+                Actividad reservada
+            </option>
+
+            <option value="seguro">
+                Seguro
+            </option>
+
+            <option value="otro">
+                Otro servicio
+            </option>
+        `;
+    }
+
+    function crearActividad(
+        indiceDia,
+        indiceActividad
+    ) {
+        const uuid = generarUuid();
+
+        return `
+            <div class="actividad-itinerario">
+                <div class="actividad-cabecera">
+                    <strong>
+                        Actividad
+                        <span class="numero-actividad">
+                            ${indiceActividad + 1}
+                        </span>
+                    </strong>
+
+                    <button
+                        type="button"
+                        class="btn-eliminar-actividad"
+                    >
+                        <i class="bi bi-trash"></i>
+                        Eliminar
+                    </button>
+                </div>
+
+                <input
+                    type="hidden"
+                    name="itinerario[${indiceDia}][actividades][${indiceActividad}][uuid]"
+                    class="actividad-uuid"
+                    value="${uuid}"
+                >
+
+                <div class="campos-grid">
+                    <div class="campo campo-completo">
+                        <label>
+                            Nombre de la actividad
+                            <span>*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="itinerario[${indiceDia}][actividades][${indiceActividad}][nombre]"
+                            class="form-control actividad-nombre"
+                            placeholder="Ej. Traslado del aeropuerto al hotel"
+                            maxlength="150"
+                        >
+
+                        <small class="mensaje-error"></small>
+                    </div>
+
+                    <div class="campo campo-completo">
+                        <label>
+                            Descripción
+                        </label>
+
+                        <textarea
+                            name="itinerario[${indiceDia}][actividades][${indiceActividad}][descripcion]"
+                            class="form-control actividad-descripcion"
+                            rows="2"
+                            maxlength="1000"
+                            placeholder="Información adicional de la actividad"
+                        ></textarea>
+                    </div>
+
+                    <div class="campo">
+                        <label>
+                            Hora de inicio
+                        </label>
+
+                        <input
+                            type="time"
+                            name="itinerario[${indiceDia}][actividades][${indiceActividad}][hora_inicio]"
+                            class="form-control actividad-hora-inicio"
+                        >
+
+                        <small class="mensaje-error"></small>
+                    </div>
+
+                    <div class="campo">
+                        <label>
+                            Hora de finalización
+                        </label>
+
+                        <input
+                            type="time"
+                            name="itinerario[${indiceDia}][actividades][${indiceActividad}][hora_fin]"
+                            class="form-control actividad-hora-fin"
+                        >
+
+                        <small class="mensaje-error"></small>
+                    </div>
+
+                    <div class="campo campo-completo">
+                        <label>
+                            Ubicación
+                        </label>
+
+                        <input
+                            type="text"
+                            name="itinerario[${indiceDia}][actividades][${indiceActividad}][ubicacion]"
+                            class="form-control actividad-ubicacion"
+                            placeholder="Ej. Aeropuerto Internacional Mariscal Sucre"
+                            maxlength="180"
+                        >
+                    </div>
+
+                    <div class="campo campo-completo campo-gestion">
+                        <input
+                            type="hidden"
+                            name="itinerario[${indiceDia}][actividades][${indiceActividad}][requiere_gestion]"
+                            class="actividad-requiere-gestion-oculto"
+                            value="0"
+                        >
+
+                        <label class="opcion-check">
+                            <input
+                                type="checkbox"
+                                name="itinerario[${indiceDia}][actividades][${indiceActividad}][requiere_gestion]"
+                                class="actividad-requiere-gestion"
+                                value="1"
+                            >
+
+                            <span>
+                                Esta actividad requiere gestión
+                                o preparación de la agencia
+                            </span>
+                        </label>
+                    </div>
+
+                    <div
+                        class="campo campo-completo contenedor-tipo-gestion"
+                        hidden
+                    >
+                        <label>
+                            Tipo de gestión
+                            <span>*</span>
+                        </label>
+
+                        <select
+                            name="itinerario[${indiceDia}][actividades][${indiceActividad}][tipo_gestion]"
+                            class="form-select actividad-tipo-gestion"
+                            disabled
+                        >
+                            ${opcionesTipoGestion()}
+                        </select>
+
+                        <small class="mensaje-error"></small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function crearDiaItinerario(
+        indice,
+        numeroDia
+    ) {
         return `
             <div class="dia-itinerario">
                 <div class="dia-cabecera">
@@ -290,7 +519,7 @@ $(function () {
 
                     <div class="campo campo-completo">
                         <label>
-                            Actividades
+                            Descripción general del día
                             <span>*</span>
                         </label>
 
@@ -298,17 +527,68 @@ $(function () {
                             name="itinerario[${indice}][descripcion]"
                             class="form-control descripcion-dia"
                             rows="3"
-                            placeholder="Describe las actividades planificadas"
+                            placeholder="Describe el objetivo y la planificación general del día"
                         ></textarea>
                     </div>
+                </div>
+
+                <div class="actividades-dia">
+                    <div class="actividades-cabecera">
+                        <div>
+                            <h4>
+                                Actividades del día
+                            </h4>
+
+                            <p>
+                                Los horarios son opcionales. Marca
+                                únicamente las actividades que requieran
+                                preparación o coordinación. Cada actividad
+                                gestionable debe representar una sola
+                                coordinación; separa, por ejemplo, el tren
+                                y el traslado al hotel.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn-agregar btn-agregar-actividad"
+                        >
+                            <i class="bi bi-plus-lg"></i>
+                            Agregar actividad
+                        </button>
+                    </div>
+
+                    <div class="lista-actividades"></div>
                 </div>
             </div>
         `;
     }
 
     $('#agregarDia').on('click', function () {
-        const numeroDia =
-            $('#listaItinerario .dia-itinerario').length + 1;
+        const cantidadDiasPaquete = parseInt(
+            $('#dias').val(),
+            10
+        );
+
+        const cantidadDiasItinerario =
+            $('#listaItinerario .dia-itinerario').length;
+
+        if (
+            !Number.isNaN(cantidadDiasPaquete) &&
+            cantidadDiasItinerario >= cantidadDiasPaquete
+        ) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Duración alcanzada',
+                text: 'No puedes agregar más días que la duración del paquete.',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#094c90'
+            });
+
+            return;
+        }
+
+        const numeroDia = cantidadDiasItinerario + 1;
 
         $('#listaItinerario').append(
             crearDiaItinerario(
@@ -318,6 +598,8 @@ $(function () {
         );
 
         contadorItinerario++;
+
+        organizarItinerario();
 
         $('#listaItinerario .titulo-dia')
             .last()
@@ -364,44 +646,214 @@ $(function () {
         }
     );
 
+    $(document).on(
+        'click',
+        '.btn-agregar-actividad',
+        function () {
+            const bloqueDia = $(this)
+                .closest('.dia-itinerario');
+
+            const indiceDia = bloqueDia.index();
+
+            const listaActividades = bloqueDia
+                .find('.lista-actividades');
+
+            const indiceActividad = listaActividades
+                .find('.actividad-itinerario')
+                .length;
+
+            listaActividades.append(
+                crearActividad(
+                    indiceDia,
+                    indiceActividad
+                )
+            );
+
+            organizarItinerario();
+
+            listaActividades
+                .find('.actividad-nombre')
+                .last()
+                .trigger('focus');
+        }
+    );
+
+    $(document).on(
+        'click',
+        '.btn-eliminar-actividad',
+        function () {
+            const actividad = $(this)
+                .closest('.actividad-itinerario');
+
+            Swal.fire({
+                icon: 'question',
+                title: '¿Eliminar esta actividad?',
+                text: 'La actividad se retirará del itinerario.',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#90091d',
+                cancelButtonColor: '#6B7280'
+            }).then(function (resultado) {
+                if (resultado.isConfirmed) {
+                    actividad.remove();
+                    organizarItinerario();
+                }
+            });
+        }
+    );
+
+    $(document).on(
+        'change',
+        '.actividad-requiere-gestion',
+        function () {
+            const checkbox = $(this);
+
+            const actividad = checkbox
+                .closest('.actividad-itinerario');
+
+            const contenedor = actividad
+                .find('.contenedor-tipo-gestion');
+
+            const selector = actividad
+                .find('.actividad-tipo-gestion');
+
+            if (checkbox.is(':checked')) {
+                contenedor.prop('hidden', false);
+                selector.prop('disabled', false);
+            } else {
+                selector
+                    .val('')
+                    .prop('disabled', true);
+
+                limpiarError(selector);
+
+                contenedor.prop('hidden', true);
+            }
+        }
+    );
+
     function organizarItinerario() {
         $('#listaItinerario .dia-itinerario').each(
-            function (indice) {
-                const numeroDia = indice + 1;
-                const bloque = $(this);
+            function (indiceDia) {
+                const numeroDia = indiceDia + 1;
+                const bloqueDia = $(this);
 
-                bloque
+                bloqueDia
                     .find('.numero-dia')
                     .text(numeroDia);
 
-                bloque
+                bloqueDia
                     .find('.campo-dia')
                     .val(numeroDia)
                     .attr(
                         'name',
-                        `itinerario[${indice}][dia]`
+                        `itinerario[${indiceDia}][dia]`
                     );
 
-                bloque
+                bloqueDia
                     .find('.titulo-dia')
                     .attr(
                         'name',
-                        `itinerario[${indice}][titulo]`
+                        `itinerario[${indiceDia}][titulo]`
                     );
 
-                bloque
+                bloqueDia
                     .find('.descripcion-dia')
                     .attr(
                         'name',
-                        `itinerario[${indice}][descripcion]`
+                        `itinerario[${indiceDia}][descripcion]`
                     );
+
+                bloqueDia
+                    .find('.actividad-itinerario')
+                    .each(function (indiceActividad) {
+                        const actividad = $(this);
+
+                        actividad
+                            .find('.numero-actividad')
+                            .text(indiceActividad + 1);
+
+                        const prefijo =
+                            `itinerario[${indiceDia}]` +
+                            `[actividades][${indiceActividad}]`;
+
+                        actividad
+                            .find('.actividad-uuid')
+                            .attr(
+                                'name',
+                                `${prefijo}[uuid]`
+                            );
+
+                        actividad
+                            .find('.actividad-nombre')
+                            .attr(
+                                'name',
+                                `${prefijo}[nombre]`
+                            );
+
+                        actividad
+                            .find('.actividad-descripcion')
+                            .attr(
+                                'name',
+                                `${prefijo}[descripcion]`
+                            );
+
+                        actividad
+                            .find('.actividad-hora-inicio')
+                            .attr(
+                                'name',
+                                `${prefijo}[hora_inicio]`
+                            );
+
+                        actividad
+                            .find('.actividad-hora-fin')
+                            .attr(
+                                'name',
+                                `${prefijo}[hora_fin]`
+                            );
+
+                        actividad
+                            .find('.actividad-ubicacion')
+                            .attr(
+                                'name',
+                                `${prefijo}[ubicacion]`
+                            );
+
+                        actividad
+                            .find(
+                                '.actividad-requiere-gestion-oculto'
+                            )
+                            .attr(
+                                'name',
+                                `${prefijo}[requiere_gestion]`
+                            );
+
+                        actividad
+                            .find(
+                                '.actividad-requiere-gestion'
+                            )
+                            .attr(
+                                'name',
+                                `${prefijo}[requiere_gestion]`
+                            );
+
+                        actividad
+                            .find('.actividad-tipo-gestion')
+                            .attr(
+                                'name',
+                                `${prefijo}[tipo_gestion]`
+                            );
+                    });
             }
         );
     }
 
+    organizarItinerario();
+
     /*
     |--------------------------------------------------------------------------
-    | Vista previa y validación de imagen
+    | Imagen
     |--------------------------------------------------------------------------
     */
 
@@ -479,7 +931,7 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Validación de fechas
+    | Fechas
     |--------------------------------------------------------------------------
     */
 
@@ -550,9 +1002,32 @@ $(function () {
         return valido;
     }
 
+    function validarSoloLetras(selector, mensaje) {
+        const campo = $(selector);
+        const valor = $.trim(campo.val());
+        const patron = /^[\p{L}\s.'’-]+$/u;
+
+        if (!valor || !patron.test(valor)) {
+            return colocarError(campo, mensaje);
+        }
+
+        return limpiarError(campo);
+    }
+
+    function validarNombreComercial(selector, mensaje) {
+        const campo = $(selector);
+        const valor = $.trim(campo.val());
+
+        if (valor && !/\p{L}/u.test(valor)) {
+            return colocarError(campo, mensaje);
+        }
+
+        return limpiarError(campo);
+    }
+
     /*
     |--------------------------------------------------------------------------
-    | Validación de duración
+    | Duración
     |--------------------------------------------------------------------------
     */
 
@@ -615,7 +1090,7 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Validación de precios
+    | Precios
     |--------------------------------------------------------------------------
     */
 
@@ -670,7 +1145,7 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Validación de servicios
+    | Servicios
     |--------------------------------------------------------------------------
     */
 
@@ -709,42 +1184,126 @@ $(function () {
     function validarItinerario() {
         let valido = true;
 
-        $('#listaItinerario .dia-itinerario').each(
-            function () {
-                const bloque = $(this);
-                const titulo = bloque.find('.titulo-dia');
-
-                const descripcion =
-                    bloque.find('.descripcion-dia');
-
-                if (!$.trim(titulo.val())) {
-                    colocarError(
-                        titulo,
-                        'Ingresa el título de este día.'
-                    );
-
-                    valido = false;
-                } else {
-                    limpiarError(titulo);
-                }
-
-                if (!$.trim(descripcion.val())) {
-                    colocarError(
-                        descripcion,
-                        'Describe las actividades de este día.'
-                    );
-
-                    valido = false;
-                } else {
-                    limpiarError(descripcion);
-                }
-            }
+        const cantidadDiasPaquete = parseInt(
+            $('#dias').val(),
+            10
         );
+
+        const bloquesDias = $(
+            '#listaItinerario .dia-itinerario'
+        );
+
+        if (!bloquesDias.length) {
+            $('#errorItinerario')
+                .text('Agrega al menos un día al itinerario.')
+                .addClass('visible');
+
+            return false;
+        }
+
+        if (
+            !Number.isNaN(cantidadDiasPaquete) &&
+            bloquesDias.length > cantidadDiasPaquete
+        ) {
+            valido = false;
+        }
+
+        bloquesDias.each(function () {
+            const bloque = $(this);
+            const titulo = bloque.find('.titulo-dia');
+
+            const descripcion =
+                bloque.find('.descripcion-dia');
+
+            if (!$.trim(titulo.val())) {
+                colocarError(
+                    titulo,
+                    'Ingresa el título de este día.'
+                );
+
+                valido = false;
+            } else {
+                limpiarError(titulo);
+            }
+
+            if (!$.trim(descripcion.val())) {
+                colocarError(
+                    descripcion,
+                    'Describe la planificación general del día.'
+                );
+
+                valido = false;
+            } else {
+                limpiarError(descripcion);
+            }
+
+            bloque
+                .find('.actividad-itinerario')
+                .each(function () {
+                    const actividad = $(this);
+
+                    const nombre = actividad
+                        .find('.actividad-nombre');
+
+                    const horaInicio = actividad
+                        .find('.actividad-hora-inicio');
+
+                    const horaFin = actividad
+                        .find('.actividad-hora-fin');
+
+                    const requiereGestion = actividad
+                        .find('.actividad-requiere-gestion')
+                        .is(':checked');
+
+                    const tipoGestion = actividad
+                        .find('.actividad-tipo-gestion');
+
+                    if (!$.trim(nombre.val())) {
+                        colocarError(
+                            nombre,
+                            'Ingresa el nombre de la actividad.'
+                        );
+
+                        valido = false;
+                    } else {
+                        limpiarError(nombre);
+                    }
+
+                    if (
+                        horaInicio.val() &&
+                        horaFin.val() &&
+                        horaFin.val() <= horaInicio.val()
+                    ) {
+                        colocarError(
+                            horaFin,
+                            'La hora final debe ser posterior a la hora de inicio.'
+                        );
+
+                        valido = false;
+                    } else {
+                        limpiarError(horaFin);
+                    }
+
+                    if (
+                        requiereGestion &&
+                        !tipoGestion.val()
+                    ) {
+                        colocarError(
+                            tipoGestion,
+                            'Selecciona el tipo de gestión.'
+                        );
+
+                        valido = false;
+                    } else {
+                        limpiarError(tipoGestion);
+                    }
+                });
+        });
 
         if (!valido) {
             $('#errorItinerario')
                 .text(
-                    'Completa la información de todos los días.'
+                    'Revisa los días y actividades del itinerario.'
                 )
                 .addClass('visible');
         } else {
@@ -758,7 +1317,7 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Validación de imagen
+    | Imagen requerida
     |--------------------------------------------------------------------------
     */
 
@@ -784,7 +1343,7 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Retirar errores mientras se corrigen los campos
+    | Validación en tiempo real
     |--------------------------------------------------------------------------
     */
 
@@ -811,34 +1370,50 @@ $(function () {
 
     $(document).on(
         'input',
-        '.titulo-dia, .descripcion-dia',
+        '.titulo-dia, .descripcion-dia, .actividad-nombre',
         function () {
             const campo = $(this);
 
             if ($.trim(campo.val())) {
                 limpiarError(campo);
             }
+        }
+    );
 
-            const itinerarioCompleto =
-                $('#listaItinerario .titulo-dia')
-                    .toArray()
-                    .every(function (elemento) {
-                        return $.trim(
-                            $(elemento).val()
-                        ) !== '';
-                    }) &&
-                $('#listaItinerario .descripcion-dia')
-                    .toArray()
-                    .every(function (elemento) {
-                        return $.trim(
-                            $(elemento).val()
-                        ) !== '';
-                    });
+    $(document).on(
+        'change input',
+        '.actividad-hora-inicio, .actividad-hora-fin',
+        function () {
+            const actividad = $(this)
+                .closest('.actividad-itinerario');
 
-            if (itinerarioCompleto) {
-                $('#errorItinerario')
-                    .text('')
-                    .removeClass('visible');
+            const horaInicio = actividad
+                .find('.actividad-hora-inicio');
+
+            const horaFin = actividad
+                .find('.actividad-hora-fin');
+
+            if (
+                horaInicio.val() &&
+                horaFin.val() &&
+                horaFin.val() <= horaInicio.val()
+            ) {
+                colocarError(
+                    horaFin,
+                    'La hora final debe ser posterior a la hora de inicio.'
+                );
+            } else {
+                limpiarError(horaFin);
+            }
+        }
+    );
+
+    $(document).on(
+        'change',
+        '.actividad-tipo-gestion',
+        function () {
+            if ($(this).val()) {
+                limpiarError($(this));
             }
         }
     );
@@ -847,14 +1422,13 @@ $(function () {
         'input',
         '.campo-incluye',
         function () {
-            const existeServicio =
-                $('.campo-incluye')
-                    .toArray()
-                    .some(function (elemento) {
-                        return $.trim(
-                            $(elemento).val()
-                        ) !== '';
-                    });
+            const existeServicio = $('.campo-incluye')
+                .toArray()
+                .some(function (elemento) {
+                    return $.trim(
+                        $(elemento).val()
+                    ) !== '';
+                });
 
             if (existeServicio) {
                 $('#errorIncluye')
@@ -878,6 +1452,29 @@ $(function () {
 
     $('#fecha_salida, #fecha_regreso')
         .on('change', validarFechas);
+
+    $('#fecha_salida').on('change', function () {
+        $('#fecha_regreso').attr(
+            'min',
+            $(this).val() || obtenerFechaActual()
+        );
+    });
+
+    $('#ciudad_salida, #pais, #ciudad_destino')
+        .on('input blur', function () {
+            validarSoloLetras(
+                '#' + this.id,
+                'Este campo solo puede contener letras.'
+            );
+        });
+
+    $('#aerolinea, #hotel')
+        .on('input blur', function () {
+            validarNombreComercial(
+                '#' + this.id,
+                'Este campo debe incluir letras.'
+            );
+        });
 
     $('#dias, #noches')
         .on('input', validarDuracion);
@@ -918,19 +1515,29 @@ $(function () {
                 'Ingresa la descripción completa.'
             ),
 
-            validarTexto(
+            validarSoloLetras(
                 '#ciudad_salida',
-                'Ingresa la ciudad de salida.'
+                'Ingresa una ciudad de salida válida.'
             ),
 
-            validarTexto(
+            validarSoloLetras(
                 '#pais',
-                'Ingresa el país de destino.'
+                'Ingresa un país de destino válido.'
             ),
 
-            validarTexto(
+            validarSoloLetras(
                 '#ciudad_destino',
-                'Ingresa la ciudad de destino.'
+                'Ingresa una ciudad de destino válida.'
+            ),
+
+            validarNombreComercial(
+                '#aerolinea',
+                'La aerolínea debe incluir letras.'
+            ),
+
+            validarNombreComercial(
+                '#hotel',
+                'El hotel debe incluir letras.'
             ),
 
             validarFechas(),
@@ -960,7 +1567,7 @@ $(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Envío del formulario
+    | Envío
     |--------------------------------------------------------------------------
     */
 
@@ -970,8 +1577,7 @@ $(function () {
         if (!validarFormularioCompleto()) {
             evento.preventDefault();
 
-            const primerError = $('.campo-error')
-                .first();
+            const primerError = $('.campo-error').first();
 
             if (primerError.length) {
                 $('html, body').animate(

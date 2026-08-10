@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Reserva;
 use App\Models\Pago;
 use App\Models\Grupo;
+use App\Models\Devolucion;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -12,7 +13,8 @@ use Carbon\Carbon;
 class PagoService
 {
     public function __construct(
-        private readonly TarifaReservaService $tarifaService
+        private readonly TarifaReservaService $tarifaService,
+        private readonly PoliticaPagoReservaService $politicaPago
     ) {
     }
 
@@ -28,6 +30,7 @@ class PagoService
                 'pagos as total_pagado',
                 'monto_depositado'
             )
+            ->with(['pagos', 'devoluciones'])
             ->get();
 
         $totalEsperado = (float) $reservas
@@ -121,15 +124,14 @@ class PagoService
                 'grupo.responsablePago',
                 'grupo.clientes',
                 'pagos',
+                'devoluciones',
             ])
             ->latest()
             ->get();
 
         $lista = $reservas->map(
             function ($reserva) {
-                $pagado = (float) $reserva
-                    ->pagos
-                    ->sum('monto_depositado');
+                $pagado = (float) $reserva->total_pagado;
 
                 $precioTotal = (float)
                     $reserva->precio_total_viaje;
@@ -170,6 +172,45 @@ class PagoService
                     ->pagos
                     ->sortByDesc('fecha_pago')
                     ->first();
+
+                $anticipoPendiente = max(
+                    0,
+                    (float) ($reserva->monto_anticipo ?? 0) - $pagado
+                );
+                $proximoVencimiento = $anticipoPendiente > 0
+                    ? $reserva->fecha_limite_anticipo
+                    : $reserva->fecha_vencimiento_saldo?->copy()->endOfDay();
+                $alertaPago = null;
+                $alertaNivel = 'normal';
+
+                if (
+                    !$reserva->estaCancelada() &&
+                    $pendiente > 0 &&
+                    $proximoVencimiento
+                ) {
+                    $diasRestantes = (int) now()
+                        ->startOfDay()
+                        ->diffInDays(
+                            $proximoVencimiento->copy()->startOfDay(),
+                            false
+                        );
+
+                    if ($diasRestantes < 0) {
+                        $alertaNivel = 'vencido';
+                        $alertaPago = 'Vencido hace ' .
+                            abs($diasRestantes) . ' día(s); reserva en riesgo.';
+                    } elseif ($diasRestantes === 0) {
+                        $alertaNivel = 'hoy';
+                        $alertaPago = 'El pago requerido vence hoy.';
+                    } else {
+                        $alertaNivel = $diasRestantes <= 7
+                            ? 'proximo'
+                            : 'normal';
+                        $alertaPago = 'Próximo vencimiento: ' .
+                            $proximoVencimiento->format('d/m/Y') .
+                            ' (' . $diasRestantes . ' día(s)).';
+                    }
+                }
 
                 $grupo = $reserva->grupo;
 
@@ -235,6 +276,15 @@ class PagoService
                                 ->fecha_pago
                                 ?->format('d/m/Y')
                             : null,
+                    'fecha_ultimo_pago_hora' =>
+                        $ultimoPago?->fecha_pago?->format('d/m/Y H:i'),
+                    'proximo_vencimiento' =>
+                        $proximoVencimiento?->format('d/m/Y H:i'),
+                    'alerta_pago' => $alertaPago,
+                    'alerta_nivel' => $alertaNivel,
+                    'anticipo_requerido' =>
+                        (float) ($reserva->monto_anticipo ?? 0),
+                    'anticipo_pendiente' => $anticipoPendiente,
                     'estado' =>
                         $estadoCalculado,
                     'estado_reserva' =>
@@ -509,6 +559,8 @@ class PagoService
                 ->with([
                     'grupo.clientes',
                     'grupo.responsablePago',
+                    'pagos.devoluciones',
+                    'devoluciones',
                 ])
                 ->lockForUpdate()
                 ->findOrFail($datos['reserva_id']);
@@ -518,6 +570,9 @@ class PagoService
                     'No se pueden registrar pagos en una reserva cancelada.'
                 );
             }
+
+            $reserva = $this->politicaPago
+                ->inicializar($reserva);
 
             $monto = round(
                 (float) ($datos['monto_depositado'] ?? 0),
@@ -554,23 +609,26 @@ class PagoService
             $clienteId = (int) (
                 $datos['cliente_id'] ?? 0
             );
+            $minimoPagoInicial = 0.0;
 
             if ($reserva->esIndividual()) {
                 $clienteId = (int) $reserva->cliente_id;
 
-                $totalPagado = (float) Pago::query()
-                    ->registrados()
-                    ->where(
-                        'reserva_id',
-                        $reserva->id
-                    )
-                    ->sum('monto_depositado');
+                $totalPagado = (float) $reserva
+                    ->fresh(['pagos', 'devoluciones'])
+                    ->total_pagado;
 
                 $saldoPermitido = max(
                     0,
                     (float) $reserva->precio_total_viaje -
                     $totalPagado
                 );
+                if ($totalPagado <= 0) {
+                    $minimoPagoInicial = min(
+                        (float) $reserva->monto_anticipo,
+                        $saldoPermitido
+                    );
+                }
             } else {
                 $grupo = $reserva->grupo;
 
@@ -591,19 +649,21 @@ class PagoService
                         );
                     }
 
-                    $totalPagado = (float) Pago::query()
-                        ->registrados()
-                        ->where(
-                            'reserva_id',
-                            $reserva->id
-                        )
-                        ->sum('monto_depositado');
+                    $totalPagado = (float) $reserva
+                        ->fresh(['pagos', 'devoluciones'])
+                        ->total_pagado;
 
                     $saldoPermitido = max(
                         0,
                         (float) $reserva->precio_total_viaje -
                         $totalPagado
                     );
+                    if ($totalPagado <= 0) {
+                        $minimoPagoInicial = min(
+                            (float) $reserva->monto_anticipo,
+                            $saldoPermitido
+                        );
+                    }
                 } else {
                     if (!$clienteId) {
                         throw new InvalidArgumentException(
@@ -640,12 +700,31 @@ class PagoService
                             $clienteId
                         )
                         ->sum('monto_depositado');
+                    $devueltoIntegrante = (float) Devolucion::query()
+                        ->procesadas()
+                        ->where('reserva_id', $reserva->id)
+                        ->where('cliente_id', $clienteId)
+                        ->sum('monto');
+                    $pagadoIntegrante = max(
+                        0,
+                        $pagadoIntegrante - $devueltoIntegrante
+                    );
 
                     $saldoPermitido = max(
                         0,
                         $montoAsignado -
                         $pagadoIntegrante
                     );
+                    if ($pagadoIntegrante <= 0) {
+                        $minimoPagoInicial = min(
+                            round(
+                                $montoAsignado *
+                                ((float) $reserva->porcentaje_anticipo / 100),
+                                2
+                            ),
+                            $saldoPermitido
+                        );
+                    }
                 }
             }
 
@@ -675,11 +754,34 @@ class PagoService
                 );
             }
 
+            if (
+                $minimoPagoInicial > 0 &&
+                $monto < $minimoPagoInicial
+            ) {
+                throw new InvalidArgumentException(
+                    'El primer pago debe cubrir el anticipo mínimo de ' .
+                    number_format($minimoPagoInicial, 2, '.', '') .
+                    ' ' . ($reserva->moneda ?: 'USD') . '.'
+                );
+            }
+
+            $pagadoAntes = (float) $reserva
+                ->fresh(['pagos', 'devoluciones'])
+                ->total_pagado;
+            $concepto = match (true) {
+                $pagadoAntes < (float) $reserva->monto_anticipo =>
+                    Pago::CONCEPTO_ANTICIPO,
+                $monto >= $saldoPermitido =>
+                    Pago::CONCEPTO_SALDO_FINAL,
+                default => Pago::CONCEPTO_ABONO,
+            };
+
             $pago = Pago::create([
                 'reserva_id' => $reserva->id,
                 'cliente_id' => $clienteId,
                 'user_id' => $datos['user_id'],
                 'monto_depositado' => $monto,
+                'concepto' => $concepto,
                 'fecha_pago' => now(),
                 'metodo_pago' => $metodo,
                 'referencia' => !empty(
@@ -712,42 +814,7 @@ class PagoService
             return;
         }
 
-        $totalPagado = (float) Pago::query()
-            ->registrados()
-            ->where(
-                'reserva_id',
-                $reserva->id
-            )
-            ->sum('monto_depositado');
-
-        $precioTotal = (float)
-            $reserva->precio_total_viaje;
-
-        if ($totalPagado <= 0) {
-            $estadoPago =
-                Reserva::PAGO_PENDIENTE;
-        } elseif (
-            $precioTotal > 0 &&
-            $totalPagado >= $precioTotal
-        ) {
-            $estadoPago =
-               Reserva::PAGO_COMPLETO;
-        } else {
-            $estadoPago =
-                Reserva::PAGO_PARCIAL;
-        }
-
-        $reserva->estado_pago =
-            $estadoPago;
-
-        if (!$reserva->estaCancelada()) {
-            $reserva->estado =
-                $estadoPago === Reserva::PAGO_COMPLETO
-                    ? Reserva::ESTADO_CONFIRMADA
-                    : Reserva::ESTADO_PENDIENTE;
-        }
-
-        $reserva->save();
+        $this->politicaPago->sincronizar($reserva);
     }
 
     public function actualizarPago(
@@ -765,6 +832,12 @@ class PagoService
             if ($pago->estaAnulado()) {
                 throw new InvalidArgumentException(
                     'Los pagos anulados no se pueden editar.'
+                );
+            }
+
+            if ($pago->devoluciones()->procesadas()->exists()) {
+                throw new InvalidArgumentException(
+                    'El pago tiene devoluciones procesadas y no se puede editar.'
                 );
             }
 
@@ -858,6 +931,16 @@ class PagoService
                         $pago->id
                     )
                     ->sum('monto_depositado');
+                $otrasDevoluciones = (float) Devolucion::query()
+                    ->procesadas()
+                    ->where('reserva_id', $reserva->id)
+                    ->where('cliente_id', $pago->cliente_id)
+                    ->where('pago_id', '!=', $pago->id)
+                    ->sum('monto');
+                $otrosPagos = max(
+                    0,
+                    $otrosPagos - $otrasDevoluciones
+                );
 
                 $maximoPermitido = max(
                     0,
@@ -877,6 +960,15 @@ class PagoService
                         $pago->id
                     )
                     ->sum('monto_depositado');
+                $otrasDevoluciones = (float) Devolucion::query()
+                    ->procesadas()
+                    ->where('reserva_id', $reserva->id)
+                    ->where('pago_id', '!=', $pago->id)
+                    ->sum('monto');
+                $otrosPagos = max(
+                    0,
+                    $otrosPagos - $otrasDevoluciones
+                );
 
                 $maximoPermitido = max(
                     0,
@@ -955,6 +1047,18 @@ class PagoService
             if ($pago->estaAnulado()) {
                 throw new InvalidArgumentException(
                     'El pago ya se encuentra anulado.'
+                );
+            }
+
+            if ($pago->devoluciones()->procesadas()->exists()) {
+                throw new InvalidArgumentException(
+                    'El pago tiene devoluciones procesadas y no se puede anular.'
+                );
+            }
+
+            if ($pago->reserva?->estaCancelada()) {
+                throw new InvalidArgumentException(
+                    'Los pagos de una reserva cancelada no se pueden anular; usa el módulo de devoluciones.'
                 );
             }
 

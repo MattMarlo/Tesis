@@ -1,12 +1,16 @@
 :root {
     --reservas-azul: #094c90;
     --reservas-celeste: #097188;
-    --reservas-texto: #2B2B2B;
-    --reservas-borde: #DCE3E8;
-    --reservas-verde: #178A52;
+    --reservas-texto: #2b2b2b;
+    --reservas-borde: #dce3e8;
+    --reservas-verde: #178a52;
     --reservas-rojo: #962234;
-    --reservas-dorado: #A87808;
+    --reservas-dorado: #a87808;
 }
+
+/* =========================================================
+   PÁGINA DE RESERVAS
+   ========================================================= */
 
 .pagina-reservas {
     padding: 2rem;
@@ -39,9 +43,13 @@
 
 .reservas-encabezado p {
     margin: 0.4rem 0 0;
-    color: #68747E;
+    color: #68747e;
     font-size: 0.87rem;
 }
+
+/* =========================================================
+   BOTONES DE NUEVA RESERVA
+   ========================================================= */
 
 .acciones-nueva-reserva {
     display: flex;
@@ -65,14 +73,18 @@
 .btn-reserva.individual {
     border: 1px solid var(--reservas-azul);
     background: var(--reservas-azul);
-    color: #FFFFFF;
+    color: #ffffff;
 }
 
 .btn-reserva.grupal {
     border: 1px solid var(--reservas-celeste);
-    background: #FFFFFF;
+    background: #ffffff;
     color: var(--reservas-azul);
 }
+
+/* =========================================================
+   RESUMEN
+   ========================================================= */
 
 .reservas-resumen {
     display: grid;
@@ -85,12 +97,12 @@
     padding: 0.9rem 1rem;
     border: 1px solid var(--reservas-borde);
     border-radius: 0.6rem;
-    background: #FFFFFF;
+    background: #ffffff;
 }
 
 .reservas-resumen span {
     display: block;
-    color: #6E7982;
+    color: #6e7982;
     font-size: 0.72rem;
 }
 
@@ -101,6 +113,10 @@
     font-size: 1.25rem;
 }
 
+/* =========================================================
+   FILTROS
+   ========================================================= */
+
 .filtros-reservas {
     display: flex;
     align-items: center;
@@ -109,7 +125,7 @@
     padding: 0.9rem;
     border: 1px solid var(--reservas-borde);
     border-radius: 0.6rem;
-    background: #FFFFFF;
+    background: #ffffff;
 }
 
 .buscador-reservas {
@@ -122,18 +138,18 @@
     position: absolute;
     top: 50%;
     left: 0.85rem;
-    color: #87929B;
+    color: #87929b;
     transform: translateY(-50%);
 }
 
 .buscador-reservas input,
 .filtros-reservas select {
     min-height: 2.45rem;
-    border: 1px solid #CDD6DD;
+    border: 1px solid #cdd6dd;
     border-radius: 0.45rem;
     outline: none;
-    background: #FFFFFF;
-    color: #3A444C;
+    background: #ffffff;
+    color: #3a444c;
     font-size: 0.77rem;
 }
 
@@ -159,24 +175,28 @@
     border: 1px solid var(--reservas-azul);
     border-radius: 0.45rem;
     background: var(--reservas-azul);
-    color: #FFFFFF;
+    color: #ffffff;
     font-size: 0.76rem;
     font-weight: 700;
     cursor: pointer;
 }
 
 .filtros-reservas > a {
-    color: #6E7982;
+    color: #6e7982;
     font-size: 0.74rem;
     font-weight: 700;
     text-decoration: none;
 }
 
+/* =========================================================
+   TABLA DE RESERVAS
+   ========================================================= */
+
 .reservas-listado-contenedor {
     overflow: hidden;
     border: 1px solid var(--reservas-borde);
     border-radius: 0.65rem;
-    background: #FFFFFF;
+    background: #ffffff;
 }
 
 .tabla-reservas-responsive {
@@ -191,13 +211,13 @@
 }
 
 .tabla-reservas thead {
-    background: #F2F5F7;
+    background: #f2f5f7;
 }
 
 .tabla-reservas th {
     padding: 0.78rem 0.85rem;
     border-bottom: 1px solid var(--reservas-borde);
-    color: #59656E;
+    color: #59656e;
     font-size: 0.67rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -208,8 +228,8 @@
 
 .tabla-reservas td {
     padding: 0.85rem;
-    border-bottom: 1px solid #E7ECEF;
-    color: #414B53;
+    border-bottom: 1px solid #e7ecef;
+    color: #414b53;
     font-size: 0.75rem;
     vertical-align: middle;
 }
@@ -219,14 +239,14 @@
 }
 
 .tabla-reservas tbody tr:hover {
-    background: #FAFCFD;
+    background: #fafcfd;
 }
 
 .reserva-codigo strong,
 .reserva-titular strong,
 .reserva-paquete strong {
     display: block;
-    color: #2F3941;
+    color: #2f3941;
     font-weight: 700;
 }
 
@@ -246,13 +266,13 @@
 }
 
 .tipo-reserva.individual {
-    background: #EAF1F7;
+    background: #eaf1f7;
     color: var(--reservas-azul);
 }
 
 .tipo-reserva.grupal {
-    background: #EAF5F7;
-    color: #23647B;
+    background: #eaf5f7;
+    color: #23647b;
 }
 
 .reserva-titular {
@@ -263,7 +283,7 @@
 .reserva-paquete small {
     display: block;
     margin-top: 0.18rem;
-    color: #7F8991;
+    color: #7f8991;
     font-size: 0.65rem;
 }
 
@@ -291,19 +311,23 @@
 
 .reserva-montos span {
     display: block;
-    color: #68747D;
+    color: #68747d;
     font-size: 0.66rem;
     line-height: 1.5;
 }
 
 .reserva-montos strong {
-    color: #303A42;
+    color: #303a42;
 }
 
 .reserva-montos .monto-pendiente {
     color: var(--reservas-rojo);
     font-weight: 700;
 }
+
+/* =========================================================
+   ESTADOS
+   ========================================================= */
 
 .reserva-estados {
     display: flex;
@@ -324,25 +348,29 @@
 
 .estado.pendiente,
 .estado-pago.pendiente {
-    background: #FFF5DA;
+    background: #fff5da;
     color: #896407;
 }
 
 .estado.confirmada,
 .estado-pago.pagado {
-    background: #E7F5ED;
+    background: #e7f5ed;
     color: var(--reservas-verde);
 }
 
 .estado.cancelada {
-    background: #FBEAEC;
+    background: #fbeaec;
     color: var(--reservas-rojo);
 }
 
 .estado-pago.parcial {
-    background: #E8F1F8;
+    background: #e8f1f8;
     color: var(--reservas-azul);
 }
+
+/* =========================================================
+   ACCIONES
+   ========================================================= */
 
 .columna-acciones {
     text-align: center !important;
@@ -361,12 +389,21 @@
     display: inline-grid;
     place-items: center;
     padding: 0;
-    border: 1px solid #D4DCE2;
+    border: 1px solid #d4dce2;
     border-radius: 0.4rem;
-    background: #FFFFFF;
+    background: #ffffff;
     font-size: 0.76rem;
     text-decoration: none;
     cursor: pointer;
+    transition:
+        color 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.accion-reserva:hover {
+    transform: translateY(-1px);
 }
 
 .accion-reserva.ver {
@@ -381,20 +418,36 @@
     color: var(--reservas-rojo);
 }
 
+.accion-reserva.editar {
+    color: #097188;
+    border-color: rgba(9, 113, 136, 0.3);
+    background: rgba(9, 113, 136, 0.08);
+}
+
 .accion-reserva.ver:hover {
     border-color: var(--reservas-azul);
-    background: #EEF4F9;
+    background: #eef4f9;
 }
 
 .accion-reserva.pago:hover {
     border-color: var(--reservas-verde);
-    background: #EDF8F2;
+    background: #edf8f2;
 }
 
 .accion-reserva.cancelar:hover {
     border-color: var(--reservas-rojo);
-    background: #FFF1F2;
+    background: #fff1f2;
 }
+
+.accion-reserva.editar:hover {
+    color: #ffffff;
+    border-color: #097188;
+    background: #097188;
+}
+
+/* =========================================================
+   LISTADO VACÍO Y PAGINACIÓN
+   ========================================================= */
 
 .reservas-vacio {
     min-height: 13rem;
@@ -402,18 +455,18 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #78838C;
+    color: #78838c;
     text-align: center;
 }
 
 .reservas-vacio i {
     margin-bottom: 0.6rem;
-    color: #A9B3BA;
+    color: #a9b3ba;
     font-size: 1.8rem;
 }
 
 .reservas-vacio strong {
-    color: #4D5860;
+    color: #4d5860;
 }
 
 .reservas-vacio span {
@@ -430,7 +483,9 @@
     height: 1rem;
 }
 
-/* Detalle */
+/* =========================================================
+   MODAL DE DETALLE
+   ========================================================= */
 
 .detalle-reserva-modal {
     border: 0;
@@ -463,7 +518,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.7rem;
-    color: #69757E;
+    color: #69757e;
     font-size: 0.78rem;
 }
 
@@ -493,7 +548,7 @@
 .detalle-valores span {
     display: block;
     margin-bottom: 0.2rem;
-    color: #7A858D;
+    color: #7a858d;
     font-size: 0.65rem;
 }
 
@@ -512,7 +567,7 @@
 .detalle-bloque-titulo span {
     padding: 0.25rem 0.45rem;
     border-radius: 0.3rem;
-    background: #EDF3F7;
+    background: #edf3f7;
     color: var(--reservas-azul);
     font-size: 0.66rem;
     font-weight: 700;
@@ -527,7 +582,7 @@
     padding: 12px 14px;
     border: 1px solid rgba(9, 113, 136, 0.3);
     border-radius: 8px;
-    color: #23647B;
+    color: #23647b;
     background: rgba(9, 113, 136, 0.08);
     font-size: 13px;
     line-height: 1.6;
@@ -542,13 +597,13 @@
 .tabla-viajeros th,
 .tabla-viajeros td {
     padding: 0.65rem;
-    border-bottom: 1px solid #E4E9EC;
+    border-bottom: 1px solid #e4e9ec;
     font-size: 0.7rem;
     text-align: left;
 }
 
 .tabla-viajeros th {
-    background: #F4F6F7;
+    background: #f4f6f7;
     color: #647079;
     font-size: 0.63rem;
     text-transform: uppercase;
@@ -557,8 +612,8 @@
 .detalle-cancelacion {
     padding: 0.9rem;
     border-left: 3px solid var(--reservas-rojo);
-    background: #FFF4F5;
-    color: #6D4145;
+    background: #fff4f5;
+    color: #6d4145;
 }
 
 .detalle-cancelacion p {
@@ -570,9 +625,367 @@
     font-size: 0.65rem;
 }
 
+/* =========================================================
+   INFORMACIÓN DE FECHAS Y PAGOS
+   ========================================================= */
+
+.fecha-ultimo-abono,
+.fecha-limite-pago {
+    align-items: flex-start;
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+    padding: 5px 7px;
+    border-radius: 7px;
+    font-size: 0.7rem;
+    line-height: 1.35;
+}
+
+.fecha-ultimo-abono {
+    background: #eff6ff;
+    color: #24558a;
+}
+
+.fecha-limite-pago {
+    background: #fff7df;
+    color: #79570d;
+}
+
+.fecha-limite-pago.vencida {
+    background: #ffe9ec;
+    color: #9b1c31;
+}
+
+.detalle-politica-pago {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+    padding: 13px;
+    border: 1px solid #dce5ef;
+    border-radius: 12px;
+    background: #f7f9fc;
+}
+
+.detalle-politica-pago div {
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================================
+   MODAL DE CANCELACIÓN
+   ========================================================= */
+
+/*
+ * :has() permite aplicar el diseño únicamente al SweetAlert
+ * que contiene el formulario de cancelación.
+ */
+.swal2-popup:has(.cancelacion-formulario) {
+    width: min(680px, calc(100vw - 32px)) !important;
+    max-height: calc(100vh - 32px);
+    padding: 0 !important;
+    overflow: hidden;
+    border: 1px solid #e1e7ec;
+    border-radius: 20px !important;
+    background: #ffffff;
+    box-shadow:
+        0 25px 70px rgba(15, 35, 55, 0.2),
+        0 5px 18px rgba(15, 35, 55, 0.08);
+}
+
+.swal2-popup:has(.cancelacion-formulario) .swal2-icon {
+    width: 56px;
+    height: 56px;
+    margin: 22px auto 8px;
+    border-width: 3px;
+    font-size: 16px;
+}
+
+.swal2-popup:has(.cancelacion-formulario) .swal2-icon-content {
+    font-size: 36px;
+}
+
+.swal2-popup:has(.cancelacion-formulario) .swal2-title {
+    margin: 0;
+    padding: 8px 28px 4px;
+    color: #253445;
+    font-family: inherit;
+    font-size: 1.42rem;
+    font-weight: 750;
+    line-height: 1.25;
+}
+
+.swal2-popup:has(.cancelacion-formulario) .swal2-html-container {
+    margin: 0 !important;
+    padding: 16px 28px 6px !important;
+    overflow: visible;
+    color: #4e5c68;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+/* Contenedor del formulario */
+
+.cancelacion-formulario {
+    width: 100%;
+    max-height: calc(100vh - 285px);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0 5px 8px 0;
+    text-align: left;
+    scrollbar-color: #becbd6 transparent;
+    scrollbar-width: thin;
+}
+
+.cancelacion-formulario::-webkit-scrollbar {
+    width: 7px;
+}
+
+.cancelacion-formulario::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cancelacion-formulario::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background: #becbd6;
+}
+
+/* Mensaje informativo */
+
+.cancelacion-ayuda {
+    position: relative;
+    margin: 0 0 8px;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid #f0d8a4;
+    border-radius: 12px;
+    background: #fff9eb;
+    color: #6d5319;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    text-align: left;
+}
+
+.cancelacion-ayuda::before {
+    position: absolute;
+    top: 13px;
+    left: 14px;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #f2b94b;
+    color: #ffffff;
+    content: "i";
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+/* Etiquetas */
+
+.cancelacion-formulario label {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    margin: 6px 0 0;
+    color: #344355;
+    font-size: 0.78rem;
+    font-weight: 750;
+    line-height: 1.35;
+    text-align: left;
+}
+
+/* Controles del formulario */
+
+.cancelacion-formulario .swal2-input,
+.cancelacion-formulario .swal2-select,
+.cancelacion-formulario .swal2-textarea {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border: 1px solid #ccd7e0 !important;
+    border-radius: 10px !important;
+    outline: none !important;
+    background: #fbfcfd !important;
+    color: #293744 !important;
+    font-family: inherit !important;
+    font-size: 0.88rem !important;
+    box-shadow: none !important;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.cancelacion-formulario .swal2-input,
+.cancelacion-formulario .swal2-select {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 13px !important;
+}
+
+.cancelacion-formulario .swal2-select {
+    appearance: auto;
+    cursor: pointer;
+}
+
+.cancelacion-formulario .swal2-textarea {
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 11px 13px !important;
+    resize: vertical;
+    line-height: 1.45;
+}
+
+.cancelacion-formulario .swal2-input:hover,
+.cancelacion-formulario .swal2-select:hover,
+.cancelacion-formulario .swal2-textarea:hover {
+    border-color: #aebdca !important;
+    background: #ffffff !important;
+}
+
+.cancelacion-formulario .swal2-input:focus,
+.cancelacion-formulario .swal2-select:focus,
+.cancelacion-formulario .swal2-textarea:focus {
+    border-color: var(--reservas-celeste) !important;
+    background: #ffffff !important;
+    box-shadow:
+        0 0 0 3px rgba(9, 113, 136, 0.12) !important;
+}
+
+.cancelacion-formulario .swal2-input::placeholder,
+.cancelacion-formulario .swal2-textarea::placeholder {
+    color: #9ba7b1;
+    opacity: 1;
+}
+
+/* Campo monetario */
+
+#swalGastosCancelacion {
+    padding-left: 48px !important;
+    background-image:
+        linear-gradient(
+            90deg,
+            #eef3f7 0,
+            #eef3f7 42px,
+            #ccd7e0 42px,
+            #ccd7e0 43px,
+            transparent 43px
+        ) !important;
+}
+
+/* Texto USD delante del campo usando el label */
+
+label[for="swalGastosCancelacion"]::after {
+    content: "USD";
+    float: right;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: #edf3f8;
+    color: var(--reservas-azul);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+/* Mensajes de validación */
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-validation-message {
+    margin: 8px 28px 0;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: #fff0f2;
+    color: #8c2435;
+    font-size: 0.77rem;
+    line-height: 1.4;
+}
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-validation-message::before {
+    width: 19px;
+    height: 19px;
+    min-width: 19px;
+    font-size: 12px;
+}
+
+/* Botonera */
+
+.swal2-popup:has(.cancelacion-formulario) .swal2-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    box-sizing: border-box;
+    margin: 12px 0 0 !important;
+    padding: 15px 28px 20px;
+    border-top: 1px solid #e7edf1;
+    background: #f8fafb;
+}
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-actions button {
+    min-height: 42px;
+    margin: 0 !important;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 750;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-actions button:hover {
+    transform: translateY(-1px);
+}
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-confirm {
+    background: var(--reservas-rojo) !important;
+    box-shadow:
+        0 7px 16px rgba(150, 34, 52, 0.2) !important;
+}
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-confirm:hover {
+    background: #7f1c2c !important;
+}
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-cancel {
+    border: 1px solid #d2dbe2 !important;
+    background: #ffffff !important;
+    color: #52616e !important;
+}
+
+.swal2-popup:has(.cancelacion-formulario)
+.swal2-cancel:hover {
+    border-color: #b9c5ce !important;
+    background: #f0f3f5 !important;
+}
+
+/* Clase general */
+
 .oculto {
     display: none !important;
 }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (max-width: 900px) {
     .pagina-reservas {
@@ -584,7 +997,8 @@
     }
 
     .reservas-resumen {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 
     .filtros-reservas {
@@ -598,7 +1012,71 @@
 
     .detalle-grid,
     .detalle-valores {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .swal2-container {
+        padding: 10px !important;
+    }
+
+    .swal2-popup:has(.cancelacion-formulario) {
+        width: calc(100vw - 20px) !important;
+        max-height: calc(100vh - 20px);
+        border-radius: 15px !important;
+    }
+
+    .swal2-popup:has(.cancelacion-formulario)
+    .swal2-icon {
+        width: 48px;
+        height: 48px;
+        margin-top: 16px;
+        margin-bottom: 5px;
+    }
+
+    .swal2-popup:has(.cancelacion-formulario)
+    .swal2-icon-content {
+        font-size: 30px;
+    }
+
+    .swal2-popup:has(.cancelacion-formulario)
+    .swal2-title {
+        padding: 6px 18px 2px;
+        font-size: 1.18rem;
+    }
+
+    .swal2-popup:has(.cancelacion-formulario)
+    .swal2-html-container {
+        padding: 13px 18px 4px !important;
+    }
+
+    .cancelacion-formulario {
+        max-height: calc(100vh - 250px);
+    }
+
+    .cancelacion-ayuda {
+        padding: 10px 11px 10px 37px;
+        font-size: 0.75rem;
+    }
+
+    .cancelacion-ayuda::before {
+        top: 11px;
+        left: 11px;
+    }
+
+    .swal2-popup:has(.cancelacion-formulario)
+    .swal2-actions {
+        gap: 8px;
+        padding: 12px 18px 16px;
+    }
+
+    .swal2-popup:has(.cancelacion-formulario)
+    .swal2-actions button {
+        flex: 1;
+        padding: 9px 10px;
+        font-size: 0.76rem;
     }
 }
 
@@ -621,16 +1099,4 @@
     .detalle-valores {
         grid-template-columns: 1fr;
     }
-}
-
-.accion-reserva.editar {
-    color: #097188;
-    border-color: rgba(9, 113, 136, 0.3);
-    background: rgba(9, 113, 136, 0.08);
-}
-
-.accion-reserva.editar:hover {
-    color: #FFFFFF;
-    border-color: #097188;
-    background: #097188;
 }

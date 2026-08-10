@@ -1,0 +1,701 @@
+.pagina-gestion-boletos {
+    padding-bottom: 2rem;
+}
+
+.origen-gestion-boletos {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #bfd9ea;
+    border-radius: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: #f1f8fc;
+}
+
+.origen-gestion-boletos-icono {
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 2.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.65rem;
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    font-size: 1rem;
+}
+
+.origen-gestion-boletos > div:last-child {
+    min-width: 0;
+}
+
+.origen-gestion-boletos span,
+.origen-gestion-boletos strong,
+.origen-gestion-boletos small {
+    display: block;
+}
+
+.origen-gestion-boletos span {
+    margin-bottom: 0.15rem;
+    color: var(--exp-celeste);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.origen-gestion-boletos strong {
+    color: var(--exp-azul);
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+
+.origen-gestion-boletos small {
+    margin-top: 0.2rem;
+    color: var(--exp-gris);
+    font-size: 0.7rem;
+    line-height: 1.45;
+}
+
+/*
+ * Información principal del vuelo.
+ */
+.tarjeta-vuelo-boletos {
+    margin-bottom: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.85rem;
+    background: var(--exp-blanco);
+    box-shadow: 0 0.35rem 1rem rgb(32 64 96 / 6%);
+}
+
+.encabezado-vuelo-boletos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--exp-borde);
+    background: #f5f9fc;
+}
+
+.identidad-vuelo-boletos {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.icono-vuelo-boletos {
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--exp-azul);
+    background: #dcecf6;
+    font-size: 1.25rem;
+}
+
+.identidad-vuelo-boletos > div {
+    min-width: 0;
+}
+
+.identidad-vuelo-boletos span {
+    color: var(--exp-celeste);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.identidad-vuelo-boletos h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.2rem 0 0;
+    color: var(--exp-azul);
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.identidad-vuelo-boletos h2 i {
+    color: var(--exp-celeste);
+    font-size: 0.9rem;
+}
+
+.identidad-vuelo-boletos p {
+    margin: 0.2rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.74rem;
+}
+
+.btn-ver-expediente {
+    min-height: 2.35rem;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid var(--exp-azul);
+    border-radius: 0.55rem;
+    padding: 0.55rem 0.8rem;
+    color: var(--exp-azul);
+    background: var(--exp-blanco);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn-ver-expediente:hover,
+.btn-ver-expediente:focus-visible {
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    transform: translateY(-1px);
+}
+
+.btn-ver-expediente:focus-visible {
+    outline: 3px solid rgb(9 113 136 / 18%);
+    outline-offset: 2px;
+}
+
+.datos-principales-vuelo {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.datos-principales-vuelo article {
+    min-width: 0;
+    padding: 0.95rem 1.1rem;
+    border-right: 1px solid var(--exp-borde);
+}
+
+.datos-principales-vuelo article:last-child {
+    border-right: 0;
+}
+
+.datos-principales-vuelo span,
+.datos-principales-vuelo strong,
+.datos-principales-vuelo small {
+    display: block;
+}
+
+.datos-principales-vuelo span {
+    margin-bottom: 0.3rem;
+    color: var(--exp-gris);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.datos-principales-vuelo strong {
+    overflow-wrap: anywhere;
+    color: var(--exp-texto);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.datos-principales-vuelo small {
+    margin-top: 0.2rem;
+    overflow-wrap: anywhere;
+    color: var(--exp-gris);
+    font-size: 0.66rem;
+    line-height: 1.4;
+}
+
+/*
+ * Estados del vuelo.
+ */
+.estado-vuelo-confirmado {
+    color: #18734a;
+    background: #e5f6ed;
+}
+
+.estado-vuelo-pendiente {
+    color: #876600;
+    background: #fff4d6;
+}
+
+.estado-vuelo-cancelado {
+    color: var(--exp-rojo);
+    background: #fbe7ea;
+}
+
+/*
+ * Resumen de avance.
+ */
+.resumen-gestion-boletos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.resumen-gestion-boletos article {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.75rem;
+    padding: 0.9rem 1rem;
+    background: var(--exp-blanco);
+}
+
+.resumen-gestion-icono {
+    width: 2.6rem;
+    height: 2.6rem;
+    flex: 0 0 2.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    font-size: 1rem;
+}
+
+.resumen-gestion-contenido {
+    min-width: 0;
+    flex: 1;
+}
+
+.resumen-gestion-contenido > span {
+    display: block;
+    color: var(--exp-gris);
+    font-size: 0.67rem;
+    font-weight: 700;
+}
+
+.resumen-gestion-contenido > strong {
+    display: block;
+    margin-top: 0.12rem;
+    color: var(--exp-azul);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.barra-gestion-boletos {
+    width: 100%;
+    height: 0.4rem;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e5ebf0;
+}
+
+.barra-gestion-boletos span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--exp-azul),
+        var(--exp-celeste)
+    );
+    transition: width 0.25s ease;
+}
+
+/*
+ * Panel y tabla de viajeros.
+ */
+.panel-viajeros-boletos {
+    overflow: hidden;
+    border: 1px solid var(--exp-borde);
+    border-radius: 0.85rem;
+    background: var(--exp-blanco);
+}
+
+.panel-viajeros-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--exp-borde);
+}
+
+.panel-viajeros-encabezado h2 {
+    margin: 0;
+    color: var(--exp-azul);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.panel-viajeros-encabezado p {
+    margin: 0.25rem 0 0;
+    color: var(--exp-gris);
+    font-size: 0.72rem;
+}
+
+.cantidad-viajeros-boletos {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.35rem 0.65rem;
+    color: var(--exp-azul);
+    background: #e7f1f8;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.tabla-gestion-boletos-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabla-gestion-boletos {
+    width: 100%;
+    min-width: 1050px;
+    border-collapse: collapse;
+}
+
+.tabla-gestion-boletos th,
+.tabla-gestion-boletos td {
+    padding: 0.75rem 0.8rem;
+    border-bottom: 1px solid #e7edf2;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.tabla-gestion-boletos th {
+    color: var(--exp-gris);
+    background: #f3f7f9;
+    font-size: 0.61rem;
+    font-weight: 800;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tabla-gestion-boletos td {
+    color: var(--exp-texto);
+    font-size: 0.72rem;
+}
+
+.tabla-gestion-boletos tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tabla-gestion-boletos tbody tr:hover {
+    background: #fbfdfe;
+}
+
+.persona-tabla-boletos {
+    min-width: 180px;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.persona-tabla-boletos > span {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.55rem;
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.persona-tabla-boletos strong,
+.persona-tabla-boletos small {
+    display: block;
+}
+
+.persona-tabla-boletos strong {
+    color: var(--exp-texto);
+    font-size: 0.73rem;
+    line-height: 1.35;
+}
+
+.persona-tabla-boletos small {
+    margin-top: 0.12rem;
+    color: var(--exp-gris);
+    font-size: 0.63rem;
+}
+
+.dato-secundario-tabla {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--exp-gris);
+    font-size: 0.62rem;
+}
+
+.boleto-no-requerido {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.35rem 0.6rem;
+    color: #52606d;
+    background: #edf1f4;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.enlace-archivo-boleto {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--exp-azul);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.enlace-archivo-boleto:hover {
+    color: var(--exp-celeste);
+    text-decoration: underline;
+}
+
+.acciones-tabla-boletos {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-eliminar-boleto-pagina {
+    width: 2.15rem;
+    height: 2.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #efb7bf;
+    border-radius: 0.5rem;
+    color: var(--exp-rojo);
+    background: var(--exp-blanco);
+    cursor: pointer;
+    transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn-eliminar-boleto-pagina:hover,
+.btn-eliminar-boleto-pagina:focus-visible {
+    color: var(--exp-blanco);
+    background: var(--exp-rojo);
+    transform: translateY(-1px);
+}
+
+.btn-eliminar-boleto-pagina:focus-visible {
+    outline: 3px solid rgb(150 34 52 / 15%);
+    outline-offset: 2px;
+}
+
+.expediente-no-editable {
+    color: var(--exp-gris);
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.sin-viajeros-boletos {
+    padding: 2rem !important;
+    color: var(--exp-gris) !important;
+    text-align: center !important;
+}
+
+/*
+ * Diseño para tabletas.
+ */
+@media (max-width: 1000px) {
+    .datos-principales-vuelo {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .datos-principales-vuelo article:nth-child(2) {
+        border-right: 0;
+    }
+
+    .datos-principales-vuelo article:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--exp-borde);
+    }
+}
+
+/*
+ * La tabla se convierte en tarjetas en celulares.
+ */
+@media (max-width: 700px) {
+    .encabezado-vuelo-boletos,
+    .panel-viajeros-encabezado {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .btn-ver-expediente {
+        width: 100%;
+    }
+
+    .datos-principales-vuelo,
+    .resumen-gestion-boletos {
+        grid-template-columns: 1fr;
+    }
+
+    .datos-principales-vuelo article {
+        border-right: 0;
+        border-bottom: 1px solid var(--exp-borde);
+    }
+
+    .datos-principales-vuelo article:last-child {
+        border-bottom: 0;
+    }
+
+    .cantidad-viajeros-boletos {
+        width: fit-content;
+    }
+
+    .tabla-gestion-boletos-responsive {
+        overflow: visible;
+    }
+
+    .tabla-gestion-boletos {
+        min-width: 0;
+    }
+
+    .tabla-gestion-boletos thead {
+        display: none;
+    }
+
+    .tabla-gestion-boletos,
+    .tabla-gestion-boletos tbody,
+    .tabla-gestion-boletos tr,
+    .tabla-gestion-boletos td {
+        display: block;
+        width: 100%;
+    }
+
+    .tabla-gestion-boletos tbody {
+        padding: 0.75rem;
+    }
+
+    .tabla-gestion-boletos tr {
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+        border: 1px solid var(--exp-borde);
+        border-radius: 0.7rem;
+        background: var(--exp-blanco);
+    }
+
+    .tabla-gestion-boletos tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .tabla-gestion-boletos td {
+        display: grid;
+        grid-template-columns:
+            minmax(105px, 36%)
+            minmax(0, 1fr);
+        gap: 0.7rem;
+        align-items: center;
+        padding: 0.65rem 0.75rem;
+        border-bottom: 1px solid #edf1f4;
+    }
+
+    .tabla-gestion-boletos td::before {
+        color: var(--exp-gris);
+        font-size: 0.6rem;
+        font-weight: 800;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+    }
+
+    .tabla-gestion-boletos td:nth-child(1)::before {
+        content: "Viajero";
+    }
+
+    .tabla-gestion-boletos td:nth-child(2)::before {
+        content: "Documento";
+    }
+
+    .tabla-gestion-boletos td:nth-child(3)::before {
+        content: "Número de boleto";
+    }
+
+    .tabla-gestion-boletos td:nth-child(4)::before {
+        content: "Asiento";
+    }
+
+    .tabla-gestion-boletos td:nth-child(5)::before {
+        content: "Clase";
+    }
+
+    .tabla-gestion-boletos td:nth-child(6)::before {
+        content: "Estado";
+    }
+
+    .tabla-gestion-boletos td:nth-child(7)::before {
+        content: "Archivo";
+    }
+
+    .tabla-gestion-boletos td:nth-child(8)::before,
+    .tabla-gestion-boletos td:last-child::before {
+        content: "Acciones";
+    }
+
+    .tabla-gestion-boletos td[colspan]::before {
+        content: "Boleto";
+    }
+
+    .tabla-gestion-boletos td:last-child {
+        border-bottom: 0;
+    }
+
+    .persona-tabla-boletos {
+        min-width: 0;
+    }
+
+    .acciones-tabla-boletos {
+        flex-wrap: wrap;
+    }
+
+    .origen-gestion-boletos {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .identidad-vuelo-boletos {
+        align-items: flex-start;
+    }
+
+    .icono-vuelo-boletos {
+        width: 2.5rem;
+        height: 2.5rem;
+        flex-basis: 2.5rem;
+    }
+
+    .identidad-vuelo-boletos h2 {
+        font-size: 1rem;
+    }
+
+    .tabla-gestion-boletos td {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+
+    .acciones-tabla-boletos,
+    .acciones-tabla-boletos .btn-gestionar-boleto {
+        width: 100%;
+    }
+
+    .btn-eliminar-boleto-pagina {
+        width: 100%;
+    }
+}

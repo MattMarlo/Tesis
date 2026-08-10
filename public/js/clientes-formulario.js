@@ -25,21 +25,6 @@ $(function () {
         return !mensaje;
     }
 
-    function esNacionalidadEcuatoriana() {
-        const nacionalidad = textoLimpio(
-            $('#nacionalidad').val()
-        )
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase();
-
-        return [
-            'ecuador',
-            'ecuatoriana',
-            'ecuatoriano'
-        ].includes(nacionalidad);
-    }
-
     function cedulaEcuatorianaValida(cedula) {
         if (!/^\d{10}$/.test(cedula)) {
             return false;
@@ -242,10 +227,23 @@ $(function () {
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
 
-        if (fecha >= hoy) {
+        const fechaMaxima = new Date(hoy);
+        fechaMaxima.setFullYear(fechaMaxima.getFullYear() - 1);
+
+        if (fecha > fechaMaxima) {
             return mostrarError(
                 'fecha_nacimiento',
-                'La fecha de nacimiento debe ser anterior a hoy.'
+                'El cliente debe tener al menos 1 año de edad.'
+            );
+        }
+
+        const fechaMinima = new Date(hoy);
+        fechaMinima.setFullYear(fechaMinima.getFullYear() - 100);
+
+        if (fecha < fechaMinima) {
+            return mostrarError(
+                'fecha_nacimiento',
+                'La edad del cliente no puede superar los 100 años.'
             );
         }
 
@@ -253,10 +251,11 @@ $(function () {
     }
 
     function validarNacionalidad() {
-        return validarNombre(
-            'nacionalidad',
-            'la nacionalidad'
-        );
+        if (!$('#nacionalidad').val()) {
+            return mostrarError('nacionalidad', 'Selecciona un país.');
+        }
+
+        return mostrarError('nacionalidad', '');
     }
 
     function validarCaducidad() {
@@ -295,7 +294,7 @@ $(function () {
 
     function validarCorreo() {
         const valor = textoLimpio($('#email').val());
-        const formato = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const formato = /^[^\s@]+@([A-Za-z0-9-]{2,}\.)+[A-Za-z]{2,}$/;
 
         if (!valor) {
             return mostrarError(
@@ -328,29 +327,28 @@ $(function () {
             return mostrarError(idCampo, '');
         }
 
-        if (!/^\d{7,15}$/.test(valor)) {
+        if (!/^\+?\d{7,15}$/.test(valor)) {
             return mostrarError(
                 idCampo,
-                'El teléfono debe contener entre 7 y 15 números.'
+                'Ingresa entre 7 y 15 dígitos; puedes comenzar con + y el código de país.'
             );
         }
 
-        if (
-            idCampo === 'telefono' &&
-            esNacionalidadEcuatoriana()
-        ) {
-            const formatoLocal = /^09\d{8}$/;
-            const formatoInternacional = /^5939\d{8}$/;
+        const digitos = valor.replace(/^\+/, '');
+        const repetido = /^(\d)\1+$/.test(digitos);
+        const secuencias = [
+            '01234567890123456789',
+            '12345678901234567890',
+            '98765432109876543210'
+        ];
 
-            if (
-                !formatoLocal.test(valor) &&
-                !formatoInternacional.test(valor)
-            ) {
-                return mostrarError(
-                    idCampo,
-                    'El celular ecuatoriano debe tener el formato 09XXXXXXXX o 5939XXXXXXXX.'
-                );
-            }
+        if (repetido || secuencias.some(function (secuencia) {
+            return secuencia.includes(digitos);
+        })) {
+            return mostrarError(
+                idCampo,
+                'No se permiten teléfonos secuenciales ni números repetidos.'
+            );
         }
 
         return mostrarError(idCampo, '');
@@ -511,7 +509,10 @@ $(function () {
     $('#telefono, #telefono_emergencia').on(
         'input',
         function () {
-            this.value = this.value.replace(/\D/g, '');
+            const incluyePrefijo = this.value.trim().startsWith('+');
+            this.value =
+                (incluyePrefijo ? '+' : '') +
+                this.value.replace(/\D/g, '');
         }
     );
 
@@ -531,7 +532,7 @@ $(function () {
 
     $documento.on('blur', validarDocumento);
     $('#fecha_nacimiento').on('change blur', validarFechaNacimiento);
-    $('#nacionalidad').on('blur input', function () {
+    $('#nacionalidad').on('change blur', function () {
         validarNacionalidad();
         validarTelefono('telefono', true);
     });

@@ -231,10 +231,17 @@
                             </td>
 
                             <td>
-                                <span class="origen-telegram">
-                                    <i class="bi bi-telegram"></i>
-                                    Telegram
-                                </span>
+                                @if ($pre->origen === \App\Models\PreReserva::ORIGEN_WHATSAPP)
+                                    <span class="origen-whatsapp">
+                                        <i class="bi bi-whatsapp"></i>
+                                        WhatsApp
+                                    </span>
+                                @else
+                                    <span class="origen-telegram">
+                                        <i class="bi bi-telegram"></i>
+                                        Telegram
+                                    </span>
+                                @endif
                             </td>
 
                             <td>

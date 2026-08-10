@@ -8,6 +8,9 @@ class PreReserva extends Model
 {
     public const ORIGEN_TELEGRAM =
         'telegram_bot';
+    
+    public const ORIGEN_WHATSAPP =
+        'whatsapp_bot';
 
     public const ESTADO_PENDIENTE =
         'pendiente_contacto';

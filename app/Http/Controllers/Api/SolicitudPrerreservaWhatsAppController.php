@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\SolicitudPrerreservaWhatsApp;
+use App\Models\Destino;
+use App\Models\PreReserva;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -89,28 +90,76 @@ class SolicitudPrerreservaWhatsAppController extends Controller
                 ],
             ]);
         }
+        
+        $destino = Destino::findOrFail(
+            $data['destino_id']
+        );
 
-        $solicitud = SolicitudPrerreservaWhatsApp::firstOrCreate(
+        $preReserva = PreReserva::firstOrCreate(
             [
                 'referencia_externa' =>
                     $data['referencia_externa'],
             ],
             [
-                'destino_id' => $data['destino_id'],
-                'nombre_completo' =>
-                    trim($data['nombre_completo']),
-                'cedula' => $data['cedula'],
-                'correo' => mb_strtolower(
+                'cliente_nombre' => trim(
+                    $data['nombre_completo']
+                ),
+
+                'email' => mb_strtolower(
                     trim($data['correo'])
                 ),
-                'telefono' => $data['telefono'],
-                'tipo_reserva' => $data['tipo_reserva'],
+
+                'destino' =>
+                    $destino->nombre_paquete,
+
+                'destino_id' => $destino->id,
+
+                'telefono' => trim(
+                    $data['telefono']
+                ),
+
+                'cedula' => $data['cedula'],
+
+                'fecha_viaje' => null,
+
                 'cantidad_personas' =>
                     $data['cantidad_personas'],
+
+                'fecha_reserva' => now(),
+
+                'origen' =>
+                    PreReserva::ORIGEN_WHATSAPP,
+
+                'telegram_chat_id' => null,
+
                 'estado' =>
-                    SolicitudPrerreservaWhatsApp::ESTADO_PENDIENTE,
+                    PreReserva::ESTADO_PENDIENTE,
+
+                'tipo_reserva' =>
+                    $data['tipo_reserva'],
+
+                'user_id' => null,
             ]
         );
+
+        return response()->json([
+            'success' => true,
+
+            'duplicada' =>
+                ! $preReserva->wasRecentlyCreated,
+
+            // Conservamos este nombre para no cambiar n8n.
+            'solicitud_id' => $preReserva->id,
+
+            'pre_reserva_id' => $preReserva->id,
+
+            'estado' => $preReserva->estado,
+
+            'message' =>
+                $preReserva->wasRecentlyCreated
+                    ? 'Prerreserva registrada correctamente.'
+                    : 'La prerreserva ya había sido registrada.',
+        ], $preReserva->wasRecentlyCreated ? 201 : 200);
 
         return response()->json([
             'success' => true,

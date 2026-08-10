@@ -188,11 +188,11 @@
     font-size: 0.7rem;
 }
 
-.origen-telegram {
+.origen-whatsapp {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    color: #2677a8;
+    color: #128c4a;
     font-size: 0.75rem;
     font-weight: 700;
 }

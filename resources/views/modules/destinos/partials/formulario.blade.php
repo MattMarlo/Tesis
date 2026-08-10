@@ -32,7 +32,7 @@
 @endphp
 
 <link
-    href="{{ asset('css/paquetes-formulario.css') }}"
+    href="{{ asset('css/paquetes-formulario.css') }}?v={{ filemtime(public_path('css/paquetes-formulario.css')) }}"
     rel="stylesheet"
 >
 

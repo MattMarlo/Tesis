@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CupoReservaService;
 use Illuminate\Database\Eloquent\Model;
 
 class Destino extends Model
@@ -59,5 +60,15 @@ class Destino extends Model
     public function preReservas()
     {
         return $this->hasMany(PreReserva::class, 'destino_id');
+    }
+
+    /**
+     * Cupos reales después de considerar reservas individuales
+     * y grupales activas. La capacidad original no se modifica.
+     */
+    public function getCuposDisponiblesAttribute(): int
+    {
+        return app(CupoReservaService::class)
+            ->obtenerDisponibles($this);
     }
 }

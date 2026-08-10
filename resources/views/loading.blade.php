@@ -380,7 +380,7 @@
 
                             <span>
                                 <i class="fa fa-users"></i>
-                                {{ $paquete->capacidad }} cupos
+                                {{ $paquete->cupos_disponibles }} cupos
                             </span>
 
                             @if($paquete->fecha_salida)

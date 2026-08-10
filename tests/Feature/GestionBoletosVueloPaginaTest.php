@@ -352,7 +352,7 @@ class GestionBoletosVueloPaginaTest extends TestCase
                         null,
 
                     'numero_boleto' =>
-                        'ETKT-001-1234567890',
+                        'r1223',
 
                     'asiento' =>
                         '12A',
@@ -466,6 +466,104 @@ class GestionBoletosVueloPaginaTest extends TestCase
             $this->tarea
                 ->fresh()
                 ->gestionable_id
+        );
+    }
+
+    public function test_no_permite_guardar_un_vuelo_cuya_salida_no_sea_anterior_a_la_llegada(): void
+    {
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.vuelos.store',
+                    $this->operacion
+                ),
+                $this->datosVuelo([
+                    'fecha_hora_salida' =>
+                        '2026-11-15 10:00:00',
+                    'fecha_hora_llegada' =>
+                        '2026-11-15 08:00:00',
+                ])
+            );
+
+        $respuesta->assertSessionHasErrors([
+            'fecha_hora_llegada',
+        ]);
+
+        $this->assertDatabaseCount(
+            'vuelos_reserva',
+            0
+        );
+    }
+
+    public function test_rechaza_datos_de_vuelo_con_formatos_incorrectos(): void
+    {
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.vuelos.store',
+                    $this->operacion
+                ),
+                $this->datosVuelo([
+                    'aerolinea' => '1a',
+                    'numero_vuelo' => '1qqw1l',
+                    'ciudad_origen' => '2',
+                    'aeropuerto_origen' => '2',
+                    'terminal_salida' => 'q',
+                    'localizador_reserva' => 'A',
+                    'proveedor' => '1',
+                ])
+            );
+
+        $respuesta->assertSessionHasErrors([
+            'aerolinea',
+            'numero_vuelo',
+            'ciudad_origen',
+            'aeropuerto_origen',
+            'terminal_salida',
+            'localizador_reserva',
+            'proveedor',
+        ]);
+
+        $this->assertDatabaseCount(
+            'vuelos_reserva',
+            0
+        );
+    }
+
+    public function test_rechaza_datos_de_boleto_con_formatos_incorrectos(): void
+    {
+        $vuelo = $this->crearVueloVinculado();
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.boletos.store',
+                    $vuelo
+                ),
+                [
+                    'cliente_id' => $this->cliente->id,
+                    'numero_boleto' => '@',
+                    'asiento' => 'ABC',
+                    'clase' => '1',
+                    'estado_emision' =>
+                        BoletoVuelo::ESTADO_EMITIDO,
+                    'observaciones' => 'x',
+                ]
+            );
+
+        $respuesta->assertSessionHasErrors([
+            'numero_boleto',
+            'asiento',
+            'clase',
+            'observaciones',
+        ]);
+
+        $this->assertDatabaseCount(
+            'boletos_vuelo',
+            0
         );
     }
 

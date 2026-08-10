@@ -5,7 +5,7 @@
 @section('content')
 <link
     rel="stylesheet"
-    href="{{ asset('css/operacion-viaje.css') }}"
+    href="{{ asset('css/operacion-viaje.css') }}?v={{ filemtime(public_path('css/operacion-viaje.css')) }}"
 >
 
 @php
@@ -978,5 +978,6 @@
 </script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="{{ asset('js/operacion-viaje.js') }}"></script>
+<script src="{{ asset('js/operacion-viaje.js') }}?v={{ filemtime(public_path('js/operacion-viaje.js')) }}"></script>
+<script src="{{ asset('js/gestion-alimentacion.js') }}?v={{ filemtime(public_path('js/gestion-alimentacion.js')) }}"></script>
 @endsection

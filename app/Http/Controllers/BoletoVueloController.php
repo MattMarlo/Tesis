@@ -366,19 +366,24 @@ class BoletoVueloController extends Controller
                 'nullable',
                 'required_if:estado_emision,emitido',
                 'string',
-                'max:100',
+                'min:3',
+                'max:30',
+                'regex:/^[A-Z0-9]+(?:-[A-Z0-9]+)*$/i',
             ],
 
             'asiento' => [
                 'nullable',
                 'string',
-                'max:20',
+                'max:4',
+                'regex:/^[0-9]{1,3}[A-Z]$/i',
             ],
 
             'clase' => [
                 'nullable',
                 'string',
+                'min:2',
                 'max:50',
+                "regex:/^[\p{L}][\p{L}\s.'’-]+$/u",
             ],
 
             'estado_emision' => [
@@ -400,6 +405,7 @@ class BoletoVueloController extends Controller
             'observaciones' => [
                 'nullable',
                 'string',
+                'min:3',
                 'max:1000',
             ],
         ], [
@@ -414,6 +420,24 @@ class BoletoVueloController extends Controller
 
             'numero_boleto.required_if' =>
                 'Ingresa el número del boleto cuando está emitido.',
+
+            'numero_boleto.min' =>
+                'El número del boleto debe tener al menos tres caracteres.',
+
+            'numero_boleto.regex' =>
+                'El número del boleto solo puede contener letras, números y guiones.',
+
+            'asiento.regex' =>
+                'Ingresa un asiento válido, por ejemplo 14A.',
+
+            'clase.min' =>
+                'La clase debe tener al menos dos caracteres.',
+
+            'clase.regex' =>
+                'Ingresa una clase válida, por ejemplo Económica.',
+
+            'observaciones.min' =>
+                'Las observaciones deben tener al menos tres caracteres.',
 
             'estado_emision.in' =>
                 'El estado del boleto no es válido.',

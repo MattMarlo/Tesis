@@ -409,6 +409,11 @@
                         ) }}"
                     enctype="multipart/form-data"
                     class="formulario-gestion-contextual"
+                    @if ($tipoGestion === GestionOperativa::TIPO_ALIMENTACION)
+                        data-validacion-alimentacion="true"
+                        data-fecha-paquete-inicio="{{ $reserva->destino?->fecha_salida?->format('Y-m-d') }}"
+                        data-fecha-paquete-fin="{{ $reserva->destino?->fecha_regreso?->format('Y-m-d') }}"
+                    @endif
                 >
                     @csrf
 
@@ -836,9 +841,11 @@
                             <div class="campos-gestion-contextual">
                                 <div class="campo-gestion">
                                     <label>Restaurante o establecimiento</label>
-                                    <input
-                                        type="text"
-                                        name="datos_adicionales[restaurante]"
+                                <input
+                                    id="gestionRestaurante{{ $tarea->id }}"
+                                    type="text"
+                                    name="datos_adicionales[restaurante]"
+                                    minlength="3"
                                         maxlength="180"
                                         value="{{ $valorFormulario(
                                             'datos_adicionales.restaurante',
@@ -851,8 +858,10 @@
                                     <label>Tipo de menú</label>
 
                                     <input
+                                        id="gestionTipoMenu{{ $tarea->id }}"
                                         type="text"
                                         name="datos_adicionales[tipo_menu]"
+                                        minlength="3"
                                         maxlength="150"
                                         value="{{ $valorFormulario(
                                             'datos_adicionales.tipo_menu',
@@ -869,8 +878,10 @@
                                     </label>
 
                                     <textarea
+                                        id="gestionRestricciones{{ $tarea->id }}"
                                         name="datos_adicionales[restricciones_alimentarias]"
                                         rows="3"
+                                        minlength="3"
                                         maxlength="2000"
                                     >{{ $valorFormulario(
                                         'datos_adicionales.restricciones_alimentarias',

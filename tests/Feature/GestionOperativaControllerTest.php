@@ -371,6 +371,52 @@ class GestionOperativaControllerTest extends TestCase
         );
     }
 
+    public function test_alimentacion_valida_campos_y_orden_de_fechas_sin_perder_el_contexto(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' =>
+                TareaOperacionViaje::TIPO_ALIMENTACION,
+            'nombre' => 'Desayuno en el hotel',
+        ]);
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.tareas.gestiones.store',
+                    [
+                        'operacion' => $this->operacion->id,
+                        'tarea' => $this->tarea->id,
+                    ]
+                ),
+                $this->datosGestion([
+                    'tipo' =>
+                        TareaOperacionViaje::TIPO_ALIMENTACION,
+                    'proveedor' => '1',
+                    'fecha_hora_inicio' =>
+                        '2026-12-03 10:00:00',
+                    'fecha_hora_fin' =>
+                        '2026-12-03 09:00:00',
+                    'datos_adicionales' => [
+                        'restaurante' => 'x',
+                        'tipo_menu' => '1',
+                    ],
+                ])
+            );
+
+        $respuesta->assertSessionHasErrors([
+            'proveedor',
+            'fecha_hora_fin',
+            'datos_adicionales.restaurante',
+            'datos_adicionales.tipo_menu',
+        ]);
+
+        $this->assertDatabaseCount(
+            'gestiones_operativas',
+            0
+        );
+    }
+
     private function crearReserva(
         string $codigo
     ): Reserva {

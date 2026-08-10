@@ -135,10 +135,21 @@
                             id="vueloAerolinea"
                             name="aerolinea"
                             type="text"
+                            minlength="2"
                             maxlength="120"
                             autocomplete="organization"
                             required
+                            aria-describedby="vueloAerolineaError"
                         >
+
+                        <small
+                            id="vueloAerolineaError"
+                            class="mensaje-validacion-vuelo"
+                            role="alert"
+                            hidden
+                        >
+                            La aerolínea debe tener al menos 2 caracteres.
+                        </small>
                     </div>
 
                     <div class="campo-expediente">
@@ -244,6 +255,7 @@
                             name="fecha_hora_salida"
                             type="datetime-local"
                             required
+                            aria-describedby="vueloFechasError"
                         >
                     </div>
 
@@ -258,7 +270,17 @@
                             name="fecha_hora_llegada"
                             type="datetime-local"
                             required
+                            aria-describedby="vueloFechasError"
                         >
+
+                        <small
+                            id="vueloFechasError"
+                            class="mensaje-validacion-vuelo"
+                            role="alert"
+                            hidden
+                        >
+                            La fecha y hora de llegada debe ser posterior a la salida.
+                        </small>
                     </div>
 
                     <div class="campo-expediente">
@@ -336,7 +358,15 @@
                             id="vueloFechaCompra"
                             name="fecha_compra"
                             type="date"
+                            aria-describedby="vueloFechaCompraError"
                         >
+
+                        <small
+                            id="vueloFechaCompraError"
+                            class="mensaje-validacion-vuelo"
+                            role="alert"
+                            hidden
+                        ></small>
                     </div>
 
                     <div class="campo-expediente">
@@ -350,7 +380,17 @@
                             type="number"
                             min="0"
                             step="0.01"
+                            aria-describedby="vueloCostoError"
                         >
+
+                        <small
+                            id="vueloCostoError"
+                            class="mensaje-validacion-vuelo"
+                            role="alert"
+                            hidden
+                        >
+                            El costo debe ser un número igual o mayor que cero.
+                        </small>
                     </div>
 
                     <div class="campo-expediente">

@@ -1295,6 +1295,320 @@ $(function () {
             'la información';
     }
 
+    function validarFechasVuelo(mostrarAlerta = false) {
+        const $salida = $('#vueloSalida');
+        const $llegada = $('#vueloLlegada');
+        const $mensaje = $('#vueloFechasError');
+        const salida = $salida.val();
+        const llegada = $llegada.val();
+
+        const limiteInicio = datosPaquete.fechaSalida
+            ? datosPaquete.fechaSalida + 'T00:00'
+            : '';
+        const limiteFin = datosPaquete.fechaRegreso
+            ? datosPaquete.fechaRegreso + 'T23:59'
+            : '';
+
+        $salida.attr({ min: limiteInicio, max: limiteFin });
+        $llegada.attr({ min: salida || limiteInicio, max: limiteFin });
+
+        let mensaje = '';
+
+        if (salida && llegada && llegada <= salida) {
+            mensaje = 'La fecha y hora de llegada debe ser posterior a la salida.';
+        } else if (
+            limiteInicio &&
+            ((salida && salida < limiteInicio) || (llegada && llegada < limiteInicio))
+        ) {
+            mensaje = 'Las fechas del vuelo no pueden ser anteriores al inicio del paquete.';
+        } else if (
+            limiteFin &&
+            ((salida && salida > limiteFin) || (llegada && llegada > limiteFin))
+        ) {
+            mensaje = 'Las fechas del vuelo no pueden superar la fecha de regreso del paquete.';
+        }
+
+        const fechasInvalidas = Boolean(mensaje);
+
+        $salida.add($llegada)
+            .toggleClass('input-error', fechasInvalidas)
+            .attr('aria-invalid', fechasInvalidas ? 'true' : 'false');
+        $mensaje.text(mensaje).prop('hidden', !fechasInvalidas);
+        $llegada.get(0)?.setCustomValidity(
+            mensaje
+        );
+
+        if (fechasInvalidas && mostrarAlerta) {
+            $llegada.trigger('focus');
+        }
+
+        return !fechasInvalidas;
+    }
+
+    function validarDatosBasicosVuelo() {
+        const $aerolinea = $('#vueloAerolinea');
+        const $fechaCompra = $('#vueloFechaCompra');
+        const $costo = $('#vueloCosto');
+        const $errorAerolinea = $('#vueloAerolineaError');
+        const $errorCompra = $('#vueloFechaCompraError');
+        const $errorCosto = $('#vueloCostoError');
+        const aerolineaInvalida = $.trim($aerolinea.val()).length < 2;
+        const hoy = new Date();
+        const fechaMinima = new Date(
+            hoy.getFullYear() - 1,
+            hoy.getMonth(),
+            hoy.getDate()
+        );
+        const formatoFecha = fecha => [
+            fecha.getFullYear(),
+            String(fecha.getMonth() + 1).padStart(2, '0'),
+            String(fecha.getDate()).padStart(2, '0')
+        ].join('-');
+        const minimoCompra = formatoFecha(fechaMinima);
+        const maximoCompra = formatoFecha(hoy);
+        const fechaCompra = $fechaCompra.val();
+        const costo = $costo.val();
+        const costoInvalido = costo !== '' && (
+            !Number.isFinite(Number(costo)) || Number(costo) < 0
+        );
+        let mensajeCompra = '';
+
+        $fechaCompra.attr({ min: minimoCompra, max: maximoCompra });
+
+        if (fechaCompra && fechaCompra < minimoCompra) {
+            mensajeCompra = 'La fecha de compra no puede tener más de un año de antigüedad.';
+        } else if (fechaCompra && fechaCompra > maximoCompra) {
+            mensajeCompra = 'La fecha de compra no puede ser futura.';
+        }
+
+        $aerolinea
+            .toggleClass('input-error', aerolineaInvalida)
+            .attr('aria-invalid', aerolineaInvalida ? 'true' : 'false');
+        $errorAerolinea.prop('hidden', !aerolineaInvalida);
+        $fechaCompra
+            .toggleClass('input-error', Boolean(mensajeCompra))
+            .attr('aria-invalid', mensajeCompra ? 'true' : 'false');
+        $errorCompra.text(mensajeCompra).prop('hidden', !mensajeCompra);
+        $costo
+            .toggleClass('input-error', costoInvalido)
+            .attr('aria-invalid', costoInvalido ? 'true' : 'false');
+        $errorCosto.prop('hidden', !costoInvalido);
+
+        return !aerolineaInvalida && !mensajeCompra && !costoInvalido;
+    }
+
+    function mostrarValidacionCampoVuelo(selector, mensaje) {
+        const $campo = $(selector);
+        const idMensaje = $campo.attr('id') + 'Validacion';
+        let $mensaje = $('#' + idMensaje);
+
+        if (!$mensaje.length) {
+            $mensaje = $('<small>', {
+                id: idMensaje,
+                class: 'mensaje-validacion-vuelo',
+                role: 'alert',
+                hidden: true
+            }).insertAfter($campo);
+        }
+
+        $campo
+            .toggleClass('input-error', Boolean(mensaje))
+            .attr('aria-invalid', mensaje ? 'true' : 'false');
+        $mensaje.text(mensaje).prop('hidden', !mensaje);
+
+        return !mensaje;
+    }
+
+    function validarCamposVuelo() {
+        const valores = {
+            aerolinea: $.trim($('#vueloAerolinea').val()),
+            numero: $.trim($('#vueloNumero').val()),
+            origen: $.trim($('#vueloCiudadOrigen').val()),
+            destino: $.trim($('#vueloCiudadDestino').val()),
+            aeropuertoOrigen: $.trim($('#vueloAeropuertoOrigen').val()),
+            aeropuertoDestino: $.trim($('#vueloAeropuertoDestino').val()),
+            terminalSalida: $.trim($('#vueloTerminalSalida').val()),
+            terminalLlegada: $.trim($('#vueloTerminalLlegada').val()),
+            localizador: $.trim($('#vueloLocalizador').val()),
+            equipaje: $.trim($('#vueloEquipaje').val()),
+            proveedor: $.trim($('#vueloProveedor').val())
+        };
+        const estado = $('#vueloEstado').val();
+        const formatoNombre = /^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’-]+$/u;
+        const formatoCiudad = /^[\p{L}][\p{L}\s.'’-]{1,119}$/u;
+        const formatoAeropuerto = /^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.'’&(),\/-]{3,150}$/u;
+        const formatoTerminal = /^[\p{L}\p{N}][\p{L}\p{N}\s.-]{1,49}$/u;
+        let valido = true;
+
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloAerolinea',
+            formatoNombre.test(valores.aerolinea)
+                ? ''
+                : 'Ingresa una aerolínea válida con al menos dos letras.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloNumero',
+            !valores.numero && estado !== 'confirmado'
+                ? ''
+                : /^[A-Z0-9]{2,3}[\s-]?[0-9]{1,4}[A-Z]?$/i.test(valores.numero)
+                    ? ''
+                    : 'Usa un número de vuelo válido, por ejemplo LA 1447 o AV8374.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloCiudadOrigen',
+            formatoCiudad.test(valores.origen)
+                ? ''
+                : 'Ingresa una ciudad de origen válida.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloCiudadDestino',
+            !formatoCiudad.test(valores.destino)
+                ? 'Ingresa una ciudad de destino válida.'
+                : valores.origen.toLocaleLowerCase() === valores.destino.toLocaleLowerCase()
+                    ? 'La ciudad de destino debe ser diferente del origen.'
+                    : ''
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloAeropuertoOrigen',
+            !valores.aeropuertoOrigen || formatoAeropuerto.test(valores.aeropuertoOrigen)
+                ? ''
+                : 'Ingresa un aeropuerto válido con al menos tres caracteres.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloAeropuertoDestino',
+            !valores.aeropuertoDestino || formatoAeropuerto.test(valores.aeropuertoDestino)
+                ? ''
+                : 'Ingresa un aeropuerto válido con al menos tres caracteres.'
+        ) && valido;
+
+        ['terminalSalida', 'terminalLlegada'].forEach(function (campo) {
+            const selector = campo === 'terminalSalida'
+                ? '#vueloTerminalSalida'
+                : '#vueloTerminalLlegada';
+            valido = mostrarValidacionCampoVuelo(
+                selector,
+                !valores[campo] || formatoTerminal.test(valores[campo])
+                    ? ''
+                    : 'Ingresa una terminal válida de al menos dos caracteres.'
+            ) && valido;
+        });
+
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloLocalizador',
+            !valores.localizador || /^[A-Z0-9]{5,12}$/i.test(valores.localizador)
+                ? ''
+                : 'El localizador debe tener entre 5 y 12 letras o números.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloEquipaje',
+            !valores.equipaje || valores.equipaje.length >= 3
+                ? ''
+                : 'Describe el equipaje con al menos tres caracteres.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#vueloProveedor',
+            !valores.proveedor || formatoNombre.test(valores.proveedor)
+                ? ''
+                : 'Ingresa un proveedor válido con al menos dos letras.'
+        ) && valido;
+
+        return valido;
+    }
+
+    function validarCamposBoleto() {
+        const estado = $('#boletoEstado').val();
+        const numero = $.trim($('#boletoNumero').val());
+        const asiento = $.trim($('#boletoAsiento').val());
+        const clase = $.trim($('#boletoClase').val());
+        const observaciones = $.trim($('#boletoObservaciones').val());
+        const archivo = $('#boletoArchivo')[0]?.files[0];
+        let valido = true;
+        let errorNumero = '';
+        let errorArchivo = '';
+
+        if (estado === 'emitido' && !numero) {
+            errorNumero = 'Ingresa el número del boleto cuando está emitido.';
+        } else if (
+            numero &&
+            !/^[A-Z0-9]+(?:-[A-Z0-9]+)*$/i.test(numero)
+        ) {
+            errorNumero = 'Usa al menos 3 caracteres entre letras y números; también puedes usar guiones.';
+        } else if (numero && (numero.length < 3 || numero.length > 30)) {
+            errorNumero = 'El número del boleto debe tener entre 3 y 30 caracteres.';
+        }
+
+        if (archivo) {
+            const extension = archivo.name.split('.').pop().toLowerCase();
+            const extensiones = ['pdf', 'jpg', 'jpeg', 'png'];
+
+            if (!extensiones.includes(extension)) {
+                errorArchivo = 'Selecciona un archivo PDF, JPG, JPEG o PNG.';
+            } else if (archivo.size > 5 * 1024 * 1024) {
+                errorArchivo = 'El archivo no puede superar los 5 MB.';
+            }
+        }
+
+        valido = mostrarValidacionCampoVuelo(
+            '#boletoNumero',
+            errorNumero
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#boletoAsiento',
+            !asiento || /^[0-9]{1,3}[A-Z]$/i.test(asiento)
+                ? ''
+                : 'Ingresa un asiento válido, por ejemplo 14A.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#boletoClase',
+            !clase || (/^[\p{L}][\p{L}\s.'’-]+$/u.test(clase) && clase.length >= 2)
+                ? ''
+                : 'Ingresa una clase válida, por ejemplo Económica.'
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#boletoArchivo',
+            errorArchivo
+        ) && valido;
+        valido = mostrarValidacionCampoVuelo(
+            '#boletoObservaciones',
+            !observaciones || observaciones.length >= 3
+                ? ''
+                : 'Las observaciones deben tener al menos tres caracteres.'
+        ) && valido;
+
+        return valido;
+    }
+
+    $('#vueloSalida, #vueloLlegada, #vueloAerolinea, #vueloFechaCompra, #vueloCosto').on(
+        'input change',
+        function () {
+            validarFechasVuelo(false);
+            validarDatosBasicosVuelo();
+        }
+    );
+
+    $('#formularioVuelo').on(
+        'input change',
+        'input:not([type="date"]):not([type="datetime-local"]), select',
+        validarCamposVuelo
+    );
+
+    $('#formularioBoleto').on(
+        'input change',
+        'input, select, textarea',
+        function () {
+            if (this.id === 'boletoAsiento') {
+                this.value = this.value.toUpperCase();
+            }
+
+            validarCamposBoleto();
+        }
+    );
+
+    $('#modalVuelo').on('shown.bs.modal', function () {
+        validarFechasVuelo(false);
+        validarDatosBasicosVuelo();
+    });
+
     $(
         '#formularioVuelo, ' +
         '#formularioBoleto, ' +
@@ -1336,6 +1650,20 @@ $(function () {
                 this.id ===
                 'formularioVuelo'
             ) {
+                    if (!validarDatosBasicosVuelo()) {
+                        $('#vueloAerolinea.input-error, #vueloFechaCompra.input-error, #vueloCosto.input-error')
+                            .first()
+                            .trigger('focus');
+                        return;
+                    }
+
+                    if (!validarCamposVuelo()) {
+                        $('#formularioVuelo .input-error')
+                            .first()
+                            .trigger('focus');
+                        return;
+                    }
+
                     const estado =
                         $('#vueloEstado').val();
 
@@ -1406,34 +1734,9 @@ $(function () {
                         return;
                     }
 
-                    const salida =
-                        new Date(
-                            $('#vueloSalida').val()
-                        );
-
-                    const llegada =
-                        new Date(
-                            $('#vueloLlegada').val()
-                        );
-
-                    if (llegada <= salida) {
-                        $('#vueloSalida, #vueloLlegada')
-                            .addClass('input-error');
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Fechas incorrectas',
-                            text:
-                                'La llegada debe ser posterior a la salida.',
-                            confirmButtonText: 'Corregir',
-                            confirmButtonColor: '#094c90'
-                        });
-
+                    if (!validarFechasVuelo(true)) {
                         return;
                     }
-
-                    $('#vueloSalida, #vueloLlegada')
-                        .removeClass('input-error');
             }
 
             if (
@@ -1637,103 +1940,13 @@ $(function () {
                 this.id ===
                 'formularioBoleto'
             ) {
-                const estado =
-                    $('#boletoEstado').val();
-
-                const numeroBoleto =
-                    $.trim(
-                        $('#boletoNumero').val()
-                    );
-
-                const archivo =
-                    $('#boletoArchivo')[0]
-                        .files[0];
-
-                $('#boletoNumero, #boletoArchivo')
-                    .removeClass('input-error');
-
-                if (
-                    estado === 'emitido' &&
-                    !numeroBoleto
-                ) {
-                    $('#boletoNumero')
-                        .addClass('input-error')
+                if (!validarCamposBoleto()) {
+                    $('#formularioBoleto .input-error')
+                        .first()
                         .trigger('focus');
-
-                    Swal.fire({
-                        icon: 'error',
-                        title:
-                            'Falta el número de boleto',
-                        text:
-                            'Un boleto emitido debe tener su número registrado.',
-                        confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#094c90'
-                    });
-
                     return;
                 }
 
-                if (archivo) {
-                    const extensionesPermitidas = [
-                        'pdf',
-                        'jpg',
-                        'jpeg',
-                        'png'
-                    ];
-
-                    const extension =
-                        archivo.name
-                            .split('.')
-                            .pop()
-                            .toLowerCase();
-
-                    const tamanoMaximo =
-                        5 * 1024 * 1024;
-
-                    if (
-                        !extensionesPermitidas.includes(
-                            extension
-                        )
-                    ) {
-                        $('#boletoArchivo')
-                            .addClass('input-error');
-
-                        Swal.fire({
-                            icon: 'error',
-                            title:
-                                'Archivo no permitido',
-                            text:
-                                'El boleto debe estar en formato PDF, JPG, JPEG o PNG.',
-                            confirmButtonText:
-                                'Corregir',
-                            confirmButtonColor:
-                                '#094c90'
-                        });
-
-                        return;
-                    }
-
-                    if (
-                        archivo.size > tamanoMaximo
-                    ) {
-                        $('#boletoArchivo')
-                            .addClass('input-error');
-
-                        Swal.fire({
-                            icon: 'error',
-                            title:
-                                'Archivo demasiado grande',
-                            text:
-                                'El archivo del boleto no puede superar los 5 MB.',
-                            confirmButtonText:
-                                'Corregir',
-                            confirmButtonColor:
-                                '#094c90'
-                        });
-
-                        return;
-                    }
-                }
             }
 
             const elemento =

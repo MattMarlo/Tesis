@@ -646,6 +646,19 @@
     border-color: var(--exp-rojo) !important;
 }
 
+.mensaje-validacion-vuelo {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--exp-rojo);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.mensaje-validacion-vuelo[hidden] {
+    display: none;
+}
+
 .oculto {
     display: none !important;
 }

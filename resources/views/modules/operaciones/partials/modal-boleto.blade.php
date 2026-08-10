@@ -61,7 +61,9 @@
                             id="boletoNumero"
                             name="numero_boleto"
                             type="text"
-                            maxlength="100"
+                            minlength="3"
+                            maxlength="30"
+                            placeholder="Ejemplo: 462-1234567890"
                         >
                     </div>
 
@@ -74,7 +76,7 @@
                             id="boletoAsiento"
                             name="asiento"
                             type="text"
-                            maxlength="20"
+                            maxlength="4"
                             placeholder="Ejemplo: 14A"
                         >
                     </div>
@@ -88,6 +90,7 @@
                             id="boletoClase"
                             name="clase"
                             type="text"
+                            minlength="2"
                             maxlength="50"
                             placeholder="Ejemplo: Económica"
                         >
@@ -150,6 +153,7 @@
                             id="boletoObservaciones"
                             name="observaciones"
                             rows="3"
+                            minlength="3"
                             maxlength="1000"
                         ></textarea>
                     </div>

@@ -46,6 +46,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('solicitud_prerreserva_whats_apps');
+        Schema::dropIfExists(
+            'solicitudes_prerreserva_whatsapp'
+        );
     }
 };

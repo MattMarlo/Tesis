@@ -490,6 +490,61 @@ $(document).ready(function () {
     });
 
     /* =====================================================
+       VISOR DE IMAGEN DE PAQUETES
+    ===================================================== */
+
+    const $visorImagen = $(
+        '<div class="visor-imagen-paquete" aria-hidden="true">' +
+            '<button type="button" class="visor-imagen-paquete-cerrar" aria-label="Cerrar imagen ampliada">&times;</button>' +
+            '<figure class="visor-imagen-paquete-contenido" role="dialog" aria-modal="true" aria-label="Imagen ampliada del paquete">' +
+                '<img class="visor-imagen-paquete-imagen" src="" alt="">' +
+                '<figcaption class="visor-imagen-paquete-titulo"></figcaption>' +
+            '</figure>' +
+        '</div>'
+    ).appendTo('body');
+
+    function abrirVisorImagen($imagen) {
+        const textoAlternativo = $imagen.attr('alt') || 'Imagen del paquete';
+
+        $visorImagen.find('.visor-imagen-paquete-imagen')
+            .attr('src', $imagen.attr('src'))
+            .attr('alt', textoAlternativo);
+        $visorImagen.find('.visor-imagen-paquete-titulo').text(textoAlternativo);
+        $visorImagen.addClass('esta-abierto').attr('aria-hidden', 'false');
+        $('body').addClass('visor-imagen-abierto');
+        $visorImagen.find('.visor-imagen-paquete-cerrar').trigger('focus');
+    }
+
+    function cerrarVisorImagen() {
+        $visorImagen.removeClass('esta-abierto').attr('aria-hidden', 'true');
+        $visorImagen.find('.visor-imagen-paquete-imagen').attr('src', '');
+        $('body').removeClass('visor-imagen-abierto');
+    }
+
+    $(document).on('click', '.paquete-imagen', function () {
+        abrirVisorImagen($(this));
+    });
+
+    $(document).on('keydown', '.paquete-imagen', function (evento) {
+        if (evento.key === 'Enter' || evento.key === ' ') {
+            evento.preventDefault();
+            abrirVisorImagen($(this));
+        }
+    });
+
+    $visorImagen.on('click', function (evento) {
+        if (evento.target === this || $(evento.target).closest('.visor-imagen-paquete-cerrar').length) {
+            cerrarVisorImagen();
+        }
+    });
+
+    $(document).on('keydown', function (evento) {
+        if (evento.key === 'Escape' && $visorImagen.hasClass('esta-abierto')) {
+            cerrarVisorImagen();
+        }
+    });
+
+    /* =====================================================
        DESPLAZAMIENTO DEL MENÚ
     ===================================================== */
 

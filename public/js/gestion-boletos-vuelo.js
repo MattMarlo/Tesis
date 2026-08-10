@@ -190,6 +190,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function limpiarFormulario() {
+        formulario
+            .querySelectorAll('.input-error')
+            .forEach(campo => {
+                campo.classList.remove('input-error');
+                campo.removeAttribute('aria-invalid');
+            });
+
+        formulario
+            .querySelectorAll(
+                '.mensaje-validacion-servidor-boleto, ' +
+                '.mensaje-validacion-cliente-boleto'
+            )
+            .forEach(mensaje => mensaje.remove());
+
         formulario.reset();
 
         formulario.action =
@@ -212,6 +226,162 @@ document.addEventListener('DOMContentLoaded', () => {
 
         limpiarArchivoActual();
     }
+
+    function mostrarErroresEnFormulario(errores) {
+        const camposPorError = {
+            numero_boleto: campos.numero,
+            asiento: campos.asiento,
+            clase: campos.clase,
+            estado_emision: campos.estado,
+            archivo_boleto: campos.archivo,
+            observaciones: campos.observaciones
+        };
+        const erroresGenerales = [];
+
+        Object.entries(errores || {}).forEach(([nombre, mensajes]) => {
+            const lista = Array.isArray(mensajes) ? mensajes : [mensajes];
+            const campo = camposPorError[nombre];
+
+            if (!campo) {
+                erroresGenerales.push(...lista);
+                return;
+            }
+
+            campo.classList.add('input-error');
+            campo.setAttribute('aria-invalid', 'true');
+
+            const mensaje = document.createElement('small');
+            mensaje.className = 'mensaje-validacion-vuelo mensaje-validacion-servidor-boleto';
+            mensaje.setAttribute('role', 'alert');
+            mensaje.textContent = lista[0];
+            campo.insertAdjacentElement('afterend', mensaje);
+        });
+
+        if (erroresGenerales.length) {
+            const resumen = document.createElement('div');
+            resumen.className = 'alert alert-danger mensaje-validacion-servidor-boleto';
+            resumen.setAttribute('role', 'alert');
+            resumen.textContent = erroresGenerales.join(' ');
+            formulario.querySelector('.modal-body')?.prepend(resumen);
+        }
+
+        formulario.querySelector('.input-error')?.focus();
+    }
+
+    function activarValidacionEnTiempoReal() {
+        if (typeof window.jQuery === 'undefined') {
+            return;
+        }
+
+        const $ = window.jQuery;
+        const $formulario = $(formulario);
+
+        function mostrarError(selector, mensaje) {
+            const $campo = $(selector);
+            const id = $campo.attr('id') + 'ErrorCliente';
+            let $mensaje = $('#' + id);
+
+            if (!$mensaje.length) {
+                $mensaje = $('<small>', {
+                    id,
+                    class: 'mensaje-validacion-vuelo mensaje-validacion-cliente-boleto',
+                    role: 'alert',
+                    hidden: true
+                }).insertAfter($campo);
+            }
+
+            $campo
+                .toggleClass('input-error', Boolean(mensaje))
+                .attr('aria-invalid', mensaje ? 'true' : 'false');
+            $mensaje.text(mensaje).prop('hidden', !mensaje);
+
+            if (!mensaje) {
+                $campo
+                    .siblings('.mensaje-validacion-servidor-boleto')
+                    .remove();
+            }
+
+            return !mensaje;
+        }
+
+        function validarFormularioBoleto() {
+            const estado = String(campos.estado?.value || '');
+            const numero = $.trim(campos.numero?.value || '');
+            const asiento = $.trim(campos.asiento?.value || '');
+            const clase = $.trim(campos.clase?.value || '');
+            const observaciones = $.trim(campos.observaciones?.value || '');
+            const archivo = campos.archivo?.files?.[0];
+            const formatoNumero = /^[A-Z0-9]+(?:-[A-Z0-9]+)*$/i;
+            let errorNumero = '';
+            let errorArchivo = '';
+            let valido = true;
+
+            if (estado === 'emitido' && !numero) {
+                errorNumero = 'Ingresa el número del boleto cuando está emitido.';
+            } else if (numero && !formatoNumero.test(numero)) {
+                errorNumero = 'Usa al menos 3 caracteres entre letras y números; también puedes usar guiones.';
+            } else if (numero && (numero.length < 3 || numero.length > 30)) {
+                errorNumero = 'El número del boleto debe tener entre 3 y 30 caracteres.';
+            }
+
+            if (archivo) {
+                const extension = archivo.name.split('.').pop().toLowerCase();
+
+                if (!['pdf', 'jpg', 'jpeg', 'png'].includes(extension)) {
+                    errorArchivo = 'Selecciona un archivo PDF, JPG, JPEG o PNG.';
+                } else if (archivo.size > 5 * 1024 * 1024) {
+                    errorArchivo = 'El archivo no puede superar los 5 MB.';
+                }
+            }
+
+            valido = mostrarError('#boletoNumero', errorNumero) && valido;
+            valido = mostrarError(
+                '#boletoAsiento',
+                !asiento || /^[0-9]{1,3}[A-Z]$/i.test(asiento)
+                    ? ''
+                    : 'Ingresa un asiento válido, por ejemplo 14A.'
+            ) && valido;
+            valido = mostrarError(
+                '#boletoClase',
+                !clase || (/^[\p{L}][\p{L}\s.'’-]+$/u.test(clase) && clase.length >= 2)
+                    ? ''
+                    : 'Ingresa una clase válida, por ejemplo Económica.'
+            ) && valido;
+            valido = mostrarError('#boletoArchivo', errorArchivo) && valido;
+            valido = mostrarError(
+                '#boletoObservaciones',
+                !observaciones || observaciones.length >= 3
+                    ? ''
+                    : 'Las observaciones deben tener al menos tres caracteres.'
+            ) && valido;
+
+            return valido;
+        }
+
+        $formulario.on(
+            'input change blur',
+            '#boletoNumero, #boletoAsiento, #boletoClase, #boletoEstado, #boletoArchivo, #boletoObservaciones',
+            function () {
+                if (this.id === 'boletoAsiento') {
+                    this.value = this.value.toUpperCase();
+                }
+
+                validarFormularioBoleto();
+            }
+        );
+
+        $formulario.on('submit', function (evento) {
+            if (validarFormularioBoleto()) {
+                return;
+            }
+
+            evento.preventDefault();
+            evento.stopImmediatePropagation();
+            $formulario.find('.input-error').first().trigger('focus');
+        });
+    }
+
+    activarValidacionEnTiempoReal();
 
     function configurarPersona(
         persona
@@ -510,6 +680,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 boleto,
                 anterior
             );
+
+            mostrarErroresEnFormulario(errores);
         }
     }
 

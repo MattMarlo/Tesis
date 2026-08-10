@@ -69,9 +69,36 @@ class HabitacionAlojamientoController extends Controller
     ) {
         $datos = $request->validate([
             'tipo' => ['required', Rule::in(array_keys(HabitacionAlojamiento::CAPACIDADES))],
-            'referencia' => ['nullable', 'string', 'max:100'],
-            'observaciones' => ['nullable', 'string', 'max:1000'],
-        ], ['tipo.required' => 'Selecciona el tipo de habitación.']);
+            'referencia' => [
+                'nullable',
+                'string',
+                'max:100',
+                "regex:~^(?:[0-9]{1,4}|(?=.{2,100}$)[\p{L}\p{N}][\p{L}\p{N}\s._-]*)$~u",
+                Rule::unique('habitaciones_alojamiento', 'referencia')
+                    ->where(fn ($consulta) => $consulta->where(
+                        'alojamiento_reserva_id',
+                        $alojamiento->id
+                    ))
+                    ->ignore($habitacion?->id),
+            ],
+            'observaciones' => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:1000',
+            ],
+        ], [
+            'tipo.required' =>
+                'Selecciona el tipo de habitación.',
+            'tipo.in' =>
+                'El tipo de habitación no es válido.',
+            'referencia.regex' =>
+                'Usa un número de habitación o un nombre de al menos dos caracteres.',
+            'referencia.unique' =>
+                'Ya existe una habitación con ese número o nombre.',
+            'observaciones.min' =>
+                'Las camas y observaciones deben tener al menos tres caracteres.',
+        ]);
         try {
             $this->service->guardarHabitacion($alojamiento, $datos, $habitacion);
             return back()->with('success', 'Habitación guardada correctamente.');

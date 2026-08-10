@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\GestionOperativa;
 use App\Models\GestionOperativaViajero;
 use App\Models\OperacionViaje;
+use App\Models\Reserva;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -135,6 +136,24 @@ class GuardarGestionOperativaRequest extends FormRequest
         $tipo =
             $this->input('tipo');
 
+        $esAlimentacion =
+            $tipo === GestionOperativa::TIPO_ALIMENTACION;
+
+        $destinoPaquete = $reservaId
+            ? Reserva::query()
+                ->with('destino')
+                ->find($reservaId)
+                ?->destino
+            : null;
+
+        $inicioPaquete = $destinoPaquete?->fecha_salida
+            ?->copy()
+            ->startOfDay();
+
+        $finPaquete = $destinoPaquete?->fecha_regreso
+            ?->copy()
+            ->endOfDay();
+
         $requiereUbicaciones = in_array(
             $tipo,
             [
@@ -182,24 +201,28 @@ class GuardarGestionOperativaRequest extends FormRequest
             'nombre' => [
                 'required',
                 'string',
+                ...($esAlimentacion ? ['min:3', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
                 'max:180',
             ],
 
             'proveedor' => [
                 'required',
                 'string',
+                ...($esAlimentacion ? ['min:2', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
                 'max:150',
             ],
 
             'contacto' => [
                 'nullable',
                 'string',
+                ...($esAlimentacion ? ['min:3', "regex:/^[\p{L}][\p{L}\s.'’-]+$/u"] : []),
                 'max:150',
             ],
 
             'telefono' => [
                 'nullable',
                 'string',
+                ...($esAlimentacion ? ['regex:/^\+?[0-9\s()\-]{7,20}$/'] : []),
                 'max:30',
             ],
 
@@ -212,12 +235,16 @@ class GuardarGestionOperativaRequest extends FormRequest
             'fecha_hora_inicio' => [
                 'required',
                 'date',
+                ...($esAlimentacion && $inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
+                ...($esAlimentacion && $finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
             ],
 
             'fecha_hora_fin' => [
                 'nullable',
                 'date',
                 'after:fecha_hora_inicio',
+                ...($esAlimentacion && $inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
+                ...($esAlimentacion && $finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
             ],
 
             'ubicacion_origen' => [
@@ -226,6 +253,7 @@ class GuardarGestionOperativaRequest extends FormRequest
                 ),
                 'nullable',
                 'string',
+                ...($esAlimentacion ? ['min:3'] : []),
                 'max:180',
             ],
 
@@ -263,6 +291,7 @@ class GuardarGestionOperativaRequest extends FormRequest
                 ),
                 'nullable',
                 'string',
+                ...($esAlimentacion ? ['min:3'] : []),
                 'max:150',
             ],
 
@@ -301,6 +330,7 @@ class GuardarGestionOperativaRequest extends FormRequest
             'observaciones' => [
                 'nullable',
                 'string',
+                ...($esAlimentacion ? ['min:3'] : []),
                 'max:5000',
             ],
 
@@ -348,12 +378,14 @@ class GuardarGestionOperativaRequest extends FormRequest
             'datos_adicionales.tipo_menu' => [
                 'nullable',
                 'string',
+                ...($esAlimentacion ? ['min:3', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
                 'max:150',
             ],
 
             'datos_adicionales.restricciones_alimentarias' => [
                 'nullable',
                 'string',
+                ...($esAlimentacion ? ['min:3'] : []),
                 'max:2000',
             ],
 
@@ -384,7 +416,7 @@ class GuardarGestionOperativaRequest extends FormRequest
             ],
 
             'datos_adicionales.restaurante' => [
-                'nullable', 'string', 'max:180',
+                'nullable', 'string', ...($esAlimentacion ? ['min:3'] : []), 'max:180',
             ],
 
             'datos_adicionales.punto_encuentro' => [
@@ -653,11 +685,29 @@ class GuardarGestionOperativaRequest extends FormRequest
             'nombre.max' =>
                 'El nombre no puede superar 180 caracteres.',
 
+            'nombre.min' =>
+                'El nombre debe tener al menos tres caracteres.',
+
+            'nombre.regex' =>
+                'Ingresa un nombre de servicio válido.',
+
             'proveedor.required' =>
                 'Ingresa el proveedor del servicio.',
 
             'proveedor.max' =>
                 'El proveedor no puede superar 150 caracteres.',
+
+            'proveedor.min' =>
+                'El proveedor debe tener al menos dos caracteres.',
+
+            'proveedor.regex' =>
+                'Ingresa un proveedor válido.',
+
+            'contacto.min' =>
+                'La persona de contacto debe tener al menos tres caracteres.',
+
+            'contacto.regex' =>
+                'Ingresa un nombre de contacto válido.',
 
             'correo.email' =>
                 'Ingresa un correo electrónico válido.',
@@ -671,8 +721,38 @@ class GuardarGestionOperativaRequest extends FormRequest
             'fecha_hora_fin.after' =>
                 'La fecha y hora final debe ser posterior al inicio.',
 
+            'fecha_hora_inicio.after_or_equal' =>
+                'El inicio no puede ser anterior a la salida del paquete.',
+
+            'fecha_hora_inicio.before_or_equal' =>
+                'El inicio no puede superar la fecha de regreso del paquete.',
+
+            'fecha_hora_fin.after_or_equal' =>
+                'La finalización no puede ser anterior a la salida del paquete.',
+
+            'fecha_hora_fin.before_or_equal' =>
+                'La finalización no puede superar la fecha de regreso del paquete.',
+
+            'telefono.regex' =>
+                'Ingresa un teléfono válido de 7 a 20 caracteres.',
+
+            'datos_adicionales.restaurante.min' =>
+                'El establecimiento debe tener al menos tres caracteres.',
+
+            'datos_adicionales.tipo_menu.min' =>
+                'El tipo de menú debe tener al menos tres caracteres.',
+
+            'datos_adicionales.tipo_menu.regex' =>
+                'Ingresa un tipo de menú válido.',
+
+            'datos_adicionales.restricciones_alimentarias.min' =>
+                'La restricción debe tener al menos tres caracteres.',
+
             'ubicacion_origen.required' =>
                 'Ingresa el lugar de origen o recogida.',
+
+            'ubicacion_origen.min' =>
+                'La ubicación debe tener al menos tres caracteres.',
 
             'destino.required' =>
                 'Ingresa el destino del servicio.',
@@ -688,6 +768,12 @@ class GuardarGestionOperativaRequest extends FormRequest
 
             'referencia_confirmacion.required' =>
                 'Una gestión confirmada debe tener una referencia de confirmación.',
+
+            'referencia_confirmacion.min' =>
+                'La referencia debe tener al menos tres caracteres.',
+
+            'observaciones.min' =>
+                'Las observaciones deben tener al menos tres caracteres.',
 
             'costo_total.numeric' =>
                 'El costo debe ser un número válido.',

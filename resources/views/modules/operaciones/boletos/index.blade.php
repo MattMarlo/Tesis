@@ -168,23 +168,6 @@
         </div>
     @endif
 
-    @if($errors->any())
-        <div
-            class="alert alert-danger"
-            role="alert"
-        >
-            <strong>
-                Revisa la información del boleto:
-            </strong>
-
-            <ul class="mb-0 mt-2">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     @if($tarea)
         <section class="origen-gestion-boletos">
             <div class="origen-gestion-boletos-icono">
@@ -653,6 +636,6 @@
 </script>
 
 <script
-    src="{{ asset('js/gestion-boletos-vuelo.js') }}"
+    src="{{ asset('js/gestion-boletos-vuelo.js') }}?v={{ filemtime(public_path('js/gestion-boletos-vuelo.js')) }}"
 ></script>
 @endsection

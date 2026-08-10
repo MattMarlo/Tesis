@@ -6,6 +6,7 @@ use App\Models\OperacionViaje;
 use App\Models\TareaOperacionViaje;
 use App\Models\VueloReserva;
 use App\Services\EstadoTareaContextualService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,8 @@ class VueloReservaController extends Controller
         }
 
         $datos = $this->validarDatos(
-            $request
+            $request,
+            $operacion
         );
 
         $tarea = $this->obtenerTareaVuelo(
@@ -97,7 +99,8 @@ class VueloReservaController extends Controller
         }
 
         $datos = $this->validarDatos(
-            $request
+            $request,
+            $vuelo->operacion
         );
 
         $tarea = $this->obtenerTareaVuelo(
@@ -262,8 +265,18 @@ class VueloReservaController extends Controller
     }
 
     private function validarDatos(
-        Request $request
+        Request $request,
+        OperacionViaje $operacion
     ): array {
+        $operacion->loadMissing('reserva.destino');
+
+        $fechaInicio = $operacion->reserva?->destino?->fecha_salida
+            ?->copy()
+            ->startOfDay();
+        $fechaFin = $operacion->reserva?->destino?->fecha_regreso
+            ?->copy()
+            ->endOfDay();
+
         return $request->validate([
             'tipo_tramo' => [
                 'required',
@@ -279,6 +292,7 @@ class VueloReservaController extends Controller
                 'string',
                 'min:2',
                 'max:120',
+                "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’-]+$/u",
             ],
 
             'numero_vuelo' => [
@@ -286,77 +300,108 @@ class VueloReservaController extends Controller
                 'required_if:estado,confirmado',
                 'string',
                 'max:30',
+                'regex:/^[A-Z0-9]{2,3}[\s-]?[0-9]{1,4}[A-Z]?$/i',
             ],
 
             'ciudad_origen' => [
                 'required',
                 'string',
+                'min:2',
                 'max:120',
+                "regex:/^[\p{L}][\p{L}\s.'’-]+$/u",
             ],
 
             'aeropuerto_origen' => [
                 'nullable',
                 'string',
+                'min:3',
                 'max:150',
+                "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.'’&(),\/-]+$/u",
             ],
 
             'ciudad_destino' => [
                 'required',
                 'string',
+                'min:2',
                 'max:120',
                 'different:ciudad_origen',
+                "regex:/^[\p{L}][\p{L}\s.'’-]+$/u",
             ],
 
             'aeropuerto_destino' => [
                 'nullable',
                 'string',
+                'min:3',
                 'max:150',
+                "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.'’&(),\/-]+$/u",
             ],
 
             'fecha_hora_salida' => [
                 'required',
                 'date',
+                ...($fechaInicio
+                    ? ['after_or_equal:' . $fechaInicio->toDateTimeString()]
+                    : []),
+                ...($fechaFin
+                    ? ['before_or_equal:' . $fechaFin->toDateTimeString()]
+                    : []),
             ],
 
             'fecha_hora_llegada' => [
                 'required',
                 'date',
                 'after:fecha_hora_salida',
+                ...($fechaInicio
+                    ? ['after_or_equal:' . $fechaInicio->toDateTimeString()]
+                    : []),
+                ...($fechaFin
+                    ? ['before_or_equal:' . $fechaFin->toDateTimeString()]
+                    : []),
             ],
 
             'terminal_salida' => [
                 'nullable',
                 'string',
+                'min:2',
                 'max:50',
+                "regex:/^[\p{L}\p{N}][\p{L}\p{N}\s.-]+$/u",
             ],
 
             'terminal_llegada' => [
                 'nullable',
                 'string',
+                'min:2',
                 'max:50',
+                "regex:/^[\p{L}\p{N}][\p{L}\p{N}\s.-]+$/u",
             ],
 
             'localizador_reserva' => [
                 'nullable',
                 'string',
-                'max:80',
+                'between:5,12',
+                'regex:/^[A-Z0-9]+$/i',
             ],
 
             'equipaje_incluido' => [
                 'nullable',
                 'string',
+                'min:3',
                 'max:150',
             ],
 
             'proveedor' => [
                 'nullable',
                 'string',
+                'min:2',
                 'max:150',
+                "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’-]+$/u",
             ],
 
             'fecha_compra' => [
                 'nullable',
                 'date',
+                'after_or_equal:' . Carbon::today()->subYear()->toDateString(),
+                'before_or_equal:today',
             ],
 
             'costo_total' => [
@@ -395,14 +440,50 @@ class VueloReservaController extends Controller
             'aerolinea.required' =>
                 'Ingresa el nombre de la aerolínea.',
 
+            'aerolinea.regex' =>
+                'Ingresa una aerolínea válida con al menos dos letras.',
+
+            'numero_vuelo.regex' =>
+                'Ingresa un número de vuelo válido, por ejemplo LA 1447.',
+
             'ciudad_origen.required' =>
                 'Ingresa la ciudad de origen.',
+
+            'ciudad_origen.regex' =>
+                'Ingresa una ciudad de origen válida.',
 
             'ciudad_destino.required' =>
                 'Ingresa la ciudad de destino.',
 
+            'ciudad_destino.regex' =>
+                'Ingresa una ciudad de destino válida.',
+
             'ciudad_destino.different' =>
                 'La ciudad de destino debe ser diferente a la ciudad de origen.',
+
+            'aeropuerto_origen.regex' =>
+                'Ingresa un aeropuerto de origen válido.',
+
+            'aeropuerto_destino.regex' =>
+                'Ingresa un aeropuerto de destino válido.',
+
+            'terminal_salida.regex' =>
+                'Ingresa una terminal de salida válida.',
+
+            'terminal_llegada.regex' =>
+                'Ingresa una terminal de llegada válida.',
+
+            'localizador_reserva.between' =>
+                'El localizador debe tener entre 5 y 12 caracteres.',
+
+            'localizador_reserva.regex' =>
+                'El localizador solo puede contener letras y números.',
+
+            'equipaje_incluido.min' =>
+                'Describe el equipaje con al menos tres caracteres.',
+
+            'proveedor.regex' =>
+                'Ingresa un proveedor válido con al menos dos letras.',
 
             'fecha_hora_salida.required' =>
                 'Ingresa la fecha y hora de salida.',
@@ -412,6 +493,24 @@ class VueloReservaController extends Controller
 
             'fecha_hora_llegada.after' =>
                 'La llegada debe ser posterior a la salida.',
+
+            'fecha_hora_salida.after_or_equal' =>
+                'La salida no puede ser anterior al inicio del paquete.',
+
+            'fecha_hora_salida.before_or_equal' =>
+                'La salida no puede superar la fecha de regreso del paquete.',
+
+            'fecha_hora_llegada.after_or_equal' =>
+                'La llegada no puede ser anterior al inicio del paquete.',
+
+            'fecha_hora_llegada.before_or_equal' =>
+                'La llegada no puede superar la fecha de regreso del paquete.',
+
+            'fecha_compra.after_or_equal' =>
+                'La fecha de compra no puede tener más de un año de antigüedad.',
+
+            'fecha_compra.before_or_equal' =>
+                'La fecha de compra no puede ser futura.',
 
             'numero_vuelo.required_if' =>
                 'Ingresa el número del vuelo cuando está confirmado.',

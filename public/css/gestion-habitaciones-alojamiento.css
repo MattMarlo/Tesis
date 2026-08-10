@@ -154,6 +154,8 @@
 .panel-crear-habitacion label { margin-top: .35rem; color: #344d62; font-size: .7rem; font-weight: 750; }
 .panel-crear-habitacion input, .panel-crear-habitacion select, .panel-crear-habitacion textarea, .form-asignar select { width: 100%; border: 1px solid #c8d6e0; border-radius: .55rem; padding: .62rem .7rem; color: #243f55; background: #fbfdff; font: inherit; font-size: .73rem; }
 .panel-crear-habitacion textarea { resize: vertical; }
+.panel-crear-habitacion .input-error { border-color: #c9364f !important; }
+.campo-error-habitacion { display: block; color: #b4233a; font-size: .66rem; font-weight: 700; line-height: 1.35; }
 .panel-crear-habitacion input:focus, .panel-crear-habitacion select:focus, .panel-crear-habitacion textarea:focus, .form-asignar select:focus { outline: 0; border-color: var(--hab-celeste); box-shadow: 0 0 0 .2rem rgb(9 113 136 / 12%); }
 .panel-crear-habitacion button, .form-asignar button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; border: 0; border-radius: .55rem; padding: .68rem .85rem; color: #fff; background: var(--hab-azul); font-size: .7rem; font-weight: 800; transition: .2s ease; }
 .panel-crear-habitacion button { margin-top: .55rem; }

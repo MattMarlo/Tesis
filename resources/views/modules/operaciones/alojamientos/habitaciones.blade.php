@@ -4,7 +4,7 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/operacion-viaje.css') }}">
-<link rel="stylesheet" href="{{ asset('css/gestion-habitaciones-alojamiento.css') }}">
+<link rel="stylesheet" href="{{ asset('css/gestion-habitaciones-alojamiento.css') }}?v={{ filemtime(public_path('css/gestion-habitaciones-alojamiento.css')) }}">
 
 @php
     $urlRegreso = route('operaciones.show', $reserva->id)
@@ -38,9 +38,6 @@
     @endif
     @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger">{{ $errors->first() }}</div>
     @endif
 
     <section class="resumen-habitaciones">
@@ -113,18 +110,21 @@
             <span>Nueva habitación</span>
             <h2>Agregar espacio</h2>
             @if ($editable)
-                <form method="POST" action="{{ route('operaciones.habitaciones.store', $alojamiento) }}">
+                <form id="formularioCrearHabitacion" method="POST" action="{{ route('operaciones.habitaciones.store', $alojamiento) }}" novalidate>
                     @csrf
                     <label>Tipo</label>
-                    <select name="tipo" required>
+                    <select id="habitacionTipo" name="tipo" required>
                         @foreach (\App\Models\HabitacionAlojamiento::CAPACIDADES as $tipo => $capacidadTipo)
-                            <option value="{{ $tipo }}">{{ ucfirst($tipo) }} ({{ $capacidadTipo }})</option>
+                            <option value="{{ $tipo }}" @selected(old('tipo') === $tipo)>{{ ucfirst($tipo) }} ({{ $capacidadTipo }})</option>
                         @endforeach
                     </select>
+                    @error('tipo')<small class="campo-error-habitacion">{{ $message }}</small>@enderror
                     <label>Número o nombre</label>
-                    <input name="referencia" maxlength="100" placeholder="Ejemplo: 301">
+                    <input id="habitacionReferencia" name="referencia" maxlength="100" value="{{ old('referencia') }}" placeholder="Ejemplo: 301">
+                    @error('referencia')<small class="campo-error-habitacion">{{ $message }}</small>@enderror
                     <label>Camas y observaciones</label>
-                    <textarea name="observaciones" maxlength="1000" rows="4" placeholder="Ejemplo: dos camas individuales"></textarea>
+                    <textarea id="habitacionObservaciones" name="observaciones" minlength="3" maxlength="1000" rows="4" placeholder="Ejemplo: dos camas individuales">{{ old('observaciones') }}</textarea>
+                    @error('observaciones')<small class="campo-error-habitacion">{{ $message }}</small>@enderror
                     <button type="submit"><i class="bi bi-plus-lg"></i> Crear habitación</button>
                 </form>
             @else
@@ -133,4 +133,6 @@
         </aside>
     </div>
 </main>
+
+<script src="{{ asset('js/gestion-habitaciones-alojamiento.js') }}?v={{ filemtime(public_path('js/gestion-habitaciones-alojamiento.js')) }}"></script>
 @endsection

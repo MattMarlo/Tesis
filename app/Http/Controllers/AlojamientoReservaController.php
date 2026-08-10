@@ -6,6 +6,7 @@ use App\Models\AlojamientoReserva;
 use App\Models\OperacionViaje;
 use App\Models\TareaOperacionViaje;
 use App\Services\EstadoTareaContextualService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,8 @@ class AlojamientoReservaController extends Controller
         }
 
         $datos = $this->validarDatos(
-            $request
+            $request,
+            $operacion
         );
 
         $tarea = $this->obtenerTareaAlojamiento($request, $operacion);
@@ -87,7 +89,8 @@ class AlojamientoReservaController extends Controller
         }
 
         $datos = $this->validarDatos(
-            $request
+            $request,
+            $alojamiento->operacion
         );
 
         $tarea = $this->obtenerTareaAlojamiento(
@@ -162,50 +165,68 @@ class AlojamientoReservaController extends Controller
     }
 
     private function validarDatos(
-        Request $request
+        Request $request,
+        OperacionViaje $operacion
     ): array {
+        $operacion->loadMissing('reserva.destino');
+        $inicioPaquete = $operacion->reserva?->destino?->fecha_salida?->copy()->startOfDay();
+        $finPaquete = $operacion->reserva?->destino?->fecha_regreso?->copy()->endOfDay();
+
         return $request->validate([
             'nombre_hotel' => [
                 'required',
                 'string',
                 'min:2',
                 'max:180',
+                "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u",
             ],
             'ciudad' => [
                 'required',
                 'string',
+                'min:2',
                 'max:120',
+                "regex:/^[\p{L}][\p{L}\s.'’,\-]+$/u",
             ],
             'pais' => [
                 'required',
                 'string',
+                'min:2',
                 'max:120',
+                "regex:/^[\p{L}][\p{L}\s.'’-]+$/u",
             ],
             'codigo_confirmacion' => [
                 'nullable',
                 'required_if:estado,confirmado',
                 'string',
+                'min:3',
                 'max:100',
+                'regex:/^[A-Z0-9]+(?:-[A-Z0-9]+)*$/i',
             ],
             'direccion' => [
                 'nullable',
                 'string',
+                'min:5',
                 'max:255',
             ],
             'fecha_hora_entrada' => [
                 'required',
                 'date',
+                ...($inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
+                ...($finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
             ],
             'fecha_hora_salida' => [
                 'required',
                 'date',
                 'after:fecha_hora_entrada',
+                ...($inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
+                ...($finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
             ],
             'tipo_habitacion' => [
                 'required',
                 'string',
                 'min:2',
                 'max:120',
+                "regex:~^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.'’/-]+$~u",
             ],
             'cantidad_habitaciones' => [
                 'required',
@@ -216,16 +237,19 @@ class AlojamientoReservaController extends Controller
             'distribucion_habitaciones' => [
                 'nullable',
                 'string',
+                'min:3',
                 'max:2000',
             ],
             'alimentacion_incluida' => [
                 'nullable',
                 'string',
+                'min:3',
                 'max:120',
             ],
             'telefono_hotel' => [
                 'nullable',
                 'string',
+                'regex:/^\+?[0-9\s()\-]{7,20}$/',
                 'max:30',
             ],
             'correo_hotel' => [
@@ -236,11 +260,15 @@ class AlojamientoReservaController extends Controller
             'proveedor' => [
                 'nullable',
                 'string',
+                'min:2',
                 'max:150',
+                "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u",
             ],
             'fecha_compra' => [
                 'nullable',
                 'date',
+                'after_or_equal:' . Carbon::today()->subYear()->toDateString(),
+                'before_or_equal:today',
             ],
             'costo_total' => [
                 'nullable',
@@ -250,7 +278,7 @@ class AlojamientoReservaController extends Controller
             'moneda' => [
                 'required',
                 'string',
-                'size:3',
+                Rule::in(['USD', 'EUR', 'PEN']),
             ],
             'estado' => [
                 'required',
@@ -263,13 +291,20 @@ class AlojamientoReservaController extends Controller
             'observaciones' => [
                 'nullable',
                 'string',
+                'min:3',
                 'max:1000',
             ],
         ], [
             'nombre_hotel.required' =>
                 'Ingresa el nombre del hotel.',
+            'nombre_hotel.regex' =>
+                'Ingresa un nombre de hotel válido.',
             'ciudad.required' =>
                 'Ingresa la ciudad del alojamiento.',
+            'ciudad.regex' =>
+                'Ingresa una ciudad válida.',
+            'pais.regex' =>
+                'Ingresa un país válido.',
 
             'fecha_hora_entrada.required' =>
                 'Ingresa la fecha y hora de entrada.',
@@ -277,6 +312,14 @@ class AlojamientoReservaController extends Controller
                 'Ingresa la fecha y hora de salida.',
             'fecha_hora_salida.after' =>
                 'La salida debe ser posterior a la entrada.',
+            'fecha_hora_entrada.after_or_equal' =>
+                'La entrada no puede ser anterior al inicio del paquete.',
+            'fecha_hora_entrada.before_or_equal' =>
+                'La entrada no puede superar el regreso del paquete.',
+            'fecha_hora_salida.after_or_equal' =>
+                'La salida no puede ser anterior al inicio del paquete.',
+            'fecha_hora_salida.before_or_equal' =>
+                'La salida no puede superar el regreso del paquete.',
 
             'cantidad_habitaciones.required' =>
                 'Ingresa la cantidad de habitaciones.',
@@ -285,6 +328,8 @@ class AlojamientoReservaController extends Controller
 
             'correo_hotel.email' =>
                 'Ingresa un correo válido.',
+            'telefono_hotel.regex' =>
+                'Ingresa un teléfono válido de 7 a 20 caracteres.',
 
             'costo_total.numeric' =>
                 'El costo debe ser un valor numérico.',
@@ -293,8 +338,8 @@ class AlojamientoReservaController extends Controller
 
             'moneda.required' =>
                 'Ingresa la moneda.',
-            'moneda.size' =>
-                'La moneda debe tener tres letras.',
+            'moneda.in' =>
+                'Selecciona una moneda válida.',
 
             'estado.required' =>
                 'Selecciona el estado del alojamiento.',
@@ -304,8 +349,16 @@ class AlojamientoReservaController extends Controller
                 'Ingresa el país del alojamiento.',
             'codigo_confirmacion.required_if' =>
                 'Ingresa el código de confirmación cuando el alojamiento está confirmado.',
+            'codigo_confirmacion.regex' =>
+                'El código solo puede contener letras, números y guiones.',
             'tipo_habitacion.required' =>
                 'Ingresa el tipo de habitación.',
+            'tipo_habitacion.regex' =>
+                'Ingresa un tipo de habitación válido.',
+            'fecha_compra.after_or_equal' =>
+                'La fecha de compra no puede tener más de un año de antigüedad.',
+            'fecha_compra.before_or_equal' =>
+                'La fecha de compra no puede ser futura.',
         ]);
     }
 

@@ -14,6 +14,8 @@
             ) }}"
             class="modal-content modal-expediente"
             novalidate
+            data-fecha-paquete-inicio="{{ $reserva->destino?->fecha_salida?->format('Y-m-d') }}"
+            data-fecha-paquete-fin="{{ $reserva->destino?->fecha_regreso?->format('Y-m-d') }}"
         >
             @csrf
 
@@ -74,6 +76,7 @@
                             id="alojamientoHotel"
                             name="nombre_hotel"
                             type="text"
+                            minlength="2"
                             maxlength="180"
                             required
                         >
@@ -112,6 +115,7 @@
                             id="alojamientoCiudad"
                             name="ciudad"
                             type="text"
+                            minlength="2"
                             maxlength="120"
                             required
                         >
@@ -126,6 +130,7 @@
                             id="alojamientoPais"
                             name="pais"
                             type="text"
+                            minlength="2"
                             maxlength="120"
                             required
                         >
@@ -140,6 +145,7 @@
                             id="alojamientoDireccion"
                             name="direccion"
                             type="text"
+                            minlength="5"
                             maxlength="255"
                         >
                     </div>
@@ -181,6 +187,7 @@
                             id="alojamientoConfirmacion"
                             name="codigo_confirmacion"
                             type="text"
+                            minlength="3"
                             maxlength="100"
                         >
                     </div>
@@ -194,6 +201,7 @@
                             id="alojamientoTipoHabitacion"
                             name="tipo_habitacion"
                             type="text"
+                            minlength="2"
                             maxlength="120"
                             placeholder="Ejemplo: doble"
                             required
@@ -226,6 +234,7 @@
                             id="alojamientoAlimentacion"
                             name="alimentacion_incluida"
                             type="text"
+                            minlength="3"
                             maxlength="120"
                             placeholder="Ejemplo: desayuno"
                         >
@@ -240,6 +249,7 @@
                             id="alojamientoDistribucion"
                             name="distribucion_habitaciones"
                             rows="3"
+                            minlength="3"
                             maxlength="2000"
                             placeholder="Indica qué viajeros ocuparán cada habitación."
                         ></textarea>
@@ -254,6 +264,7 @@
                             id="alojamientoTelefono"
                             name="telefono_hotel"
                             type="text"
+                            minlength="7"
                             maxlength="30"
                         >
                     </div>
@@ -280,6 +291,7 @@
                             id="alojamientoProveedor"
                             name="proveedor"
                             type="text"
+                            minlength="2"
                             maxlength="150"
                         >
                     </div>
@@ -334,6 +346,7 @@
                             id="alojamientoObservaciones"
                             name="observaciones"
                             rows="3"
+                            minlength="3"
                             maxlength="1000"
                         ></textarea>
                     </div>

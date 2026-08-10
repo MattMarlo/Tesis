@@ -694,6 +694,52 @@ class ReservaGrupalFamiliarTest extends TestCase
         ]);
     }
 
+    public function test_formulario_habitacion_valida_campos_y_referencias_duplicadas(): void
+    {
+        $usuario = $this->usuario();
+        $reserva = app(ReservaGrupalService::class)->guardar(
+            $this->datosFamilia($this->destino(), $this->cliente(35)),
+            $usuario->id
+        );
+        $operacion = $this->iniciarOperacion($reserva, $usuario);
+        $alojamiento = $this->alojamiento($operacion);
+
+        $this->actingAs($usuario)
+            ->post(
+                route('operaciones.habitaciones.store', $alojamiento),
+                [
+                    'tipo' => 'individual',
+                    'referencia' => 'a',
+                    'observaciones' => 'x',
+                ]
+            )
+            ->assertSessionHasErrors([
+                'referencia',
+                'observaciones',
+            ]);
+
+        $this->actingAs($usuario)
+            ->post(
+                route('operaciones.habitaciones.store', $alojamiento),
+                [
+                    'tipo' => 'individual',
+                    'referencia' => '301',
+                    'observaciones' => 'Una cama individual',
+                ]
+            )
+            ->assertSessionHasNoErrors();
+
+        $this->actingAs($usuario)
+            ->post(
+                route('operaciones.habitaciones.store', $alojamiento),
+                [
+                    'tipo' => 'doble',
+                    'referencia' => '301',
+                ]
+            )
+            ->assertSessionHasErrors('referencia');
+    }
+
     public function test_saldo_bloquea_completar_pero_no_preparacion(): void
     {
         $usuario = $this->usuario();

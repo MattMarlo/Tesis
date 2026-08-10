@@ -1743,104 +1743,12 @@ $(function () {
                 this.id ===
                 'formularioAlojamiento'
             ) {
-                const estado =
-                    $('#alojamientoEstado').val();
-
-                const codigoConfirmacion =
-                    $.trim(
-                        $('#alojamientoConfirmacion')
-                            .val()
-                    );
-
-                const cantidadHabitaciones =
-                    Number(
-                        $('#alojamientoCantidad')
-                            .val()
-                    );
-
-                $('#alojamientoConfirmacion')
-                    .removeClass('input-error');
-
-                $('#alojamientoCantidad')
-                    .removeClass('input-error');
-
                 if (
-                    estado === 'confirmado' &&
-                    !codigoConfirmacion
+                    typeof window.validarFormularioHospedaje === 'function' &&
+                    !window.validarFormularioHospedaje(true)
                 ) {
-                    $('#alojamientoConfirmacion')
-                        .addClass('input-error')
-                        .trigger('focus');
-
-                    Swal.fire({
-                        icon: 'error',
-                        title:
-                            'Falta el código de confirmación',
-                        text:
-                            'Ingresa el código cuando el alojamiento está confirmado.',
-                        confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#094c90'
-                    });
-
                     return;
                 }
-
-                if (
-                    !Number.isInteger(
-                        cantidadHabitaciones
-                    ) ||
-                    cantidadHabitaciones < 1 ||
-                    cantidadHabitaciones > 100
-                ) {
-                    $('#alojamientoCantidad')
-                        .addClass('input-error')
-                        .trigger('focus');
-
-                    Swal.fire({
-                        icon: 'error',
-                        title:
-                            'Cantidad de habitaciones incorrecta',
-                        text:
-                            'Ingresa una cantidad entre 1 y 100 habitaciones.',
-                        confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#094c90'
-                    });
-
-                    return;
-                }
-
-                const entrada =
-                    new Date(
-                        $('#alojamientoEntrada')
-                            .val()
-                    );
-
-                const salida =
-                    new Date(
-                        $('#alojamientoSalida')
-                            .val()
-                    );
-
-                if (salida <= entrada) {
-                    $('#alojamientoEntrada, ' +
-                        '#alojamientoSalida'
-                    ).addClass('input-error');
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Fechas incorrectas',
-                        text:
-                            'La salida del hotel debe ser posterior a la entrada.',
-                        confirmButtonText: 'Corregir',
-                        confirmButtonColor: '#094c90'
-                    });
-
-                    return;
-                }
-
-                $('#alojamientoEntrada, ' +
-                    '#alojamientoSalida'
-                ).removeClass('input-error');
             }
 
             if (

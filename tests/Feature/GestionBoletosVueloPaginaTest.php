@@ -567,6 +567,50 @@ class GestionBoletosVueloPaginaTest extends TestCase
         );
     }
 
+    public function test_rechaza_datos_de_hospedaje_con_formatos_y_fechas_incorrectos(): void
+    {
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.alojamientos.store',
+                    $this->operacion
+                ),
+                [
+                    'nombre_hotel' => '1',
+                    'estado' => 'confirmado',
+                    'ciudad' => '2',
+                    'pais' => '3',
+                    'fecha_hora_entrada' =>
+                        '2026-11-17 15:00:00',
+                    'fecha_hora_salida' =>
+                        '2026-11-17 14:00:00',
+                    'codigo_confirmacion' => 'A',
+                    'tipo_habitacion' => '1',
+                    'cantidad_habitaciones' => 0,
+                    'telefono_hotel' => '1',
+                    'moneda' => 'ABC',
+                ]
+            );
+
+        $respuesta->assertSessionHasErrors([
+            'nombre_hotel',
+            'ciudad',
+            'pais',
+            'fecha_hora_salida',
+            'codigo_confirmacion',
+            'tipo_habitacion',
+            'cantidad_habitaciones',
+            'telefono_hotel',
+            'moneda',
+        ]);
+
+        $this->assertDatabaseCount(
+            'alojamientos_reserva',
+            0
+        );
+    }
+
     public function test_pagina_muestra_vuelo_viajero_y_tarea_contextual(): void
     {
         $vuelo = $this->crearVueloVinculado();

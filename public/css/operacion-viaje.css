@@ -1057,3 +1057,299 @@
         width: 100%;
     }
 }
+
+/*
+ * Gestión contextual del itinerario.
+ *
+ * Estas reglas están aisladas de los módulos generales de vuelos,
+ * alojamientos y guías para que cada tarea pueda mostrar su acción y el
+ * resumen de la gestión vinculada sin duplicar los formularios completos.
+ */
+.gestion-contextual-tarea {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+}
+
+.btn-gestion-contextual,
+.btn-ver-gestion-contextual {
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 1px solid var(--exp-azul);
+    border-radius: 0.55rem;
+    padding: 0.55rem 0.85rem;
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn-gestion-contextual {
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+}
+
+.btn-ver-gestion-contextual {
+    color: var(--exp-azul);
+    background: var(--exp-blanco);
+}
+
+.btn-gestion-contextual:hover,
+.btn-gestion-contextual:focus-visible {
+    color: var(--exp-blanco);
+    border-color: var(--exp-celeste);
+    background: var(--exp-celeste);
+    box-shadow: 0 0.45rem 1rem rgb(9 76 144 / 18%);
+    transform: translateY(-1px);
+}
+
+.btn-ver-gestion-contextual:hover,
+.btn-ver-gestion-contextual:focus-visible {
+    color: var(--exp-blanco);
+    border-color: var(--exp-azul);
+    background: var(--exp-azul);
+    box-shadow: 0 0.45rem 1rem rgb(9 76 144 / 15%);
+    transform: translateY(-1px);
+}
+
+.btn-gestion-contextual:focus-visible,
+.btn-ver-gestion-contextual:focus-visible {
+    outline: 3px solid rgb(9 113 136 / 18%);
+    outline-offset: 2px;
+}
+
+.contexto-tarea-modal {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #BFD9EA;
+    border-radius: 0.7rem;
+    padding: 0.85rem 0.95rem;
+    color: var(--exp-texto);
+    background: #F1F8FC;
+}
+
+.contexto-tarea-modal[hidden] {
+    display: none !important;
+}
+
+.contexto-tarea-modal-icono {
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.65rem;
+    color: var(--exp-blanco);
+    background: var(--exp-azul);
+    font-size: 1rem;
+}
+
+.contexto-tarea-modal-contenido {
+    min-width: 0;
+}
+
+.contexto-tarea-modal-contenido small {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--exp-celeste);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.contexto-tarea-modal-contenido strong {
+    display: block;
+    color: var(--exp-azul);
+    font-size: 0.83rem;
+    line-height: 1.35;
+}
+
+.contexto-tarea-modal-contenido span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--exp-gris);
+    font-size: 0.72rem;
+    line-height: 1.45;
+}
+
+.resumen-vuelo-contextual {
+    margin-top: 0.95rem;
+    overflow: hidden;
+    border: 1px solid #CADAE7;
+    border-radius: 0.7rem;
+    background: #FBFDFE;
+    box-shadow: 0 0.3rem 0.8rem rgb(32 64 96 / 6%);
+}
+
+.resumen-vuelo-contextual-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid #DDE8F0;
+    background: #F2F7FA;
+}
+
+.resumen-vuelo-contextual-identidad {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.resumen-vuelo-icono {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--exp-azul);
+    background: #DCECF6;
+    font-size: 0.9rem;
+}
+
+.resumen-vuelo-contextual-identidad strong,
+.resumen-vuelo-contextual-identidad span {
+    display: block;
+}
+
+.resumen-vuelo-contextual-identidad strong {
+    overflow-wrap: anywhere;
+    color: var(--exp-azul);
+    font-size: 0.8rem;
+    line-height: 1.3;
+}
+
+.resumen-vuelo-contextual-identidad span {
+    margin-top: 0.15rem;
+    color: var(--exp-gris);
+    font-size: 0.68rem;
+}
+
+.estado-vuelo-contextual {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: capitalize;
+}
+
+.estado-vuelo-confirmado {
+    color: #18734A;
+    background: #E5F6ED;
+}
+
+.estado-vuelo-pendiente {
+    color: #876600;
+    background: #FFF4D6;
+}
+
+.estado-vuelo-cancelado {
+    color: var(--exp-rojo);
+    background: #FBE7EA;
+}
+
+.datos-vuelo-contextual,
+.progreso-vuelo-contextual {
+    display: grid;
+    gap: 0.7rem;
+    padding: 0.75rem 0.85rem;
+}
+
+.datos-vuelo-contextual {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.progreso-vuelo-contextual {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid #E4EDF3;
+    background: var(--exp-blanco);
+}
+
+.datos-vuelo-contextual div,
+.progreso-vuelo-contextual div {
+    min-width: 0;
+}
+
+.datos-vuelo-contextual small,
+.progreso-vuelo-contextual small {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--exp-gris);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.datos-vuelo-contextual strong,
+.progreso-vuelo-contextual strong {
+    display: block;
+    overflow-wrap: anywhere;
+    color: var(--exp-texto);
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.acciones-vuelo-contextual {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding: 0 0.85rem 0.85rem;
+    background: var(--exp-blanco);
+}
+
+@media (max-width: 650px) {
+    .gestion-contextual-tarea,
+    .acciones-vuelo-contextual {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .btn-gestion-contextual,
+    .btn-ver-gestion-contextual {
+        width: 100%;
+    }
+
+    .contexto-tarea-modal {
+        padding: 0.75rem;
+    }
+
+    .resumen-vuelo-contextual-cabecera {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .estado-vuelo-contextual {
+        margin-left: 2.65rem;
+    }
+
+    .datos-vuelo-contextual,
+    .progreso-vuelo-contextual {
+        grid-template-columns: 1fr;
+    }
+}

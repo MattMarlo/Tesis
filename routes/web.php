@@ -25,6 +25,8 @@ use App\Http\Controllers\TestimonioController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViajeroReservaController;
 use App\Http\Controllers\VueloReservaController;
+use App\Http\Controllers\GestionOperativaController;
+use App\Http\Controllers\GestionBoletosVueloController;
 use App\Models\Destino;
 use App\Models\Reserva;
 use App\Models\Testimonio;
@@ -661,6 +663,58 @@ Route::middleware('auth')
                         'update',
                     ]
                 )->name('tareas.update');
+                /*
+                * Gestiones operativas contextuales.
+                */
+                Route::post(
+                    '/expediente/{operacion}/tareas/{tarea}/gestiones',
+                    [
+                        GestionOperativaController::class,
+                        'store',
+                    ]
+                )->name(
+                    'tareas.gestiones.store'
+                );
+
+                Route::put(
+                    '/gestiones/{gestion}',
+                    [
+                        GestionOperativaController::class,
+                        'update',
+                    ]
+                )->name(
+                    'gestiones.update'
+                );
+
+                Route::delete(
+                    '/gestiones/{gestion}',
+                    [
+                        GestionOperativaController::class,
+                        'destroy',
+                    ]
+                )->name(
+                    'gestiones.destroy'
+                );
+
+                Route::post(
+                    '/expediente/{operacion}/tareas/{tarea}/gestiones/{gestion}/vincular',
+                    [
+                        GestionOperativaController::class,
+                        'vincular',
+                    ]
+                )->name(
+                    'tareas.gestiones.vincular'
+                );
+
+                Route::delete(
+                    '/expediente/{operacion}/tareas/{tarea}/gestion',
+                    [
+                        GestionOperativaController::class,
+                        'desvincular',
+                    ]
+                )->name(
+                    'tareas.gestiones.desvincular'
+                );
 
                 Route::post(
                     '/reserva/{reserva}/viajeros/titular',
@@ -717,7 +771,13 @@ Route::middleware('auth')
                         'destroy',
                     ]
                 )->name('vuelos.destroy');
-
+                Route::get(
+                    '/expediente/{operacion}/vuelos/{vuelo}/boletos',
+                    [
+                        GestionBoletosVueloController::class,
+                        'index',
+                    ]
+                )->name('vuelos.boletos.index');
                 Route::post(
                     '/vuelos/{vuelo}/boletos',
                     [

@@ -78,6 +78,8 @@ $(function () {
 
     let enviando = false;
 
+    let contextoVueloActivo = false;
+
     function valorFechaHora(valor) {
         if (!valor) {
             return '';
@@ -151,6 +153,276 @@ $(function () {
             : '';
     }
 
+    function ocultarContextoVuelo() {
+        contextoVueloActivo = false;
+
+        colocar('#vueloTareaId', '');
+
+        $('#vueloContextoTarea').prop(
+            'hidden',
+            true
+        );
+
+        $('#vueloContextoNombre').text(
+            'Vuelo'
+        );
+
+        $('#vueloContextoProgramacion').text(
+            ''
+        );
+    }
+
+    function separarRutaVuelo(ubicacion) {
+        const texto = String(
+            ubicacion || ''
+        ).trim();
+
+        if (!texto) {
+            return {
+                origen: '',
+                destino: ''
+            };
+        }
+
+        const partes = texto
+            .split(/\s+(?:-|–|—|→)\s+/)
+            .map(parte => parte.trim())
+            .filter(Boolean);
+
+        if (partes.length < 2) {
+            return {
+                origen: '',
+                destino: ''
+            };
+        }
+
+        return {
+            origen: partes[0],
+            destino: partes
+                .slice(1)
+                .join(' - ')
+        };
+    }
+
+    function fechaHoraDeTarea(
+        fecha,
+        hora
+    ) {
+        if (!fecha || !hora) {
+            return '';
+        }
+
+        return `${fecha}T${String(hora).slice(0, 5)}`;
+    }
+
+    function ajustarLlegadaVuelo(
+        salida,
+        llegada
+    ) {
+        if (!salida || !llegada) {
+            return llegada || '';
+        }
+
+        const fechaSalida = new Date(salida);
+        const fechaLlegada = new Date(llegada);
+
+        if (
+            Number.isNaN(fechaSalida.getTime()) ||
+            Number.isNaN(fechaLlegada.getTime())
+        ) {
+            return llegada;
+        }
+
+        if (fechaLlegada <= fechaSalida) {
+            fechaLlegada.setDate(
+                fechaLlegada.getDate() + 1
+            );
+
+            return valorFechaHora(fechaLlegada);
+        }
+
+        return llegada;
+    }
+
+    function resolverTramoContextual(
+        origen,
+        destino
+    ) {
+        const normalizar = valor =>
+            String(valor || '')
+                .trim()
+                .toLocaleLowerCase('es');
+
+        const ciudadSalida = normalizar(
+            datosPaquete.ciudadSalida
+        );
+
+        const origenNormalizado = normalizar(
+            origen
+        );
+
+        const destinoNormalizado = normalizar(
+            destino
+        );
+
+        if (
+            ciudadSalida &&
+            destinoNormalizado === ciudadSalida
+        ) {
+            return 'regreso';
+        }
+
+        if (
+            ciudadSalida &&
+            origenNormalizado === ciudadSalida
+        ) {
+            return 'ida';
+        }
+
+        return 'conexion';
+    }
+
+    function prepararFormularioNuevoVuelo() {
+        limpiarFormulario($formVuelo);
+
+        $formVuelo.attr(
+            'action',
+            accionesIniciales.vuelo
+        );
+
+        $('#vueloMetodo').prop(
+            'disabled',
+            true
+        );
+
+        $('#tituloModalVuelo').text(
+            'Agregar vuelo'
+        );
+
+        $('#vueloTipoTramo').val('ida');
+        $('#vueloEstado').val('pendiente');
+
+        ocultarContextoVuelo();
+    }
+
+    function abrirVueloGeneral() {
+        prepararFormularioNuevoVuelo();
+
+        $('#vueloEstado').val('confirmado');
+
+        precargarVuelo('ida');
+
+        modalVuelo.show();
+    }
+
+    function abrirVueloDesdeTarea(boton) {
+        const $boton = $(boton);
+
+        prepararFormularioNuevoVuelo();
+
+        contextoVueloActivo = true;
+
+        const tareaId = String(
+            $boton.data('tarea-id') || ''
+        );
+
+        const nombre = String(
+            $boton.data('nombre') ||
+            'Vuelo del itinerario'
+        );
+
+        const descripcion = String(
+            $boton.data('descripcion') || ''
+        );
+
+        const fecha = String(
+            $boton.data('fecha') || ''
+        );
+
+        const horaInicio = String(
+            $boton.data('hora-inicio') || ''
+        );
+
+        const horaFin = String(
+            $boton.data('hora-fin') || ''
+        );
+
+        const ubicacion = String(
+            $boton.data('ubicacion') || ''
+        );
+
+        const ruta = separarRutaVuelo(
+            ubicacion
+        );
+
+        const salida = fechaHoraDeTarea(
+            fecha,
+            horaInicio
+        );
+
+        const llegadaBase = fechaHoraDeTarea(
+            fecha,
+            horaFin
+        );
+
+        const llegada = ajustarLlegadaVuelo(
+            salida,
+            llegadaBase
+        );
+
+        const tramo = resolverTramoContextual(
+            ruta.origen,
+            ruta.destino
+        );
+
+        colocar('#vueloTareaId', tareaId);
+
+        $('#vueloContextoTarea').prop(
+            'hidden',
+            false
+        );
+
+        $('#vueloContextoNombre').text(
+            nombre
+        );
+
+        const programacion = [
+            fecha,
+            horaInicio && horaFin
+                ? `${horaInicio} – ${horaFin}`
+                : horaInicio
+                    ? `Desde las ${horaInicio}`
+                    : horaFin
+                        ? `Hasta las ${horaFin}`
+                        : '',
+            ubicacion
+        ].filter(Boolean);
+
+        $('#vueloContextoProgramacion').text(
+            programacion.join(' · ')
+        );
+
+        $('#tituloModalVuelo').text(
+            'Gestionar vuelo del itinerario'
+        );
+
+        colocar('#vueloTipoTramo', tramo);
+        colocar('#vueloCiudadOrigen', ruta.origen);
+        colocar('#vueloCiudadDestino', ruta.destino);
+        colocar('#vueloSalida', salida);
+        colocar('#vueloLlegada', llegada);
+        colocar(
+            '#vueloMoneda',
+            datosPaquete.moneda || 'USD'
+        );
+        colocar(
+            '#vueloObservaciones',
+            descripcion
+        );
+
+        modalVuelo.show();
+    }
+
     function precargarVuelo(tipoTramo) {
         colocar(
             '#vueloAerolinea',
@@ -215,28 +487,19 @@ $(function () {
     $('#btnNuevoVuelo').on(
         'click',
         function () {
-            limpiarFormulario($formVuelo);
+            abrirVueloGeneral();
+        }
+    );
 
-            $formVuelo.attr(
-                'action',
-                accionesIniciales.vuelo
-            );
+    $(document).on(
+        'click',
+        '.btn-gestion-especializada' +
+            '[data-tipo-gestion="vuelo"]',
+        function (evento) {
+            evento.preventDefault();
+            evento.stopImmediatePropagation();
 
-            $('#vueloMetodo').prop(
-                'disabled',
-                true
-            );
-
-            $('#tituloModalVuelo').text(
-                'Agregar vuelo'
-            );
-
-            $('#vueloTipoTramo').val('ida');
-            $('#vueloEstado').val('confirmado');
-
-            precargarVuelo('ida');
-
-            modalVuelo.show();
+            abrirVueloDesdeTarea(this);
         }
     );
 
@@ -248,7 +511,10 @@ $(function () {
                     'disabled'
                 );
 
-            if (!creandoVuelo) {
+            if (
+                !creandoVuelo ||
+                contextoVueloActivo
+            ) {
                 return;
             }
 
@@ -276,6 +542,8 @@ $(function () {
             }
 
             limpiarFormulario($formVuelo);
+
+            ocultarContextoVuelo();
 
             $formVuelo.attr(
                 'action',

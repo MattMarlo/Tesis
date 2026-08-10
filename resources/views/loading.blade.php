@@ -7,7 +7,7 @@
 )
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/inicio-publico.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/inicio-publico.css') }}?v={{ filemtime(public_path('css/inicio-publico.css')) }}">
 @endsection
 
 @section('content')
@@ -312,6 +312,9 @@
                             alt="{{ $paquete->nombre_paquete }}"
                             class="paquete-imagen"
                             loading="lazy"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Ampliar imagen de {{ $paquete->nombre_paquete }}"
                         >
 
                         <div class="paquete-etiquetas">
@@ -1103,5 +1106,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/inicio-publico.js') }}"></script>
+    <script src="{{ asset('js/inicio-publico.js') }}?v={{ filemtime(public_path('js/inicio-publico.js')) }}"></script>
 @endsection

@@ -14,6 +14,6 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <script src="{{ asset('js/paquetes-formulario.js') }}"></script>
+    <script src="{{ asset('js/paquetes-formulario.js') }}?v={{ filemtime(public_path('js/paquetes-formulario.js')) }}"></script>
 
 @endsection

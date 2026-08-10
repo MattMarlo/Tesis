@@ -126,7 +126,7 @@
                                 data-fecha-regreso="{{ $destino->fecha_regreso?->format('Y-m-d') }}"
                                 data-precio="{{ number_format($precioBase, 2, '.', '') }}"
                                 data-moneda="{{ strtoupper($destino->moneda ?: 'USD') }}"
-                                data-capacidad="{{ $destino->capacidad }}"
+                                data-capacidad="{{ $destino->cupos_disponibles }}"
                                 @selected(
                                     (int) old(
                                         'destino_id',

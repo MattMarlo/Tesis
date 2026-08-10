@@ -158,7 +158,7 @@
 
                     <span class="etiqueta-cupos">
                         <i class="bi bi-people"></i>
-                        {{ $destino->capacidad }} cupos
+                        {{ $destino->cupos_disponibles }} cupos disponibles
                     </span>
                 </div>
 

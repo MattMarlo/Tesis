@@ -131,7 +131,7 @@
                 <i class="fa fa-users"></i>
 
                 <strong>
-                    {{ $destino->capacidad }}
+                    {{ $destino->cupos_disponibles }}
                 </strong>
 
                 cupos
@@ -746,7 +746,7 @@
                         </span>
 
                         <strong>
-                            {{ $destino->capacidad }}
+                            {{ $destino->cupos_disponibles }}
                         </strong>
                     </div>
 
@@ -893,7 +893,7 @@
                         </span>
 
                         <strong>
-                            {{ $destino->capacidad }}
+                            {{ $destino->cupos_disponibles }}
                             cupos
                         </strong>
                     </div>

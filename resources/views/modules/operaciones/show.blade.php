@@ -64,6 +64,63 @@
         </span>
     </header>
 
+    <section class="bloque-expediente">
+        <div class="bloque-expediente-titulo">
+            <div>
+                <span>Personas incluidas</span>
+                <h2>Integrantes del viaje</h2>
+            </div>
+            @if ($editable && $composicionFamiliar)
+                <button type="button" class="btn-agregar-expediente" id="btnNuevoViajero">
+                    <i class="bi bi-person-plus"></i> Agregar acompañante
+                </button>
+            @endif
+        </div>
+
+        <div class="lista-viajeros-expediente">
+            @foreach ($progreso['personas'] as $persona)
+                <article>
+                    <div class="viajero-inicial">
+                        {{ mb_strtoupper(mb_substr($persona['nombre'], 0, 1)) }}
+                    </div>
+
+                    <div>
+                        <strong>{{ $persona['nombre'] }}</strong>
+                        <small>{{ ucfirst(str_replace('_', ' ', $persona['categoria'] ?? 'Sin categoría')) }} · {{ $persona['edad'] }} años</small>
+                        <small>{{ $persona['tipo_documento'] ? ucfirst($persona['tipo_documento']) : 'Documento' }}: {{ $persona['documento_enmascarado'] }}</small>
+                        @if ($persona['es_titular'])<small><strong>Titular</strong></small>@endif
+                        @if (!$persona['requiere_boleto'])
+                            <small class="etiqueta-infante-operacion">Infante — no requiere boleto ni habitación</small>
+                            @php
+                                $registroHistoricoInfante = $operacion->vuelos->contains(fn ($vuelo) =>
+                                    $vuelo->boletos->contains(fn ($boleto) =>
+                                        $persona['tipo'] === 'viajero'
+                                            ? (int) $boleto->viajero_reserva_id === (int) $persona['id']
+                                            : (int) $boleto->cliente_id === (int) $persona['id']
+                                    )
+                                ) || $operacion->alojamientos->contains(fn ($alojamiento) =>
+                                    $alojamiento->asignacionesHabitacion->contains(fn ($asignacion) =>
+                                        $persona['tipo'] === 'viajero'
+                                            ? (int) $asignacion->viajero_reserva_id === (int) $persona['id']
+                                            : (int) $asignacion->cliente_id === (int) $persona['id']
+                                    )
+                                );
+                            @endphp
+                            @if ($registroHistoricoInfante)
+                                <small class="advertencia-registro-historico">Existe un boleto o asignación histórica; se conserva sin modificar.</small>
+                            @endif
+                        @endif
+                    </div>
+                    @if ($editable && $persona['tipo'] === 'viajero' && !$persona['es_titular'])
+                        <button type="button" class="btn-gestionar-boleto btnEditarViajero"
+                            data-viajero-id="{{ $persona['id'] }}">Editar</button>
+                    @endif
+
+                </article>
+            @endforeach
+        </div>
+    </section>
+
     <section class="resumen-expediente">
         <article>
             <span>Fecha del viaje</span>
@@ -269,63 +326,6 @@
                 </button>
             @endif
         </form>
-    </section>
-
-    <section class="bloque-expediente">
-        <div class="bloque-expediente-titulo">
-            <div>
-                <span>Personas incluidas</span>
-                <h2>Integrantes del viaje</h2>
-            </div>
-            @if ($editable && $composicionFamiliar)
-                <button type="button" class="btn-agregar-expediente" id="btnNuevoViajero">
-                    <i class="bi bi-person-plus"></i> Agregar acompañante
-                </button>
-            @endif
-        </div>
-
-        <div class="lista-viajeros-expediente">
-            @foreach ($progreso['personas'] as $persona)
-                <article>
-                    <div class="viajero-inicial">
-                        {{ mb_strtoupper(mb_substr($persona['nombre'], 0, 1)) }}
-                    </div>
-
-                    <div>
-                        <strong>{{ $persona['nombre'] }}</strong>
-                        <small>{{ ucfirst(str_replace('_', ' ', $persona['categoria'] ?? 'Sin categoría')) }} · {{ $persona['edad'] }} años</small>
-                        <small>{{ $persona['tipo_documento'] ? ucfirst($persona['tipo_documento']) : 'Documento' }}: {{ $persona['documento_enmascarado'] }}</small>
-                        @if ($persona['es_titular'])<small><strong>Titular</strong></small>@endif
-                        @if (!$persona['requiere_boleto'])
-                            <small class="etiqueta-infante-operacion">Infante — no requiere boleto ni habitación</small>
-                            @php
-                                $registroHistoricoInfante = $operacion->vuelos->contains(fn ($vuelo) =>
-                                    $vuelo->boletos->contains(fn ($boleto) =>
-                                        $persona['tipo'] === 'viajero'
-                                            ? (int) $boleto->viajero_reserva_id === (int) $persona['id']
-                                            : (int) $boleto->cliente_id === (int) $persona['id']
-                                    )
-                                ) || $operacion->alojamientos->contains(fn ($alojamiento) =>
-                                    $alojamiento->asignacionesHabitacion->contains(fn ($asignacion) =>
-                                        $persona['tipo'] === 'viajero'
-                                            ? (int) $asignacion->viajero_reserva_id === (int) $persona['id']
-                                            : (int) $asignacion->cliente_id === (int) $persona['id']
-                                    )
-                                );
-                            @endphp
-                            @if ($registroHistoricoInfante)
-                                <small class="advertencia-registro-historico">Existe un boleto o asignación histórica; se conserva sin modificar.</small>
-                            @endif
-                        @endif
-                    </div>
-                    @if ($editable && $persona['tipo'] === 'viajero' && !$persona['es_titular'])
-                        <button type="button" class="btn-gestionar-boleto btnEditarViajero"
-                            data-viajero-id="{{ $persona['id'] }}">Editar</button>
-                    @endif
-
-                </article>
-            @endforeach
-        </div>
     </section>
 
     {{--

@@ -27,6 +27,7 @@ use App\Http\Controllers\ViajeroReservaController;
 use App\Http\Controllers\VueloReservaController;
 use App\Http\Controllers\GestionOperativaController;
 use App\Http\Controllers\GestionBoletosVueloController;
+use App\Http\Controllers\GestionHabitacionesAlojamientoController;
 use App\Models\Destino;
 use App\Models\Reserva;
 use App\Models\Testimonio;
@@ -823,6 +824,11 @@ Route::middleware('auth')
                 )->name(
                     'alojamientos.destroy'
                 );
+
+                Route::get(
+                    '/expediente/{operacion}/alojamientos/{alojamiento}/habitaciones',
+                    [GestionHabitacionesAlojamientoController::class, 'index']
+                )->name('alojamientos.habitaciones.index');
 
                 Route::post(
                     '/alojamientos/{alojamiento}/habitaciones',

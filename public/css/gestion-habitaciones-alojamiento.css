@@ -1,0 +1,171 @@
+.pagina-habitaciones {
+    --hab-azul: #094c90;
+    --hab-celeste: #097188;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.pagina-habitaciones .expediente-encabezado {
+    position: relative;
+    overflow: hidden;
+    border: 0;
+    color: #fff;
+    background: linear-gradient(130deg, #073966 0%, #094c90 62%, #08788e 100%);
+    box-shadow: 0 .7rem 1.8rem rgb(8 55 96 / 18%);
+}
+
+.pagina-habitaciones .expediente-encabezado::after {
+    position: absolute;
+    right: -4rem;
+    bottom: -6rem;
+    width: 16rem;
+    height: 16rem;
+    border: 2.8rem solid rgb(255 255 255 / 5%);
+    border-radius: 50%;
+    content: "";
+}
+
+.pagina-habitaciones .expediente-encabezado h1,
+.pagina-habitaciones .expediente-encabezado p,
+.pagina-habitaciones .expediente-modulo,
+.pagina-habitaciones .volver-operaciones { color: #fff; }
+
+.pagina-habitaciones .volver-operaciones { opacity: .82; }
+.pagina-habitaciones .volver-operaciones:hover { opacity: 1; }
+
+.estado-alojamiento {
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgb(255 255 255 / 24%);
+    border-radius: 999px;
+    padding: .55rem 1rem;
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+.estado-alojamiento.estado-confirmado { color: #d7ffea; background: rgb(20 133 84 / 38%); }
+.estado-alojamiento.estado-pendiente { color: #fff1bd; background: rgb(155 108 0 / 35%); }
+.estado-alojamiento.estado-cancelado { color: #ffe2e5; background: rgb(154 30 48 / 40%); }
+
+.resumen-habitaciones {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .85rem;
+    margin: 1.25rem 0;
+}
+
+.resumen-habitaciones > div {
+    position: relative;
+    overflow: hidden;
+    min-height: 5.5rem;
+    border: 1px solid #dce6ee;
+    border-radius: .8rem;
+    padding: 1rem;
+    background: #fff;
+    box-shadow: 0 .25rem .85rem rgb(30 66 98 / 6%);
+}
+
+.resumen-habitaciones > div::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: .22rem;
+    background: linear-gradient(var(--hab-azul), var(--hab-celeste));
+    content: "";
+}
+
+.resumen-habitaciones span,
+.panel-crear-habitacion > span,
+.panel-titulo span {
+    display: block;
+    color: #718397;
+    font-size: .63rem;
+    font-weight: 800;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+}
+
+.resumen-habitaciones strong {
+    display: block;
+    margin-top: .4rem;
+    color: #173b5b;
+    font-size: .95rem;
+}
+
+.distribucion-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 1rem;
+    align-items: start;
+}
+
+.panel-habitaciones,
+.panel-crear-habitacion {
+    border: 1px solid #dbe5ed;
+    border-radius: .9rem;
+    padding: 1.1rem;
+    background: #fff;
+    box-shadow: 0 .3rem 1rem rgb(26 62 92 / 6%);
+}
+
+.panel-crear-habitacion { position: sticky; top: 5.5rem; }
+.panel-titulo { padding-bottom: .85rem; border-bottom: 1px solid #e7eef3; }
+.panel-titulo h2, .panel-crear-habitacion h2 { margin: .18rem 0 0; color: #0c477e; font-size: 1rem; font-weight: 800; }
+.panel-crear-habitacion h2 { margin-bottom: 1rem; }
+
+.lista-habitaciones {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+    margin-top: 1rem;
+}
+
+.tarjeta-habitacion {
+    overflow: hidden;
+    border: 1px solid #d8e4ed;
+    border-radius: .75rem;
+    padding: 0;
+    background: #fbfdff;
+}
+
+.tarjeta-habitacion > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .85rem .9rem;
+    border-bottom: 1px solid #dfe9f0;
+    background: #f0f6fa;
+}
+
+.tarjeta-habitacion h3 { margin: .15rem 0; color: #103f69; font-size: .9rem; }
+.tarjeta-habitacion header small, .tarjeta-habitacion header span { color: #718397; font-size: .64rem; }
+.tarjeta-habitacion header > strong { min-width: 2.6rem; border-radius: 999px; padding: .35rem .55rem; color: #fff; background: var(--hab-azul); font-size: .69rem; text-align: center; }
+.tarjeta-habitacion ul { list-style: none; padding: 0 .9rem; margin: .3rem 0; }
+.tarjeta-habitacion li { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .65rem 0; border-bottom: 1px solid #e8eff4; color: #304b62; font-size: .72rem; }
+.tarjeta-habitacion li:last-child { border-bottom: 0; }
+.tarjeta-habitacion li button { width: 1.75rem; height: 1.75rem; border: 0; border-radius: 50%; color: #ad263b; background: #fbeaec; }
+.habitacion-vacia, .sin-habitaciones { color: #718397; }
+.sin-habitaciones { grid-column: 1 / -1; border: 1px dashed #c9d8e3; border-radius: .7rem; padding: 2rem; text-align: center; }
+
+.form-asignar { display: flex; gap: .5rem; padding: .75rem .9rem .9rem; }
+.form-asignar select { min-width: 0; flex: 1; }
+.panel-crear-habitacion form { display: grid; gap: .45rem; }
+.panel-crear-habitacion label { margin-top: .35rem; color: #344d62; font-size: .7rem; font-weight: 750; }
+.panel-crear-habitacion input, .panel-crear-habitacion select, .panel-crear-habitacion textarea, .form-asignar select { width: 100%; border: 1px solid #c8d6e0; border-radius: .55rem; padding: .62rem .7rem; color: #243f55; background: #fbfdff; font: inherit; font-size: .73rem; }
+.panel-crear-habitacion textarea { resize: vertical; }
+.panel-crear-habitacion input:focus, .panel-crear-habitacion select:focus, .panel-crear-habitacion textarea:focus, .form-asignar select:focus { outline: 0; border-color: var(--hab-celeste); box-shadow: 0 0 0 .2rem rgb(9 113 136 / 12%); }
+.panel-crear-habitacion button, .form-asignar button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; border: 0; border-radius: .55rem; padding: .68rem .85rem; color: #fff; background: var(--hab-azul); font-size: .7rem; font-weight: 800; transition: .2s ease; }
+.panel-crear-habitacion button { margin-top: .55rem; }
+.panel-crear-habitacion button:hover, .form-asignar button:hover { background: var(--hab-celeste); transform: translateY(-1px); }
+
+@media (max-width: 1050px) {
+    .resumen-habitaciones { grid-template-columns: repeat(3, 1fr); }
+    .distribucion-grid { grid-template-columns: 1fr; }
+    .panel-crear-habitacion { position: static; }
+}
+
+@media (max-width: 700px) {
+    .resumen-habitaciones, .lista-habitaciones { grid-template-columns: 1fr; }
+    .form-asignar { align-items: stretch; flex-direction: column; }
+}

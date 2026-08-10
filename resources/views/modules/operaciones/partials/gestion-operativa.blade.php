@@ -56,15 +56,11 @@
             'Gestionar servicio',
     };
 
-    $fechaActividad =
-        $reserva->fecha_viaje
-            ?->copy()
-            ->addDays(
-                max(
-                    0,
-                    (int) $tarea->dia - 1
-                )
-            );
+    $programacionActividad = app(
+        \App\Services\ProgramacionTareaContextualService::class
+    )->resolver($tarea, $reserva);
+
+    $fechaActividad = $programacionActividad['fecha'];
 
     $horaInicio =
         $tarea->hora_inicio
@@ -84,34 +80,28 @@
             )
             : null;
 
-    $fechaHoraInicioSugerida =
-        $gestionActual?->fecha_hora_inicio
-            ?->format('Y-m-d\TH:i');
+    $fechaHoraInicioSugerida = $gestionActual?->fecha_hora_inicio
+        ?->format('Y-m-d\TH:i')
+        ?? $programacionActividad['inicio_input'];
+
+    $fechaHoraFinSugerida = $gestionActual?->fecha_hora_fin
+        ?->format('Y-m-d\TH:i')
+        ?? $programacionActividad['fin_input'];
+
+    $origenSugerido = $gestionActual?->ubicacion_origen
+        ?? $programacionActividad['origen'];
+
+    $destinoSugerido = $gestionActual?->destino
+        ?? $programacionActividad['destino'];
 
     if (
-        !$fechaHoraInicioSugerida
-        && $fechaActividad
-        && $horaInicio
+        !$gestionActual
+        && $tipoGestion === GestionOperativa::TIPO_TRASLADO
+        && !$destinoSugerido
+        && str_contains(mb_strtolower($tarea->nombre), 'hotel')
     ) {
-        $fechaHoraInicioSugerida =
-            $fechaActividad->format('Y-m-d')
-            . 'T'
-            . $horaInicio;
-    }
-
-    $fechaHoraFinSugerida =
-        $gestionActual?->fecha_hora_fin
-            ?->format('Y-m-d\TH:i');
-
-    if (
-        !$fechaHoraFinSugerida
-        && $fechaActividad
-        && $horaFin
-    ) {
-        $fechaHoraFinSugerida =
-            $fechaActividad->format('Y-m-d')
-            . 'T'
-            . $horaFin;
+        $destinoSugerido = $reserva->destino?->hotel
+            ?: $reserva->destino?->ciudad_destino;
     }
 
     $datosAdicionales =
@@ -294,6 +284,29 @@
             </div>
 
             <div class="modal-body">
+                <div class="contexto-actividad-gestion">
+                    <span class="contexto-actividad-icono">
+                        <i class="bi bi-calendar2-week"></i>
+                    </span>
+                    <div>
+                        <small>Datos tomados de la actividad del paquete</small>
+                        <strong>{{ $tarea->nombre }}</strong>
+                        <p>
+                            @if ($fechaActividad)
+                                {{ $fechaActividad->format('d/m/Y') }}
+                            @endif
+                            @if ($horaInicio)
+                                · {{ $horaInicio }}
+                            @endif
+                            @if ($horaFin)
+                                – {{ $horaFin }}
+                            @endif
+                            @if ($tarea->ubicacion)
+                                · {{ $tarea->ubicacion }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
                 @if (
                     !$gestionActual
                     && $gestionesCompatibles->isNotEmpty()
@@ -596,8 +609,7 @@
                                     maxlength="180"
                                     value="{{ $valorFormulario(
                                         'ubicacion_origen',
-                                        $gestionActual?->ubicacion_origen
-                                            ?? $tarea->ubicacion
+                                        $origenSugerido
                                     ) }}"
                                 >
                             </div>
@@ -628,7 +640,7 @@
                                     maxlength="180"
                                     value="{{ $valorFormulario(
                                         'destino',
-                                        $gestionActual?->destino
+                                        $destinoSugerido
                                     ) }}"
                                 >
                             </div>
@@ -675,9 +687,8 @@
                                         maxlength="255"
                                         value="{{ $valorFormulario(
                                             'datos_adicionales.ruta',
-                                            $datosAdicionales[
-                                                'ruta'
-                                            ] ?? null
+                                            $datosAdicionales['ruta']
+                                                ?? $programacionActividad['ruta']
                                         ) }}"
                                     >
                                 </div>
@@ -765,6 +776,53 @@
                         </section>
                     @elseif (
                         $tipoGestion ===
+                            GestionOperativa::TIPO_ENTRADA
+                    )
+                        <section class="seccion-formulario-gestion">
+                            <div class="titulo-seccion-gestion">
+                                <div>
+                                    <span>Entrada</span>
+                                    <h3>Atracción y acceso</h3>
+                                </div>
+                            </div>
+
+                            <div class="campos-gestion-contextual">
+                                <div class="campo-gestion">
+                                    <label>Atracción o recinto</label>
+                                    <input
+                                        type="text"
+                                        name="datos_adicionales[atraccion]"
+                                        maxlength="180"
+                                        value="{{ $valorFormulario(
+                                            'datos_adicionales.atraccion',
+                                            $datosAdicionales['atraccion']
+                                                ?? $tarea->ubicacion
+                                        ) }}"
+                                    >
+                                </div>
+                                <div class="campo-gestion">
+                                    <label>Franja o puerta de acceso</label>
+                                    <input
+                                        type="text"
+                                        name="datos_adicionales[franja_acceso]"
+                                        maxlength="150"
+                                        value="{{ $valorFormulario(
+                                            'datos_adicionales.franja_acceso',
+                                            $datosAdicionales['franja_acceso'] ?? null
+                                        ) }}"
+                                    >
+                                </div>
+                                <div class="campo-gestion campo-gestion-amplio">
+                                    <label>Detalle de la visita</label>
+                                    <textarea name="datos_adicionales[descripcion_servicio]" rows="3" maxlength="2000">{{ $valorFormulario(
+                                        'datos_adicionales.descripcion_servicio',
+                                        $datosAdicionales['descripcion_servicio'] ?? $tarea->descripcion
+                                    ) }}</textarea>
+                                </div>
+                            </div>
+                        </section>
+                    @elseif (
+                        $tipoGestion ===
                             GestionOperativa::TIPO_ALIMENTACION
                     )
                         <section class="seccion-formulario-gestion">
@@ -776,6 +834,19 @@
                             </div>
 
                             <div class="campos-gestion-contextual">
+                                <div class="campo-gestion">
+                                    <label>Restaurante o establecimiento</label>
+                                    <input
+                                        type="text"
+                                        name="datos_adicionales[restaurante]"
+                                        maxlength="180"
+                                        value="{{ $valorFormulario(
+                                            'datos_adicionales.restaurante',
+                                            $datosAdicionales['restaurante']
+                                                ?? $tarea->ubicacion
+                                        ) }}"
+                                    >
+                                </div>
                                 <div class="campo-gestion">
                                     <label>Tipo de menú</label>
 
@@ -812,6 +883,40 @@
                         </section>
                     @elseif (
                         $tipoGestion ===
+                            GestionOperativa::TIPO_ACTIVIDAD_RESERVADA
+                    )
+                        <section class="seccion-formulario-gestion">
+                            <div class="titulo-seccion-gestion">
+                                <div>
+                                    <span>Actividad</span>
+                                    <h3>Servicio y punto de encuentro</h3>
+                                </div>
+                            </div>
+                            <div class="campos-gestion-contextual">
+                                <div class="campo-gestion">
+                                    <label>Punto de encuentro</label>
+                                    <input
+                                        type="text"
+                                        name="datos_adicionales[punto_encuentro]"
+                                        maxlength="180"
+                                        value="{{ $valorFormulario(
+                                            'datos_adicionales.punto_encuentro',
+                                            $datosAdicionales['punto_encuentro']
+                                                ?? $tarea->ubicacion
+                                        ) }}"
+                                    >
+                                </div>
+                                <div class="campo-gestion campo-gestion-amplio">
+                                    <label>Descripción de la actividad</label>
+                                    <textarea name="datos_adicionales[descripcion_servicio]" rows="3" maxlength="2000">{{ $valorFormulario(
+                                        'datos_adicionales.descripcion_servicio',
+                                        $datosAdicionales['descripcion_servicio'] ?? $tarea->descripcion
+                                    ) }}</textarea>
+                                </div>
+                            </div>
+                        </section>
+                    @elseif (
+                        $tipoGestion ===
                             GestionOperativa::TIPO_SEGURO
                     )
                         <section class="seccion-formulario-gestion">
@@ -823,6 +928,18 @@
                             </div>
 
                             <div class="campos-gestion-contextual">
+                                <div class="campo-gestion">
+                                    <label>Aseguradora</label>
+                                    <input
+                                        type="text"
+                                        name="datos_adicionales[aseguradora]"
+                                        maxlength="150"
+                                        value="{{ $valorFormulario(
+                                            'datos_adicionales.aseguradora',
+                                            $datosAdicionales['aseguradora'] ?? null
+                                        ) }}"
+                                    >
+                                </div>
                                 <div class="campo-gestion">
                                     <label>Número de póliza</label>
 
@@ -1078,6 +1195,7 @@
                                 >{{ $valorFormulario(
                                     'observaciones',
                                     $gestionActual?->observaciones
+                                        ?? $tarea->descripcion
                                 ) }}</textarea>
                             </div>
                         </div>

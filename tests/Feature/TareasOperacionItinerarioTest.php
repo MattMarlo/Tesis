@@ -253,7 +253,7 @@ class TareasOperacionItinerarioTest extends TestCase
                     1,
 
                 'tipo_gestion' =>
-                    TareaOperacionViaje::TIPO_TRASLADO,
+                    TareaOperacionViaje::TIPO_VUELO,
 
                 'estado' =>
                     TareaOperacionViaje::ESTADO_PENDIENTE,
@@ -276,7 +276,7 @@ class TareasOperacionItinerarioTest extends TestCase
                     2,
 
                 'tipo_gestion' =>
-                    TareaOperacionViaje::TIPO_ENTRADA,
+                    TareaOperacionViaje::TIPO_ALIMENTACION,
 
                 'estado' =>
                     TareaOperacionViaje::ESTADO_PENDIENTE,
@@ -640,9 +640,10 @@ class TareasOperacionItinerarioTest extends TestCase
         );
     }
 
-    public function test_sincroniza_todos_los_tipos_especificos_sin_convertirlos_en_otro(): void
+    public function test_solo_sincroniza_los_tipos_de_preparacion(): void
     {
         $tipos = TareaOperacionViaje::TIPOS_SELECCIONABLES;
+        $tiposEsperados = TareaOperacionViaje::TIPOS_PREPARACION;
 
         $itinerario = [
             [
@@ -708,12 +709,12 @@ class TareasOperacionItinerarioTest extends TestCase
         );
 
         $this->assertCount(
-            count($tipos),
+            count($tiposEsperados),
             $tareas
         );
 
         $this->assertEqualsCanonicalizing(
-            $tipos,
+            $tiposEsperados,
             $tareas
                 ->pluck('tipo_gestion')
                 ->all()
@@ -757,7 +758,7 @@ class TareasOperacionItinerarioTest extends TestCase
                             true,
 
                         'tipo_gestion' =>
-                            TareaOperacionViaje::TIPO_TRASLADO,
+                            TareaOperacionViaje::TIPO_VUELO,
                     ],
 
                     [
@@ -822,7 +823,7 @@ class TareasOperacionItinerarioTest extends TestCase
                             true,
 
                         'tipo_gestion' =>
-                            TareaOperacionViaje::TIPO_ENTRADA,
+                            TareaOperacionViaje::TIPO_ALIMENTACION,
                     ],
                 ],
             ],

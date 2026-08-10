@@ -56,7 +56,7 @@
             '#tarea-itinerario-' .
             $tarea->id;
     } else {
-        $urlRegreso .= '#vuelos';
+        $urlRegreso .= '#tareasItinerario';
     }
 
     /*

@@ -183,6 +183,11 @@ class SincronizarTareasItinerarioService
 
                                 return
                                     $requiereGestion &&
+                                    in_array(
+                                        $actividad['tipo_gestion'] ?? null,
+                                        TareaOperacionViaje::tiposPreparacion(),
+                                        true
+                                    ) &&
                                     filled(
                                         $actividad[
                                             'uuid'

@@ -180,7 +180,7 @@ class ActualizarTareaOperacionViajeTest extends TestCase
                                 true,
 
                             'tipo_gestion' =>
-                                TareaOperacionViaje::TIPO_ENTRADA,
+                                TareaOperacionViaje::TIPO_ALIMENTACION,
                         ],
                     ],
                 ],

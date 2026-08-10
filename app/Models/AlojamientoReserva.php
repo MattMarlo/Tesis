@@ -156,7 +156,7 @@ class AlojamientoReserva extends Model
      */
     public function cantidadViajerosAsignados(): int
     {
-        return $this->asignacionesHabitacion()
+        $viajerosReserva = $this->asignacionesHabitacion()
             ->whereNotNull(
                 'viajero_reserva_id'
             )
@@ -164,6 +164,13 @@ class AlojamientoReserva extends Model
             ->count(
                 'viajero_reserva_id'
             );
+
+        $clientes = $this->asignacionesHabitacion()
+            ->whereNotNull('cliente_id')
+            ->distinct()
+            ->count('cliente_id');
+
+        return $viajerosReserva + $clientes;
     }
 
     /**

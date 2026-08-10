@@ -375,6 +375,26 @@ class GuardarGestionOperativaRequest extends FormRequest
                 'max:2000',
             ],
 
+            'datos_adicionales.atraccion' => [
+                'nullable', 'string', 'max:180',
+            ],
+
+            'datos_adicionales.franja_acceso' => [
+                'nullable', 'string', 'max:150',
+            ],
+
+            'datos_adicionales.restaurante' => [
+                'nullable', 'string', 'max:180',
+            ],
+
+            'datos_adicionales.punto_encuentro' => [
+                'nullable', 'string', 'max:180',
+            ],
+
+            'datos_adicionales.aseguradora' => [
+                'nullable', 'string', 'max:150',
+            ],
+
             'viajeros' =>
                 $reglasViajeros,
 

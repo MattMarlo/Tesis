@@ -13,6 +13,11 @@ use InvalidArgumentException;
 
 class DistribucionHabitacionService
 {
+    public function __construct(
+        private readonly EstadoTareaContextualService $estadoTareaContextual
+    ) {
+    }
+
     public function guardarHabitacion(
         AlojamientoReserva $alojamiento,
         array $datos,
@@ -59,6 +64,7 @@ class DistribucionHabitacionService
             ]);
             $habitacion->save();
             $this->marcarPreparacion($alojamiento->operacion);
+            $this->sincronizarTareas($alojamiento);
 
             return $habitacion->fresh('asignaciones');
         });
@@ -80,6 +86,7 @@ class DistribucionHabitacionService
             $operacion = $habitacion->alojamiento->operacion;
             $habitacion->delete();
             $this->marcarPreparacion($operacion);
+            $this->sincronizarTareas($habitacion->alojamiento);
         });
     }
 
@@ -169,6 +176,7 @@ class DistribucionHabitacionService
                 'cliente_id' => $clienteId,
             ]);
             $this->marcarPreparacion($operacion);
+            $this->sincronizarTareas($alojamiento);
 
             return $asignacion;
         });
@@ -183,8 +191,10 @@ class DistribucionHabitacionService
                 ->findOrFail($asignacion->id);
             $this->validarEditable($asignacion->alojamiento->operacion);
             $operacion = $asignacion->alojamiento->operacion;
+            $alojamiento = $asignacion->alojamiento;
             $asignacion->delete();
             $this->marcarPreparacion($operacion);
+            $this->sincronizarTareas($alojamiento);
         });
     }
 
@@ -214,5 +224,15 @@ class DistribucionHabitacionService
         }
         $operacion->actualizado_por_user_id = Auth::id();
         $operacion->save();
+    }
+
+    private function sincronizarTareas(AlojamientoReserva $alojamiento): void
+    {
+        $alojamiento->tareas()->vigentes()->get()->each(
+            fn ($tarea) => $this->estadoTareaContextual->sincronizar(
+                $tarea,
+                Auth::user()
+            )
+        );
     }
 }

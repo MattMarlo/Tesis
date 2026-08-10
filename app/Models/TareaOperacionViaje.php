@@ -86,6 +86,21 @@ class TareaOperacionViaje extends Model
         self::TIPO_ACTIVIDAD,
     ];
 
+    /**
+     * Únicas coordinaciones que pertenecen al módulo
+     * Preparación de viajes.
+     */
+    public const TIPOS_PREPARACION = [
+        self::TIPO_VUELO,
+        self::TIPO_ALOJAMIENTO,
+        self::TIPO_ALIMENTACION,
+    ];
+
+    public static function tiposPreparacion(): array
+    {
+        return self::TIPOS_PREPARACION;
+    }
+
     protected $table =
         'tareas_operacion_viaje';
 

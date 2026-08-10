@@ -190,7 +190,6 @@ class EstadoTareaContextualService
     ): string {
         if (
             $alojamiento->estaCancelado()
-            || $alojamiento->estaPendiente()
         ) {
             return
                 TareaOperacionViaje::ESTADO_PENDIENTE;

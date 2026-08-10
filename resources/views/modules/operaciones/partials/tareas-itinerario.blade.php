@@ -23,20 +23,12 @@
             : 100;
 
     $tiposGestionGenerica = [
-        \App\Models\TareaOperacionViaje::TIPO_TREN,
-        \App\Models\TareaOperacionViaje::TIPO_TRASLADO,
-        \App\Models\TareaOperacionViaje::TIPO_ENTRADA,
         \App\Models\TareaOperacionViaje::TIPO_ALIMENTACION,
-        \App\Models\TareaOperacionViaje::
-            TIPO_ACTIVIDAD_RESERVADA,
-        \App\Models\TareaOperacionViaje::TIPO_SEGURO,
-        \App\Models\TareaOperacionViaje::TIPO_OTRO,
     ];
 
     $tiposGestionEspecializada = [
         \App\Models\TareaOperacionViaje::TIPO_VUELO,
         \App\Models\TareaOperacionViaje::TIPO_ALOJAMIENTO,
-        \App\Models\TareaOperacionViaje::TIPO_GUIA,
     ];
 @endphp
 
@@ -267,6 +259,28 @@
                                 'Pendiente',
                         }
                         : null;
+
+                    $alojamientoVinculado =
+                        $tarea->tipo_gestion ===
+                            \App\Models\TareaOperacionViaje::TIPO_ALOJAMIENTO
+                        && $tarea->gestionable instanceof
+                            \App\Models\AlojamientoReserva
+                            ? $tarea->gestionable
+                            : null;
+
+                    $habitacionesAlojamiento = $alojamientoVinculado
+                        ? $alojamientoVinculado->habitaciones->count()
+                        : 0;
+                    $capacidadAlojamiento = $alojamientoVinculado
+                        ? $alojamientoVinculado->habitaciones->sum('capacidad')
+                        : 0;
+                    $asignadosAlojamiento = $alojamientoVinculado
+                        ? $alojamientoVinculado->cantidadViajerosAsignados()
+                        : 0;
+                    $esperadosAlojamiento = max(
+                        1,
+                        (int) ($totalViajerosEsperados ?? $reserva->cantidad_viajeros ?? 1)
+                    );
                 @endphp
 
                 <article
@@ -496,6 +510,46 @@
                                             >
                                                 <i class="bi bi-ticket-perforated"></i>
                                                 Gestionar boletos
+                                            </a>
+                                        </div>
+                                    </div>
+                                @elseif ($alojamientoVinculado)
+                                    <div class="resumen-vuelo-contextual resumen-alojamiento-contextual">
+                                        <div class="resumen-vuelo-contextual-cabecera">
+                                            <div class="resumen-vuelo-contextual-identidad">
+                                                <span class="resumen-vuelo-icono"><i class="bi bi-building"></i></span>
+                                                <div>
+                                                    <small>Alojamiento vinculado</small>
+                                                    <strong>{{ $alojamientoVinculado->nombre_hotel }}</strong>
+                                                    <span>{{ $alojamientoVinculado->ciudad }}, {{ $alojamientoVinculado->pais }}</span>
+                                                </div>
+                                            </div>
+                                            <span class="estado-vuelo-contextual estado-vuelo-{{ $alojamientoVinculado->estado }}">
+                                                {{ ucfirst($alojamientoVinculado->estado) }}
+                                            </span>
+                                        </div>
+                                        <div class="datos-vuelo-contextual">
+                                            <div><span>Entrada</span><strong>{{ $alojamientoVinculado->fecha_hora_entrada->format('d/m/Y H:i') }}</strong></div>
+                                            <div><span>Salida</span><strong>{{ $alojamientoVinculado->fecha_hora_salida->format('d/m/Y H:i') }}</strong></div>
+                                            <div><span>Confirmación</span><strong>{{ $alojamientoVinculado->codigo_confirmacion ?: 'Pendiente' }}</strong></div>
+                                        </div>
+                                        <div class="progreso-vuelo-contextual">
+                                            <div><span>Habitaciones</span><strong>{{ $habitacionesAlojamiento }}</strong></div>
+                                            <div><span>Viajeros asignados</span><strong>{{ $asignadosAlojamiento }} de {{ $esperadosAlojamiento }}</strong></div>
+                                            <div><span>Capacidad total</span><strong>{{ $capacidadAlojamiento }}</strong></div>
+                                        </div>
+                                        <div class="acciones-vuelo-contextual">
+                                            @if ($editable)
+                                                <button type="button" class="btn-gestion-contextual btnEditarAlojamiento" data-id="{{ $alojamientoVinculado->id }}">
+                                                    <i class="bi bi-pencil-square"></i> Editar alojamiento
+                                                </button>
+                                            @endif
+                                            <a href="{{ route('operaciones.alojamientos.habitaciones.index', [
+                                                'operacion' => $operacion->id,
+                                                'alojamiento' => $alojamientoVinculado->id,
+                                                'tarea_id' => $tarea->id,
+                                            ]) }}" class="btn-ver-gestion-contextual">
+                                                <i class="bi bi-door-open"></i> Gestionar habitaciones
                                             </a>
                                         </div>
                                     </div>

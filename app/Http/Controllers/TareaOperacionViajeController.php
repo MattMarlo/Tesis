@@ -5,11 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ActualizarTareaOperacionViajeRequest;
 use App\Models\OperacionViaje;
 use App\Models\TareaOperacionViaje;
+use App\Services\EstadoTareaContextualService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
 class TareaOperacionViajeController extends Controller
 {
+    public function __construct(
+        private readonly EstadoTareaContextualService $estadoTareaContextual
+    ) {
+    }
+
     public function update(
         ActualizarTareaOperacionViajeRequest $request,
         OperacionViaje $operacion,
@@ -38,6 +44,23 @@ class TareaOperacionViajeController extends Controller
         }
 
         $datos = $request->validated();
+
+        if (
+            $datos['estado'] === TareaOperacionViaje::ESTADO_COMPLETADA
+            && $tarea->tieneGestionVinculada()
+        ) {
+            $tarea = $this->estadoTareaContextual->sincronizar(
+                $tarea,
+                $request->user()
+            );
+
+            if (!$tarea->estaCompletada()) {
+                return back()->withErrors([
+                    'estado' =>
+                        'La tarea no puede completarse mientras la gestión vinculada tenga requisitos pendientes.',
+                ]);
+            }
+        }
 
         DB::transaction(
             function () use (

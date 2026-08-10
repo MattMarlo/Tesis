@@ -423,6 +423,56 @@ $(function () {
         modalVuelo.show();
     }
 
+    function prepararFormularioNuevoAlojamiento() {
+        limpiarFormulario($formAlojamiento);
+        $formAlojamiento.attr('action', accionesIniciales.alojamiento);
+        $('#alojamientoMetodo').prop('disabled', true);
+        $('#tituloModalAlojamiento').text('Agregar alojamiento');
+        colocar('#alojamientoTareaId', '');
+        $('#alojamientoContextoTarea').prop('hidden', true);
+        $('#alojamientoEstado').val('pendiente');
+        $('#alojamientoCantidad').val(1);
+    }
+
+    function abrirAlojamientoDesdeTarea(boton) {
+        const $boton = $(boton);
+        prepararFormularioNuevoAlojamiento();
+
+        const fecha = String($boton.data('fecha') || '');
+        const horaInicio = String($boton.data('hora-inicio') || '');
+        const horaFin = String($boton.data('hora-fin') || '');
+        const ubicacion = String($boton.data('ubicacion') || '');
+        const nombre = String($boton.data('nombre') || 'Alojamiento del itinerario');
+        const descripcion = String($boton.data('descripcion') || '');
+        const entrada = fechaHoraDeTarea(fecha, horaInicio) || fechaHoraInicial(fecha);
+        let salida = fechaHoraDeTarea(fecha, horaFin);
+
+        if (!salida && entrada) {
+            const fechaSalida = new Date(entrada);
+            fechaSalida.setDate(fechaSalida.getDate() + 1);
+            salida = valorFechaHora(fechaSalida);
+        } else {
+            salida = ajustarLlegadaVuelo(entrada, salida);
+        }
+
+        colocar('#alojamientoTareaId', $boton.data('tarea-id'));
+        colocar('#alojamientoHotel', datosPaquete.hotel || nombre);
+        colocar('#alojamientoCiudad', ubicacion || datosPaquete.ciudadDestino);
+        colocar('#alojamientoPais', datosPaquete.paisDestino);
+        colocar('#alojamientoEntrada', entrada);
+        colocar('#alojamientoSalida', salida);
+        colocar('#alojamientoMoneda', datosPaquete.moneda || 'USD');
+        colocar('#alojamientoObservaciones', descripcion);
+
+        $('#tituloModalAlojamiento').text('Gestionar alojamiento del itinerario');
+        $('#alojamientoContextoTarea').prop('hidden', false);
+        $('#alojamientoContextoNombre').text(nombre);
+        $('#alojamientoContextoProgramacion').text(
+            [fecha, horaInicio, horaFin, ubicacion].filter(Boolean).join(' \u00b7 ')
+        );
+        modalAlojamiento.show();
+    }
+
     function precargarVuelo(tipoTramo) {
         colocar(
             '#vueloAerolinea',
@@ -667,29 +717,8 @@ $(function () {
     $('#btnNuevoAlojamiento').on(
         'click',
         function () {
-            limpiarFormulario(
-                $formAlojamiento
-            );
-
-            $formAlojamiento.attr(
-                'action',
-                accionesIniciales.alojamiento
-            );
-
-            $('#alojamientoMetodo').prop(
-                'disabled',
-                true
-            );
-
-            $('#tituloModalAlojamiento').text(
-                'Agregar alojamiento'
-            );
-
-            $('#alojamientoEstado').val(
-                'confirmado'
-            );
-
-            $('#alojamientoCantidad').val(1);
+            prepararFormularioNuevoAlojamiento();
+            $('#alojamientoEstado').val('confirmado');
 
             colocar(
                 '#alojamientoHotel',
@@ -731,6 +760,16 @@ $(function () {
 
     $(document).on(
         'click',
+        '.btn-gestion-especializada[data-tipo-gestion="alojamiento"]',
+        function (evento) {
+            evento.preventDefault();
+            evento.stopImmediatePropagation();
+            abrirAlojamientoDesdeTarea(this);
+        }
+    );
+
+    $(document).on(
+        'click',
         '.btnEditarAlojamiento',
         function () {
             const id = Number(
@@ -751,6 +790,9 @@ $(function () {
             limpiarFormulario(
                 $formAlojamiento
             );
+
+            colocar('#alojamientoTareaId', '');
+            $('#alojamientoContextoTarea').prop('hidden', true);
 
             $formAlojamiento.attr(
                 'action',

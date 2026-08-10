@@ -328,6 +328,12 @@
         </div>
     </section>
 
+    {{--
+        Los módulos generales de vuelos, alojamientos y guías se conservan
+        en el backend por compatibilidad histórica. Su gestión visual se
+        realiza ahora desde cada tarea contextual del itinerario.
+    --}}
+    @if (false)
     <section
         id="vuelos"
         class="bloque-expediente"
@@ -890,6 +896,18 @@
             @endforelse
         </div>
     </section>
+    @endif
+
+    @if ($editable)
+        {{-- Activador interno requerido temporalmente por el modal de guía. --}}
+        <button
+            type="button"
+            id="btnNuevoGuia"
+            hidden
+            aria-hidden="true"
+            tabindex="-1"
+        ></button>
+    @endif
 </main>
 
 @include(

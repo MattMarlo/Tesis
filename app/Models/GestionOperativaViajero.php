@@ -32,6 +32,7 @@ class GestionOperativaViajero extends Model
     protected $fillable = [
         'gestion_operativa_id',
         'viajero_reserva_id',
+        'cliente_id',
         'numero_documento',
         'asiento',
         'referencia_individual',
@@ -60,6 +61,17 @@ class GestionOperativaViajero extends Model
         return $this->belongsTo(
             ViajeroReserva::class,
             'viajero_reserva_id'
+        );
+    }
+
+    /**
+     * Integrante de una reserva tradicional asociado al tren.
+     */
+    public function cliente()
+    {
+        return $this->belongsTo(
+            Cliente::class,
+            'cliente_id'
         );
     }
 

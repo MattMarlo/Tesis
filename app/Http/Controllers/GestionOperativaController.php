@@ -498,20 +498,47 @@ class GestionOperativaController extends Controller
             ]);
         }
 
-        $identificadores = collect(
-            $viajeros
-        )
-            ->pluck('viajero_reserva_id')
+        $detalles = collect($viajeros)
+            ->map(function ($detalle) {
+                $viajeroId = filled(
+                    $detalle[
+                        'viajero_reserva_id'
+                    ] ?? null
+                )
+                    ? (int) $detalle[
+                        'viajero_reserva_id'
+                    ]
+                    : null;
+
+                $clienteId = filled(
+                    $detalle['cliente_id']
+                    ?? null
+                )
+                    ? (int) $detalle[
+                        'cliente_id'
+                    ]
+                    : null;
+
+                return [
+                    ...$detalle,
+                    'viajero_reserva_id' =>
+                        $viajeroId,
+                    'cliente_id' => $clienteId,
+                    'clave_integrante' => $viajeroId
+                        ? 'viajero:'.$viajeroId
+                        : 'cliente:'.$clienteId,
+                ];
+            });
+
+        $identificadores = $detalles
+            ->pluck('clave_integrante')
             ->filter()
-            ->map(
-                fn ($id) => (int) $id
-            )
             ->unique()
             ->values();
 
         if (
             $identificadores->count()
-            !== count($viajeros)
+            !== $detalles->count()
         ) {
             throw ValidationException::withMessages([
                 'viajeros' =>
@@ -519,10 +546,15 @@ class GestionOperativaController extends Controller
             ]);
         }
 
+        $viajerosIds = $detalles
+            ->pluck('viajero_reserva_id')
+            ->filter()
+            ->values();
+
         $viajerosValidos =
             $reserva->viajerosReserva()
                 ->whereKey(
-                    $identificadores->all()
+                    $viajerosIds->all()
                 )
                 ->pluck('id')
                 ->map(
@@ -530,7 +562,7 @@ class GestionOperativaController extends Controller
                 );
 
         $identificadoresInvalidos =
-            $identificadores->diff(
+            $viajerosIds->diff(
                 $viajerosValidos
             );
 
@@ -544,21 +576,67 @@ class GestionOperativaController extends Controller
             ]);
         }
 
-        foreach ($viajeros as $detalle) {
-            $viajeroId = (int) (
-                $detalle[
-                    'viajero_reserva_id'
-                ]
-            );
+        $clientesIds = $detalles
+            ->pluck('cliente_id')
+            ->filter()
+            ->values();
+
+        $clientesValidos = collect();
+
+        if (
+            $gestion->tipo ===
+                GestionOperativa::TIPO_TREN
+            && $reserva->viajerosReserva()
+                ->doesntExist()
+        ) {
+            $clientesValidos = $reserva->esIndividual()
+                ? collect([$reserva->cliente_id])
+                    ->filter()
+                : ($reserva->grupo?->clientes()
+                    ->whereKey($clientesIds->all())
+                    ->pluck('clientes.id')
+                    ?? collect());
+
+            $clientesValidos = $clientesValidos
+                ->map(fn ($id) => (int) $id);
+        }
+
+        if (
+            $clientesIds->diff($clientesValidos)
+                ->isNotEmpty()
+        ) {
+            throw ValidationException::withMessages([
+                'viajeros' =>
+                    'Uno o más integrantes no pertenecen a esta reserva.',
+            ]);
+        }
+
+        foreach ($detalles as $detalle) {
+            $viajeroId = $detalle[
+                'viajero_reserva_id'
+            ];
+
+            $clienteId = $detalle['cliente_id'];
 
             $gestion
                 ->detallesViajeros()
                 ->updateOrCreate(
+                    $viajeroId
+                        ? [
+                            'viajero_reserva_id' =>
+                                $viajeroId,
+                        ]
+                        : [
+                            'cliente_id' =>
+                                $clienteId,
+                        ],
                     [
                         'viajero_reserva_id' =>
                             $viajeroId,
-                    ],
-                    [
+
+                        'cliente_id' =>
+                            $clienteId,
+
                         'numero_documento' =>
                             $detalle[
                                 'numero_documento'
@@ -594,7 +672,7 @@ class GestionOperativaController extends Controller
          * Los viajeros que ya no llegaron en el formulario
          * se retiran de esta gestión.
          */
-        if ($identificadores->isEmpty()) {
+        if ($detalles->isEmpty()) {
             $gestion
                 ->detallesViajeros()
                 ->delete();
@@ -602,13 +680,22 @@ class GestionOperativaController extends Controller
             return;
         }
 
-        $gestion
-            ->detallesViajeros()
-            ->whereNotIn(
-                'viajero_reserva_id',
-                $identificadores->all()
-            )
-            ->delete();
+        $gestion->detallesViajeros()
+            ->get()
+            ->reject(function ($detalle) use (
+                $identificadores
+            ) {
+                $clave = $detalle
+                    ->viajero_reserva_id
+                    ? 'viajero:'.(int) $detalle
+                        ->viajero_reserva_id
+                    : 'cliente:'.(int) $detalle
+                        ->cliente_id;
+
+                return $identificadores
+                    ->contains($clave);
+            })
+            ->each->delete();
     }
 
     private function validarTareaDeOperacion(

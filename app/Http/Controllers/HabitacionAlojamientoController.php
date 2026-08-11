@@ -6,6 +6,7 @@ use App\Models\AlojamientoReserva;
 use App\Models\AsignacionHabitacion;
 use App\Models\HabitacionAlojamiento;
 use App\Services\DistribucionHabitacionService;
+use App\Services\NotificacionAlojamientoN8nService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
@@ -13,7 +14,9 @@ use InvalidArgumentException;
 class HabitacionAlojamientoController extends Controller
 {
     public function __construct(
-        private readonly DistribucionHabitacionService $service
+        private readonly DistribucionHabitacionService $service,
+        private readonly NotificacionAlojamientoN8nService
+            $notificacionAlojamientoN8n
     ) {
     }
 
@@ -45,7 +48,14 @@ class HabitacionAlojamientoController extends Controller
             'cliente_id' => ['nullable', 'integer', 'exists:clientes,id'],
         ]);
         try {
-            $this->service->asignar($habitacion, $datos);
+            $asignacion = $this->service->asignar(
+                $habitacion,
+                $datos
+            );
+
+            $this->notificacionAlojamientoN8n
+                ->enviar($asignacion);
+
             return back()->with('success', 'Viajero asignado correctamente.');
         } catch (InvalidArgumentException $error) {
             return back()->with('error', $error->getMessage());

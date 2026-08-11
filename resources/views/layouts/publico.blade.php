@@ -18,7 +18,8 @@
           href="{{ asset('assets/css/font-awesome.min.css') }}">
 
     <link rel="stylesheet"
-          href="{{ asset('css/publico.css') }}">
+          href="{{ asset('css/publico.css') }}?v={{ filemtime(public_path('css/publico.css')) }}"
+    >
 
     @yield('styles')
 </head>

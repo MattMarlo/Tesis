@@ -96,10 +96,7 @@ class EstadoTareaContextualService
 
         $estado = $this->resolverEstado(
             $tareaActual->gestionable,
-            $cantidadViajeros,
-            $tareaActual->operacion?->reserva
-                ?->viajerosReserva()
-                ->exists() ?? false
+            $cantidadViajeros
         );
 
         $datos = [
@@ -131,8 +128,7 @@ class EstadoTareaContextualService
 
     private function resolverEstado(
         Model $gestionable,
-        int $cantidadViajeros,
-        bool $tieneViajerosRegistrados
+        int $cantidadViajeros
     ): string {
         return match (true) {
             $gestionable instanceof VueloReserva =>
@@ -155,8 +151,7 @@ class EstadoTareaContextualService
             $gestionable instanceof GestionOperativa =>
                 $this->estadoGestionGenerica(
                     $gestionable,
-                    $cantidadViajeros,
-                    $tieneViajerosRegistrados
+                    $cantidadViajeros
                 ),
 
             default =>
@@ -235,8 +230,7 @@ class EstadoTareaContextualService
 
     private function estadoGestionGenerica(
         GestionOperativa $gestion,
-        int $cantidadViajeros,
-        bool $tieneViajerosRegistrados
+        int $cantidadViajeros
     ): string {
         if (
             $gestion->estaCancelada()
@@ -278,31 +272,23 @@ class EstadoTareaContextualService
         }
 
         /*
-         * Las reservas históricas pueden usar directamente al
-         * cliente titular y no tener filas en viajeros_reserva.
-         * En Tren, la cantidad confirmada de la gestión permite
-         * completar la tarea sin bloquear esos expedientes.
-         */
-        if (
-            $gestion->tipo === GestionOperativa::TIPO_TREN
-            && !$tieneViajerosRegistrados
-        ) {
-            return TareaOperacionViaje::ESTADO_COMPLETADA;
-        }
-
-        /*
          * Para trenes, entradas, seguros y servicios que
          * requieran detalle individual, verificamos que todos
          * los viajeros estén confirmados.
          */
-        $cantidadConfirmados =
+        $detallesConfirmados =
             $gestion->detallesViajeros()
                 ->where(
                     'estado',
                     GestionOperativaViajero::ESTADO_CONFIRMADO
-                )
-                ->distinct()
-                ->count('viajero_reserva_id');
+                );
+
+        $cantidadConfirmados =
+            $gestion->tipo === GestionOperativa::TIPO_TREN
+                ? $detallesConfirmados->count()
+                : $detallesConfirmados
+                    ->distinct()
+                    ->count('viajero_reserva_id');
 
         if (
             $cantidadConfirmados
@@ -332,6 +318,20 @@ class EstadoTareaContextualService
 
         if ($cantidadRegistrados > 0) {
             return $cantidadRegistrados;
+        }
+
+        if (
+            $tarea->tipo_gestion ===
+                TareaOperacionViaje::TIPO_TREN
+        ) {
+            $cantidadClientes = $reserva->esIndividual()
+                ? (int) ($reserva->cliente_id !== null)
+                : (int) ($reserva->grupo?->clientes()
+                    ->count() ?? 0);
+
+            if ($cantidadClientes > 0) {
+                return $cantidadClientes;
+            }
         }
 
         return max(

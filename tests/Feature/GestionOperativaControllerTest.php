@@ -522,7 +522,7 @@ class GestionOperativaControllerTest extends TestCase
         ]);
     }
 
-    public function test_tren_no_bloquea_reserva_historica_sin_filas_de_viajeros(): void
+    public function test_tren_gestiona_al_titular_registrado_en_una_reserva_tradicional(): void
     {
         $this->tarea->update([
             'tipo_gestion' => TareaOperacionViaje::TIPO_TREN,
@@ -557,13 +557,100 @@ class GestionOperativaControllerTest extends TestCase
                         'ruta' => 'Alausí - Sibambe',
                         'clase' => 'Turista',
                     ],
+                    'viajeros' => [[
+                        'cliente_id' => $this->cliente->id,
+                        'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
+                        'numero_documento' => 'TRAD-001',
+                        'referencia_individual' => 'TREN-CLI-01',
+                        'asiento' => '8B',
+                    ]],
                 ])
             );
 
         $respuesta->assertRedirect()->assertSessionHasNoErrors();
+
+        $gestion = GestionOperativa::query()
+            ->where('tipo', GestionOperativa::TIPO_TREN)
+            ->firstOrFail();
+
+        $this->assertDatabaseHas(
+            'gestion_operativa_viajeros',
+            [
+                'gestion_operativa_id' => $gestion->id,
+                'cliente_id' => $this->cliente->id,
+                'viajero_reserva_id' => null,
+                'asiento' => '8B',
+            ]
+        );
+
         $this->assertSame(
             TareaOperacionViaje::ESTADO_COMPLETADA,
             $this->tarea->fresh()->estado
+        );
+    }
+
+    public function test_tren_rechaza_un_cliente_ajeno_a_la_reserva(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_TREN,
+            'nombre' => 'Tren reservado',
+        ]);
+
+        $clienteAjeno = Cliente::create([
+            'nombres' => 'Persona',
+            'apellidos' => 'Ajena',
+            'tipo_documento' =>
+                Cliente::DOCUMENTO_PASAPORTE,
+            'documento' => 'AJENO123',
+            'fecha_nacimiento' => '1992-01-01',
+            'email' => 'persona-ajena@example.com',
+            'telefono' => '0999999810',
+            'estado' => Cliente::ESTADO_ACTIVO,
+        ]);
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.tareas.gestiones.store',
+                    [
+                        'operacion' => $this->operacion->id,
+                        'tarea' => $this->tarea->id,
+                    ]
+                ),
+                $this->datosGestion([
+                    'tipo' => TareaOperacionViaje::TIPO_TREN,
+                    'nombre' => 'Tren reservado',
+                    'proveedor' => 'Empresa Ferroviaria',
+                    'fecha_hora_inicio' => '2026-12-02 07:00:00',
+                    'fecha_hora_fin' => '2026-12-02 10:00:00',
+                    'ubicacion_origen' => 'Estacion origen',
+                    'destino' => 'Estacion destino',
+                    'cantidad_viajeros' => 1,
+                    'referencia_confirmacion' => 'TREN-001',
+                    'estado' => GestionOperativa::ESTADO_CONFIRMADO,
+                    'datos_adicionales' => [
+                        'empresa_ferroviaria' => 'Empresa Ferroviaria',
+                        'ruta' => 'Origen - Destino',
+                        'clase' => 'Turista',
+                    ],
+                    'viajeros' => [[
+                        'cliente_id' => $clienteAjeno->id,
+                        'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
+                        'numero_documento' => 'TR-001',
+                        'asiento' => '4A',
+                    ]],
+                ])
+            );
+
+        $respuesta->assertSessionHasErrors([
+            'viajeros.0.cliente_id',
+            'viajeros',
+        ]);
+
+        $this->assertDatabaseCount(
+            'gestiones_operativas',
+            0
         );
     }
 

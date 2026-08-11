@@ -6,7 +6,6 @@ use App\Models\GestionOperativa;
 use App\Models\GestionOperativaViajero;
 use App\Models\OperacionViaje;
 use App\Models\Reserva;
-use App\Models\ViajeroReserva;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -183,15 +182,14 @@ class GuardarGestionOperativaRequest extends FormRequest
                 true
             );
 
-        if (
-            $tipo === GestionOperativa::TIPO_TREN
-            && $reservaId
-            && !ViajeroReserva::query()
-                ->where('reserva_id', $reservaId)
-                ->exists()
-        ) {
-            $requiereViajerosIndividuales = false;
-        }
+        $identificadoresTren = $esTren
+            ? $this->identificadoresRegistradosTren(
+                $reservaId
+            )
+            : [
+                'viajeros' => collect(),
+                'clientes' => collect(),
+            ];
 
         $reglasViajeros = [
             Rule::requiredIf(
@@ -290,6 +288,12 @@ class GuardarGestionOperativaRequest extends FormRequest
                 'required',
                 'integer',
                 'min:1',
+                ...($esTren
+                    ? [Rule::in([
+                        $identificadoresTren['viajeros']->count()
+                        + $identificadoresTren['clientes']->count(),
+                    ])]
+                    : []),
             ],
 
             'capacidad' => [
@@ -457,19 +461,36 @@ class GuardarGestionOperativaRequest extends FormRequest
                 $reglasViajeros,
 
             'viajeros.*.viajero_reserva_id' => [
-                'required',
+                Rule::requiredIf(!$esTren),
+                'nullable',
                 'integer',
                 'distinct',
+                $esTren
+                    ? Rule::in(
+                        $identificadoresTren[
+                            'viajeros'
+                        ]->all()
+                    )
+                    : Rule::exists(
+                        'viajeros_reserva',
+                        'id'
+                    )->where(
+                        fn ($consulta) =>
+                            $consulta->where(
+                                'reserva_id',
+                                $reservaId
+                            )
+                    ),
+            ],
 
-                Rule::exists(
-                    'viajeros_reserva',
-                    'id'
-                )->where(
-                    fn ($consulta) =>
-                        $consulta->where(
-                            'reserva_id',
-                            $reservaId
-                        )
+            'viajeros.*.cliente_id' => [
+                'nullable',
+                'integer',
+                'distinct',
+                Rule::in(
+                    $identificadoresTren[
+                        'clientes'
+                    ]->all()
                 ),
             ],
 
@@ -534,6 +555,10 @@ class GuardarGestionOperativaRequest extends FormRequest
                     ->validarDetallesIndividuales(
                         $validator
                     );
+
+                $this->validarIntegrantesTren(
+                    $validator
+                );
             },
         ];
     }
@@ -632,6 +657,122 @@ class GuardarGestionOperativaRequest extends FormRequest
                 );
             }
         }
+    }
+
+    private function validarIntegrantesTren(
+        Validator $validator
+    ): void {
+        if (
+            $this->input('tipo') !==
+                GestionOperativa::TIPO_TREN
+        ) {
+            return;
+        }
+
+        $registrados =
+            $this->identificadoresRegistradosTren(
+                $this->obtenerReservaId()
+            );
+
+        $esperados = $registrados['viajeros']
+            ->map(fn ($id) => 'viajero:'.(int) $id)
+            ->merge(
+                $registrados['clientes']->map(
+                    fn ($id) => 'cliente:'.(int) $id
+                )
+            )
+            ->sort()
+            ->values();
+
+        $recibidos = collect(
+            $this->input('viajeros', [])
+        )->map(function ($detalle, $indice) use (
+            $validator
+        ) {
+            $viajeroId = $detalle[
+                'viajero_reserva_id'
+            ] ?? null;
+
+            $clienteId = $detalle['cliente_id']
+                ?? null;
+
+            if (
+                filled($viajeroId) ===
+                filled($clienteId)
+            ) {
+                $validator->errors()->add(
+                    "viajeros.$indice.viajero_reserva_id",
+                    'Selecciona un único integrante registrado en la reserva.'
+                );
+
+                return null;
+            }
+
+            return filled($viajeroId)
+                ? 'viajero:'.(int) $viajeroId
+                : 'cliente:'.(int) $clienteId;
+        })->filter()->sort()->values();
+
+        if (
+            $esperados->isEmpty()
+            || $recibidos->all() !== $esperados->all()
+        ) {
+            $validator->errors()->add(
+                'viajeros',
+                'La gestión del tren debe incluir únicamente a todos los integrantes registrados en la reserva.'
+            );
+        }
+    }
+
+    private function identificadoresRegistradosTren(
+        ?int $reservaId
+    ): array {
+        if (!$reservaId) {
+            return [
+                'viajeros' => collect(),
+                'clientes' => collect(),
+            ];
+        }
+
+        $reserva = Reserva::query()
+            ->with([
+                'viajerosReserva:id,reserva_id',
+                'grupo.clientes:id',
+            ])
+            ->find($reservaId);
+
+        if (!$reserva) {
+            return [
+                'viajeros' => collect(),
+                'clientes' => collect(),
+            ];
+        }
+
+        $viajeros = $reserva->viajerosReserva
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        if ($viajeros->isNotEmpty()) {
+            return [
+                'viajeros' => $viajeros,
+                'clientes' => collect(),
+            ];
+        }
+
+        $clientes = $reserva->esIndividual()
+            ? collect([$reserva->cliente_id])
+                ->filter()
+            : ($reserva->grupo?->clientes
+                ?->pluck('id') ?? collect());
+
+        return [
+            'viajeros' => collect(),
+            'clientes' => $clientes
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values(),
+        ];
     }
 
     private function obtenerReservaId(): ?int
@@ -814,6 +955,9 @@ class GuardarGestionOperativaRequest extends FormRequest
 
             'cantidad_viajeros.min' =>
                 'La gestión debe incluir al menos un viajero.',
+
+            'cantidad_viajeros.in' =>
+                'La cantidad debe coincidir con los integrantes registrados en la reserva.',
 
             'capacidad.required' =>
                 'Indica la capacidad del vehículo.',

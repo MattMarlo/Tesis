@@ -8,6 +8,7 @@ use App\Models\GestionOperativaViajero;
 use App\Models\OperacionViaje;
 use App\Models\TareaOperacionViaje;
 use App\Services\EstadoTareaContextualService;
+use App\Services\PasajesTrenService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,9 @@ class GestionOperativaController extends Controller
 {
     public function __construct(
         private readonly EstadoTareaContextualService
-            $estadoTareaService
+            $estadoTareaService,
+        private readonly PasajesTrenService
+            $pasajesTrenService
     ) {
     }
 
@@ -124,7 +127,15 @@ class GestionOperativaController extends Controller
                             $datosGestion
                         );
 
-                    if ($incluyeViajeros) {
+                    if (
+                        $gestion->tipo ===
+                            GestionOperativa::TIPO_TREN
+                    ) {
+                        $this->pasajesTrenService
+                            ->sincronizarIntegrantes(
+                                $gestion
+                            );
+                    } elseif ($incluyeViajeros) {
                         $this->sincronizarViajeros(
                             $gestion,
                             $detallesViajeros
@@ -256,7 +267,15 @@ class GestionOperativaController extends Controller
                         $datosGestion
                     );
 
-                    if ($incluyeViajeros) {
+                    if (
+                        $gestion->tipo ===
+                            GestionOperativa::TIPO_TREN
+                    ) {
+                        $this->pasajesTrenService
+                            ->sincronizarIntegrantes(
+                                $gestion
+                            );
+                    } elseif ($incluyeViajeros) {
                         $this->sincronizarViajeros(
                             $gestion,
                             $detallesViajeros

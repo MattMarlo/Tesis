@@ -173,7 +173,6 @@ class GuardarGestionOperativaRequest extends FormRequest
             in_array(
                 $tipo,
                 [
-                    GestionOperativa::TIPO_TREN,
                     GestionOperativa::TIPO_ENTRADA,
                     GestionOperativa::
                         TIPO_ACTIVIDAD_RESERVADA,
@@ -556,9 +555,6 @@ class GuardarGestionOperativaRequest extends FormRequest
                         $validator
                     );
 
-                $this->validarIntegrantesTren(
-                    $validator
-                );
             },
         ];
     }
@@ -604,7 +600,6 @@ class GuardarGestionOperativaRequest extends FormRequest
             $this->input('tipo');
 
         $tiposConDocumentoIndividual = [
-            GestionOperativa::TIPO_TREN,
             GestionOperativa::TIPO_ENTRADA,
             GestionOperativa::
                 TIPO_ACTIVIDAD_RESERVADA,
@@ -656,71 +651,6 @@ class GuardarGestionOperativaRequest extends FormRequest
                     'Un viajero confirmado debe tener un número de documento o una referencia individual.'
                 );
             }
-        }
-    }
-
-    private function validarIntegrantesTren(
-        Validator $validator
-    ): void {
-        if (
-            $this->input('tipo') !==
-                GestionOperativa::TIPO_TREN
-        ) {
-            return;
-        }
-
-        $registrados =
-            $this->identificadoresRegistradosTren(
-                $this->obtenerReservaId()
-            );
-
-        $esperados = $registrados['viajeros']
-            ->map(fn ($id) => 'viajero:'.(int) $id)
-            ->merge(
-                $registrados['clientes']->map(
-                    fn ($id) => 'cliente:'.(int) $id
-                )
-            )
-            ->sort()
-            ->values();
-
-        $recibidos = collect(
-            $this->input('viajeros', [])
-        )->map(function ($detalle, $indice) use (
-            $validator
-        ) {
-            $viajeroId = $detalle[
-                'viajero_reserva_id'
-            ] ?? null;
-
-            $clienteId = $detalle['cliente_id']
-                ?? null;
-
-            if (
-                filled($viajeroId) ===
-                filled($clienteId)
-            ) {
-                $validator->errors()->add(
-                    "viajeros.$indice.viajero_reserva_id",
-                    'Selecciona un único integrante registrado en la reserva.'
-                );
-
-                return null;
-            }
-
-            return filled($viajeroId)
-                ? 'viajero:'.(int) $viajeroId
-                : 'cliente:'.(int) $clienteId;
-        })->filter()->sort()->values();
-
-        if (
-            $esperados->isEmpty()
-            || $recibidos->all() !== $esperados->all()
-        ) {
-            $validator->errors()->add(
-                'viajeros',
-                'La gestión del tren debe incluir únicamente a todos los integrantes registrados en la reserva.'
-            );
         }
     }
 

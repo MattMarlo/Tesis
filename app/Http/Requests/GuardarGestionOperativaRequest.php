@@ -173,7 +173,6 @@ class GuardarGestionOperativaRequest extends FormRequest
             in_array(
                 $tipo,
                 [
-                    GestionOperativa::TIPO_TREN,
                     GestionOperativa::TIPO_ENTRADA,
                     GestionOperativa::
                         TIPO_ACTIVIDAD_RESERVADA,
@@ -181,6 +180,15 @@ class GuardarGestionOperativaRequest extends FormRequest
                 ],
                 true
             );
+
+        $identificadoresTren = $esTren
+            ? $this->identificadoresRegistradosTren(
+                $reservaId
+            )
+            : [
+                'viajeros' => collect(),
+                'clientes' => collect(),
+            ];
 
         $reglasViajeros = [
             Rule::requiredIf(
@@ -279,6 +287,12 @@ class GuardarGestionOperativaRequest extends FormRequest
                 'required',
                 'integer',
                 'min:1',
+                ...($esTren
+                    ? [Rule::in([
+                        $identificadoresTren['viajeros']->count()
+                        + $identificadoresTren['clientes']->count(),
+                    ])]
+                    : []),
             ],
 
             'capacidad' => [
@@ -446,19 +460,36 @@ class GuardarGestionOperativaRequest extends FormRequest
                 $reglasViajeros,
 
             'viajeros.*.viajero_reserva_id' => [
-                'required',
+                Rule::requiredIf(!$esTren),
+                'nullable',
                 'integer',
                 'distinct',
+                $esTren
+                    ? Rule::in(
+                        $identificadoresTren[
+                            'viajeros'
+                        ]->all()
+                    )
+                    : Rule::exists(
+                        'viajeros_reserva',
+                        'id'
+                    )->where(
+                        fn ($consulta) =>
+                            $consulta->where(
+                                'reserva_id',
+                                $reservaId
+                            )
+                    ),
+            ],
 
-                Rule::exists(
-                    'viajeros_reserva',
-                    'id'
-                )->where(
-                    fn ($consulta) =>
-                        $consulta->where(
-                            'reserva_id',
-                            $reservaId
-                        )
+            'viajeros.*.cliente_id' => [
+                'nullable',
+                'integer',
+                'distinct',
+                Rule::in(
+                    $identificadoresTren[
+                        'clientes'
+                    ]->all()
                 ),
             ],
 
@@ -523,6 +554,7 @@ class GuardarGestionOperativaRequest extends FormRequest
                     ->validarDetallesIndividuales(
                         $validator
                     );
+
             },
         ];
     }
@@ -568,7 +600,6 @@ class GuardarGestionOperativaRequest extends FormRequest
             $this->input('tipo');
 
         $tiposConDocumentoIndividual = [
-            GestionOperativa::TIPO_TREN,
             GestionOperativa::TIPO_ENTRADA,
             GestionOperativa::
                 TIPO_ACTIVIDAD_RESERVADA,
@@ -621,6 +652,57 @@ class GuardarGestionOperativaRequest extends FormRequest
                 );
             }
         }
+    }
+
+    private function identificadoresRegistradosTren(
+        ?int $reservaId
+    ): array {
+        if (!$reservaId) {
+            return [
+                'viajeros' => collect(),
+                'clientes' => collect(),
+            ];
+        }
+
+        $reserva = Reserva::query()
+            ->with([
+                'viajerosReserva:id,reserva_id',
+                'grupo.clientes:id',
+            ])
+            ->find($reservaId);
+
+        if (!$reserva) {
+            return [
+                'viajeros' => collect(),
+                'clientes' => collect(),
+            ];
+        }
+
+        $viajeros = $reserva->viajerosReserva
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        if ($viajeros->isNotEmpty()) {
+            return [
+                'viajeros' => $viajeros,
+                'clientes' => collect(),
+            ];
+        }
+
+        $clientes = $reserva->esIndividual()
+            ? collect([$reserva->cliente_id])
+                ->filter()
+            : ($reserva->grupo?->clientes
+                ?->pluck('id') ?? collect());
+
+        return [
+            'viajeros' => collect(),
+            'clientes' => $clientes
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values(),
+        ];
     }
 
     private function obtenerReservaId(): ?int
@@ -803,6 +885,9 @@ class GuardarGestionOperativaRequest extends FormRequest
 
             'cantidad_viajeros.min' =>
                 'La gestión debe incluir al menos un viajero.',
+
+            'cantidad_viajeros.in' =>
+                'La cantidad debe coincidir con los integrantes registrados en la reserva.',
 
             'capacidad.required' =>
                 'Indica la capacidad del vehículo.',

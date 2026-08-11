@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Models\VueloReserva;
 use App\Services\SincronizarTareasItinerarioService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request as HttpRequest;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class GestionBoletosVueloPaginaTest extends TestCase
@@ -321,6 +323,15 @@ class GestionBoletosVueloPaginaTest extends TestCase
 
     public function test_emitir_boleto_completa_tarea_y_eliminarlo_la_reabre(): void
     {
+        config([
+            'services.n8n.flight_ticket_notification_url' =>
+                'https://n8n.example.test/webhook/boleto-avion-emitido',
+        ]);
+
+        Http::fake([
+            '*' => Http::response([], 500),
+        ]);
+
         $this
             ->actingAs($this->usuario)
             ->post(
@@ -375,6 +386,51 @@ class GestionBoletosVueloPaginaTest extends TestCase
             );
 
         $boleto = BoletoVuelo::firstOrFail();
+
+        Http::assertSent(
+            function (HttpRequest $request) use (
+                $boleto
+            ): bool {
+                return $request->url() === config(
+                    'services.n8n.flight_ticket_notification_url'
+                )
+                    && $request['event'] ===
+                        'boleto.avion.emitido'
+                    && (int) data_get(
+                        $request->data(),
+                        'data.boleto_id'
+                    ) === $boleto->id
+                    && data_get(
+                        $request->data(),
+                        'data.numero_boleto'
+                    ) === 'r1223'
+                    && data_get(
+                        $request->data(),
+                        'data.email'
+                    ) === $this->cliente->email;
+            }
+        );
+
+        $this->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.boletos.store',
+                    $vuelo
+                ),
+                [
+                    'cliente_id' => $this->cliente->id,
+                    'numero_boleto' => 'r1223',
+                    'asiento' => '12A',
+                    'clase' => 'Económica',
+                    'estado_emision' =>
+                        BoletoVuelo::ESTADO_EMITIDO,
+                    'observaciones' =>
+                        'Boleto emitido para el titular.',
+                ]
+            )
+            ->assertSessionHasNoErrors();
+
+        Http::assertSentCount(1);
 
         $tareaCompletada =
             $this->tarea->fresh();

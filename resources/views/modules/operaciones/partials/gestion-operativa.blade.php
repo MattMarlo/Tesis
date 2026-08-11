@@ -118,11 +118,82 @@
     $viajerosReserva =
         $reserva->viajerosReserva;
 
+    $integrantesTren = collect();
+
+    if (
+        $tipoGestion === GestionOperativa::TIPO_TREN
+    ) {
+        if ($viajerosReserva->isNotEmpty()) {
+            $integrantesTren = $viajerosReserva
+                ->map(fn ($viajero) => [
+                    'tipo' => 'viajero',
+                    'id' => $viajero->id,
+                    'nombre' => $viajero->nombre_completo,
+                    'documento' =>
+                        $viajero->documento_enmascarado,
+                ]);
+        } else {
+            $clientesReserva = $reserva->esIndividual()
+                ? collect([$reserva->cliente])
+                    ->filter()
+                : ($reserva->grupo?->clientes
+                    ?? collect());
+
+            $integrantesTren = $clientesReserva
+                ->map(function ($cliente) {
+                    $documento = (string) (
+                        $cliente->documento ?? ''
+                    );
+
+                    $documentoEnmascarado =
+                        mb_strlen($documento) > 4
+                            ? str_repeat(
+                                '*',
+                                mb_strlen($documento) - 4
+                            ).mb_substr($documento, -4)
+                            : ($documento ?: 'Sin documento');
+
+                    return [
+                        'tipo' => 'cliente',
+                        'id' => $cliente->id,
+                        'nombre' =>
+                            $cliente->nombre_completo,
+                        'documento' =>
+                            $documentoEnmascarado,
+                    ];
+                });
+        }
+    }
+
+    $participantesGestion =
+        $tipoGestion === GestionOperativa::TIPO_TREN
+            ? $integrantesTren->values()
+            : $viajerosReserva->map(
+                fn ($viajero) => [
+                    'tipo' => 'viajero',
+                    'id' => $viajero->id,
+                    'nombre' => $viajero->nombre_completo,
+                    'documento' =>
+                        $viajero->documento_enmascarado,
+                ]
+            )->values();
+
+    $requiereDetalleIndividualDisponible =
+        $requiereDetalleIndividual
+        && $participantesGestion->isNotEmpty();
+
+    $mostrarDetalleIndividual =
+        $tipoGestion === GestionOperativa::TIPO_TREN
+            ? false
+            : $requiereDetalleIndividualDisponible;
+
     $cantidadViajeros =
-        max(
-            1,
-            (int) $totalViajerosEsperados
-        );
+        $tipoGestion === GestionOperativa::TIPO_TREN
+            ? max(1, $participantesGestion->count())
+            : max(
+                1,
+                (int) $totalViajerosEsperados
+            );
 
     $usarDatosAnteriores =
         (int) old(
@@ -231,6 +302,26 @@
                 ? 'Editar gestión'
                 : $accionContextual }}
         </button>
+    @endif
+
+    @if (
+        $gestionActual
+        && $tipoGestion === GestionOperativa::TIPO_TREN
+    )
+        <a
+            href="{{ route(
+                'operaciones.trenes.pasajes.index',
+                [
+                    'operacion' => $operacion->id,
+                    'gestion' => $gestionActual->id,
+                    'tarea_id' => $tarea->id,
+                ]
+            ) }}"
+            class="btn-ver-gestion-contextual"
+        >
+            <i class="bi bi-ticket-perforated"></i>
+            Gestionar pasajes
+        </a>
     @endif
 </div>
 
@@ -1038,6 +1129,10 @@
                                     name="cantidad_viajeros"
                                     min="1"
                                     required
+                                    @readonly(
+                                        $tipoGestion ===
+                                            GestionOperativa::TIPO_TREN
+                                    )
                                     value="{{ $valorFormulario(
                                         'cantidad_viajeros',
                                         $gestionActual?->cantidad_viajeros
@@ -1222,7 +1317,7 @@
                         </div>
                     </section>
 
-                    @if ($requiereDetalleIndividual)
+                    @if ($mostrarDetalleIndividual)
                         <section class="seccion-formulario-gestion">
                             <div class="titulo-seccion-gestion">
                                 <div>
@@ -1234,7 +1329,7 @@
                                 </div>
                             </div>
 
-                            @if ($viajerosReserva->isEmpty())
+                            @if ($participantesGestion->isEmpty())
                                 <div class="alert alert-warning">
                                     Primero registra los integrantes
                                     del viaje antes de confirmar esta
@@ -1243,15 +1338,21 @@
                             @else
                                 <div class="lista-viajeros-gestion">
                                     @foreach (
-                                        $viajerosReserva
-                                        as $indice => $viajero
+                                        $participantesGestion
+                                        as $indice => $participante
                                     )
                                         @php
+                                            $campoIdentificador =
+                                                $participante['tipo'] === 'viajero'
+                                                    ? 'viajero_reserva_id'
+                                                    : 'cliente_id';
+
                                             $detalleActual =
                                                 $detallesViajeros
-                                                    ->firstWhere(
-                                                        'viajero_reserva_id',
-                                                        $viajero->id
+                                                    ->first(
+                                                        fn ($detalle) =>
+                                                            (int) $detalle->{$campoIdentificador}
+                                                                === (int) $participante['id']
                                                     );
 
                                             $prefijoViajero =
@@ -1278,14 +1379,12 @@
                                             <header>
                                                 <div>
                                                     <strong>
-                                                        {{ $viajero
-                                                            ->nombre_completo }}
+                                                        {{ $participante['nombre'] }}
                                                     </strong>
 
                                                     <span>
                                                         {{
-                                                            $viajero
-                                                                ->documento_enmascarado
+                                                            $participante['documento']
                                                         }}
                                                     </span>
                                                 </div>
@@ -1293,8 +1392,8 @@
 
                                             <input
                                                 type="hidden"
-                                                name="viajeros[{{ $indice }}][viajero_reserva_id]"
-                                                value="{{ $viajero->id }}"
+                                                name="viajeros[{{ $indice }}][{{ $participante['tipo'] === 'viajero' ? 'viajero_reserva_id' : 'cliente_id' }}]"
+                                                value="{{ $participante['id'] }}"
                                             >
 
                                             <div class="campos-viajero-gestion">
@@ -1435,6 +1534,29 @@
             <div class="modal-footer modal-footer-gestion-contextual">
                 @if ($gestionActual)
                     <div class="acciones-secundarias-gestion">
+                        @if (
+                            $tipoGestion ===
+                                GestionOperativa::TIPO_TREN
+                        )
+                            <a
+                                href="{{ route(
+                                    'operaciones.trenes.pasajes.index',
+                                    [
+                                        'operacion' =>
+                                            $operacion->id,
+                                        'gestion' =>
+                                            $gestionActual->id,
+                                        'tarea_id' =>
+                                            $tarea->id,
+                                    ]
+                                ) }}"
+                                class="btn btn-outline-primary"
+                            >
+                                <i class="bi bi-ticket-perforated"></i>
+                                Gestionar pasajes
+                            </a>
+                        @endif
+
                         <form
                             method="POST"
                             action="{{ route(
@@ -1500,8 +1622,8 @@
                         form="{{ $formularioId }}"
                         class="btn btn-primary"
                         @disabled(
-                            $requiereDetalleIndividual
-                            && $viajerosReserva->isEmpty()
+                            $tipoGestion === GestionOperativa::TIPO_TREN
+                            && $participantesGestion->isEmpty()
                         )
                     >
                         <i class="bi bi-check2"></i>

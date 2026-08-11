@@ -276,14 +276,19 @@ class EstadoTareaContextualService
          * requieran detalle individual, verificamos que todos
          * los viajeros estén confirmados.
          */
-        $cantidadConfirmados =
+        $detallesConfirmados =
             $gestion->detallesViajeros()
                 ->where(
                     'estado',
                     GestionOperativaViajero::ESTADO_CONFIRMADO
-                )
-                ->distinct()
-                ->count('viajero_reserva_id');
+                );
+
+        $cantidadConfirmados =
+            $gestion->tipo === GestionOperativa::TIPO_TREN
+                ? $detallesConfirmados->count()
+                : $detallesConfirmados
+                    ->distinct()
+                    ->count('viajero_reserva_id');
 
         if (
             $cantidadConfirmados
@@ -313,6 +318,20 @@ class EstadoTareaContextualService
 
         if ($cantidadRegistrados > 0) {
             return $cantidadRegistrados;
+        }
+
+        if (
+            $tarea->tipo_gestion ===
+                TareaOperacionViaje::TIPO_TREN
+        ) {
+            $cantidadClientes = $reserva->esIndividual()
+                ? (int) ($reserva->cliente_id !== null)
+                : (int) ($reserva->grupo?->clientes()
+                    ->count() ?? 0);
+
+            if ($cantidadClientes > 0) {
+                return $cantidadClientes;
+            }
         }
 
         return max(

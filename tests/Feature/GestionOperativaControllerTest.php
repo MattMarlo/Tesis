@@ -490,17 +490,10 @@ class GestionOperativaControllerTest extends TestCase
                         'ruta' => 'Lima - Cusco',
                         'clase' => 'Turista',
                     ],
-                    'viajeros' => [[
-                        'viajero_reserva_id' => $viajero->id,
-                        'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
-                        'numero_documento' => 'TR123456',
-                        'referencia_individual' => 'REF-001',
-                        'asiento' => '12A',
-                    ]],
                 ])
             );
 
-        $respuesta->assertSessionHasNoErrors();
+        $respuesta->assertRedirect()->assertSessionHasNoErrors();
 
         $gestion = GestionOperativa::query()
             ->where('tipo', GestionOperativa::TIPO_TREN)
@@ -511,15 +504,194 @@ class GestionOperativaControllerTest extends TestCase
             $this->tarea->fresh()->gestionable_id
         );
         $this->assertSame(
-            TareaOperacionViaje::ESTADO_COMPLETADA,
+            TareaOperacionViaje::ESTADO_EN_PROCESO,
             $this->tarea->fresh()->estado
         );
         $this->assertDatabaseHas('gestion_operativa_viajeros', [
             'gestion_operativa_id' => $gestion->id,
             'viajero_reserva_id' => $viajero->id,
+            'asiento' => null,
+            'estado' => GestionOperativaViajero::ESTADO_PENDIENTE,
+        ]);
+
+        $pasaje = $gestion->detallesViajeros()
+            ->firstOrFail();
+
+        $this->actingAs($this->usuario)
+            ->get(route(
+                'operaciones.trenes.pasajes.index',
+                [
+                    'operacion' => $this->operacion->id,
+                    'gestion' => $gestion->id,
+                    'tarea_id' => $this->tarea->id,
+                ]
+            ))
+            ->assertOk()
+            ->assertSee('Gestión de pasajes de tren')
+            ->assertSee($viajero->nombre_completo);
+
+        $this->actingAs($this->usuario)
+            ->put(route(
+                'operaciones.trenes.pasajes.update',
+                $pasaje->id
+            ), [
+                'pasaje_id' => $pasaje->id,
+                'numero_documento' => 'TR123456',
+                'referencia_individual' => 'REF-001',
+                'asiento' => '12A',
+                'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('gestion_operativa_viajeros', [
+            'id' => $pasaje->id,
+            'numero_documento' => 'TR123456',
             'asiento' => '12A',
             'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
         ]);
+
+        $this->assertSame(
+            TareaOperacionViaje::ESTADO_COMPLETADA,
+            $this->tarea->fresh()->estado
+        );
+    }
+
+    public function test_tren_gestiona_al_titular_registrado_en_una_reserva_tradicional(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_TREN,
+            'nombre' => 'Tren histórico',
+        ]);
+
+        $this->assertDatabaseCount('viajeros_reserva', 0);
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.tareas.gestiones.store',
+                    [
+                        'operacion' => $this->operacion->id,
+                        'tarea' => $this->tarea->id,
+                    ]
+                ),
+                $this->datosGestion([
+                    'tipo' => TareaOperacionViaje::TIPO_TREN,
+                    'nombre' => 'Tren histórico',
+                    'proveedor' => 'Ferrocarriles Ecuador',
+                    'fecha_hora_inicio' => '2026-12-02 07:00:00',
+                    'fecha_hora_fin' => '2026-12-02 10:00:00',
+                    'ubicacion_origen' => 'Estación Alausí',
+                    'destino' => 'Estación Sibambe',
+                    'cantidad_viajeros' => 1,
+                    'referencia_confirmacion' => 'TREN-HIST-01',
+                    'estado' => GestionOperativa::ESTADO_CONFIRMADO,
+                    'datos_adicionales' => [
+                        'empresa_ferroviaria' => 'Ferrocarriles Ecuador',
+                        'ruta' => 'Alausí - Sibambe',
+                        'clase' => 'Turista',
+                    ],
+                ])
+            );
+
+        $respuesta->assertRedirect()->assertSessionHasNoErrors();
+
+        $gestion = GestionOperativa::query()
+            ->where('tipo', GestionOperativa::TIPO_TREN)
+            ->firstOrFail();
+
+        $this->assertDatabaseHas(
+            'gestion_operativa_viajeros',
+            [
+                'gestion_operativa_id' => $gestion->id,
+                'cliente_id' => $this->cliente->id,
+                'viajero_reserva_id' => null,
+                'asiento' => null,
+            ]
+        );
+
+        $this->actingAs($this->usuario)
+            ->get(route(
+                'operaciones.trenes.pasajes.index',
+                [
+                    'operacion' => $this->operacion->id,
+                    'gestion' => $gestion->id,
+                    'tarea_id' => $this->tarea->id,
+                ]
+            ))
+            ->assertOk()
+            ->assertSee($this->cliente->nombre_completo)
+            ->assertSee('Gestionar');
+
+        $this->assertSame(
+            TareaOperacionViaje::ESTADO_EN_PROCESO,
+            $this->tarea->fresh()->estado
+        );
+    }
+
+    public function test_tren_rechaza_un_cliente_ajeno_a_la_reserva(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_TREN,
+            'nombre' => 'Tren reservado',
+        ]);
+
+        $clienteAjeno = Cliente::create([
+            'nombres' => 'Persona',
+            'apellidos' => 'Ajena',
+            'tipo_documento' =>
+                Cliente::DOCUMENTO_PASAPORTE,
+            'documento' => 'AJENO123',
+            'fecha_nacimiento' => '1992-01-01',
+            'email' => 'persona-ajena@example.com',
+            'telefono' => '0999999810',
+            'estado' => Cliente::ESTADO_ACTIVO,
+        ]);
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.tareas.gestiones.store',
+                    [
+                        'operacion' => $this->operacion->id,
+                        'tarea' => $this->tarea->id,
+                    ]
+                ),
+                $this->datosGestion([
+                    'tipo' => TareaOperacionViaje::TIPO_TREN,
+                    'nombre' => 'Tren reservado',
+                    'proveedor' => 'Empresa Ferroviaria',
+                    'fecha_hora_inicio' => '2026-12-02 07:00:00',
+                    'fecha_hora_fin' => '2026-12-02 10:00:00',
+                    'ubicacion_origen' => 'Estacion origen',
+                    'destino' => 'Estacion destino',
+                    'cantidad_viajeros' => 1,
+                    'referencia_confirmacion' => 'TREN-001',
+                    'estado' => GestionOperativa::ESTADO_CONFIRMADO,
+                    'datos_adicionales' => [
+                        'empresa_ferroviaria' => 'Empresa Ferroviaria',
+                        'ruta' => 'Origen - Destino',
+                        'clase' => 'Turista',
+                    ],
+                    'viajeros' => [[
+                        'cliente_id' => $clienteAjeno->id,
+                        'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
+                        'numero_documento' => 'TR-001',
+                        'asiento' => '4A',
+                    ]],
+                ])
+            );
+
+        $respuesta->assertSessionHasErrors([
+            'viajeros.0.cliente_id',
+        ]);
+
+        $this->assertDatabaseCount(
+            'gestiones_operativas',
+            0
+        );
     }
 
     private function crearReserva(

@@ -1,0 +1,335 @@
+.pagina-pasajes-tren {
+    --tren-azul: #07579b;
+    --tren-celeste: #0e829b;
+    --tren-borde: #d7e2eb;
+    --tren-fondo: #f5f8fb;
+}
+
+.origen-pasajes-tren,
+.tarjeta-trayecto-tren,
+.panel-pasajes-tren {
+    background: #fff;
+    border: 1px solid var(--tren-borde);
+    border-radius: 18px;
+    margin-bottom: 22px;
+}
+
+.origen-pasajes-tren {
+    align-items: center;
+    background: #eef8fc;
+    display: flex;
+    gap: 16px;
+    padding: 18px 22px;
+}
+
+.origen-pasajes-tren > i {
+    color: var(--tren-azul);
+    font-size: 1.7rem;
+}
+
+.origen-pasajes-tren div {
+    display: grid;
+    gap: 2px;
+}
+
+.origen-pasajes-tren span,
+.panel-pasajes-tren > header span,
+.identidad-trayecto-tren small {
+    color: var(--tren-celeste);
+    font-size: .76rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.origen-pasajes-tren small,
+.panel-pasajes-tren > header p {
+    color: #6b7b8d;
+}
+
+.tarjeta-trayecto-tren {
+    overflow: hidden;
+}
+
+.identidad-trayecto-tren {
+    align-items: center;
+    background: linear-gradient(135deg, #f3f9fd, #edf7f7);
+    display: flex;
+    gap: 18px;
+    padding: 24px;
+}
+
+.identidad-trayecto-tren > span {
+    align-items: center;
+    background: var(--tren-azul);
+    border-radius: 14px;
+    color: #fff;
+    display: flex;
+    font-size: 1.7rem;
+    height: 54px;
+    justify-content: center;
+    width: 54px;
+}
+
+.identidad-trayecto-tren h2 {
+    color: #073f77;
+    font-size: 1.35rem;
+    margin: 3px 0;
+}
+
+.identidad-trayecto-tren p {
+    color: #617184;
+    margin: 0;
+}
+
+.datos-trayecto-tren {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 22px 24px;
+}
+
+.datos-trayecto-tren article {
+    display: grid;
+    gap: 5px;
+}
+
+.datos-trayecto-tren article > span {
+    color: #75869a;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.barra-pasajes-tren {
+    background: #e7edf3;
+    border-radius: 10px;
+    height: 7px;
+    overflow: hidden;
+}
+
+.barra-pasajes-tren span {
+    background: linear-gradient(90deg, var(--tren-azul), var(--tren-celeste));
+    display: block;
+    height: 100%;
+}
+
+.panel-pasajes-tren {
+    padding: 24px;
+}
+
+.panel-pasajes-tren > header {
+    align-items: flex-start;
+    border-bottom: 1px solid #e8eef3;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 18px;
+}
+
+.panel-pasajes-tren h2 {
+    color: #074b8b;
+    font-size: 1.35rem;
+    margin: 3px 0;
+}
+
+.panel-pasajes-tren > header p {
+    margin: 0;
+}
+
+.panel-pasajes-tren > header > strong {
+    background: #eef5fa;
+    border-radius: 999px;
+    color: #315b7d;
+    padding: 8px 13px;
+}
+
+.tabla-pasajes-tren-responsive {
+    overflow-x: auto;
+}
+
+.tabla-pasajes-tren {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tabla-pasajes-tren th,
+.tabla-pasajes-tren td {
+    border-bottom: 1px solid #e8eef3;
+    padding: 16px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.tabla-pasajes-tren th {
+    color: #647487;
+    font-size: .76rem;
+    text-transform: uppercase;
+}
+
+.persona-pasaje-tren {
+    align-items: center;
+    display: flex;
+    gap: 11px;
+    min-width: 210px;
+}
+
+.persona-pasaje-tren > span {
+    align-items: center;
+    background: #07579b;
+    border-radius: 11px;
+    color: #fff;
+    display: flex;
+    font-weight: 800;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.persona-pasaje-tren div {
+    display: grid;
+}
+
+.persona-pasaje-tren small,
+.solo-lectura-pasaje {
+    color: #7b8999;
+}
+
+.estado-pasaje {
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: .82rem;
+    font-weight: 700;
+    padding: 6px 10px;
+}
+
+.estado-pasaje-pendiente {
+    background: #fff4d8;
+    color: #8a5b00;
+}
+
+.estado-pasaje-en_proceso {
+    background: #e7f2ff;
+    color: #155c9b;
+}
+
+.estado-pasaje-confirmado {
+    background: #e2f7eb;
+    color: #167344;
+}
+
+.estado-pasaje-cancelado {
+    background: #fde9e9;
+    color: #a72b2b;
+}
+
+.btn-gestionar-pasaje {
+    background: #fff;
+    border: 1px solid #9fc6df;
+    border-radius: 9px;
+    color: #07579b;
+    font-weight: 700;
+    padding: 9px 13px;
+}
+
+.btn-gestionar-pasaje:hover {
+    background: #07579b;
+    color: #fff;
+}
+
+.sin-pasajes-tren {
+    color: #748496;
+    padding: 35px !important;
+    text-align: center !important;
+}
+
+.modal-pasaje-tren .modal-header span {
+    color: #0b7894;
+    font-size: .75rem;
+    font-weight: 800;
+}
+
+.modal-pasaje-tren .modal-header h2 {
+    color: #075096;
+    font-size: 1.35rem;
+    margin: 3px 0 0;
+}
+
+.viajero-modal-pasaje {
+    align-items: center;
+    background: #eef3f6;
+    border-radius: 12px;
+    display: flex;
+    gap: 13px;
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.viajero-modal-pasaje i {
+    color: #07579b;
+    font-size: 1.5rem;
+}
+
+.viajero-modal-pasaje div {
+    display: grid;
+}
+
+.viajero-modal-pasaje span {
+    color: #738295;
+    font-size: .8rem;
+}
+
+.campos-pasaje-tren {
+    display: grid;
+    gap: 17px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.campo-pasaje-tren {
+    display: grid;
+    gap: 7px;
+}
+
+.campo-pasaje-amplio {
+    grid-column: 1 / -1;
+}
+
+.campo-pasaje-tren label {
+    color: #4d5c6c;
+    font-weight: 700;
+}
+
+.campo-pasaje-tren input,
+.campo-pasaje-tren select,
+.campo-pasaje-tren textarea {
+    border: 1px solid #d3dee7;
+    border-radius: 10px;
+    padding: 12px 14px;
+    width: 100%;
+}
+
+.campo-pasaje-tren .input-error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, .1);
+}
+
+.mensaje-error-pasaje {
+    color: #b3262e;
+    font-size: .82rem;
+}
+
+@media (max-width: 768px) {
+    .datos-trayecto-tren,
+    .campos-pasaje-tren {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-pasaje-amplio {
+        grid-column: auto;
+    }
+
+    .panel-pasajes-tren > header {
+        gap: 12px;
+        flex-direction: column;
+    }
+}

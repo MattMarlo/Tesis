@@ -9,6 +9,7 @@ use App\Models\TareaOperacionViaje;
 use App\Models\VueloReserva;
 use App\Models\ViajeroReserva;
 use App\Services\EstadoTareaContextualService;
+use App\Services\NotificacionBoletoN8nService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,9 @@ class BoletoVueloController extends Controller
 {
     public function __construct(
         private readonly EstadoTareaContextualService
-            $estadoTareaContextual
+            $estadoTareaContextual,
+        private readonly NotificacionBoletoN8nService
+            $notificacionBoletoN8n
     ) {
     }
 
@@ -207,6 +210,15 @@ class BoletoVueloController extends Controller
             ...$clavePersona,
         ]);
 
+        $debeNotificarEmision =
+            ($datos['estado_emision'] ?? null) ===
+                BoletoVuelo::ESTADO_EMITIDO
+            && (
+                !$boleto->exists
+                || $boleto->estado_emision !==
+                    BoletoVuelo::ESTADO_EMITIDO
+            );
+
         $archivoAnterior =
             $boleto->archivo_boleto;
 
@@ -277,6 +289,11 @@ class BoletoVueloController extends Controller
             Storage::disk('public')->delete(
                 $archivoAnterior
             );
+        }
+
+        if ($debeNotificarEmision) {
+            $this->notificacionBoletoN8n
+                ->enviar($boleto);
         }
 
         return back()->with(

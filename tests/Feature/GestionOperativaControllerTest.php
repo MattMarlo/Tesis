@@ -500,7 +500,7 @@ class GestionOperativaControllerTest extends TestCase
                 ])
             );
 
-        $respuesta->assertSessionHasNoErrors();
+        $respuesta->assertRedirect()->assertSessionHasNoErrors();
 
         $gestion = GestionOperativa::query()
             ->where('tipo', GestionOperativa::TIPO_TREN)
@@ -520,6 +520,51 @@ class GestionOperativaControllerTest extends TestCase
             'asiento' => '12A',
             'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
         ]);
+    }
+
+    public function test_tren_no_bloquea_reserva_historica_sin_filas_de_viajeros(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_TREN,
+            'nombre' => 'Tren histórico',
+        ]);
+
+        $this->assertDatabaseCount('viajeros_reserva', 0);
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.tareas.gestiones.store',
+                    [
+                        'operacion' => $this->operacion->id,
+                        'tarea' => $this->tarea->id,
+                    ]
+                ),
+                $this->datosGestion([
+                    'tipo' => TareaOperacionViaje::TIPO_TREN,
+                    'nombre' => 'Tren histórico',
+                    'proveedor' => 'Ferrocarriles Ecuador',
+                    'fecha_hora_inicio' => '2026-12-02 07:00:00',
+                    'fecha_hora_fin' => '2026-12-02 10:00:00',
+                    'ubicacion_origen' => 'Estación Alausí',
+                    'destino' => 'Estación Sibambe',
+                    'cantidad_viajeros' => 1,
+                    'referencia_confirmacion' => 'TREN-HIST-01',
+                    'estado' => GestionOperativa::ESTADO_CONFIRMADO,
+                    'datos_adicionales' => [
+                        'empresa_ferroviaria' => 'Ferrocarriles Ecuador',
+                        'ruta' => 'Alausí - Sibambe',
+                        'clase' => 'Turista',
+                    ],
+                ])
+            );
+
+        $respuesta->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame(
+            TareaOperacionViaje::ESTADO_COMPLETADA,
+            $this->tarea->fresh()->estado
+        );
     }
 
     private function crearReserva(

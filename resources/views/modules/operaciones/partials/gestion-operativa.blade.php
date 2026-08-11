@@ -409,10 +409,15 @@
                         ) }}"
                     enctype="multipart/form-data"
                     class="formulario-gestion-contextual"
-                    @if ($tipoGestion === GestionOperativa::TIPO_ALIMENTACION)
-                        data-validacion-alimentacion="true"
+                    @if (in_array($tipoGestion, [GestionOperativa::TIPO_ALIMENTACION, GestionOperativa::TIPO_TREN], true))
                         data-fecha-paquete-inicio="{{ $reserva->destino?->fecha_salida?->format('Y-m-d') }}"
                         data-fecha-paquete-fin="{{ $reserva->destino?->fecha_regreso?->format('Y-m-d') }}"
+                    @endif
+                    @if ($tipoGestion === GestionOperativa::TIPO_ALIMENTACION)
+                        data-validacion-alimentacion="true"
+                    @elseif ($tipoGestion === GestionOperativa::TIPO_TREN)
+                        data-validacion-tren="true"
+                        data-reabrir-validacion="{{ $usarDatosAnteriores ? 'true' : 'false' }}"
                     @endif
                 >
                     @csrf
@@ -667,13 +672,15 @@
                             <div class="campos-gestion-contextual">
                                 <div class="campo-gestion">
                                     <label>
-                                        Empresa ferroviaria
+                                        Empresa ferroviaria *
                                     </label>
 
                                     <input
                                         type="text"
                                         name="datos_adicionales[empresa_ferroviaria]"
+                                        minlength="2"
                                         maxlength="150"
+                                        required
                                         value="{{ $valorFormulario(
                                             'datos_adicionales.empresa_ferroviaria',
                                             $datosAdicionales[
@@ -684,12 +691,14 @@
                                 </div>
 
                                 <div class="campo-gestion">
-                                    <label>Ruta</label>
+                                    <label>Ruta *</label>
 
                                     <input
                                         type="text"
                                         name="datos_adicionales[ruta]"
+                                        minlength="3"
                                         maxlength="255"
+                                        required
                                         value="{{ $valorFormulario(
                                             'datos_adicionales.ruta',
                                             $datosAdicionales['ruta']
@@ -704,6 +713,7 @@
                                     <input
                                         type="text"
                                         name="datos_adicionales[clase]"
+                                        minlength="2"
                                         maxlength="100"
                                         value="{{ $valorFormulario(
                                             'datos_adicionales.clase',

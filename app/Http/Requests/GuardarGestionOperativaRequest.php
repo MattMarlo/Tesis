@@ -6,6 +6,7 @@ use App\Models\GestionOperativa;
 use App\Models\GestionOperativaViajero;
 use App\Models\OperacionViaje;
 use App\Models\Reserva;
+use App\Models\ViajeroReserva;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -181,6 +182,16 @@ class GuardarGestionOperativaRequest extends FormRequest
                 ],
                 true
             );
+
+        if (
+            $tipo === GestionOperativa::TIPO_TREN
+            && $reservaId
+            && !ViajeroReserva::query()
+                ->where('reserva_id', $reservaId)
+                ->exists()
+        ) {
+            $requiereViajerosIndividuales = false;
+        }
 
         $reglasViajeros = [
             Rule::requiredIf(

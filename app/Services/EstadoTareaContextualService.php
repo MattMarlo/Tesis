@@ -96,7 +96,10 @@ class EstadoTareaContextualService
 
         $estado = $this->resolverEstado(
             $tareaActual->gestionable,
-            $cantidadViajeros
+            $cantidadViajeros,
+            $tareaActual->operacion?->reserva
+                ?->viajerosReserva()
+                ->exists() ?? false
         );
 
         $datos = [
@@ -128,7 +131,8 @@ class EstadoTareaContextualService
 
     private function resolverEstado(
         Model $gestionable,
-        int $cantidadViajeros
+        int $cantidadViajeros,
+        bool $tieneViajerosRegistrados
     ): string {
         return match (true) {
             $gestionable instanceof VueloReserva =>
@@ -151,7 +155,8 @@ class EstadoTareaContextualService
             $gestionable instanceof GestionOperativa =>
                 $this->estadoGestionGenerica(
                     $gestionable,
-                    $cantidadViajeros
+                    $cantidadViajeros,
+                    $tieneViajerosRegistrados
                 ),
 
             default =>
@@ -230,7 +235,8 @@ class EstadoTareaContextualService
 
     private function estadoGestionGenerica(
         GestionOperativa $gestion,
-        int $cantidadViajeros
+        int $cantidadViajeros,
+        bool $tieneViajerosRegistrados
     ): string {
         if (
             $gestion->estaCancelada()
@@ -269,6 +275,19 @@ class EstadoTareaContextualService
         ) {
             return
                 TareaOperacionViaje::ESTADO_COMPLETADA;
+        }
+
+        /*
+         * Las reservas históricas pueden usar directamente al
+         * cliente titular y no tener filas en viajeros_reserva.
+         * En Tren, la cantidad confirmada de la gestión permite
+         * completar la tarea sin bloquear esos expedientes.
+         */
+        if (
+            $gestion->tipo === GestionOperativa::TIPO_TREN
+            && !$tieneViajerosRegistrados
+        ) {
+            return TareaOperacionViaje::ESTADO_COMPLETADA;
         }
 
         /*

@@ -118,6 +118,10 @@
     $viajerosReserva =
         $reserva->viajerosReserva;
 
+    $requiereDetalleIndividualDisponible =
+        $requiereDetalleIndividual
+        && $viajerosReserva->isNotEmpty();
+
     $cantidadViajeros =
         max(
             1,
@@ -1222,7 +1226,7 @@
                         </div>
                     </section>
 
-                    @if ($requiereDetalleIndividual)
+                    @if ($requiereDetalleIndividualDisponible)
                         <section class="seccion-formulario-gestion">
                             <div class="titulo-seccion-gestion">
                                 <div>
@@ -1500,7 +1504,7 @@
                         form="{{ $formularioId }}"
                         class="btn btn-primary"
                         @disabled(
-                            $requiereDetalleIndividual
+                            $requiereDetalleIndividualDisponible
                             && $viajerosReserva->isEmpty()
                         )
                     >

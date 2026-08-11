@@ -119,8 +119,8 @@
                         @endforeach
                     </select>
                     @error('tipo')<small class="campo-error-habitacion">{{ $message }}</small>@enderror
-                    <label>Número o nombre</label>
-                    <input id="habitacionReferencia" name="referencia" maxlength="100" value="{{ old('referencia') }}" placeholder="Ejemplo: 301">
+                    <label>Número o nombre *</label>
+                    <input id="habitacionReferencia" name="referencia" maxlength="100" value="{{ old('referencia') }}" placeholder="Ejemplo: 301" required>
                     @error('referencia')<small class="campo-error-habitacion">{{ $message }}</small>@enderror
                     <label>Camas y observaciones</label>
                     <textarea id="habitacionObservaciones" name="observaciones" minlength="3" maxlength="1000" rows="4" placeholder="Ejemplo: dos camas individuales">{{ old('observaciones') }}</textarea>

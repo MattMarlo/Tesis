@@ -48,6 +48,12 @@ class HabitacionAlojamientoController extends Controller
             'cliente_id' => ['nullable', 'integer', 'exists:clientes,id'],
         ]);
         try {
+            if (!filled($habitacion->referencia)) {
+                throw new InvalidArgumentException(
+                    'Registra el número o nombre de la habitación antes de asignar un viajero.'
+                );
+            }
+
             $asignacion = $this->service->asignar(
                 $habitacion,
                 $datos
@@ -80,7 +86,7 @@ class HabitacionAlojamientoController extends Controller
         $datos = $request->validate([
             'tipo' => ['required', Rule::in(array_keys(HabitacionAlojamiento::CAPACIDADES))],
             'referencia' => [
-                'nullable',
+                'required',
                 'string',
                 'max:100',
                 "regex:~^(?:[0-9]{1,4}|(?=.{2,100}$)[\p{L}\p{N}][\p{L}\p{N}\s._-]*)$~u",
@@ -102,6 +108,8 @@ class HabitacionAlojamientoController extends Controller
                 'Selecciona el tipo de habitación.',
             'tipo.in' =>
                 'El tipo de habitación no es válido.',
+            'referencia.required' =>
+                'Ingresa el número o nombre de la habitación.',
             'referencia.regex' =>
                 'Usa un número de habitación o un nombre de al menos dos caracteres.',
             'referencia.unique' =>

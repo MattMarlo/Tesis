@@ -709,6 +709,16 @@ class ReservaGrupalFamiliarTest extends TestCase
                 route('operaciones.habitaciones.store', $alojamiento),
                 [
                     'tipo' => 'individual',
+                    'observaciones' => 'Una cama individual',
+                ]
+            )
+            ->assertSessionHasErrors('referencia');
+
+        $this->actingAs($usuario)
+            ->post(
+                route('operaciones.habitaciones.store', $alojamiento),
+                [
+                    'tipo' => 'individual',
                     'referencia' => 'a',
                     'observaciones' => 'x',
                 ]

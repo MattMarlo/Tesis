@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ConsultaReservaTelegramController;
 use App\Http\Controllers\Api\SolicitudPrerreservaWhatsAppController;
 use App\Http\Controllers\Api\WhatsAppConsentimientoController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SolicitudAsesorWhatsAppController;
 
 Route::prefix('telegram')
     ->middleware('throttle:60,1')
@@ -35,4 +36,14 @@ Route::prefix('whatsapp')
             '/solicitudes-prerreserva',
             [SolicitudPrerreservaWhatsAppController::class, 'store']
         )->name('api.whatsapp.solicitudes-prerreserva.store');
+
+        Route::post(
+            '/solicitudes-asesor',
+            [
+                SolicitudAsesorWhatsAppController::class,
+                'store',
+            ]
+        )->name(
+            'api.whatsapp.solicitudes-asesor.store'
+        );
     });

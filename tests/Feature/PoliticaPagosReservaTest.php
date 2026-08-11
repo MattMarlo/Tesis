@@ -509,6 +509,14 @@ class PoliticaPagosReservaTest extends TestCase
             $reserva->estado_reembolso
         );
 
+        $this
+            ->actingAs($this->usuario)
+            ->get(route('devoluciones.index'))
+            ->assertOk()
+            ->assertSee('Reembolsos pendientes')
+            ->assertSee($reserva->codigo_reserva)
+            ->assertSee('USD 200.00');
+
         $this->expectException(
             InvalidArgumentException::class
         );

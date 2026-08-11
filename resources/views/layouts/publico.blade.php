@@ -41,6 +41,11 @@
     $telegramGeneral = 'https://t.me/' . $telegramBot;
     $telegramAyuda = $telegramGeneral . '?start=ayuda';
     $telegramAsesor = $telegramGeneral . '?start=asesor';
+
+    $whatsappAyuda = 'https://wa.me/593980692745?' . http_build_query([
+        'text' => 'Hola, necesito ayuda e información de Passion Travel.'
+    ]);
+
     @endphp
 
 <header class="encabezado-principal" id="encabezadoPrincipal">
@@ -100,16 +105,6 @@
                 <i class="fa fa-user"></i>
                 Iniciar sesión
             </a>
-
-            <a
-                href="{{ $telegramAsesor }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="boton-telegram-menu"
-            >
-                <i class="fa fa-telegram"></i>
-                Mas información
-            </a>
         </nav>
 
     </div>
@@ -134,20 +129,6 @@
                 disponibilidad y opciones para tu viaje.
             </p>
         </div>
-
-        <a
-            href="{{ $telegramAyuda }}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="boton-contacto-telegram"
-        >
-            <i class="fa fa-telegram"></i>
-
-            <span>
-                <small>Atención por Telegram</small>
-                Consultar ahora
-            </span>
-        </a>
 
     </div>
 </section>
@@ -253,14 +234,20 @@
 </footer>
 
 <a
-    href="{{ $telegramAyuda }}"
+    href="{{ $whatsappAyuda }}"
     target="_blank"
     rel="noopener noreferrer"
-    class="telegram-flotante"
-    aria-label="Consultar mediante Telegram"
+    class="whatsapp-flotante"
+    aria-label="Hablar con Passion Travel por WhatsApp"
 >
-    <i class="fa fa-telegram"></i>
-    <span>¿Necesitas ayuda?</span>
+    <span class="whatsapp-flotante-icono">
+        <i class="fa fa-whatsapp"></i>
+    </span>
+
+    <span class="whatsapp-flotante-texto">
+        <small>Estamos para ayudarte</small>
+        ¿Necesitas ayuda?
+    </span>
 </a>
 
 <script src="{{ asset('assets/js/jquery.js') }}"></script>

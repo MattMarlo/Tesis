@@ -28,6 +28,7 @@ use App\Http\Controllers\VueloReservaController;
 use App\Http\Controllers\GestionOperativaController;
 use App\Http\Controllers\GestionBoletosVueloController;
 use App\Http\Controllers\GestionHabitacionesAlojamientoController;
+use App\Http\Controllers\GestionPasajesTrenController;
 use App\Models\Destino;
 use App\Models\Reserva;
 use App\Models\Testimonio;
@@ -794,6 +795,22 @@ Route::middleware('auth')
                         'destroy',
                     ]
                 )->name('boletos.destroy');
+
+                Route::get(
+                    '/expediente/{operacion}/trenes/{gestion}/pasajes',
+                    [
+                        GestionPasajesTrenController::class,
+                        'index',
+                    ]
+                )->name('trenes.pasajes.index');
+
+                Route::put(
+                    '/trenes/pasajes/{pasaje}',
+                    [
+                        GestionPasajesTrenController::class,
+                        'update',
+                    ]
+                )->name('trenes.pasajes.update');
 
                 Route::post(
                     '/expediente/{operacion}/alojamientos',

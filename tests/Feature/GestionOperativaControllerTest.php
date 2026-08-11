@@ -490,13 +490,6 @@ class GestionOperativaControllerTest extends TestCase
                         'ruta' => 'Lima - Cusco',
                         'clase' => 'Turista',
                     ],
-                    'viajeros' => [[
-                        'viajero_reserva_id' => $viajero->id,
-                        'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
-                        'numero_documento' => 'TR123456',
-                        'referencia_individual' => 'REF-001',
-                        'asiento' => '12A',
-                    ]],
                 ])
             );
 
@@ -511,15 +504,57 @@ class GestionOperativaControllerTest extends TestCase
             $this->tarea->fresh()->gestionable_id
         );
         $this->assertSame(
-            TareaOperacionViaje::ESTADO_COMPLETADA,
+            TareaOperacionViaje::ESTADO_EN_PROCESO,
             $this->tarea->fresh()->estado
         );
         $this->assertDatabaseHas('gestion_operativa_viajeros', [
             'gestion_operativa_id' => $gestion->id,
             'viajero_reserva_id' => $viajero->id,
+            'asiento' => null,
+            'estado' => GestionOperativaViajero::ESTADO_PENDIENTE,
+        ]);
+
+        $pasaje = $gestion->detallesViajeros()
+            ->firstOrFail();
+
+        $this->actingAs($this->usuario)
+            ->get(route(
+                'operaciones.trenes.pasajes.index',
+                [
+                    'operacion' => $this->operacion->id,
+                    'gestion' => $gestion->id,
+                    'tarea_id' => $this->tarea->id,
+                ]
+            ))
+            ->assertOk()
+            ->assertSee('Gestión de pasajes de tren')
+            ->assertSee($viajero->nombre_completo);
+
+        $this->actingAs($this->usuario)
+            ->put(route(
+                'operaciones.trenes.pasajes.update',
+                $pasaje->id
+            ), [
+                'pasaje_id' => $pasaje->id,
+                'numero_documento' => 'TR123456',
+                'referencia_individual' => 'REF-001',
+                'asiento' => '12A',
+                'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('gestion_operativa_viajeros', [
+            'id' => $pasaje->id,
+            'numero_documento' => 'TR123456',
             'asiento' => '12A',
             'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
         ]);
+
+        $this->assertSame(
+            TareaOperacionViaje::ESTADO_COMPLETADA,
+            $this->tarea->fresh()->estado
+        );
     }
 
     public function test_tren_gestiona_al_titular_registrado_en_una_reserva_tradicional(): void
@@ -557,13 +592,6 @@ class GestionOperativaControllerTest extends TestCase
                         'ruta' => 'Alausí - Sibambe',
                         'clase' => 'Turista',
                     ],
-                    'viajeros' => [[
-                        'cliente_id' => $this->cliente->id,
-                        'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
-                        'numero_documento' => 'TRAD-001',
-                        'referencia_individual' => 'TREN-CLI-01',
-                        'asiento' => '8B',
-                    ]],
                 ])
             );
 
@@ -579,12 +607,25 @@ class GestionOperativaControllerTest extends TestCase
                 'gestion_operativa_id' => $gestion->id,
                 'cliente_id' => $this->cliente->id,
                 'viajero_reserva_id' => null,
-                'asiento' => '8B',
+                'asiento' => null,
             ]
         );
 
+        $this->actingAs($this->usuario)
+            ->get(route(
+                'operaciones.trenes.pasajes.index',
+                [
+                    'operacion' => $this->operacion->id,
+                    'gestion' => $gestion->id,
+                    'tarea_id' => $this->tarea->id,
+                ]
+            ))
+            ->assertOk()
+            ->assertSee($this->cliente->nombre_completo)
+            ->assertSee('Gestionar');
+
         $this->assertSame(
-            TareaOperacionViaje::ESTADO_COMPLETADA,
+            TareaOperacionViaje::ESTADO_EN_PROCESO,
             $this->tarea->fresh()->estado
         );
     }
@@ -645,7 +686,6 @@ class GestionOperativaControllerTest extends TestCase
 
         $respuesta->assertSessionHasErrors([
             'viajeros.0.cliente_id',
-            'viajeros',
         ]);
 
         $this->assertDatabaseCount(

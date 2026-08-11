@@ -184,7 +184,7 @@
 
     $mostrarDetalleIndividual =
         $tipoGestion === GestionOperativa::TIPO_TREN
-            ? $requiereDetalleIndividual
+            ? false
             : $requiereDetalleIndividualDisponible;
 
     $cantidadViajeros =
@@ -302,6 +302,26 @@
                 ? 'Editar gestión'
                 : $accionContextual }}
         </button>
+    @endif
+
+    @if (
+        $gestionActual
+        && $tipoGestion === GestionOperativa::TIPO_TREN
+    )
+        <a
+            href="{{ route(
+                'operaciones.trenes.pasajes.index',
+                [
+                    'operacion' => $operacion->id,
+                    'gestion' => $gestionActual->id,
+                    'tarea_id' => $tarea->id,
+                ]
+            ) }}"
+            class="btn-ver-gestion-contextual"
+        >
+            <i class="bi bi-ticket-perforated"></i>
+            Gestionar pasajes
+        </a>
     @endif
 </div>
 
@@ -1514,6 +1534,29 @@
             <div class="modal-footer modal-footer-gestion-contextual">
                 @if ($gestionActual)
                     <div class="acciones-secundarias-gestion">
+                        @if (
+                            $tipoGestion ===
+                                GestionOperativa::TIPO_TREN
+                        )
+                            <a
+                                href="{{ route(
+                                    'operaciones.trenes.pasajes.index',
+                                    [
+                                        'operacion' =>
+                                            $operacion->id,
+                                        'gestion' =>
+                                            $gestionActual->id,
+                                        'tarea_id' =>
+                                            $tarea->id,
+                                    ]
+                                ) }}"
+                                class="btn btn-outline-primary"
+                            >
+                                <i class="bi bi-ticket-perforated"></i>
+                                Gestionar pasajes
+                            </a>
+                        @endif
+
                         <form
                             method="POST"
                             action="{{ route(

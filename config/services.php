@@ -43,6 +43,11 @@ return [
             'https://n8n.passiontravelviajes.de/webhook/confirmacion-pago-registrado'
         ),
 
+        'flight_ticket_notification_url' => env(
+            'N8N_FLIGHT_TICKET_NOTIFICATION_URL',
+            'https://n8n.passiontravelviajes.de/webhook/boleto-avion-emitido'
+        ),
+
         'webhook_secret' => env('N8N_WEBHOOK_SECRET'),
 
         'api_secret' => env('N8N_API_SECRET'),

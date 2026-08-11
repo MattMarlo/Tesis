@@ -513,7 +513,9 @@ class PoliticaPagosReservaTest extends TestCase
             ->actingAs($this->usuario)
             ->get(route('devoluciones.index'))
             ->assertOk()
-            ->assertSee('Reembolsos pendientes')
+            ->assertSee('Reembolsos autorizados')
+            ->assertSee('Pendiente de devolución')
+            ->assertSee('Procesar')
             ->assertSee($reserva->codigo_reserva)
             ->assertSee('USD 200.00');
 

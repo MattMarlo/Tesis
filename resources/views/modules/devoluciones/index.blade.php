@@ -3,7 +3,7 @@
 @section('title', 'Devoluciones')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/devoluciones.css') }}">
+<link rel="stylesheet" href="{{ asset('css/devoluciones.css') }}?v={{ filemtime(public_path('css/devoluciones.css')) }}">
 
 <main class="pagina-devoluciones">
     @if ($errors->any())
@@ -51,28 +51,47 @@
     <section class="tabla-contenedor reembolsos-pendientes">
         <div class="tabla-titulo">
             <div>
-                <span>POR PROCESAR</span>
-                <h2>Reembolsos pendientes</h2>
+                <span class="tabla-titulo-etiqueta"><i class="bi bi-hourglass-split"></i> POR PROCESAR</span>
+                <h2>Reembolsos autorizados</h2>
+                <p>La cancelación ya fue liquidada. Registra la devolución cuando el dinero sea entregado al cliente.</p>
             </div>
-            <strong>{{ $reembolsosPendientes->total() }}</strong>
+            <strong class="contador-pendientes">{{ $reembolsosPendientes->total() }}</strong>
+        </div>
+        <div class="aviso-estados-reembolso">
+            <i class="bi bi-info-circle"></i>
+            <p><strong>¿Por qué aparece pendiente?</strong> El monto está aprobado, pero todavía no existe una devolución procesada. Cuando registres el pago, pasará al historial automáticamente.</p>
         </div>
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th>Fecha</th><th>Reserva / Cliente</th><th>Pagado al cancelar</th><th>Gastos</th><th>Reembolso autorizado</th><th>Saldo pendiente</th><th>Estado</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Reserva / Cliente</th><th>Pagado al cancelar</th><th>Gastos</th><th>Reembolso autorizado</th><th>Saldo pendiente</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
                 @forelse($reembolsosPendientes as $reembolso)
                     @php($saldoReembolso = max(0, round((float) $reembolso->monto_reembolsable - (float) $reembolso->total_devuelto, 2)))
-                    <tr>
+                    @php($esParcial = (float) $reembolso->total_devuelto > 0 || $reembolso->estado_reembolso === 'parcial')
+                    <tr class="fila-reembolso">
                         <td>{{ $reembolso->fecha_cancelacion?->format('d/m/Y H:i') }}</td>
                         <td><strong>{{ $reembolso->codigo_reserva }}</strong><small>{{ $reembolso->cliente?->nombre_completo }}</small></td>
                         <td>USD {{ number_format((float) $reembolso->monto_pagado_al_cancelar, 2, '.', ',') }}</td>
                         <td>USD {{ number_format((float) $reembolso->gastos_no_reembolsables, 2, '.', ',') }}</td>
                         <td><strong>USD {{ number_format((float) $reembolso->monto_reembolsable, 2, '.', ',') }}</strong></td>
-                        <td><strong>USD {{ number_format($saldoReembolso, 2, '.', ',') }}</strong></td>
-                        <td><span class="estado estado-pendiente">{{ $reembolso->estado_reembolso === 'parcial' ? 'Parcial' : 'Pendiente' }}</span></td>
+                        <td class="saldo-reembolso"><strong>USD {{ number_format($saldoReembolso, 2, '.', ',') }}</strong></td>
+                        <td>
+                            <span class="estado {{ $esParcial ? 'estado-parcial' : 'estado-pendiente' }}">
+                                <i class="bi {{ $esParcial ? 'bi-arrow-repeat' : 'bi-clock' }}"></i>
+                                {{ $esParcial ? 'Reembolso parcial' : 'Pendiente de devolución' }}
+                            </span>
+                            @if($esParcial)
+                                <small>Devuelto: USD {{ number_format((float) $reembolso->total_devuelto, 2, '.', ',') }}</small>
+                            @endif
+                        </td>
+                        <td class="accion-reembolso">
+                            <button type="button" class="btn-procesar-reembolso" data-bs-toggle="modal" data-bs-target="#modalNuevaDevolucion" data-reserva-id="{{ $reembolso->id }}" data-saldo="{{ number_format($saldoReembolso, 2, '.', '') }}">
+                                <i class="bi bi-cash-coin"></i> Procesar
+                            </button>
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="sin-registros">No hay reembolsos pendientes.</td></tr>
+                    <tr><td colspan="8" class="sin-registros">No hay reembolsos pendientes.</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -121,7 +140,7 @@
         <div class="modal-header"><div><small>NUEVO MOVIMIENTO</small><h2>Registrar devolución</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body campos-devolucion">
             <label>Pago original *</label>
-            <select name="pago_id" id="pagoDevolucion" required><option value="">Selecciona un pago</option>@foreach($pagos as $pago)@php($disponible=round((float)$pago->monto_depositado-(float)$pago->total_devuelto,2))<option value="{{ $pago->id }}" data-disponible="{{ number_format($disponible,2,'.','') }}" @selected(old('pago_id')==$pago->id)>#{{ $pago->id }} · {{ $pago->reserva?->codigo_reserva }} · {{ $pago->cliente?->nombre_completo }} · Disponible USD {{ number_format($disponible,2,'.',',') }}</option>@endforeach</select>
+            <select name="pago_id" id="pagoDevolucion" required><option value="">Selecciona un pago</option>@foreach($pagos as $pago)@php($disponible=round((float)$pago->monto_depositado-(float)$pago->total_devuelto,2))<option value="{{ $pago->id }}" data-reserva-id="{{ $pago->reserva_id }}" data-disponible="{{ number_format($disponible,2,'.','') }}" @selected(old('pago_id')==$pago->id)>#{{ $pago->id }} · {{ $pago->reserva?->codigo_reserva }} · {{ $pago->cliente?->nombre_completo }} · Disponible USD {{ number_format($disponible,2,'.',',') }}</option>@endforeach</select>
             <label>Monto *</label><input type="number" name="monto" value="{{ old('monto') }}" min="0.01" step="0.01" required>
             <label>Método *</label><select name="metodo" id="metodoDevolucion" required><option value="efectivo" @selected(old('metodo')==='efectivo')>Efectivo</option><option value="transferencia" @selected(old('metodo')==='transferencia')>Transferencia</option><option value="tarjeta" @selected(old('metodo')==='tarjeta')>Tarjeta</option><option value="otro" @selected(old('metodo')==='otro')>Otro</option></select>
             <label>Referencia</label><input type="text" name="referencia" value="{{ old('referencia') }}" maxlength="100" placeholder="Comprobante o transacción">
@@ -158,6 +177,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     selectorPago.addEventListener('change', actualizarMontoMaximo);
     actualizarMontoMaximo();
+
+    document.querySelectorAll('.btn-procesar-reembolso').forEach(function (boton) {
+        boton.addEventListener('click', function () {
+            const reservaId = boton.dataset.reservaId;
+            const saldo = Number(boton.dataset.saldo || 0);
+            const opciones = Array.from(selectorPago.options).filter(function (opcion) {
+                return opcion.dataset.reservaId === reservaId && Number(opcion.dataset.disponible || 0) > 0;
+            });
+            const mejorOpcion = opciones.sort(function (a, b) {
+                return Number(b.dataset.disponible) - Number(a.dataset.disponible);
+            })[0];
+
+            selectorPago.value = mejorOpcion?.value || '';
+            actualizarMontoMaximo();
+
+            if (mejorOpcion) {
+                campoMonto.value = Math.min(saldo, Number(mejorOpcion.dataset.disponible)).toFixed(2);
+            }
+
+            document.querySelector('#modalNuevaDevolucion [name="tipo"]').value = 'cancelacion';
+        });
+    });
 
     document.querySelectorAll('.btn-anular').forEach(function (boton) {
         boton.addEventListener('click', function () {

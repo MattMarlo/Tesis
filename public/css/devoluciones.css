@@ -5,4 +5,28 @@
 .filtros-devoluciones{display:flex;gap:.65rem;background:#fff;border:1px solid var(--dev-borde);border-radius:.8rem;padding:.8rem;margin-bottom:1rem}.filtros-devoluciones input{flex:1;border:1px solid var(--dev-borde);border-radius:.55rem;padding:.65rem}.filtros-devoluciones button,.filtros-devoluciones a{border:0;border-radius:.55rem;padding:.65rem 1rem;text-decoration:none}.filtros-devoluciones button{background:var(--dev-azul);color:#fff}.filtros-devoluciones a{background:#eef2f5;color:var(--dev-gris)}
 .tabla-contenedor{background:#fff;border:1px solid var(--dev-borde);border-radius:.8rem;overflow:hidden}.reembolsos-pendientes{margin-bottom:1rem}.tabla-titulo{align-items:center;display:flex;justify-content:space-between;padding:1rem 1rem .35rem}.tabla-titulo span{color:#3a7ca5;font-size:.72rem;font-weight:700;letter-spacing:.08em}.tabla-titulo h2{color:var(--dev-azul);font-size:1.15rem;margin:.15rem 0}.tabla-titulo>strong{align-items:center;background:#eef5fb;border-radius:999px;color:var(--dev-azul);display:flex;height:2rem;justify-content:center;min-width:2rem;padding:0 .65rem}.tabla-contenedor table{margin:0}.tabla-contenedor th{background:#f7f9fb;color:var(--dev-gris);font-size:.75rem;text-transform:uppercase}.tabla-contenedor td{padding:.9rem}.tabla-contenedor td small{display:block;color:var(--dev-gris);font-size:.75rem}.tabla-contenedor .motivo{max-width:240px}.estado{display:inline-block;border-radius:2rem;padding:.3rem .65rem;font-size:.75rem;font-weight:700}.estado-procesada{background:#e8f6ef;color:var(--dev-verde)}.estado-pendiente{background:#fff5d9;color:#8a6410}.estado-anulada{background:#fff0f1;color:var(--dev-rojo)}.sin-registros{text-align:center;color:var(--dev-gris);padding:3rem!important}.paginacion{padding:1rem}
 .modal-content{border:0;border-radius:1rem}.modal-header h2{color:var(--dev-azul);font-size:1.25rem;margin:0}.campos-devolucion{display:grid;gap:.5rem}.campos-devolucion label{font-size:.8rem;font-weight:700;margin-top:.4rem}.campos-devolucion input,.campos-devolucion select,.campos-devolucion textarea{width:100%;border:1px solid var(--dev-borde);border-radius:.6rem;padding:.72rem;outline:none}.campos-devolucion input:focus,.campos-devolucion select:focus,.campos-devolucion textarea:focus{border-color:#3a7ca5;box-shadow:0 0 0 3px rgba(58,124,165,.1)}
-@media(max-width:768px){.devoluciones-encabezado{align-items:stretch;flex-direction:column}.metricas-devoluciones{grid-template-columns:1fr}.filtros-devoluciones{flex-wrap:wrap}.filtros-devoluciones input{flex-basis:100%}}
+
+/* Reembolsos autorizados */
+.pagina-devoluciones .reembolsos-pendientes{border-color:#cfdde9;box-shadow:0 8px 24px rgba(9,61,119,.06)}
+.pagina-devoluciones .tabla-titulo{background:linear-gradient(135deg,#fff 0%,#f6faff 100%);padding:1.25rem 1.35rem 1rem}
+.pagina-devoluciones .tabla-titulo>div{min-width:0}
+.pagina-devoluciones .tabla-titulo-etiqueta{align-items:center;display:flex;gap:.4rem}
+.pagina-devoluciones .tabla-titulo h2{color:var(--dev-azul)!important;font-size:1.35rem!important;font-weight:700!important;line-height:1.25!important;margin:.3rem 0 .2rem!important}
+.pagina-devoluciones .tabla-titulo p{color:var(--dev-gris);font-size:.87rem;margin:0;max-width:720px}
+.pagina-devoluciones .contador-pendientes{box-shadow:0 3px 10px rgba(9,61,119,.1);font-size:.9rem}
+.aviso-estados-reembolso{align-items:flex-start;background:#fff9e8;border-left:4px solid #e4aa21;color:#765710;display:flex;gap:.75rem;margin:0 1.35rem 1rem;padding:.8rem 1rem}
+.aviso-estados-reembolso>i{font-size:1.05rem;margin-top:.1rem}
+.aviso-estados-reembolso p{font-size:.82rem;line-height:1.45;margin:0}
+.aviso-estados-reembolso strong{color:#604506}
+.pagina-devoluciones .fila-reembolso{transition:background-color .18s ease}
+.pagina-devoluciones .fila-reembolso:hover{background:#f9fbfd}
+.pagina-devoluciones .fila-reembolso td{border-color:#e8eef3;padding:1rem .75rem;vertical-align:middle}
+.pagina-devoluciones .saldo-reembolso strong{color:var(--dev-azul);font-size:1rem}
+.pagina-devoluciones .estado{align-items:center;display:inline-flex;gap:.35rem;line-height:1.25;white-space:nowrap}
+.pagina-devoluciones .estado-pendiente{background:#fff4d6;border:1px solid #f0d58d;color:#805c0b}
+.pagina-devoluciones .estado-parcial{background:#eaf4ff;border:1px solid #bcd8f1;color:#185f96}
+.pagina-devoluciones .accion-reembolso{text-align:right}
+.btn-procesar-reembolso{align-items:center;background:#0b4a87;border:0;border-radius:.6rem;color:#fff;display:inline-flex;font-size:.8rem;font-weight:700;gap:.4rem;padding:.58rem .8rem;white-space:nowrap}
+.btn-procesar-reembolso:hover{background:#073b70;box-shadow:0 4px 12px rgba(9,61,119,.18);transform:translateY(-1px)}
+
+@media(max-width:768px){.devoluciones-encabezado{align-items:stretch;flex-direction:column}.metricas-devoluciones{grid-template-columns:1fr}.filtros-devoluciones{flex-wrap:wrap}.filtros-devoluciones input{flex-basis:100%}.pagina-devoluciones .tabla-titulo{align-items:flex-start;gap:.75rem;padding:1rem}.aviso-estados-reembolso{margin:0 1rem 1rem}.pagina-devoluciones .tabla-titulo h2{font-size:1.15rem!important}}

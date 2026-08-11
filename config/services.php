@@ -53,6 +53,11 @@ return [
             'https://n8n.passiontravelviajes.de/webhook/habitacion-alojamiento-asignada'
         ),
 
+        'guide_assignment_notification_url' => env(
+            'N8N_GUIDE_ASSIGNMENT_NOTIFICATION_URL',
+            'https://n8n.passiontravelviajes.de/webhook/guia-viaje-asignado'
+        ),
+
         'webhook_secret' => env('N8N_WEBHOOK_SECRET'),
 
         'api_secret' => env('N8N_API_SECRET'),

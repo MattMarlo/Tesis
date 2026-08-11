@@ -14,6 +14,8 @@ use App\Models\User;
 use App\Models\ViajeroReserva;
 use App\Services\EstadoTareaContextualService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request as HttpRequest;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -214,8 +216,94 @@ class GestionOperativaControllerTest extends TestCase
         );
     }
 
+    public function test_asignar_guia_notifica_una_sola_vez_a_n8n_sin_bloquear_la_asignacion(): void
+    {
+        config([
+            'services.n8n.guide_assignment_notification_url' =>
+                'https://n8n.example.test/webhook/guia-viaje-asignado',
+        ]);
+
+        Http::fake([
+            '*' => Http::response([], 500),
+        ]);
+
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_GUIA,
+            'nombre' => 'Recorrido histórico por Lima',
+        ]);
+
+        $this
+            ->actingAs($this->usuario)
+            ->post(
+                route('operaciones.guias.store', $this->operacion),
+                $this->datosGuia([
+                    'tarea_id' => $this->tarea->id,
+                ])
+            )
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $guia = GuiaReserva::query()->firstOrFail();
+
+        Http::assertSent(
+            function (HttpRequest $request) use ($guia): bool {
+                return $request->url() === config(
+                    'services.n8n.guide_assignment_notification_url'
+                )
+                    && $request['event'] ===
+                        'guia.viaje.asignado'
+                    && data_get(
+                        $request->data(),
+                        'data.guia_id'
+                    ) === $guia->id
+                    && data_get(
+                        $request->data(),
+                        'data.codigo_reserva'
+                    ) === $this->reserva->codigo_reserva
+                    && data_get(
+                        $request->data(),
+                        'data.cliente'
+                    ) === $this->cliente->nombre_completo
+                    && data_get(
+                        $request->data(),
+                        'data.telefono'
+                    ) === $this->cliente->telefono
+                    && data_get(
+                        $request->data(),
+                        'data.destino'
+                    ) === $this->destino->ciudad_destino
+                    && data_get(
+                        $request->data(),
+                        'data.nombre_guia'
+                    ) === $guia->nombre_completo
+                    && data_get(
+                        $request->data(),
+                        'data.telefono_guia'
+                    ) === $guia->telefono
+                    && data_get(
+                        $request->data(),
+                        'data.actividad'
+                    ) === 'Recorrido histórico por Lima';
+            }
+        );
+
+        Http::assertSentCount(1);
+
+        $this->assertSame(
+            $guia->id,
+            $this->tarea->fresh()->gestionable_id
+        );
+    }
+
     public function test_reutiliza_guia_y_lo_desvincula_antes_de_eliminarlo(): void
     {
+        config([
+            'services.n8n.guide_assignment_notification_url' =>
+                'https://n8n.example.test/webhook/guia-viaje-asignado',
+        ]);
+
+        Http::fake();
+
         $this->tarea->update([
             'tipo_gestion' => TareaOperacionViaje::TIPO_GUIA,
         ]);
@@ -253,6 +341,8 @@ class GestionOperativaControllerTest extends TestCase
             TareaOperacionViaje::ESTADO_PENDIENTE,
             $tarea->estado
         );
+
+        Http::assertSentCount(1);
     }
 
     public function test_actualizar_gestion_sincroniza_estado_de_tarea(): void

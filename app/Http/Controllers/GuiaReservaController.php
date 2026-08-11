@@ -6,6 +6,7 @@ use App\Models\GuiaReserva;
 use App\Models\OperacionViaje;
 use App\Models\TareaOperacionViaje;
 use App\Services\EstadoTareaContextualService;
+use App\Services\NotificacionGuiaN8nService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,9 @@ use InvalidArgumentException;
 class GuiaReservaController extends Controller
 {
     public function __construct(
-        private readonly EstadoTareaContextualService $estadoTareaService
+        private readonly EstadoTareaContextualService $estadoTareaService,
+        private readonly NotificacionGuiaN8nService
+            $notificacionGuiaN8n
     ) {
     }
 
@@ -61,6 +64,11 @@ class GuiaReservaController extends Controller
 
             $this->marcarEnPreparacion($operacion);
 
+            $this->notificacionGuiaN8n->enviar(
+                $guia,
+                $tarea
+            );
+
             return back()->with(
                 'success',
                 'Guía existente vinculado correctamente con la actividad.'
@@ -69,7 +77,7 @@ class GuiaReservaController extends Controller
 
         $datos = $this->validarDatos($request);
 
-        DB::transaction(function () use (
+        $guia = DB::transaction(function () use (
             $operacion,
             $datos,
             $tarea,
@@ -86,7 +94,14 @@ class GuiaReservaController extends Controller
             }
 
             $this->marcarEnPreparacion($operacion);
+
+            return $guia;
         });
+
+        $this->notificacionGuiaN8n->enviar(
+            $guia,
+            $tarea
+        );
 
         return back()->with(
             'success',

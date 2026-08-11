@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Devolucion;
 use App\Models\Pago;
+use App\Models\Reserva;
 use App\Services\DevolucionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,31 @@ class DevolucionController extends Controller
             })
             ->latest('fecha_devolucion')->paginate(15)->withQueryString();
 
+        /*
+         * La cancelacion autoriza el reembolso, mientras que la
+         * devolucion se registra despues. Mostramos ambos momentos.
+         */
+        $reembolsosPendientes = Reserva::query()
+            ->with('cliente')
+            ->withSum('devoluciones as total_devuelto', 'monto')
+            ->where('estado', Reserva::ESTADO_CANCELADA)
+            ->whereIn('estado_reembolso', [
+                Reserva::REEMBOLSO_PENDIENTE,
+                Reserva::REEMBOLSO_PARCIAL,
+            ])
+            ->where('monto_reembolsable', '>', 0)
+            ->when($buscar, function ($query) use ($buscar) {
+                $query->where(function ($q) use ($buscar) {
+                    $q->where('codigo_reserva', 'like', "%{$buscar}%")
+                        ->orWhereHas('cliente', fn ($cliente) => $cliente
+                            ->where('nombres', 'like', "%{$buscar}%")
+                            ->orWhere('apellidos', 'like', "%{$buscar}%"));
+                });
+            })
+            ->latest('fecha_cancelacion')
+            ->paginate(15, ['*'], 'reembolsos_page')
+            ->withQueryString();
+
         $pagos = Pago::query()
             ->registrados()
             ->with(['reserva', 'cliente'])
@@ -37,7 +63,13 @@ class DevolucionController extends Controller
 
         $totalProcesado = (float) Devolucion::query()->procesadas()->sum('monto');
 
-        return view('modules.devoluciones.index', compact('devoluciones', 'pagos', 'totalProcesado', 'buscar'));
+        return view('modules.devoluciones.index', compact(
+            'devoluciones',
+            'reembolsosPendientes',
+            'pagos',
+            'totalProcesado',
+            'buscar'
+        ));
     }
 
     public function store(Request $request)

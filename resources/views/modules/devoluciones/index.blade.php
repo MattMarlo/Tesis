@@ -17,6 +17,14 @@
         </div>
     @endif
 
+    @if (session('success'))
+        <div class="alerta-devolucion alerta-exito">{{ session('success') }}</div>
+    @endif
+
+    @if (session('error'))
+        <div class="alerta-devolucion alerta-error">{{ session('error') }}</div>
+    @endif
+
     <header class="devoluciones-encabezado">
         <div>
             <span>GESTIÓN FINANCIERA</span>
@@ -40,7 +48,45 @@
         @if($buscar)<a href="{{ route('devoluciones.index') }}">Limpiar</a>@endif
     </form>
 
+    <section class="tabla-contenedor reembolsos-pendientes">
+        <div class="tabla-titulo">
+            <div>
+                <span>POR PROCESAR</span>
+                <h2>Reembolsos pendientes</h2>
+            </div>
+            <strong>{{ $reembolsosPendientes->total() }}</strong>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Fecha</th><th>Reserva / Cliente</th><th>Pagado al cancelar</th><th>Gastos</th><th>Reembolso autorizado</th><th>Saldo pendiente</th><th>Estado</th></tr></thead>
+                <tbody>
+                @forelse($reembolsosPendientes as $reembolso)
+                    @php($saldoReembolso = max(0, round((float) $reembolso->monto_reembolsable - (float) $reembolso->total_devuelto, 2)))
+                    <tr>
+                        <td>{{ $reembolso->fecha_cancelacion?->format('d/m/Y H:i') }}</td>
+                        <td><strong>{{ $reembolso->codigo_reserva }}</strong><small>{{ $reembolso->cliente?->nombre_completo }}</small></td>
+                        <td>USD {{ number_format((float) $reembolso->monto_pagado_al_cancelar, 2, '.', ',') }}</td>
+                        <td>USD {{ number_format((float) $reembolso->gastos_no_reembolsables, 2, '.', ',') }}</td>
+                        <td><strong>USD {{ number_format((float) $reembolso->monto_reembolsable, 2, '.', ',') }}</strong></td>
+                        <td><strong>USD {{ number_format($saldoReembolso, 2, '.', ',') }}</strong></td>
+                        <td><span class="estado estado-pendiente">{{ $reembolso->estado_reembolso === 'parcial' ? 'Parcial' : 'Pendiente' }}</span></td>
+                    </tr>
+                @empty
+                    <tr><td colspan="7" class="sin-registros">No hay reembolsos pendientes.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="paginacion">{{ $reembolsosPendientes->links() }}</div>
+    </section>
+
     <section class="tabla-contenedor">
+        <div class="tabla-titulo">
+            <div>
+                <span>HISTORIAL</span>
+                <h2>Devoluciones registradas</h2>
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead><tr><th>Fecha</th><th>Reserva / Cliente</th><th>Pago</th><th>Método</th><th>Motivo</th><th>Monto</th><th>Estado</th><th></th></tr></thead>

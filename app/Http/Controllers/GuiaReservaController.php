@@ -4,13 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\GuiaReserva;
 use App\Models\OperacionViaje;
+use App\Models\TareaOperacionViaje;
+use App\Services\EstadoTareaContextualService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class GuiaReservaController extends Controller
 {
+    public function __construct(
+        private readonly EstadoTareaContextualService $estadoTareaService
+    ) {
+    }
+
     public function store(
         Request $request,
         OperacionViaje $operacion
@@ -28,21 +37,62 @@ class GuiaReservaController extends Controller
             );
         }
 
-        $datos = $this->validarDatos(
-            $request
-        );
-
-        $operacion->guias()->create(
-            $datos
-        );
-
-        $this->marcarEnPreparacion(
+        $tarea = $this->resolverTareaContextual(
+            $request,
             $operacion
         );
 
+        if ($tarea && $request->filled('guia_existente_id')) {
+            $guia = $operacion->guias()
+                ->find($request->integer('guia_existente_id'));
+
+            if (!$guia) {
+                throw ValidationException::withMessages([
+                    'guia_existente_id' =>
+                        'El guía seleccionado no pertenece a esta operación.',
+                ]);
+            }
+
+            $this->estadoTareaService->vincular(
+                $tarea,
+                $guia,
+                $request->user()
+            );
+
+            $this->marcarEnPreparacion($operacion);
+
+            return back()->with(
+                'success',
+                'Guía existente vinculado correctamente con la actividad.'
+            );
+        }
+
+        $datos = $this->validarDatos($request);
+
+        DB::transaction(function () use (
+            $operacion,
+            $datos,
+            $tarea,
+            $request
+        ) {
+            $guia = $operacion->guias()->create($datos);
+
+            if ($tarea) {
+                $this->estadoTareaService->vincular(
+                    $tarea,
+                    $guia,
+                    $request->user()
+                );
+            }
+
+            $this->marcarEnPreparacion($operacion);
+        });
+
         return back()->with(
             'success',
-            'Guía registrado correctamente.'
+            $tarea
+                ? 'Guía registrado y vinculado correctamente con la actividad.'
+                : 'Guía registrado correctamente.'
         );
     }
 
@@ -75,6 +125,13 @@ class GuiaReservaController extends Controller
             $datos
         );
 
+        foreach ($guia->tareas()->get() as $tarea) {
+            $this->estadoTareaService->sincronizar(
+                $tarea,
+                $request->user()
+            );
+        }
+
         $this->marcarEnPreparacion(
             $guia->operacion
         );
@@ -105,10 +162,15 @@ class GuiaReservaController extends Controller
             );
         }
 
-        $operacion =
-            $guia->operacion;
+        $operacion = $guia->operacion;
 
-        $guia->delete();
+        DB::transaction(function () use ($guia) {
+            foreach ($guia->tareas()->get() as $tarea) {
+                $this->estadoTareaService->desvincular($tarea);
+            }
+
+            $guia->delete();
+        });
 
         $this->marcarEnPreparacion(
             $operacion
@@ -253,6 +315,41 @@ class GuiaReservaController extends Controller
             'fecha_fin.required' =>
                 'Ingresa la fecha de finalización del servicio.',
         ]);
+    }
+
+    private function resolverTareaContextual(
+        Request $request,
+        OperacionViaje $operacion
+    ): ?TareaOperacionViaje {
+        if (!$request->filled('tarea_id')) {
+            return null;
+        }
+
+        $request->validate([
+            'tarea_id' => ['required', 'integer'],
+            'guia_existente_id' => ['nullable', 'integer'],
+        ]);
+
+        $tarea = $operacion->tareas()
+            ->whereKey($request->integer('tarea_id'))
+            ->where('vigente', true)
+            ->first();
+
+        if (!$tarea) {
+            throw ValidationException::withMessages([
+                'tarea_id' =>
+                    'La actividad seleccionada no pertenece a esta operación.',
+            ]);
+        }
+
+        if ($tarea->tipo_gestion !== TareaOperacionViaje::TIPO_GUIA) {
+            throw ValidationException::withMessages([
+                'tarea_id' =>
+                    'La actividad seleccionada no corresponde a una gestión de guía.',
+            ]);
+        }
+
+        return $tarea;
     }
 
     private function validarExpedienteEditable(

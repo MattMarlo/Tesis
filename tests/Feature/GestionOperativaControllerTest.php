@@ -6,6 +6,7 @@ use App\Models\Cliente;
 use App\Models\Destino;
 use App\Models\GestionOperativa;
 use App\Models\GestionOperativaViajero;
+use App\Models\GuiaReserva;
 use App\Models\OperacionViaje;
 use App\Models\Reserva;
 use App\Models\TareaOperacionViaje;
@@ -176,6 +177,81 @@ class GestionOperativaControllerTest extends TestCase
 
         $this->assertNotNull(
             $tareaActualizada->completada_at
+        );
+    }
+
+    public function test_crea_guia_contextual_y_lo_vincula_con_la_tarea(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_GUIA,
+            'nombre' => 'Recorrido histórico por Lima',
+        ]);
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route('operaciones.guias.store', $this->operacion),
+                $this->datosGuia([
+                    'tarea_id' => $this->tarea->id,
+                ])
+            );
+
+        $respuesta
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas(
+                'success',
+                'Guía registrado y vinculado correctamente con la actividad.'
+            );
+
+        $guia = GuiaReserva::query()->firstOrFail();
+        $tarea = $this->tarea->fresh();
+
+        $this->assertSame(GuiaReserva::class, $tarea->gestionable_type);
+        $this->assertSame($guia->id, $tarea->gestionable_id);
+        $this->assertSame(
+            TareaOperacionViaje::ESTADO_COMPLETADA,
+            $tarea->estado
+        );
+    }
+
+    public function test_reutiliza_guia_y_lo_desvincula_antes_de_eliminarlo(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_GUIA,
+        ]);
+
+        $guia = $this->operacion->guias()->create(
+            $this->datosGuia()
+        );
+
+        $this
+            ->actingAs($this->usuario)
+            ->post(
+                route('operaciones.guias.store', $this->operacion),
+                [
+                    'tarea_id' => $this->tarea->id,
+                    'guia_existente_id' => $guia->id,
+                ]
+            )
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            $guia->id,
+            $this->tarea->fresh()->gestionable_id
+        );
+
+        $this
+            ->actingAs($this->usuario)
+            ->delete(route('operaciones.guias.destroy', $guia))
+            ->assertSessionHasNoErrors();
+
+        $tarea = $this->tarea->fresh();
+
+        $this->assertNull($tarea->gestionable_type);
+        $this->assertNull($tarea->gestionable_id);
+        $this->assertSame(
+            TareaOperacionViaje::ESTADO_PENDIENTE,
+            $tarea->estado
         );
     }
 
@@ -878,5 +954,27 @@ class GestionOperativaControllerTest extends TestCase
             ],
             $cambios
         );
+    }
+
+    private function datosGuia(array $cambios = []): array
+    {
+        return array_replace([
+            'nombre_completo' => 'Lucía Guía Cultural',
+            'empresa' => 'Rutas del Perú',
+            'ciudad_servicio' => 'Lima',
+            'telefono' => '+51999999888',
+            'correo' => 'lucia.guia@example.com',
+            'idiomas' => 'Español e inglés',
+            'fecha_inicio' => '2026-12-01',
+            'fecha_fin' => '2026-12-05',
+            'punto_encuentro' => 'Plaza Mayor de Lima',
+            'fecha_hora_encuentro' => '2026-12-01 08:00:00',
+            'servicios_incluidos' => 'Recorrido cultural guiado.',
+            'contacto_emergencia' => '+51999999777',
+            'costo_total' => 180,
+            'moneda' => 'USD',
+            'estado' => GuiaReserva::ESTADO_CONFIRMADO,
+            'observaciones' => 'Guía confirmado para el recorrido.',
+        ], $cambios);
     }
 }

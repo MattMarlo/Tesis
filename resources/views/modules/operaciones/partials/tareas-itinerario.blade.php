@@ -30,6 +30,7 @@
     $tiposGestionEspecializada = [
         \App\Models\TareaOperacionViaje::TIPO_VUELO,
         \App\Models\TareaOperacionViaje::TIPO_ALOJAMIENTO,
+        \App\Models\TareaOperacionViaje::TIPO_GUIA,
     ];
 @endphp
 
@@ -266,6 +267,14 @@
                             \App\Models\TareaOperacionViaje::TIPO_ALOJAMIENTO
                         && $tarea->gestionable instanceof
                             \App\Models\AlojamientoReserva
+                            ? $tarea->gestionable
+                            : null;
+
+                    $guiaVinculado =
+                        $tarea->tipo_gestion ===
+                            \App\Models\TareaOperacionViaje::TIPO_GUIA
+                        && $tarea->gestionable instanceof
+                            \App\Models\GuiaReserva
                             ? $tarea->gestionable
                             : null;
 
@@ -554,6 +563,41 @@
                                             </a>
                                         </div>
                                     </div>
+                                @elseif ($guiaVinculado)
+                                    <div class="resumen-vuelo-contextual resumen-guia-contextual">
+                                        <div class="resumen-vuelo-contextual-cabecera">
+                                            <div class="resumen-vuelo-contextual-identidad">
+                                                <span class="resumen-vuelo-icono"><i class="bi bi-person-badge"></i></span>
+                                                <div>
+                                                    <small>Guía vinculado</small>
+                                                    <strong>{{ $guiaVinculado->nombre_completo }}</strong>
+                                                    <span>{{ $guiaVinculado->empresa ?: 'Guía independiente' }}</span>
+                                                </div>
+                                            </div>
+                                            <span class="estado-vuelo-contextual estado-vuelo-{{ $guiaVinculado->estado }}">
+                                                {{ ucfirst($guiaVinculado->estado) }}
+                                            </span>
+                                        </div>
+                                        <div class="datos-vuelo-contextual">
+                                            <div><span>Teléfono</span><strong>{{ $guiaVinculado->telefono }}</strong></div>
+                                            <div><span>Ciudad</span><strong>{{ $guiaVinculado->ciudad_servicio }}</strong></div>
+                                            <div><span>Punto de encuentro</span><strong>{{ $guiaVinculado->punto_encuentro ?: 'Por definir' }}</strong></div>
+                                        </div>
+                                        @if ($editable)
+                                            <div class="acciones-vuelo-contextual">
+                                                <button type="button" class="btn-gestion-contextual btnEditarGuia" data-id="{{ $guiaVinculado->id }}">
+                                                    <i class="bi bi-pencil-square"></i> Editar guía
+                                                </button>
+                                                <form method="POST" action="{{ route('operaciones.tareas.gestiones.desvincular', ['operacion' => $operacion->id, 'tarea' => $tarea->id]) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn-ver-gestion-contextual">
+                                                        <i class="bi bi-link-45deg"></i> Desvincular
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </div>
                                 @elseif ($editable)
                                     <div class="gestion-contextual-tarea">
                                         <button
@@ -572,8 +616,8 @@
                                             data-hora-fin="{{ $horaFin }}"
                                             data-ubicacion="{{ $tarea->ubicacion }}"
                                             @if (
-                                                $tarea->tipo_gestion !==
-                                                    \App\Models\TareaOperacionViaje::TIPO_VUELO
+                                                $tarea->tipo_gestion ===
+                                                    \App\Models\TareaOperacionViaje::TIPO_ALOJAMIENTO
                                             )
                                                 onclick="
                                                     document

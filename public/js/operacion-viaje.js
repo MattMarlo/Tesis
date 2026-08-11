@@ -951,57 +951,88 @@ $(function () {
             .join('\n');
     }
 
-    $('#btnNuevoGuia').on(
+    function prepararFormularioNuevoGuia() {
+        limpiarFormulario($formGuia);
+
+        $formGuia.attr('action', accionesIniciales.guia);
+        $('#guiaMetodo').prop('disabled', true);
+        $('#guiaTareaId').prop('disabled', true).val('');
+        $('#guiaContextoTarea').prop('hidden', true);
+        $('#guiasExistentesContexto').prop('hidden', true);
+        $('#separadorGuiaExistente').prop('hidden', true);
+        $('#guiaExistenteId').val('');
+        $('#btnVincularGuiaExistente').prop('disabled', true);
+
+        $('#tituloModalGuia').text('Agregar guía');
+        $('#guiaEstado').val('confirmado');
+        colocar('#guiaCiudad', datosPaquete.ciudadDestino);
+        colocar('#guiaFechaInicio', datosPaquete.fechaSalida);
+        colocar('#guiaFechaFin', datosPaquete.fechaRegreso);
+        colocar('#guiaMoneda', datosPaquete.moneda || 'USD');
+        colocar('#guiaServicios', obtenerServiciosGuia());
+    }
+
+    function abrirGuiaDesdeTarea(boton) {
+        const $boton = $(boton);
+        const tareaId = String($boton.data('tarea-id') || '');
+        const nombre = String($boton.data('nombre') || 'Actividad con guía');
+        const descripcion = String($boton.data('descripcion') || '');
+        const fecha = String($boton.data('fecha') || '');
+        const horaInicio = String($boton.data('hora-inicio') || '');
+        const horaFin = String($boton.data('hora-fin') || '');
+        const ubicacion = String($boton.data('ubicacion') || '');
+
+        prepararFormularioNuevoGuia();
+
+        $('#guiaTareaId').prop('disabled', false).val(tareaId);
+        $('#guiaContextoTarea').prop('hidden', false);
+        $('#guiasExistentesContexto').prop('hidden', false);
+        $('#separadorGuiaExistente').prop('hidden', false);
+        $('#guiaContextoNombre').text(nombre);
+        $('#guiaContextoProgramacion').text(
+            [
+                fecha,
+                horaInicio && horaFin
+                    ? `${horaInicio} – ${horaFin}`
+                    : horaInicio,
+                ubicacion
+            ].filter(Boolean).join(' · ')
+        );
+
+        $('#tituloModalGuia').text('Gestionar guía de la actividad');
+        colocar('#guiaFechaInicio', fecha || datosPaquete.fechaSalida);
+        colocar('#guiaFechaFin', fecha || datosPaquete.fechaRegreso);
+        colocar(
+            '#guiaHoraEncuentro',
+            fecha && horaInicio ? `${fecha}T${horaInicio}` : ''
+        );
+        colocar('#guiaPuntoEncuentro', ubicacion);
+        colocar('#guiaServicios', descripcion || nombre);
+
+        modalGuia.show();
+    }
+
+    $('#btnNuevoGuia').on('click', function () {
+        prepararFormularioNuevoGuia();
+        modalGuia.show();
+    });
+
+    $(document).on(
         'click',
-        function () {
-            limpiarFormulario($formGuia);
-
-            $formGuia.attr(
-                'action',
-                accionesIniciales.guia
-            );
-
-            $('#guiaMetodo').prop(
-                'disabled',
-                true
-            );
-
-            $('#tituloModalGuia').text(
-                'Agregar guía'
-            );
-
-            $('#guiaEstado').val(
-                'confirmado'
-            );
-
-            colocar(
-                '#guiaCiudad',
-                datosPaquete.ciudadDestino
-            );
-
-            colocar(
-                '#guiaFechaInicio',
-                datosPaquete.fechaSalida
-            );
-
-            colocar(
-                '#guiaFechaFin',
-                datosPaquete.fechaRegreso
-            );
-
-            colocar(
-                '#guiaMoneda',
-                datosPaquete.moneda || 'USD'
-            );
-
-            colocar(
-                '#guiaServicios',
-                obtenerServiciosGuia()
-            );
-
-            modalGuia.show();
+        '.btn-gestion-especializada[data-tipo-gestion="guia"]',
+        function (evento) {
+            evento.preventDefault();
+            evento.stopImmediatePropagation();
+            abrirGuiaDesdeTarea(this);
         }
     );
+
+    $('#guiaExistenteId').on('change', function () {
+        $('#btnVincularGuiaExistente').prop(
+            'disabled',
+            !$(this).val()
+        );
+    });
 
     $(document).on(
         'click',
@@ -1031,6 +1062,13 @@ $(function () {
                 'disabled',
                 false
             );
+
+            $('#guiaTareaId').prop('disabled', true).val('');
+            $('#guiaContextoTarea').prop('hidden', true);
+            $('#guiasExistentesContexto').prop('hidden', true);
+            $('#separadorGuiaExistente').prop('hidden', true);
+            $('#guiaExistenteId').val('');
+            $('#btnVincularGuiaExistente').prop('disabled', true);
 
             $('#tituloModalGuia').text(
                 'Editar guía'
@@ -1625,6 +1663,26 @@ $(function () {
             }
 
             const $formulario = $(this);
+
+            const botonEnvio =
+                evento.originalEvent?.submitter;
+
+            if (
+                this.id === 'formularioGuia'
+                && botonEnvio?.id ===
+                    'btnVincularGuiaExistente'
+            ) {
+                if (
+                    !$('#guiaExistenteId').val()
+                    || !$('#guiaTareaId').val()
+                ) {
+                    return;
+                }
+
+                enviando = true;
+                this.submit();
+                return;
+            }
 
             if (
                 !validarFormulario(

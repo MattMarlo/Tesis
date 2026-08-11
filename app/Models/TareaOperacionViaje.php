@@ -93,6 +93,7 @@ class TareaOperacionViaje extends Model
     public const TIPOS_PREPARACION = [
         self::TIPO_VUELO,
         self::TIPO_ALOJAMIENTO,
+        self::TIPO_GUIA,
         self::TIPO_ALIMENTACION,
         self::TIPO_TREN,
     ];

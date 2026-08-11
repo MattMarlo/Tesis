@@ -25,6 +25,13 @@
                 disabled
             >
 
+            <input
+                type="hidden"
+                name="tarea_id"
+                id="guiaTareaId"
+                disabled
+            >
+
             <div class="modal-header">
                 <div>
                     <span>Acompañamiento</span>
@@ -43,6 +50,73 @@
             </div>
 
             <div class="modal-body">
+                <div
+                    id="guiaContextoTarea"
+                    class="contexto-actividad-gestion"
+                    hidden
+                >
+                    <span class="contexto-actividad-icono">
+                        <i class="bi bi-person-walking"></i>
+                    </span>
+                    <div>
+                        <small>Guía requerido por la actividad</small>
+                        <strong id="guiaContextoNombre"></strong>
+                        <p id="guiaContextoProgramacion"></p>
+                    </div>
+                </div>
+
+                @if ($operacion->guias->where('estado', '!=', 'cancelado')->isNotEmpty())
+                    <section
+                        id="guiasExistentesContexto"
+                        class="gestiones-existentes"
+                        hidden
+                    >
+                        <div class="titulo-seccion-gestion">
+                            <div>
+                                <span>Reutilizar registro</span>
+                                <h3>Asignar un guía existente</h3>
+                            </div>
+                        </div>
+
+                        <p>
+                            Si el mismo guía atenderá esta actividad,
+                            puedes vincularlo sin volver a registrarlo.
+                        </p>
+
+                        <div class="selector-guia-existente">
+                            <select
+                                name="guia_existente_id"
+                                id="guiaExistenteId"
+                            >
+                                <option value="">Selecciona un guía</option>
+                                @foreach ($operacion->guias->where('estado', '!=', 'cancelado') as $guiaExistente)
+                                    <option value="{{ $guiaExistente->id }}">
+                                        {{ $guiaExistente->nombre_completo }}
+                                        · {{ $guiaExistente->empresa ?: 'Independiente' }}
+                                        · {{ ucfirst($guiaExistente->estado) }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <button
+                                type="submit"
+                                class="btn-vincular-gestion"
+                                formnovalidate
+                                id="btnVincularGuiaExistente"
+                                disabled
+                            >
+                                <i class="bi bi-link-45deg"></i>
+                                Asignar a la actividad
+                            </button>
+                        </div>
+                    </section>
+
+                    <hr
+                        id="separadorGuiaExistente"
+                        hidden
+                    >
+                @endif
+
                 <div class="formulario-expediente-grid">
                     <div class="campo-expediente">
                         <label for="guiaNombre">

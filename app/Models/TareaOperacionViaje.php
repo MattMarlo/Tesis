@@ -94,6 +94,7 @@ class TareaOperacionViaje extends Model
         self::TIPO_VUELO,
         self::TIPO_ALOJAMIENTO,
         self::TIPO_ALIMENTACION,
+        self::TIPO_TREN,
     ];
 
     public static function tiposPreparacion(): array

@@ -33,5 +33,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="N8N_FLIGHT_TICKET_NOTIFICATION_URL" value=""/>
+        <env name="N8N_ROOM_ASSIGNMENT_NOTIFICATION_URL" value=""/>
     </php>
 </phpunit>

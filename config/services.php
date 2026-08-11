@@ -48,6 +48,11 @@ return [
             'https://n8n.passiontravelviajes.de/webhook/boleto-avion-emitido'
         ),
 
+        'room_assignment_notification_url' => env(
+            'N8N_ROOM_ASSIGNMENT_NOTIFICATION_URL',
+            'https://n8n.passiontravelviajes.de/webhook/habitacion-alojamiento-asignada'
+        ),
+
         'webhook_secret' => env('N8N_WEBHOOK_SECRET'),
 
         'api_secret' => env('N8N_API_SECRET'),

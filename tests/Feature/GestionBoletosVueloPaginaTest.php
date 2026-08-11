@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\AlojamientoReserva;
 use App\Models\BoletoVuelo;
 use App\Models\Cliente;
 use App\Models\Destino;
+use App\Models\HabitacionAlojamiento;
 use App\Models\OperacionViaje;
 use App\Models\Reserva;
 use App\Models\TareaOperacionViaje;
@@ -673,6 +675,140 @@ class GestionBoletosVueloPaginaTest extends TestCase
             'alojamientos_reserva',
             0
         );
+    }
+
+    public function test_asignar_habitacion_notifica_una_sola_vez_a_n8n_sin_bloquear_la_asignacion(): void
+    {
+        config([
+            'services.n8n.room_assignment_notification_url' =>
+                'https://n8n.example.test/webhook/habitacion-alojamiento-asignada',
+        ]);
+
+        Http::fake([
+            '*' => Http::response([], 500),
+        ]);
+
+        $datos = [
+            'nombre_hotel' => 'Hotel Miraflores Central',
+            'estado' => AlojamientoReserva::ESTADO_CONFIRMADO,
+            'ciudad' => 'Lima',
+            'pais' => 'Perú',
+            'direccion' => 'Avenida Larco 123, Miraflores',
+            'fecha_hora_entrada' => '2026-11-15 15:00:00',
+            'fecha_hora_salida' => '2026-11-18 11:00:00',
+            'codigo_confirmacion' => 'HOTEL-456',
+            'tipo_habitacion' => 'Doble',
+            'cantidad_habitaciones' => 1,
+            'alimentacion_incluida' => 'Desayuno',
+            'telefono_hotel' => '+51 987 654 321',
+            'correo_hotel' => 'reservas@hotel.example',
+            'proveedor' => 'Operador Hotelero Perú',
+            'costo_total' => 360,
+            'moneda' => 'USD',
+            'observaciones' => 'Reserva confirmada para el titular.',
+        ];
+
+        $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.alojamientos.store',
+                    $this->operacion
+                ),
+                $datos
+            )
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $alojamiento = AlojamientoReserva::firstOrFail();
+
+        Http::assertNothingSent();
+
+        $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.habitaciones.store',
+                    $alojamiento
+                ),
+                [
+                    'tipo' => 'individual',
+                    'referencia' => '301',
+                    'observaciones' =>
+                        'Una cama individual.',
+                ]
+            )
+            ->assertSessionHasNoErrors();
+
+        Http::assertNothingSent();
+
+        $habitacion = HabitacionAlojamiento::firstOrFail();
+
+        $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.habitaciones.asignar',
+                    $habitacion
+                ),
+                [
+                    'cliente_id' => $this->cliente->id,
+                    'viajero_reserva_id' => null,
+                ]
+            )
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        Http::assertSent(
+            function (HttpRequest $request): bool {
+                return $request->url() === config(
+                    'services.n8n.room_assignment_notification_url'
+                )
+                    && $request['event'] ===
+                        'habitacion.alojamiento.asignada'
+                    && data_get(
+                        $request->data(),
+                        'data.codigo_reserva'
+                    ) === $this->reserva->codigo_reserva
+                    && data_get(
+                        $request->data(),
+                        'data.destino'
+                    ) === $this->destino->ciudad_destino
+                    && data_get(
+                        $request->data(),
+                        'data.email'
+                    ) === $this->cliente->email
+                    && data_get(
+                        $request->data(),
+                        'data.nombre_hotel'
+                    ) === 'Hotel Miraflores Central'
+                    && data_get(
+                        $request->data(),
+                        'data.numero_habitacion'
+                    ) === '301'
+                    && data_get(
+                        $request->data(),
+                        'data.viajero'
+                    ) === $this->cliente->nombre_completo;
+            }
+        );
+
+        $this
+            ->actingAs($this->usuario)
+            ->put(
+                route(
+                    'operaciones.alojamientos.update',
+                    $alojamiento
+                ),
+                [
+                    ...$datos,
+                    'observaciones' =>
+                        'Alojamiento actualizado sin nueva notificación.',
+                ]
+            )
+            ->assertSessionHasNoErrors();
+
+        Http::assertSentCount(1);
     }
 
     public function test_pagina_muestra_vuelo_viajero_y_tarea_contextual(): void

@@ -45,7 +45,7 @@ $(function () {
         ) && valido;
         valido = mostrarError(
             $('#habitacionReferencia'),
-            !referencia || referenciaValida.test(referencia)
+            referencia && referenciaValida.test(referencia)
                 ? ''
                 : 'Usa un número o un nombre de al menos dos caracteres.'
         ) && valido;

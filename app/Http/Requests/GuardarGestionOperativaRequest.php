@@ -139,6 +139,12 @@ class GuardarGestionOperativaRequest extends FormRequest
         $esAlimentacion =
             $tipo === GestionOperativa::TIPO_ALIMENTACION;
 
+        $esTren =
+            $tipo === GestionOperativa::TIPO_TREN;
+
+        $validaServicioContextual =
+            $esAlimentacion || $esTren;
+
         $destinoPaquete = $reservaId
             ? Reserva::query()
                 ->with('destino')
@@ -201,28 +207,28 @@ class GuardarGestionOperativaRequest extends FormRequest
             'nombre' => [
                 'required',
                 'string',
-                ...($esAlimentacion ? ['min:3', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
+                ...($validaServicioContextual ? ['min:3', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
                 'max:180',
             ],
 
             'proveedor' => [
                 'required',
                 'string',
-                ...($esAlimentacion ? ['min:2', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
+                ...($validaServicioContextual ? ['min:2', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
                 'max:150',
             ],
 
             'contacto' => [
                 'nullable',
                 'string',
-                ...($esAlimentacion ? ['min:3', "regex:/^[\p{L}][\p{L}\s.'’-]+$/u"] : []),
+                ...($validaServicioContextual ? ['min:3', "regex:/^[\p{L}][\p{L}\s.'’-]+$/u"] : []),
                 'max:150',
             ],
 
             'telefono' => [
                 'nullable',
                 'string',
-                ...($esAlimentacion ? ['regex:/^\+?[0-9\s()\-]{7,20}$/'] : []),
+                ...($validaServicioContextual ? ['regex:/^\+?[0-9\s()\-]{7,20}$/'] : []),
                 'max:30',
             ],
 
@@ -235,16 +241,17 @@ class GuardarGestionOperativaRequest extends FormRequest
             'fecha_hora_inicio' => [
                 'required',
                 'date',
-                ...($esAlimentacion && $inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
-                ...($esAlimentacion && $finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
+                ...($validaServicioContextual && $inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
+                ...($validaServicioContextual && $finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
             ],
 
             'fecha_hora_fin' => [
+                Rule::requiredIf($esTren),
                 'nullable',
                 'date',
                 'after:fecha_hora_inicio',
-                ...($esAlimentacion && $inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
-                ...($esAlimentacion && $finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
+                ...($validaServicioContextual && $inicioPaquete ? ['after_or_equal:' . $inicioPaquete->toDateTimeString()] : []),
+                ...($validaServicioContextual && $finPaquete ? ['before_or_equal:' . $finPaquete->toDateTimeString()] : []),
             ],
 
             'ubicacion_origen' => [
@@ -253,8 +260,9 @@ class GuardarGestionOperativaRequest extends FormRequest
                 ),
                 'nullable',
                 'string',
-                ...($esAlimentacion ? ['min:3'] : []),
+                ...($validaServicioContextual ? ['min:3'] : []),
                 'max:180',
+                ...($esTren ? ['different:destino'] : []),
             ],
 
             'destino' => [
@@ -263,6 +271,7 @@ class GuardarGestionOperativaRequest extends FormRequest
                 ),
                 'nullable',
                 'string',
+                ...($esTren ? ['min:3', 'different:ubicacion_origen'] : []),
                 'max:180',
             ],
 
@@ -291,8 +300,9 @@ class GuardarGestionOperativaRequest extends FormRequest
                 ),
                 'nullable',
                 'string',
-                ...($esAlimentacion ? ['min:3'] : []),
+                ...($validaServicioContextual ? ['min:3'] : []),
                 'max:150',
+                ...($esTren ? ['regex:/^[A-Z0-9-]+$/i'] : []),
             ],
 
             'costo_total' => [
@@ -330,7 +340,7 @@ class GuardarGestionOperativaRequest extends FormRequest
             'observaciones' => [
                 'nullable',
                 'string',
-                ...($esAlimentacion ? ['min:3'] : []),
+                ...($validaServicioContextual ? ['min:3'] : []),
                 'max:5000',
             ],
 
@@ -340,20 +350,25 @@ class GuardarGestionOperativaRequest extends FormRequest
             ],
 
             'datos_adicionales.empresa_ferroviaria' => [
+                Rule::requiredIf($esTren),
                 'nullable',
                 'string',
+                ...($esTren ? ['min:2', "regex:/^(?=(?:.*\p{L}){2})[\p{L}\p{N}\s.&'’(),\/-]+$/u"] : []),
                 'max:150',
             ],
 
             'datos_adicionales.clase' => [
                 'nullable',
                 'string',
+                ...($esTren ? ['min:2', "regex:/^[\p{L}][\p{L}\p{N}\s.'’\/-]+$/u"] : []),
                 'max:100',
             ],
 
             'datos_adicionales.ruta' => [
+                Rule::requiredIf($esTren),
                 'nullable',
                 'string',
+                ...($esTren ? ['min:3'] : []),
                 'max:255',
             ],
 
@@ -450,18 +465,21 @@ class GuardarGestionOperativaRequest extends FormRequest
             'viajeros.*.numero_documento' => [
                 'nullable',
                 'string',
+                ...($esTren ? ['min:3', 'regex:/^[A-Z0-9-]+$/i'] : []),
                 'max:150',
             ],
 
             'viajeros.*.asiento' => [
                 'nullable',
                 'string',
+                ...($esTren ? ['regex:/^[0-9]{1,3}[A-Z]$/i'] : []),
                 'max:30',
             ],
 
             'viajeros.*.referencia_individual' => [
                 'nullable',
                 'string',
+                ...($esTren ? ['min:3', 'regex:/^[A-Z0-9-]+$/i'] : []),
                 'max:150',
             ],
 
@@ -478,12 +496,14 @@ class GuardarGestionOperativaRequest extends FormRequest
             'viajeros.*.restricciones' => [
                 'nullable',
                 'string',
+                ...($esTren ? ['min:3'] : []),
                 'max:2000',
             ],
 
             'viajeros.*.observaciones' => [
                 'nullable',
                 'string',
+                ...($esTren ? ['min:3'] : []),
                 'max:2000',
             ],
         ];
@@ -721,6 +741,9 @@ class GuardarGestionOperativaRequest extends FormRequest
             'fecha_hora_fin.after' =>
                 'La fecha y hora final debe ser posterior al inicio.',
 
+            'fecha_hora_fin.required' =>
+                'Selecciona la fecha y hora de llegada.',
+
             'fecha_hora_inicio.after_or_equal' =>
                 'El inicio no puede ser anterior a la salida del paquete.',
 
@@ -757,6 +780,24 @@ class GuardarGestionOperativaRequest extends FormRequest
             'destino.required' =>
                 'Ingresa el destino del servicio.',
 
+            'destino.different' =>
+                'El destino debe ser diferente al origen.',
+
+            'datos_adicionales.empresa_ferroviaria.required' =>
+                'Ingresa la empresa ferroviaria.',
+
+            'datos_adicionales.empresa_ferroviaria.regex' =>
+                'Ingresa una empresa ferroviaria válida.',
+
+            'datos_adicionales.ruta.required' =>
+                'Ingresa la ruta ferroviaria.',
+
+            'datos_adicionales.ruta.min' =>
+                'La ruta debe tener al menos tres caracteres.',
+
+            'datos_adicionales.clase.regex' =>
+                'Ingresa una clase ferroviaria válida.',
+
             'cantidad_viajeros.required' =>
                 'Indica la cantidad de viajeros.',
 
@@ -771,6 +812,9 @@ class GuardarGestionOperativaRequest extends FormRequest
 
             'referencia_confirmacion.min' =>
                 'La referencia debe tener al menos tres caracteres.',
+
+            'referencia_confirmacion.regex' =>
+                'La referencia solo puede contener letras, números y guiones.',
 
             'observaciones.min' =>
                 'Las observaciones deben tener al menos tres caracteres.',
@@ -819,6 +863,15 @@ class GuardarGestionOperativaRequest extends FormRequest
 
             'viajeros.*.estado.in' =>
                 'El estado individual seleccionado no es válido.',
+
+            'viajeros.*.numero_documento.regex' =>
+                'El documento o boleto solo puede contener letras, números y guiones.',
+
+            'viajeros.*.asiento.regex' =>
+                'Ingresa un asiento válido, por ejemplo 12A.',
+
+            'viajeros.*.referencia_individual.regex' =>
+                'La referencia individual solo puede contener letras, números y guiones.',
         ];
     }
 

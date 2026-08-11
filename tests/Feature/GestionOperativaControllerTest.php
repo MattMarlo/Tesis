@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Models\Cliente;
 use App\Models\Destino;
 use App\Models\GestionOperativa;
+use App\Models\GestionOperativaViajero;
 use App\Models\OperacionViaje;
 use App\Models\Reserva;
 use App\Models\TareaOperacionViaje;
 use App\Models\User;
+use App\Models\ViajeroReserva;
 use App\Services\EstadoTareaContextualService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -415,6 +417,109 @@ class GestionOperativaControllerTest extends TestCase
             'gestiones_operativas',
             0
         );
+    }
+
+    public function test_tren_se_muestra_y_registra_con_detalle_confirmado_del_viajero(): void
+    {
+        $this->tarea->update([
+            'tipo_gestion' => TareaOperacionViaje::TIPO_TREN,
+            'nombre' => 'Tren de Lima a Cusco',
+            'descripcion' => 'Traslado ferroviario turístico.',
+            'ubicacion' => 'Lima - Cusco',
+        ]);
+
+        $viajero = ViajeroReserva::create([
+            'reserva_id' => $this->reserva->id,
+            'cliente_id' => $this->cliente->id,
+            'nombres' => $this->cliente->nombres,
+            'apellidos' => $this->cliente->apellidos,
+            'tipo_documento' => 'pasaporte',
+            'documento' => 'PA123456',
+            'fecha_nacimiento' => '1990-01-01',
+            'edad_al_viajar' => 36,
+            'categoria_tarifa' => Reserva::TARIFA_ADULTO,
+            'es_titular' => true,
+        ]);
+
+        $this->destino->update([
+            'itinerario' => [[
+                'dia' => 1,
+                'titulo' => 'Trayecto ferroviario',
+                'actividades' => [[
+                    'uuid' => $this->tarea->actividad_uuid,
+                    'nombre' => 'Tren de Lima a Cusco',
+                    'descripcion' => 'Traslado ferroviario turístico.',
+                    'hora_inicio' => '07:00',
+                    'hora_fin' => '11:30',
+                    'ubicacion' => 'Lima - Cusco',
+                    'requiere_gestion' => true,
+                    'tipo_gestion' => TareaOperacionViaje::TIPO_TREN,
+                ]],
+            ]],
+        ]);
+
+        $this->actingAs($this->usuario)
+            ->get(route('operaciones.show', $this->reserva))
+            ->assertOk()
+            ->assertSee('Gestionar reserva de tren')
+            ->assertSee('Información ferroviaria');
+
+        $respuesta = $this
+            ->actingAs($this->usuario)
+            ->post(
+                route(
+                    'operaciones.tareas.gestiones.store',
+                    [
+                        'operacion' => $this->operacion->id,
+                        'tarea' => $this->tarea->id,
+                    ]
+                ),
+                $this->datosGestion([
+                    'tipo' => TareaOperacionViaje::TIPO_TREN,
+                    'nombre' => 'Tren de Lima a Cusco',
+                    'proveedor' => 'PeruRail',
+                    'fecha_hora_inicio' => '2026-12-02 07:00:00',
+                    'fecha_hora_fin' => '2026-12-02 11:30:00',
+                    'ubicacion_origen' => 'Estación Lima',
+                    'destino' => 'Estación Cusco',
+                    'cantidad_viajeros' => 1,
+                    'referencia_confirmacion' => 'TREN-2026-01',
+                    'estado' => GestionOperativa::ESTADO_CONFIRMADO,
+                    'datos_adicionales' => [
+                        'empresa_ferroviaria' => 'PeruRail',
+                        'ruta' => 'Lima - Cusco',
+                        'clase' => 'Turista',
+                    ],
+                    'viajeros' => [[
+                        'viajero_reserva_id' => $viajero->id,
+                        'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
+                        'numero_documento' => 'TR123456',
+                        'referencia_individual' => 'REF-001',
+                        'asiento' => '12A',
+                    ]],
+                ])
+            );
+
+        $respuesta->assertSessionHasNoErrors();
+
+        $gestion = GestionOperativa::query()
+            ->where('tipo', GestionOperativa::TIPO_TREN)
+            ->firstOrFail();
+
+        $this->assertSame(
+            $gestion->id,
+            $this->tarea->fresh()->gestionable_id
+        );
+        $this->assertSame(
+            TareaOperacionViaje::ESTADO_COMPLETADA,
+            $this->tarea->fresh()->estado
+        );
+        $this->assertDatabaseHas('gestion_operativa_viajeros', [
+            'gestion_operativa_id' => $gestion->id,
+            'viajero_reserva_id' => $viajero->id,
+            'asiento' => '12A',
+            'estado' => GestionOperativaViajero::ESTADO_CONFIRMADO,
+        ]);
     }
 
     private function crearReserva(

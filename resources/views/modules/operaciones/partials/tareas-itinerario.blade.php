@@ -24,6 +24,7 @@
 
     $tiposGestionGenerica = [
         \App\Models\TareaOperacionViaje::TIPO_ALIMENTACION,
+        \App\Models\TareaOperacionViaje::TIPO_TREN,
     ];
 
     $tiposGestionEspecializada = [

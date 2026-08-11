@@ -981,4 +981,5 @@
 <script src="{{ asset('js/operacion-viaje.js') }}?v={{ filemtime(public_path('js/operacion-viaje.js')) }}"></script>
 <script src="{{ asset('js/gestion-alimentacion.js') }}?v={{ filemtime(public_path('js/gestion-alimentacion.js')) }}"></script>
 <script src="{{ asset('js/gestion-hospedaje.js') }}?v={{ filemtime(public_path('js/gestion-hospedaje.js')) }}"></script>
+<script src="{{ asset('js/gestion-tren.js') }}?v={{ filemtime(public_path('js/gestion-tren.js')) }}"></script>
 @endsection

@@ -47,6 +47,15 @@ class NotificacionBoletoN8nService
                             'reserva_id' => $reserva?->id,
                             'codigo_reserva' =>
                                 $reserva?->codigo_reserva,
+                            'reserva' => [
+                                'codigo' =>
+                                    $reserva?->codigo_reserva,
+                            ],
+                            'paquete_turistico' => [
+                                'destino' =>
+                                    $reserva?->destino
+                                        ?->ciudad_destino,
+                            ],
                             'cliente' => $persona
                                 ? trim(
                                     ($persona->nombres ?? '').' '.

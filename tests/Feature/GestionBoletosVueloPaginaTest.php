@@ -407,7 +407,15 @@ class GestionBoletosVueloPaginaTest extends TestCase
                     && data_get(
                         $request->data(),
                         'data.email'
-                    ) === $this->cliente->email;
+                    ) === $this->cliente->email
+                    && data_get(
+                        $request->data(),
+                        'data.reserva.codigo'
+                    ) === $this->reserva->codigo_reserva
+                    && data_get(
+                        $request->data(),
+                        'data.paquete_turistico.destino'
+                    ) === $this->destino->ciudad_destino;
             }
         );
 

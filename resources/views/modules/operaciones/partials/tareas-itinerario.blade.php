@@ -682,16 +682,19 @@
                                         Pendiente
                                     </option>
 
-                                    <option
-                                        value="en_proceso"
-                                        @selected(
-                                            $tarea->estado ===
-                                                \App\Models\TareaOperacionViaje::
-                                                    ESTADO_EN_PROCESO
-                                        )
-                                    >
-                                        En proceso
-                                    </option>
+                                    @if (
+                                        $tarea->estado ===
+                                            \App\Models\TareaOperacionViaje::
+                                                ESTADO_EN_PROCESO
+                                    )
+                                        <option
+                                            value="en_proceso"
+                                            selected
+                                            hidden
+                                        >
+                                            En proceso
+                                        </option>
+                                    @endif
 
                                     <option
                                         value="completada"

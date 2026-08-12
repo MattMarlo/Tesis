@@ -288,6 +288,60 @@ class ActualizarTareaOperacionViajeTest extends TestCase
         );
     }
 
+    public function test_en_proceso_no_se_puede_elegir_manualmente_pero_conserva_el_estado_automatico(): void
+    {
+        $respuestaPendiente = $this
+            ->actingAs($this->usuario)
+            ->get(route('operaciones.show', [
+                'id' => $this->reserva->id,
+            ]));
+
+        $respuestaPendiente->assertOk();
+
+        preg_match(
+            '/<select\s+id="estado_tarea_'.
+                $this->tarea->id.
+                '".*?<\/select>/su',
+            $respuestaPendiente->getContent(),
+            $selectorPendiente
+        );
+
+        $this->assertNotEmpty($selectorPendiente);
+
+        $this->assertStringNotContainsString(
+            'value="en_proceso"',
+            $selectorPendiente[0]
+        );
+
+        $this->tarea->update([
+            'estado' =>
+                TareaOperacionViaje::ESTADO_EN_PROCESO,
+        ]);
+
+        $respuestaEnProceso = $this
+            ->actingAs($this->usuario)
+            ->get(route('operaciones.show', [
+                'id' => $this->reserva->id,
+            ]));
+
+        $respuestaEnProceso->assertOk();
+
+        preg_match(
+            '/<select\s+id="estado_tarea_'.
+                $this->tarea->id.
+                '".*?<\/select>/su',
+            $respuestaEnProceso->getContent(),
+            $selectorEnProceso
+        );
+
+        $this->assertNotEmpty($selectorEnProceso);
+
+        $this->assertMatchesRegularExpression(
+            '/<option\s+value="en_proceso"\s+selected\s+hidden\s*>/u',
+            $selectorEnProceso[0]
+        );
+    }
+
     public function test_omitir_tarea_exige_una_justificacion(): void
     {
         $respuesta = $this

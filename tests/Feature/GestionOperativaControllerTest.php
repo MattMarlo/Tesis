@@ -717,9 +717,13 @@ class GestionOperativaControllerTest extends TestCase
             ->assertSee($viajero->nombre_completo);
 
         $this->actingAs($this->usuario)
-            ->put(route(
-                'operaciones.trenes.pasajes.update',
-                $pasaje->id
+            ->post(route(
+                'operaciones.trenes.pasajes.update-from-index',
+                [
+                    'operacion' => $this->operacion->id,
+                    'gestion' => $gestion->id,
+                    'tarea_id' => $this->tarea->id,
+                ]
             ), [
                 'pasaje_id' => $pasaje->id,
                 'numero_documento' => 'TR123456',

@@ -256,6 +256,43 @@ class GestionPasajesTrenController extends Controller
         );
     }
 
+    public function updateFromIndex(
+        Request $request,
+        OperacionViaje $operacion,
+        GestionOperativa $gestion
+    ) {
+        $this->validarGestion(
+            $operacion,
+            $gestion
+        );
+
+        $request->validate([
+            'pasaje_id' => [
+                'required',
+                'integer',
+            ],
+        ], [
+            'pasaje_id.required' =>
+                'Selecciona el viajero cuyo pasaje deseas gestionar.',
+        ]);
+
+        $pasaje = $gestion->detallesViajeros()
+            ->whereKey($request->integer('pasaje_id'))
+            ->first();
+
+        if (! $pasaje) {
+            throw ValidationException::withMessages([
+                'pasaje' =>
+                    'El pasaje seleccionado no pertenece a este trayecto de tren.',
+            ]);
+        }
+
+        return $this->update(
+            $request,
+            $pasaje
+        );
+    }
+
     private function validarGestion(
         OperacionViaje $operacion,
         GestionOperativa $gestion

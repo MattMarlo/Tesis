@@ -209,10 +209,6 @@
                                         class="btn-gestionar-pasaje"
                                         data-bs-toggle="modal"
                                         data-bs-target="#modalPasajeTren"
-                                        data-url="{{ route(
-                                            'operaciones.trenes.pasajes.update',
-                                            $pasaje->id
-                                        ) }}"
                                         data-id="{{ $pasaje->id }}"
                                         data-nombre="{{ $integrante['nombre'] }}"
                                         data-documento="{{ $pasaje->numero_documento }}"
@@ -271,16 +267,17 @@
             <form
                 id="formPasajeTren"
                 method="POST"
-                action="{{ $pasajeConError
-                    ? route(
-                        'operaciones.trenes.pasajes.update',
-                        $pasajeConError->id
-                    )
-                    : '#' }}"
+                action="{{ route(
+                    'operaciones.trenes.pasajes.update-from-index',
+                    [
+                        'operacion' => $operacion->id,
+                        'gestion' => $gestion->id,
+                        'tarea_id' => request('tarea_id'),
+                    ]
+                ) }}"
                 novalidate
             >
                 @csrf
-                @method('PUT')
 
                 <input
                     type="hidden"

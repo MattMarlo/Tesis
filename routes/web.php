@@ -804,6 +804,14 @@ Route::middleware('auth')
                     ]
                 )->name('trenes.pasajes.index');
 
+                Route::post(
+                    '/expediente/{operacion}/trenes/{gestion}/pasajes',
+                    [
+                        GestionPasajesTrenController::class,
+                        'updateFromIndex',
+                    ]
+                )->name('trenes.pasajes.update-from-index');
+
                 Route::put(
                     '/trenes/pasajes/{pasaje}',
                     [

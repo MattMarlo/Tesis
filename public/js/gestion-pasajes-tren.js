@@ -87,7 +87,6 @@ $(function () {
     $('.btn-gestionar-pasaje').on('click', function () {
         const $boton = $(this);
 
-        $formulario.attr('action', $boton.data('url'));
         campo('pasaje_id').val($boton.data('id'));
         campo('numero_documento').val($boton.data('documento') || '');
         campo('asiento').val($boton.data('asiento') || '');

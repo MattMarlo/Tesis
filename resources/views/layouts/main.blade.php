@@ -164,6 +164,19 @@
             </a>
 
             <a
+                href="{{ route('devoluciones.index') }}"
+                class="nav-link {{
+                    request()->routeIs('devoluciones.*')
+                        ? 'active'
+                        : ''
+                }}"
+                title="Devoluciones"
+            >
+                <i class="bi bi-arrow-counterclockwise"></i>
+                <span>Devoluciones</span>
+            </a>
+
+            <a
                 href="{{ route('clientes') }}"
                 class="nav-link {{
                     request()->routeIs('clientes*')

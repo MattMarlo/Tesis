@@ -35,6 +35,14 @@
             </a>
 
             <a
+                href="{{ route('devoluciones.index') }}"
+                class="btn-reserva grupal"
+            >
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Devoluciones
+            </a>
+
+            <a
                 href="{{ route('reservas_individual.create') }}"
                 class="btn-reserva individual"
             >

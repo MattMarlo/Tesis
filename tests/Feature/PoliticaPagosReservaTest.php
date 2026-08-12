@@ -804,6 +804,19 @@ class PoliticaPagosReservaTest extends TestCase
     {
         $this
             ->actingAs($this->usuario)
+            ->get(route('reservas'))
+            ->assertOk()
+            ->assertSee(
+                route('cancelaciones.solicitudes.index'),
+                false
+            )
+            ->assertSee(
+                route('devoluciones.index'),
+                false
+            );
+
+        $this
+            ->actingAs($this->usuario)
             ->get(
                 route('reservas.riesgo')
             )

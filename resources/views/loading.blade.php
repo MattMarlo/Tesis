@@ -550,7 +550,7 @@
                     <div>
                         <strong>Comunicación directa</strong>
                         <span>
-                            Atención mediante nuestro asistente en Telegram.
+                            Atención mediante nuestro asistente en WhatsApp.
                         </span>
                     </div>
                 </div>
@@ -998,15 +998,7 @@
                         Cómo llegar
                     </a>
 
-                    <a
-                        href="https://t.me/AsistentePassionTravelVJBot"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="boton-contacto-directo"
-                    >
-                        <i class="fa fa-telegram"></i>
-                        Consultar
-                    </a>
+                    
 
                 </div>
 
@@ -1051,7 +1043,7 @@
                 <div class="pregunta-respuesta">
                     <p>
                         Puedes revisar los detalles del paquete y comunicarte
-                        mediante Telegram para solicitar información adicional.
+                        mediante WhatsApp para solicitar información adicional.
                     </p>
                 </div>
             </article>
@@ -1078,7 +1070,7 @@
 
                 <div class="pregunta-respuesta">
                     <p>
-                        Nuestro asistente en Telegram recopilará la información
+                        Nuestro asistente en WhatsApp recopilará la información
                         necesaria para iniciar el proceso de prerreserva.
                     </p>
                 </div>

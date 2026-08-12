@@ -174,9 +174,9 @@
                         href="{{ $telegramGeneral }}"
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label="Telegram"
+                        aria-label="Whatsapp"
                     >
-                        <i class="fa fa-telegram"></i>
+                        <i class="fa fa-whatsapp"></i>
                     </a>
                 </div>
             </div>
@@ -194,9 +194,7 @@
                 <h3>Información</h3>
 
                 <a href="{{ url('/#contacto') }}">Contacto</a>
-                <a href="{{ $telegramGeneral }}" target="_blank">
-                    Atención en Telegram
-                </a>
+                
                 <a href="{{ route('login') }}">Acceso administrativo</a>
             </div>
 
@@ -214,7 +212,7 @@
                 </p>
 
                 <p>
-                    <i class="fa fa-paper-plane"></i>
+                    <i class="fa fa-whatsapp"></i>
                     Passion Travel
                 </p>
             </div>
@@ -247,7 +245,7 @@
 
     <span class="whatsapp-flotante-texto">
         <small>Estamos para ayudarte</small>
-        ¿Necesitas ayuda?
+             Consultas
     </span>
 </a>
 

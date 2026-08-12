@@ -132,9 +132,6 @@
             <article>
                 <span>Progreso</span>
                 <strong>{{ $porcentaje }}%</strong>
-                <div class="barra-pasajes-tren">
-                    <span style="width: {{ $porcentaje }}%"></span>
-                </div>
             </article>
         </div>
     </section>

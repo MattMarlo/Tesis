@@ -16,9 +16,6 @@
     use App\Models\GestionOperativaViajero;
 
     $totalPasajes = $integrantes->count();
-    $porcentaje = $totalPasajes > 0
-        ? (int) round($confirmados / $totalPasajes * 100)
-        : 0;
 
     $urlRegreso = route(
         'operaciones.show',
@@ -128,10 +125,6 @@
                     {{ $gestion->fecha_hora_fin
                         ?->format('d/m/Y H:i') }}
                 </strong>
-            </article>
-            <article>
-                <span>Progreso</span>
-                <strong>{{ $porcentaje }}%</strong>
             </article>
         </div>
     </section>

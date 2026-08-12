@@ -3,6 +3,8 @@
 @section('title', 'Devoluciones')
 
 @section('content')
+<link rel="stylesheet" href="https://cdn.datatables.net/3.0.1/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/4.0.1/css/buttons.bootstrap5.min.css">
 <link rel="stylesheet" href="{{ asset('css/devoluciones.css') }}?v={{ filemtime(public_path('css/devoluciones.css')) }}">
 
 <main class="pagina-devoluciones">
@@ -38,7 +40,7 @@
 
     <section class="metricas-devoluciones">
         <article><span>Total devuelto</span><strong>USD {{ number_format($totalProcesado, 2, '.', ',') }}</strong></article>
-        <article><span>Operaciones</span><strong>{{ $devoluciones->total() }}</strong></article>
+        <article><span>Operaciones</span><strong>{{ $devoluciones->count() }}</strong></article>
         <article><span>Pagos reembolsables</span><strong>{{ $pagos->count() }}</strong></article>
     </section>
 
@@ -99,7 +101,7 @@
         <div class="paginacion">{{ $reembolsosPendientes->links() }}</div>
     </section>
 
-    <section class="tabla-contenedor">
+    <section class="tabla-contenedor historial-devoluciones">
         <div class="tabla-titulo">
             <div>
                 <span>HISTORIAL</span>
@@ -107,17 +109,17 @@
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table align-middle">
+            <table id="tablaDevoluciones" class="table align-middle">
                 <thead><tr><th>Fecha</th><th>Reserva / Cliente</th><th>Pago</th><th>Método</th><th>Motivo</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
-                @forelse($devoluciones as $devolucion)
+                @foreach($devoluciones as $devolucion)
                     <tr>
-                        <td>{{ $devolucion->fecha_devolucion?->format('d/m/Y H:i') }}</td>
+                        <td data-order="{{ $devolucion->fecha_devolucion?->timestamp ?? 0 }}">{{ $devolucion->fecha_devolucion?->format('d/m/Y H:i') }}</td>
                         <td><strong>{{ $devolucion->reserva?->codigo_reserva }}</strong><small>{{ $devolucion->cliente?->nombre_completo }}</small></td>
                         <td>#{{ $devolucion->pago_id }}</td>
                         <td>{{ ucfirst($devolucion->metodo) }}<small>{{ $devolucion->referencia ?: 'Sin referencia' }}</small></td>
                         <td class="motivo"><strong>{{ ucfirst(str_replace('_', ' ', $devolucion->tipo)) }}</strong><small>{{ $devolucion->motivo }}</small></td>
-                        <td><strong>USD {{ number_format((float)$devolucion->monto, 2, '.', ',') }}</strong></td>
+                        <td data-order="{{ (float) $devolucion->monto }}"><strong>USD {{ number_format((float)$devolucion->monto, 2, '.', ',') }}</strong></td>
                         <td><span class="estado estado-{{ $devolucion->estado }}">{{ ucfirst($devolucion->estado) }}</span></td>
                         <td>
                             @if(!$devolucion->estaAnulada())
@@ -125,13 +127,10 @@
                             @endif
                         </td>
                     </tr>
-                @empty
-                    <tr><td colspan="8" class="sin-registros">No hay devoluciones registradas.</td></tr>
-                @endforelse
+                @endforeach
                 </tbody>
             </table>
         </div>
-        <div class="paginacion">{{ $devoluciones->links() }}</div>
     </section>
 </main>
 
@@ -214,4 +213,14 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 });
 </script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/3.0.1/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/3.0.1/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/4.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.html5.min.js"></script>
+<script src="{{ asset('js/devoluciones-listado.js') }}?v={{ filemtime(public_path('js/devoluciones-listado.js')) }}"></script>
 @endsection

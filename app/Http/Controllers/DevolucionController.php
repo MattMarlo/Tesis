@@ -27,7 +27,7 @@ class DevolucionController extends Controller
                     ->orWhereHas('cliente', fn ($q) => $q->where('nombres', 'like', "%{$buscar}%")
                         ->orWhere('apellidos', 'like', "%{$buscar}%"));
             })
-            ->latest('fecha_devolucion')->paginate(15)->withQueryString();
+            ->latest('fecha_devolucion')->get();
 
         /*
          * La cancelacion autoriza el reembolso, mientras que la

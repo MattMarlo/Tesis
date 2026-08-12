@@ -29,4 +29,25 @@
 .btn-procesar-reembolso{align-items:center;background:#0b4a87;border:0;border-radius:.6rem;color:#fff;display:inline-flex;font-size:.8rem;font-weight:700;gap:.4rem;padding:.58rem .8rem;white-space:nowrap}
 .btn-procesar-reembolso:hover{background:#073b70;box-shadow:0 4px 12px rgba(9,61,119,.18);transform:translateY(-1px)}
 
+/* DataTables: solo historial de devoluciones */
+.historial-devoluciones .table-responsive>.dt-container{min-width:0;width:100%}
+.historial-devoluciones .dt-layout-row{margin:0}
+.historial-devoluciones .dt-layout-row:not(.dt-layout-table){align-items:center;padding:.8rem 1rem}
+.historial-devoluciones .dt-layout-row:first-child{border-bottom:1px solid var(--dev-borde)}
+.historial-devoluciones .dt-layout-row:last-child{border-top:1px solid var(--dev-borde)}
+.historial-devoluciones .dt-layout-table{padding:0}
+.historial-devoluciones .dt-length,.historial-devoluciones .dt-info{color:var(--dev-gris);font-size:.72rem}
+.historial-devoluciones .dt-length select{min-width:4.5rem;margin:0 .35rem;border-color:var(--dev-borde);color:#2b2b2b;font-size:.72rem}
+.historial-devoluciones .dt-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem}
+.historial-devoluciones .dt-buttons .btn-exportar-devoluciones{align-items:center;background:#fff!important;border-style:solid;border-width:1px;border-radius:.45rem;box-shadow:none;display:inline-flex;font-size:.78rem;font-weight:700;gap:.35rem;justify-content:center;line-height:1;min-height:2.65rem;padding:.55rem .9rem}
+.historial-devoluciones .dt-buttons .btn-exportar-devoluciones i{font-size:.72rem}
+.historial-devoluciones .dt-buttons .exportar-excel{border-color:#8bc9a8;color:#147a46}
+.historial-devoluciones .dt-buttons .exportar-excel:hover{background:#f2fbf6!important;border-color:#147a46;color:#147a46}
+.historial-devoluciones .dt-buttons .exportar-pdf{border-color:#dda1a7;color:#b02f3b}
+.historial-devoluciones .dt-buttons .exportar-pdf:hover{background:#fff6f7!important;border-color:#b02f3b;color:#b02f3b}
+.historial-devoluciones .pagination{margin:0}
+.historial-devoluciones .page-link{border-color:var(--dev-borde);color:var(--dev-azul);font-size:.7rem;min-width:2rem;text-align:center}
+.historial-devoluciones .page-item.active .page-link{background:var(--dev-azul);border-color:var(--dev-azul);color:#fff}
+.historial-devoluciones .page-item.disabled .page-link{color:#9aa5ad}
+
 @media(max-width:768px){.devoluciones-encabezado{align-items:stretch;flex-direction:column}.metricas-devoluciones{grid-template-columns:1fr}.filtros-devoluciones{flex-wrap:wrap}.filtros-devoluciones input{flex-basis:100%}.pagina-devoluciones .tabla-titulo{align-items:flex-start;gap:.75rem;padding:1rem}.aviso-estados-reembolso{margin:0 1rem 1rem}.pagina-devoluciones .tabla-titulo h2{font-size:1.15rem!important}}

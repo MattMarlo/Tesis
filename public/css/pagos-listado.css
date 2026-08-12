@@ -188,6 +188,136 @@
     overflow-x: auto;
 }
 
+.tabla-pagos-responsive > .dt-container {
+    width: 100%;
+    min-width: 0;
+}
+
+.contenedor-tabla-pagos .dt-layout-row {
+    margin: 0;
+}
+
+.contenedor-tabla-pagos
+    .dt-layout-row:not(.dt-layout-table) {
+    padding: 0.8rem 0.9rem;
+}
+
+.contenedor-tabla-pagos
+    .dt-layout-row:first-child {
+    border-bottom: 1px solid var(--pagos-borde);
+}
+
+.contenedor-tabla-pagos
+    .dt-layout-row:last-child {
+    border-top: 1px solid var(--pagos-borde);
+}
+
+.contenedor-tabla-pagos .dt-layout-table {
+    padding: 0;
+}
+
+.contenedor-tabla-pagos .dt-length,
+.contenedor-tabla-pagos .dt-info {
+    color: var(--pagos-gris);
+    font-size: 0.72rem;
+}
+
+.contenedor-tabla-pagos .dt-length select {
+    min-width: 4.5rem;
+    margin: 0 0.35rem;
+    border-color: var(--pagos-borde);
+    color: var(--pagos-texto);
+    font-size: 0.72rem;
+}
+
+.contenedor-tabla-pagos .dt-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.contenedor-tabla-pagos
+    .dt-buttons
+    .btn-exportar-pagos {
+    min-height: 2.65rem;
+    padding: 0.55rem 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 0.45rem;
+    background: var(--pagos-blanco) !important;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: none;
+}
+
+.contenedor-tabla-pagos
+    .dt-buttons
+    .btn-exportar-pagos i {
+    font-size: 0.72rem;
+}
+
+.contenedor-tabla-pagos
+    .dt-buttons
+    .exportar-excel {
+    color: #147a46;
+    border-color: #8bc9a8;
+}
+
+.contenedor-tabla-pagos
+    .dt-buttons
+    .exportar-excel:hover {
+    color: #147a46;
+    background: #f2fbf6 !important;
+    border-color: #147a46;
+}
+
+.contenedor-tabla-pagos
+    .dt-buttons
+    .exportar-pdf {
+    color: #b02f3b;
+    border-color: #dda1a7;
+}
+
+.contenedor-tabla-pagos
+    .dt-buttons
+    .exportar-pdf:hover {
+    color: #b02f3b;
+    background: #fff6f7 !important;
+    border-color: #b02f3b;
+}
+
+.contenedor-tabla-pagos .pagination {
+    margin: 0;
+}
+
+.contenedor-tabla-pagos .page-link {
+    min-width: 2rem;
+    color: var(--pagos-azul);
+    border-color: var(--pagos-borde);
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.contenedor-tabla-pagos
+    .page-item.active
+    .page-link {
+    color: var(--pagos-blanco);
+    background: var(--pagos-azul);
+    border-color: var(--pagos-azul);
+}
+
+.contenedor-tabla-pagos
+    .page-item.disabled
+    .page-link {
+    color: #9aa5ad;
+}
+
 .tabla-pagos,
 .tabla-integrantes-pago {
     width: 100%;

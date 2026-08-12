@@ -5,7 +5,15 @@
 @section('content')
 <link
     rel="stylesheet"
-    href="{{ asset('css/reservas-listado.css') }}"
+    href="https://cdn.datatables.net/3.0.1/css/dataTables.bootstrap5.min.css"
+>
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/buttons/4.0.1/css/buttons.bootstrap5.min.css"
+>
+<link
+    rel="stylesheet"
+    href="{{ asset('css/reservas-listado.css') }}?v={{ filemtime(public_path('css/reservas-listado.css')) }}"
 >
 
 <main id="main" class="main pagina-reservas">
@@ -220,7 +228,10 @@
 
     <section class="reservas-listado-contenedor">
         <div class="tabla-reservas-responsive">
-            <table class="tabla-reservas">
+            <table
+                id="tablaReservas"
+                class="tabla-reservas"
+            >
                 <thead>
                     <tr>
                         <th>Reserva</th>
@@ -238,7 +249,7 @@
                 </thead>
 
                 <tbody>
-                    @forelse ($reservas as $reserva)
+                    @foreach ($reservas as $reserva)
                         @php
                             $moneda = strtoupper(
                                 $reserva->moneda ?: 'USD'
@@ -407,7 +418,12 @@
                                 </div>
                             </td>
 
-                            <td>
+                            <td
+                                data-order="{{
+                                    $reserva->fecha_viaje
+                                        ?->format('Y-m-d')
+                                }}"
+                            >
                                 <div class="reserva-fecha">
                                     <i
                                         class="
@@ -425,7 +441,7 @@
                                 </div>
                             </td>
 
-                            <td>
+                            <td data-order="{{ $cantidadViajeros }}">
                                 <span class="cantidad-viajeros">
                                     <i class="bi bi-people"></i>
 
@@ -433,7 +449,7 @@
                                 </span>
                             </td>
 
-                            <td>
+                            <td data-order="{{ $total }}">
                                 <div class="reserva-montos">
                                     <span>
                                         Total:
@@ -741,39 +757,11 @@
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8">
-                                <div class="reservas-vacio">
-                                    <i
-                                        class="
-                                            bi
-                                            bi-calendar2-x
-                                        "
-                                    ></i>
-
-                                    <strong>
-                                        No se encontraron reservas
-                                    </strong>
-
-                                    <span>
-                                        Registra una reserva o
-                                        modifica los filtros.
-                                    </span>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
     </section>
-
-    @if ($reservas->hasPages())
-        <div class="paginacion-reservas">
-            {{ $reservas->links() }}
-        </div>
-    @endif
 </main>
 
 <div
@@ -1000,6 +988,38 @@
 ></script>
 
 <script
-    src="{{ asset('js/reservas-listado.js') }}"
+    src="https://cdn.datatables.net/3.0.1/js/dataTables.min.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/3.0.1/js/dataTables.bootstrap5.min.js"
+></script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+></script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"
+></script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/dataTables.buttons.min.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.bootstrap5.min.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.html5.min.js"
+></script>
+
+<script
+    src="{{ asset('js/reservas-listado.js') }}?v={{ filemtime(public_path('js/reservas-listado.js')) }}"
 ></script>
 @endsection

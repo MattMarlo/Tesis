@@ -122,8 +122,7 @@ class ReservaController extends Controller
 
         $reservas = $query
             ->latest()
-            ->paginate(12)
-            ->withQueryString();
+            ->get();
 
         $diasSaldo = (int) config(
             'reservas.dias_antes_saldo_final',

@@ -47,6 +47,160 @@ $(function () {
     let monedaActual = 'USD';
     let enviandoPago = false;
     let enviandoEdicion = false;
+    let tablaPagos = null;
+
+    const tablaElemento = document.getElementById(
+        'tablaPagos'
+    );
+
+    if (
+        tablaElemento &&
+        typeof DataTable !== 'undefined'
+    ) {
+        const fechaActual = new Date();
+        const fechaArchivo = [
+            fechaActual.getFullYear(),
+            String(fechaActual.getMonth() + 1).padStart(2, '0'),
+            String(fechaActual.getDate()).padStart(2, '0')
+        ].join('-');
+
+        const opcionesExportacion = {
+            columns: [0, 1, 2, 3, 4, 5],
+            modifier: {
+                search: 'applied',
+                page: 'all'
+            },
+            format: {
+                body: function (contenido, fila, columna, nodo) {
+                    const texto = nodo
+                        ? nodo.innerText
+                        : contenido;
+
+                    return String(texto || '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                }
+            }
+        };
+
+        const botonesExportacion = [];
+        const botonesRegistrados =
+            DataTable.ext?.buttons || {};
+
+        if (
+            botonesRegistrados.excelHtml5 &&
+            typeof JSZip !== 'undefined'
+        ) {
+            if (
+                typeof DataTable.Buttons?.jszip === 'function'
+            ) {
+                DataTable.Buttons.jszip(JSZip);
+            }
+
+            botonesExportacion.push({
+                extend: 'excelHtml5',
+                text:
+                    '<i class="bi bi-file-earmark-excel"></i> Excel',
+                title: 'Reporte de pagos',
+                filename: 'reporte_pagos_' + fechaArchivo,
+                titleAttr: 'Descargar reporte en Excel',
+                className: 'btn-exportar-pagos exportar-excel',
+                exportOptions: opcionesExportacion
+            });
+        }
+
+        if (
+            botonesRegistrados.pdfHtml5 &&
+            typeof pdfMake !== 'undefined'
+        ) {
+            if (
+                typeof DataTable.Buttons?.pdfMake === 'function'
+            ) {
+                DataTable.Buttons.pdfMake(pdfMake);
+            }
+
+            botonesExportacion.push({
+                extend: 'pdfHtml5',
+                text:
+                    '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                title: 'Reporte de pagos',
+                filename: 'reporte_pagos_' + fechaArchivo,
+                titleAttr: 'Descargar reporte en PDF',
+                className: 'btn-exportar-pagos exportar-pdf',
+                orientation: 'landscape',
+                pageSize: 'A4',
+                exportOptions: opcionesExportacion,
+                customize: function (documento) {
+                    documento.pageMargins = [24, 24, 24, 24];
+                    documento.defaultStyle.fontSize = 8;
+                    documento.styles.tableHeader.fontSize = 8;
+
+                    const contenidoTabla = documento.content.find(
+                        function (contenido) {
+                            return contenido.table;
+                        }
+                    );
+
+                    if (contenidoTabla) {
+                        contenidoTabla.table.widths = [
+                            'auto',
+                            '*',
+                            'auto',
+                            '*',
+                            'auto',
+                            'auto'
+                        ];
+                    }
+                }
+            });
+        }
+
+        tablaPagos = new DataTable(tablaElemento, {
+            autoWidth: false,
+            order: [],
+            pageLength: 12,
+            lengthMenu: [12, 25, 50, 100],
+            columnDefs: [
+                {
+                    targets: 6,
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+            layout: {
+                topStart: botonesExportacion.length
+                    ? {
+                        buttons: botonesExportacion
+                    }
+                    : 'pageLength',
+                topEnd: botonesExportacion.length
+                    ? 'pageLength'
+                    : null,
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            language: {
+                emptyTable:
+                    '<div class="sin-pagos">' +
+                        '<i class="bi bi-receipt"></i>' +
+                        '<strong>No existen reservas para mostrar</strong>' +
+                        '<span>Cambia los filtros o registra una reserva.</span>' +
+                    '</div>',
+                info:
+                    'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                infoEmpty: 'No hay registros de pago disponibles',
+                lengthMenu: 'Mostrar _MENU_ registros',
+                zeroRecords:
+                    'No se encontraron pagos con estos criterios.',
+                paginate: {
+                    first: 'Primera',
+                    last: 'Última',
+                    next: 'Siguiente',
+                    previous: 'Anterior'
+                }
+            }
+        });
+    }
 
     function escapar(valor) {
         return $('<div>')
@@ -136,6 +290,12 @@ $(function () {
             const texto = $.trim(
                 $(this).val()
             ).toLocaleLowerCase();
+
+            if (tablaPagos) {
+                tablaPagos.search(texto).draw();
+
+                return;
+            }
 
             $('.fila-pago').each(
                 function () {

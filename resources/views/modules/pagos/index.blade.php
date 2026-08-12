@@ -5,7 +5,15 @@
 @section('content')
 <link
     rel="stylesheet"
-    href="{{ asset('css/pagos-listado.css') }}"
+    href="https://cdn.datatables.net/3.0.1/css/dataTables.bootstrap5.min.css"
+>
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/buttons/4.0.1/css/buttons.bootstrap5.min.css"
+>
+<link
+    rel="stylesheet"
+    href="{{ asset('css/pagos-listado.css') }}?v={{ filemtime(public_path('css/pagos-listado.css')) }}"
 >
 
 <main id="main" class="main pagina-pagos">
@@ -207,7 +215,10 @@
 
     <section class="contenedor-tabla-pagos">
         <div class="tabla-pagos-responsive">
-            <table class="tabla-pagos">
+            <table
+                id="tablaPagos"
+                class="tabla-pagos"
+            >
                 <thead>
                     <tr>
                         <th>Reserva</th>
@@ -223,7 +234,7 @@
                 </thead>
 
                 <tbody id="cuerpoTablaPagos">
-                    @forelse ($reservas as $reserva)
+                    @foreach ($reservas as $reserva)
                         <tr
                             class="fila-pago"
                             data-busqueda="{{ mb_strtolower(
@@ -271,7 +282,7 @@
                                 </small>
                             </td>
 
-                            <td>
+                            <td data-order="{{ $reserva['precio_total'] }}">
                                 <div class="valores-reserva-pago">
                                     <span>
                                         Total:
@@ -310,7 +321,11 @@
                                 </div>
                             </td>
 
-                            <td>
+                            <td
+                                data-order="{{
+                                    $reserva['id_ultimo_pago'] ?: 0
+                                }}"
+                            >
                                 <strong>
                                     {{ $reserva['metodo'] }}
                                 </strong>
@@ -394,22 +409,7 @@
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td
-                                colspan="7"
-                                class="sin-pagos"
-                            >
-                                <i class="bi bi-receipt"></i>
-                                <strong>
-                                    No existen reservas para mostrar
-                                </strong>
-                                <span>
-                                    Cambia los filtros o registra una reserva.
-                                </span>
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -886,5 +886,31 @@
 </script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="{{ asset('js/pagos-listado.js') }}"></script>
+<script
+    src="https://cdn.datatables.net/3.0.1/js/dataTables.min.js"
+></script>
+<script
+    src="https://cdn.datatables.net/3.0.1/js/dataTables.bootstrap5.min.js"
+></script>
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+></script>
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"
+></script>
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"
+></script>
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/dataTables.buttons.min.js"
+></script>
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.bootstrap5.min.js"
+></script>
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.html5.min.js"
+></script>
+<script
+    src="{{ asset('js/pagos-listado.js') }}?v={{ filemtime(public_path('js/pagos-listado.js')) }}"
+></script>
 @endsection

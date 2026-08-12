@@ -204,6 +204,126 @@
     overflow-x: auto;
 }
 
+.tabla-reservas-responsive > .dt-container {
+    width: 100%;
+    min-width: 0;
+}
+
+.reservas-listado-contenedor .dt-layout-row {
+    margin: 0;
+}
+
+.reservas-listado-contenedor
+    .dt-layout-row:not(.dt-layout-table) {
+    padding: 0.8rem 0.9rem;
+}
+
+.reservas-listado-contenedor
+    .dt-layout-row:first-child {
+    border-bottom: 1px solid var(--reservas-borde);
+}
+
+.reservas-listado-contenedor
+    .dt-layout-row:last-child {
+    border-top: 1px solid var(--reservas-borde);
+}
+
+.reservas-listado-contenedor .dt-layout-table {
+    padding: 0;
+}
+
+.reservas-listado-contenedor .dt-length,
+.reservas-listado-contenedor .dt-info {
+    color: #66727b;
+    font-size: 0.72rem;
+}
+
+.reservas-listado-contenedor .dt-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.reservas-listado-contenedor
+    .dt-buttons
+    .btn-exportar-reservas {
+    min-height: 2.25rem;
+    padding: 0.45rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 0.42rem;
+    background: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.reservas-listado-contenedor
+    .dt-buttons
+    .exportar-excel {
+    color: #147a46;
+    border-color: #8bc9a8;
+}
+
+.reservas-listado-contenedor
+    .dt-buttons
+    .exportar-excel:hover {
+    color: #ffffff;
+    background: #147a46;
+    border-color: #147a46;
+}
+
+.reservas-listado-contenedor
+    .dt-buttons
+    .exportar-pdf {
+    color: #b02f3b;
+    border-color: #dda1a7;
+}
+
+.reservas-listado-contenedor
+    .dt-buttons
+    .exportar-pdf:hover {
+    color: #ffffff;
+    background: #b02f3b;
+    border-color: #b02f3b;
+}
+
+.reservas-listado-contenedor .dt-length select {
+    min-width: 4.5rem;
+    margin: 0 0.35rem;
+    border-color: var(--reservas-borde);
+    color: #3f4a52;
+    font-size: 0.72rem;
+}
+
+.reservas-listado-contenedor .pagination {
+    margin: 0;
+}
+
+.reservas-listado-contenedor .page-link {
+    min-width: 2rem;
+    color: var(--reservas-azul);
+    border-color: var(--reservas-borde);
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.reservas-listado-contenedor
+    .page-item.active
+    .page-link {
+    color: #ffffff;
+    background: var(--reservas-azul);
+    border-color: var(--reservas-azul);
+}
+
+.reservas-listado-contenedor
+    .page-item.disabled
+    .page-link {
+    color: #9aa5ad;
+}
+
 .tabla-reservas {
     width: 100%;
     min-width: 1180px;

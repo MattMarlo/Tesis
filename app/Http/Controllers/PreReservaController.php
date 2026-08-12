@@ -577,8 +577,7 @@ class PreReservaController extends Controller
 
         $preReservas = $consulta
             ->latest()
-            ->paginate(15)
-            ->withQueryString();
+            ->get();
 
         $resumen = [
             'total' => PreReserva::count(),

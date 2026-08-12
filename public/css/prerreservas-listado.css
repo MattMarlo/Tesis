@@ -149,6 +149,136 @@
     overflow-x: auto;
 }
 
+.tabla-prerreservas-responsive > .dt-container {
+    width: 100%;
+    min-width: 0;
+}
+
+.contenedor-prerreservas .dt-layout-row {
+    margin: 0;
+}
+
+.contenedor-prerreservas
+    .dt-layout-row:not(.dt-layout-table) {
+    padding: 0.8rem 0.9rem;
+}
+
+.contenedor-prerreservas
+    .dt-layout-row:first-child {
+    border-bottom: 1px solid var(--pre-borde);
+}
+
+.contenedor-prerreservas
+    .dt-layout-row:last-child {
+    border-top: 1px solid var(--pre-borde);
+}
+
+.contenedor-prerreservas .dt-layout-table {
+    padding: 0;
+}
+
+.contenedor-prerreservas .dt-length,
+.contenedor-prerreservas .dt-info {
+    color: var(--pre-gris);
+    font-size: 0.72rem;
+}
+
+.contenedor-prerreservas .dt-length select {
+    min-width: 4.5rem;
+    margin: 0 0.35rem;
+    border-color: var(--pre-borde);
+    color: var(--pre-texto);
+    font-size: 0.72rem;
+}
+
+.contenedor-prerreservas .dt-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.contenedor-prerreservas
+    .dt-buttons
+    .btn-exportar-prerreservas {
+    min-height: 2.65rem;
+    padding: 0.55rem 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 0.45rem;
+    background: #ffffff !important;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: none;
+}
+
+.contenedor-prerreservas
+    .dt-buttons
+    .btn-exportar-prerreservas i {
+    font-size: 0.72rem;
+}
+
+.contenedor-prerreservas
+    .dt-buttons
+    .exportar-excel {
+    color: #147a46;
+    border-color: #8bc9a8;
+}
+
+.contenedor-prerreservas
+    .dt-buttons
+    .exportar-excel:hover {
+    color: #147a46;
+    background: #f2fbf6 !important;
+    border-color: #147a46;
+}
+
+.contenedor-prerreservas
+    .dt-buttons
+    .exportar-pdf {
+    color: #b02f3b;
+    border-color: #dda1a7;
+}
+
+.contenedor-prerreservas
+    .dt-buttons
+    .exportar-pdf:hover {
+    color: #b02f3b;
+    background: #fff6f7 !important;
+    border-color: #b02f3b;
+}
+
+.contenedor-prerreservas .pagination {
+    margin: 0;
+}
+
+.contenedor-prerreservas .page-link {
+    min-width: 2rem;
+    color: var(--pre-azul);
+    border-color: var(--pre-borde);
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.contenedor-prerreservas
+    .page-item.active
+    .page-link {
+    color: #ffffff;
+    background: var(--pre-azul);
+    border-color: var(--pre-azul);
+}
+
+.contenedor-prerreservas
+    .page-item.disabled
+    .page-link {
+    color: #9aa5ad;
+}
+
 .tabla-prerreservas {
     width: 100%;
     min-width: 1050px;

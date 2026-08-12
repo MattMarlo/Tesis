@@ -6,7 +6,17 @@
 
 <link
     rel="stylesheet"
-    href="{{ asset('css/prerreservas-listado.css') }}"
+    href="https://cdn.datatables.net/3.0.1/css/dataTables.bootstrap5.min.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/buttons/4.0.1/css/buttons.bootstrap5.min.css"
+>
+
+<link
+    rel="stylesheet"
+    href="{{ asset('css/prerreservas-listado.css') }}?v={{ filemtime(public_path('css/prerreservas-listado.css')) }}"
 >
 
 <main
@@ -130,7 +140,10 @@
 
     <section class="contenedor-prerreservas">
         <div class="tabla-prerreservas-responsive">
-            <table class="tabla-prerreservas">
+            <table
+                id="tablaPrerreservas"
+                class="tabla-prerreservas"
+            >
                 <thead>
                     <tr>
                         <th>Cliente</th>
@@ -145,7 +158,7 @@
                 </thead>
 
                 <tbody>
-                    @forelse ($preReservas as $pre)
+                    @foreach ($preReservas as $pre)
                         @php
                             $nombreEstado = match (
                                 $pre->estado
@@ -200,7 +213,7 @@
                                 </small>
                             </td>
 
-                            <td>
+                            <td data-order="{{ $pre->cantidad_personas }}">
                                 <strong>
                                     {{ $pre->cantidad_personas }}
                                 </strong>
@@ -214,7 +227,7 @@
                                 </small>
                             </td>
 
-                            <td>
+                            <td data-order="{{ $pre->created_at?->timestamp ?? 0 }}">
                                 <strong>
                                     {{
                                         $pre->created_at
@@ -323,35 +336,11 @@
                                 @endif
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td
-                                colspan="8"
-                                class="sin-prerreservas"
-                            >
-                                <i class="bi bi-telegram"></i>
-
-                                <strong>
-                                    No existen prerreservas para mostrar
-                                </strong>
-
-                                <span>
-                                    Cambia los filtros o espera una nueva
-                                    solicitud desde Telegram.
-                                </span>
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
     </section>
-
-    @if ($preReservas->hasPages())
-        <div class="paginacion-prerreservas">
-            {{ $preReservas->links() }}
-        </div>
-    @endif
 </main>
 
 <script>
@@ -365,7 +354,39 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <script
-    src="{{ asset('js/prerreservas-listado.js') }}"
+    src="https://cdn.datatables.net/3.0.1/js/dataTables.min.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/3.0.1/js/dataTables.bootstrap5.min.js"
+></script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+></script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"
+></script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/dataTables.buttons.min.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.bootstrap5.min.js"
+></script>
+
+<script
+    src="https://cdn.datatables.net/buttons/4.0.1/js/buttons.html5.min.js"
+></script>
+
+<script
+    src="{{ asset('js/prerreservas-listado.js') }}?v={{ filemtime(public_path('js/prerreservas-listado.js')) }}"
 ></script>
 
 @endsection

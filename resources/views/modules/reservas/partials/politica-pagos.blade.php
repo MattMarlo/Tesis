@@ -81,60 +81,18 @@
         </article>
     </div>
 
-    <div class="politica-campos">
-        <div class="{{ $claseCampo }}">
-            <label for="canal_aceptacion_politica">
-                Canal de aceptación <span>*</span>
-            </label>
-            <select
-                id="canal_aceptacion_politica"
-                name="canal_aceptacion_politica"
-                class="control-reserva"
-                required
-            >
-                <option value="">Selecciona el canal</option>
-                @foreach ([
-                    'presencial' => 'Presencial / contrato firmado',
-                    'correo' => 'Correo electrónico',
-                    'whatsapp' => 'WhatsApp',
-                    'telegram' => 'Telegram',
-                    'otro' => 'Otro',
-                ] as $valor => $nombre)
-                    <option
-                        value="{{ $valor }}"
-                        @selected(old('canal_aceptacion_politica') === $valor)
-                    >
-                        {{ $nombre }}
-                    </option>
-                @endforeach
-            </select>
-            <small
-                id="canal_aceptacion_politicaError"
-                class="mensaje-error"
-            ></small>
-        </div>
-
-        <div class="{{ $claseCampo }}">
-            <label for="referencia_aceptacion_politica">
-                Referencia de la evidencia <span>*</span>
-            </label>
-            <input
-                id="referencia_aceptacion_politica"
-                name="referencia_aceptacion_politica"
-                class="control-reserva"
-                type="text"
-                minlength="5"
-                maxlength="255"
-                value="{{ old('referencia_aceptacion_politica') }}"
-                placeholder="Ej.: contrato 125 o correo confirmado del 05/08"
-                required
-            >
-            <small
-                id="referencia_aceptacion_politicaError"
-                class="mensaje-error"
-            ></small>
-        </div>
-    </div>
+    <input
+        id="canal_aceptacion_politica"
+        name="canal_aceptacion_politica"
+        type="hidden"
+        value="otro"
+    >
+    <input
+        id="referencia_aceptacion_politica"
+        name="referencia_aceptacion_politica"
+        type="hidden"
+        value="Aceptación confirmada en el formulario administrativo"
+    >
 
     <label class="politica-aceptacion">
         <input
@@ -148,7 +106,7 @@
         <span>
             <strong>Confirmación obligatoria</strong>
             Confirmo que el cliente o responsable recibió y aceptó estas
-            reglas, y que la referencia indicada permite comprobarlo.
+            reglas.
         </span>
     </label>
     <small

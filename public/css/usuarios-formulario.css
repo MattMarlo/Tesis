@@ -119,8 +119,8 @@
 
 .campo-usuario.campo-invalido input,
 .campo-usuario.campo-invalido select {
-    border-color: #962234;
-    box-shadow: 0 0 0 3px rgba(200, 66, 66, 0.08);
+    border-color: #c83d48;
+    box-shadow: 0 0 0 3px rgba(200, 61, 72, 0.1);
 }
 
 .ayuda-campo {
@@ -135,8 +135,9 @@
     min-height: 15px;
     margin-top: 4px;
     display: block;
-    color: #962234;
-    font-size: 9px;
+    color: #c83d48;
+    font-size: 11px;
+    line-height: 1.4;
 }
 
 .campo-contrasena {

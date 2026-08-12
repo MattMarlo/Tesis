@@ -15,6 +15,9 @@ $(document).ready(function () {
 
         $contenedor.addClass('campo-invalido');
         $contenedor.find('.error-campo').first().text(mensaje);
+        $campo.attr('aria-invalid', 'true');
+
+        return false;
     }
 
     function limpiarError($campo) {
@@ -22,6 +25,9 @@ $(document).ready(function () {
 
         $contenedor.removeClass('campo-invalido');
         $contenedor.find('.error-campo').first().text('');
+        $campo.removeAttr('aria-invalid');
+
+        return true;
     }
 
     function escaparHtml(texto) {
@@ -52,8 +58,219 @@ $(document).ready(function () {
         );
     }
 
+    function validarCampoIndividual($campo) {
+        const id = $campo.attr('id');
+        const valor = $.trim($campo.val());
+        const formatoNombre = /^(?=.*\p{L})[\p{L}\s'-]+$/u;
+        const formatoDocumento =
+            /^(?=.*[A-Za-z0-9])[A-Za-z0-9-]+$/;
+        const formatoTelefono = /^\+?[0-9\s()-]+$/;
+        const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (id === 'nombres' || id === 'apellidos') {
+            const etiqueta = id === 'nombres'
+                ? 'Los nombres'
+                : 'Los apellidos';
+
+            if (!valor) {
+                return mostrarError(
+                    $campo,
+                    id === 'nombres'
+                        ? 'Ingresa los nombres.'
+                        : 'Ingresa los apellidos.'
+                );
+            }
+
+            if (valor.length < 2) {
+                return mostrarError(
+                    $campo,
+                    etiqueta +
+                        ' deben tener al menos dos caracteres.'
+                );
+            }
+
+            if (
+                valor.length > 100 ||
+                !formatoNombre.test(valor)
+            ) {
+                return mostrarError(
+                    $campo,
+                    'Utiliza solamente letras, espacios, apóstrofes o guiones.'
+                );
+            }
+
+            return limpiarError($campo);
+        }
+
+        if (id === 'documento') {
+            if (!valor) {
+                return mostrarError(
+                    $campo,
+                    'Ingresa el número de identificación.'
+                );
+            }
+
+            if (
+                valor.length < 5 ||
+                valor.length > 30 ||
+                !formatoDocumento.test(valor)
+            ) {
+                return mostrarError(
+                    $campo,
+                    'Ingresa entre 5 y 30 letras, números o guiones, sin espacios.'
+                );
+            }
+
+            return limpiarError($campo);
+        }
+
+        if (id === 'telefono') {
+            if (!valor) {
+                return mostrarError(
+                    $campo,
+                    'Ingresa el teléfono.'
+                );
+            }
+
+            const cantidadDigitos =
+                (valor.match(/\d/g) || []).length;
+
+            if (
+                valor.length > 20 ||
+                !formatoTelefono.test(valor) ||
+                cantidadDigitos < 7 ||
+                cantidadDigitos > 15
+            ) {
+                return mostrarError(
+                    $campo,
+                    'Ingresa un teléfono con entre 7 y 15 dígitos.'
+                );
+            }
+
+            return limpiarError($campo);
+        }
+
+        if (id === 'email') {
+            if (!valor) {
+                return mostrarError(
+                    $campo,
+                    'Ingresa el correo electrónico.'
+                );
+            }
+
+            if (
+                valor.length > 100 ||
+                !formatoCorreo.test(valor)
+            ) {
+                return mostrarError(
+                    $campo,
+                    'Escribe un correo electrónico válido.'
+                );
+            }
+
+            return limpiarError($campo);
+        }
+
+        if (id === 'rol') {
+            if (!['admin', 'agente'].includes(valor)) {
+                return mostrarError(
+                    $campo,
+                    'Selecciona el tipo de usuario.'
+                );
+            }
+
+            return limpiarError($campo);
+        }
+
+        if (id === 'estado') {
+            if (!['activo', 'inactivo'].includes(valor)) {
+                return mostrarError(
+                    $campo,
+                    'Selecciona el estado de la cuenta.'
+                );
+            }
+
+            return limpiarError($campo);
+        }
+
+        return true;
+    }
+
+    function validarContrasenasEnVivo() {
+        const contrasena = $password.val();
+        const confirmacion = $confirmacion.val();
+        const debeValidar =
+            !esEdicion ||
+            contrasena.length > 0 ||
+            confirmacion.length > 0;
+
+        if (!debeValidar) {
+            limpiarError($password);
+            limpiarError($confirmacion);
+
+            return true;
+        }
+
+        let esValida = true;
+
+        if (!contrasena) {
+            mostrarError($password, 'Ingresa la contraseña.');
+            esValida = false;
+        } else if (contrasena.length < 8) {
+            mostrarError(
+                $password,
+                'La contraseña debe tener al menos ocho caracteres.'
+            );
+            esValida = false;
+        } else if (contrasena.length > 72) {
+            mostrarError(
+                $password,
+                'La contraseña no puede superar los 72 caracteres.'
+            );
+            esValida = false;
+        } else if (
+            !/\p{L}/u.test(contrasena) ||
+            !/\p{N}/u.test(contrasena)
+        ) {
+            mostrarError(
+                $password,
+                'La contraseña debe incluir letras y números.'
+            );
+            esValida = false;
+        } else {
+            limpiarError($password);
+        }
+
+        if (!confirmacion) {
+            mostrarError(
+                $confirmacion,
+                'Confirma la contraseña.'
+            );
+            esValida = false;
+        } else if (contrasena !== confirmacion) {
+            mostrarError(
+                $confirmacion,
+                'Las contraseñas no coinciden.'
+            );
+            esValida = false;
+        } else {
+            limpiarError($confirmacion);
+        }
+
+        return esValida;
+    }
+
     function validarFormulario() {
         let esValido = true;
+
+        $('#nombres, #apellidos').each(function () {
+            this.value = $.trim(this.value).replace(/\s+/g, ' ');
+        });
+
+        $('#email').val(
+            $.trim($('#email').val()).toLowerCase()
+        );
+        $('#telefono').val($.trim($('#telefono').val()));
 
         const nombres = $.trim($('#nombres').val());
         const apellidos = $.trim($('#apellidos').val());
@@ -65,18 +282,28 @@ $(document).ready(function () {
         const contrasena = $password.val();
         const confirmarContrasena = $confirmacion.val();
 
-        const formatoNombre = /^[\p{L}\s'-]+$/u;
-        const formatoDocumento = /^[A-Za-z0-9-]+$/;
-        const formatoTelefono = /^[0-9+\s()-]+$/;
+        const formatoNombre = /^(?=.*\p{L})[\p{L}\s'-]+$/u;
+        const formatoDocumento =
+            /^(?=.*[A-Za-z0-9])[A-Za-z0-9-]+$/;
+        const formatoTelefono = /^\+?[0-9\s()-]+$/;
         const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         $('.campo-usuario').removeClass('campo-invalido');
         $('.error-campo').text('');
+        $('.campo-usuario input, .campo-usuario select')
+            .removeAttr('aria-invalid');
 
         if (!nombres) {
             mostrarError(
                 $('#nombres'),
                 'Ingresa los nombres.'
+            );
+
+            esValido = false;
+        } else if (nombres.length < 2) {
+            mostrarError(
+                $('#nombres'),
+                'Los nombres deben tener al menos dos caracteres.'
             );
 
             esValido = false;
@@ -93,6 +320,13 @@ $(document).ready(function () {
             mostrarError(
                 $('#apellidos'),
                 'Ingresa los apellidos.'
+            );
+
+            esValido = false;
+        } else if (apellidos.length < 2) {
+            mostrarError(
+                $('#apellidos'),
+                'Los apellidos deben tener al menos dos caracteres.'
             );
 
             esValido = false;
@@ -131,16 +365,28 @@ $(document).ready(function () {
             );
 
             esValido = false;
-        } else if (
-            telefono.length < 7 ||
-            !formatoTelefono.test(telefono)
-        ) {
+        } else if (!formatoTelefono.test(telefono)) {
             mostrarError(
                 $('#telefono'),
                 'Ingresa un número de teléfono válido.'
             );
 
             esValido = false;
+        } else {
+            const cantidadDigitos =
+                (telefono.match(/\d/g) || []).length;
+
+            if (
+                cantidadDigitos < 7 ||
+                cantidadDigitos > 15
+            ) {
+                mostrarError(
+                    $('#telefono'),
+                    'El teléfono debe contener entre 7 y 15 dígitos.'
+                );
+
+                esValido = false;
+            }
         }
 
         if (!email) {
@@ -150,7 +396,10 @@ $(document).ready(function () {
             );
 
             esValido = false;
-        } else if (!formatoCorreo.test(email)) {
+        } else if (
+            email.length > 100 ||
+            !formatoCorreo.test(email)
+        ) {
             mostrarError(
                 $('#email'),
                 'Escribe un correo electrónico válido.'
@@ -159,7 +408,7 @@ $(document).ready(function () {
             esValido = false;
         }
 
-        if (!rol) {
+        if (!['admin', 'agente'].includes(rol)) {
             mostrarError(
                 $('#rol'),
                 'Selecciona el tipo de usuario.'
@@ -168,7 +417,7 @@ $(document).ready(function () {
             esValido = false;
         }
 
-        if (!estado) {
+        if (!['activo', 'inactivo'].includes(estado)) {
             mostrarError(
                 $('#estado'),
                 'Selecciona el estado de la cuenta.'
@@ -197,9 +446,16 @@ $(document).ready(function () {
                 );
 
                 esValido = false;
+            } else if (contrasena.length > 72) {
+                mostrarError(
+                    $password,
+                    'La contraseña no puede superar los 72 caracteres.'
+                );
+
+                esValido = false;
             } else if (
-                !/[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(contrasena) ||
-                !/[0-9]/.test(contrasena)
+                !/\p{L}/u.test(contrasena) ||
+                !/\p{N}/u.test(contrasena)
             ) {
                 mostrarError(
                     $password,
@@ -254,28 +510,39 @@ $(document).ready(function () {
             .toUpperCase()
             .replace(/\s/g, '');
 
-        limpiarError($(this));
+        validarCampoIndividual($(this));
+    });
+
+    $('#documento').on('blur', function () {
+        validarCampoIndividual($(this));
     });
 
     $('#email').on('input', function () {
         this.value = this.value.toLowerCase();
-        limpiarError($(this));
+        validarCampoIndividual($(this));
+    });
+
+    $('#email').on('blur', function () {
+        validarCampoIndividual($(this));
     });
 
     $(
-        '#nombres, #apellidos, #telefono, ' +
-        '#password, #password_confirmation'
-    ).on('input', function () {
-        limpiarError($(this));
+        '#nombres, #apellidos, #telefono'
+    ).on('input blur', function () {
+        validarCampoIndividual($(this));
+    });
+
+    $password.add($confirmacion).on('input blur', function () {
+        validarContrasenasEnVivo();
     });
 
     $('#rol').on('change', function () {
         actualizarDescripcionRol();
-        limpiarError($(this));
+        validarCampoIndividual($(this));
     });
 
     $('#estado').on('change', function () {
-        limpiarError($(this));
+        validarCampoIndividual($(this));
     });
 
     $formulario.on(
@@ -374,6 +641,23 @@ $(document).ready(function () {
 
     const erroresServidor =
         $('#erroresServidorUsuario').data('errores');
+    const erroresServidorPorCampo =
+        $('#erroresServidorUsuario').data('errores-campos');
+
+    if (
+        erroresServidorPorCampo &&
+        typeof erroresServidorPorCampo === 'object'
+    ) {
+        Object.entries(erroresServidorPorCampo).forEach(
+            function ([nombreCampo, mensajes]) {
+                const $campo = $('[name="' + nombreCampo + '"]');
+
+                if ($campo.length && mensajes.length) {
+                    mostrarError($campo, mensajes[0]);
+                }
+            }
+        );
+    }
 
     if (
         Array.isArray(erroresServidor) &&

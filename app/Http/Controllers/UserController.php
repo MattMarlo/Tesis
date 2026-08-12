@@ -28,7 +28,7 @@ class UserController extends Controller
     public function create()
     {
         $titulo = 'Registrar usuario';
-        $usuario = new User();
+        $usuario = new User;
 
         return view(
             'modules.usuarios.create',
@@ -38,6 +38,8 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $this->normalizarEntrada($request);
+
         $datos = $request->validate(
             $this->reglas(),
             $this->mensajesValidacion()
@@ -89,6 +91,8 @@ class UserController extends Controller
     ) {
         $usuario = User::findOrFail($id);
 
+        $this->normalizarEntrada($request);
+
         $datos = $request->validate(
             $this->reglas($usuario),
             $this->mensajesValidacion()
@@ -130,7 +134,7 @@ class UserController extends Controller
 
         if (
             $dejaDeSerAdministrador &&
-            !$this->existeOtroAdministradorActivo($usuario)
+            ! $this->existeOtroAdministradorActivo($usuario)
         ) {
             return back()
                 ->withInput($request->except([
@@ -192,7 +196,7 @@ class UserController extends Controller
         if (
             $usuario->isAdmin() &&
             $usuario->estaActivo() &&
-            !$this->existeOtroAdministradorActivo($usuario)
+            ! $this->existeOtroAdministradorActivo($usuario)
         ) {
             return back()->with(
                 'error',
@@ -245,6 +249,7 @@ class UserController extends Controller
             ? [
                 'nullable',
                 'confirmed',
+                'max:72',
                 Password::min(8)
                     ->letters()
                     ->numbers(),
@@ -252,6 +257,7 @@ class UserController extends Controller
             : [
                 'required',
                 'confirmed',
+                'max:72',
                 Password::min(8)
                     ->letters()
                     ->numbers(),
@@ -259,37 +265,62 @@ class UserController extends Controller
 
         return [
             'nombres' => [
+                'bail',
                 'required',
                 'string',
+                'min:2',
                 'max:100',
-                "regex:/^[\pL\s'-]+$/u",
+                "regex:/^(?=.*\pL)[\pL\s'-]+$/u",
             ],
             'apellidos' => [
+                'bail',
                 'required',
                 'string',
+                'min:2',
                 'max:100',
-                "regex:/^[\pL\s'-]+$/u",
+                "regex:/^(?=.*\pL)[\pL\s'-]+$/u",
             ],
             'email' => [
+                'bail',
                 'required',
-                'email',
+                'email:rfc',
                 'max:100',
                 Rule::unique('users', 'email')
                     ->ignore($usuario?->id),
             ],
             'telefono' => [
+                'bail',
                 'required',
                 'string',
-                'min:7',
                 'max:20',
-                'regex:/^[0-9+\s()-]+$/',
+                'regex:/^\+?[0-9\s()-]+$/',
+                function (
+                    string $atributo,
+                    mixed $valor,
+                    \Closure $fallar
+                ): void {
+                    $cantidadDigitos = preg_match_all(
+                        '/\d/',
+                        (string) $valor
+                    );
+
+                    if (
+                        $cantidadDigitos < 7 ||
+                        $cantidadDigitos > 15
+                    ) {
+                        $fallar(
+                            'El teléfono debe contener entre 7 y 15 dígitos.'
+                        );
+                    }
+                },
             ],
             'documento' => [
+                'bail',
                 'required',
                 'string',
                 'min:5',
                 'max:30',
-                'regex:/^[A-Za-z0-9-]+$/',
+                'regex:/^(?=.*[A-Za-z0-9])[A-Za-z0-9-]+$/',
                 Rule::unique('users', 'documento')
                     ->ignore($usuario?->id),
             ],
@@ -308,66 +339,87 @@ class UserController extends Controller
                 ]),
             ],
             'password' => $reglaContrasena,
+            'password_confirmation' => [
+                $usuario ? 'nullable' : 'required',
+                'string',
+                'max:72',
+            ],
         ];
     }
 
     private function mensajesValidacion(): array
     {
         return [
-            'nombres.required' =>
-                'Ingresa los nombres.',
-            'nombres.regex' =>
-                'Los nombres solo pueden contener letras, espacios, apóstrofes o guiones.',
-            'nombres.max' =>
-                'Los nombres no pueden superar los 100 caracteres.',
+            'nombres.required' => 'Ingresa los nombres.',
+            'nombres.min' => 'Los nombres deben tener al menos 2 caracteres.',
+            'nombres.regex' => 'Los nombres solo pueden contener letras, espacios, apóstrofes o guiones.',
+            'nombres.max' => 'Los nombres no pueden superar los 100 caracteres.',
 
-            'apellidos.required' =>
-                'Ingresa los apellidos.',
-            'apellidos.regex' =>
-                'Los apellidos solo pueden contener letras, espacios, apóstrofes o guiones.',
-            'apellidos.max' =>
-                'Los apellidos no pueden superar los 100 caracteres.',
+            'apellidos.required' => 'Ingresa los apellidos.',
+            'apellidos.min' => 'Los apellidos deben tener al menos 2 caracteres.',
+            'apellidos.regex' => 'Los apellidos solo pueden contener letras, espacios, apóstrofes o guiones.',
+            'apellidos.max' => 'Los apellidos no pueden superar los 100 caracteres.',
 
-            'email.required' =>
-                'Ingresa el correo electrónico.',
-            'email.email' =>
-                'Escribe un correo electrónico válido.',
-            'email.unique' =>
-                'Este correo ya está registrado.',
+            'email.required' => 'Ingresa el correo electrónico.',
+            'email.email' => 'Escribe un correo electrónico válido.',
+            'email.unique' => 'Este correo ya está registrado.',
 
-            'telefono.required' =>
-                'Ingresa el número de teléfono.',
-            'telefono.min' =>
-                'El teléfono debe tener al menos 7 caracteres.',
-            'telefono.max' =>
-                'El teléfono no puede superar los 20 caracteres.',
-            'telefono.regex' =>
-                'El teléfono contiene caracteres no permitidos.',
+            'telefono.required' => 'Ingresa el número de teléfono.',
+            'telefono.max' => 'El teléfono no puede superar los 20 caracteres.',
+            'telefono.regex' => 'El teléfono contiene caracteres no permitidos.',
 
-            'documento.required' =>
-                'Ingresa el número de identificación.',
-            'documento.min' =>
-                'La identificación debe tener al menos 5 caracteres.',
-            'documento.regex' =>
-                'La identificación solo puede contener letras, números y guiones.',
-            'documento.unique' =>
-                'Este número de identificación ya está registrado.',
+            'documento.required' => 'Ingresa el número de identificación.',
+            'documento.min' => 'La identificación debe tener al menos 5 caracteres.',
+            'documento.max' => 'La identificación no puede superar los 30 caracteres.',
+            'documento.regex' => 'La identificación solo puede contener letras, números y guiones.',
+            'documento.unique' => 'Este número de identificación ya está registrado.',
 
-            'rol.required' =>
-                'Selecciona el tipo de usuario.',
-            'rol.in' =>
-                'El tipo de usuario seleccionado no es válido.',
+            'rol.required' => 'Selecciona el tipo de usuario.',
+            'rol.in' => 'El tipo de usuario seleccionado no es válido.',
 
-            'estado.required' =>
-                'Selecciona el estado de la cuenta.',
-            'estado.in' =>
-                'El estado seleccionado no es válido.',
+            'estado.required' => 'Selecciona el estado de la cuenta.',
+            'estado.in' => 'El estado seleccionado no es válido.',
 
-            'password.required' =>
-                'Ingresa una contraseña.',
-            'password.confirmed' =>
-                'Las contraseñas no coinciden.',
+            'password.required' => 'Ingresa una contraseña.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede superar los 72 caracteres.',
+            'password.letters' => 'La contraseña debe incluir al menos una letra.',
+            'password.numbers' => 'La contraseña debe incluir al menos un número.',
+            'password_confirmation.required' => 'Confirma la contraseña.',
+            'password_confirmation.max' => 'La confirmación no puede superar los 72 caracteres.',
         ];
+    }
+
+    private function normalizarEntrada(Request $request): void
+    {
+        $normalizarNombre = static fn (mixed $valor): string => preg_replace(
+            '/\s+/u',
+            ' ',
+            trim((string) $valor)
+        ) ?? '';
+
+        $request->merge([
+            'nombres' => $normalizarNombre(
+                $request->input('nombres')
+            ),
+            'apellidos' => $normalizarNombre(
+                $request->input('apellidos')
+            ),
+            'email' => mb_strtolower(
+                trim((string) $request->input('email'))
+            ),
+            'telefono' => trim(
+                (string) $request->input('telefono')
+            ),
+            'documento' => mb_strtoupper(
+                preg_replace(
+                    '/\s+/u',
+                    '',
+                    trim((string) $request->input('documento'))
+                ) ?? ''
+            ),
+        ]);
     }
 
     private function prepararDatos(

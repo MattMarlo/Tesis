@@ -4,7 +4,7 @@
 
 <link
     rel="stylesheet"
-    href="{{ asset('css/usuarios-formulario.css') }}"
+    href="{{ asset('css/usuarios-formulario.css') }}?v={{ filemtime(public_path('css/usuarios-formulario.css')) }}"
 >
 
 <form
@@ -24,6 +24,7 @@
     <div
         id="erroresServidorUsuario"
         data-errores='@json($errors->all())'
+        data-errores-campos='@json($errors->toArray())'
     ></div>
 
     <div class="encabezado-formulario-usuario">
@@ -62,6 +63,7 @@
                     type="text"
                     id="nombres"
                     name="nombres"
+                    minlength="2"
                     maxlength="100"
                     value="{{ old(
                         'nombres',
@@ -84,6 +86,7 @@
                     type="text"
                     id="apellidos"
                     name="apellidos"
+                    minlength="2"
                     maxlength="100"
                     value="{{ old(
                         'apellidos',
@@ -106,6 +109,7 @@
                     type="text"
                     id="documento"
                     name="documento"
+                    minlength="5"
                     maxlength="30"
                     value="{{ old(
                         'documento',
@@ -113,6 +117,8 @@
                     ) }}"
                     placeholder="Cédula o pasaporte"
                     autocomplete="off"
+                    autocapitalize="characters"
+                    spellcheck="false"
                     required
                 >
 
@@ -139,6 +145,7 @@
                     ) }}"
                     placeholder="Ejemplo: 0987654321"
                     autocomplete="tel"
+                    inputmode="tel"
                     required
                 >
 
@@ -304,6 +311,8 @@
                         type="password"
                         id="password"
                         name="password"
+                        minlength="8"
+                        maxlength="72"
                         autocomplete="new-password"
                         {{ $esEdicion ? '' : 'required' }}
                     >
@@ -335,6 +344,8 @@
                         type="password"
                         id="password_confirmation"
                         name="password_confirmation"
+                        minlength="8"
+                        maxlength="72"
                         autocomplete="new-password"
                         {{ $esEdicion ? '' : 'required' }}
                     >

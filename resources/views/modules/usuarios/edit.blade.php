@@ -10,5 +10,5 @@
 
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="{{ asset('js/usuarios-formulario.js') }}"></script>
+    <script src="{{ asset('js/usuarios-formulario.js') }}?v={{ filemtime(public_path('js/usuarios-formulario.js')) }}"></script>
 @endsection

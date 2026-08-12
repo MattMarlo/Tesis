@@ -1,48 +1,51 @@
-$(function () {
+document.addEventListener('DOMContentLoaded', function () {
     'use strict';
 
-    const $modal = $('#modalPasajeTren');
-    const $formulario = $('#formPasajeTren');
+    const modal = document.getElementById('modalPasajeTren');
+    const formulario = document.getElementById('formPasajeTren');
 
-    if (!$modal.length || !$formulario.length) {
+    if (!modal || !formulario) {
         return;
     }
 
     function campo(nombre) {
-        return $formulario.find(`[name="${nombre}"]`);
+        return formulario.querySelector(`[name="${nombre}"]`);
     }
 
-    function mostrarError($campo, mensaje) {
-        const id = String($campo.attr('id')) + 'Error';
-        let $error = $('#' + id);
+    function mostrarError(elemento, mensaje) {
+        const id = String(elemento.id) + 'Error';
+        let error = document.getElementById(id);
 
-        $campo
-            .toggleClass('input-error', Boolean(mensaje))
-            .attr('aria-invalid', mensaje ? 'true' : 'false');
+        elemento.classList.toggle('input-error', Boolean(mensaje));
+        elemento.setAttribute(
+            'aria-invalid',
+            mensaje ? 'true' : 'false'
+        );
 
-        if (!$error.length) {
-            $error = $('<small>', {
-                id,
-                class: 'mensaje-error-pasaje',
-                role: 'alert'
-            }).insertAfter($campo);
+        if (!error) {
+            error = document.createElement('small');
+            error.id = id;
+            error.className = 'mensaje-error-pasaje';
+            error.setAttribute('role', 'alert');
+            elemento.insertAdjacentElement('afterend', error);
         }
 
-        $error.text(mensaje).prop('hidden', !mensaje);
+        error.textContent = mensaje;
+        error.hidden = !mensaje;
 
         return !mensaje;
     }
 
     function validar() {
-        const estado = campo('estado').val();
-        const numero = $.trim(campo('numero_documento').val());
-        const asiento = $.trim(campo('asiento').val()).toUpperCase();
-        const referencia = $.trim(campo('referencia_individual').val());
-        const restricciones = $.trim(campo('restricciones').val());
-        const observaciones = $.trim(campo('observaciones').val());
+        const estado = campo('estado').value;
+        const numero = campo('numero_documento').value.trim();
+        const asiento = campo('asiento').value.trim().toUpperCase();
+        const referencia = campo('referencia_individual').value.trim();
+        const restricciones = campo('restricciones').value.trim();
+        const observaciones = campo('observaciones').value.trim();
         let valido = true;
 
-        campo('asiento').val(asiento);
+        campo('asiento').value = asiento;
 
         valido = mostrarError(
             campo('numero_documento'),
@@ -84,39 +87,52 @@ $(function () {
         return valido;
     }
 
-    $('.btn-gestionar-pasaje').on('click', function () {
-        const $boton = $(this);
+    document.querySelectorAll('.btn-gestionar-pasaje')
+        .forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                campo('pasaje_id').value = boton.dataset.id || '';
+                campo('numero_documento').value =
+                    boton.dataset.documento || '';
+                campo('asiento').value = boton.dataset.asiento || '';
+                campo('referencia_individual').value =
+                    boton.dataset.referencia || '';
+                campo('estado').value =
+                    boton.dataset.estado || 'pendiente';
+                campo('restricciones').value =
+                    boton.dataset.restricciones || '';
+                campo('observaciones').value =
+                    boton.dataset.observaciones || '';
 
-        campo('pasaje_id').val($boton.data('id'));
-        campo('numero_documento').val($boton.data('documento') || '');
-        campo('asiento').val($boton.data('asiento') || '');
-        campo('referencia_individual').val($boton.data('referencia') || '');
-        campo('estado').val($boton.data('estado') || 'pendiente');
-        campo('restricciones').val($boton.data('restricciones') || '');
-        campo('observaciones').val($boton.data('observaciones') || '');
-        $('#nombreViajeroPasaje').text($boton.data('nombre') || 'Viajero');
-        validar();
-    });
+                document.getElementById('nombreViajeroPasaje')
+                    .textContent = boton.dataset.nombre || 'Viajero';
 
-    $formulario.on(
-        'input change blur',
-        'input, select, textarea',
-        validar
-    );
+                validar();
+            });
+        });
 
-    $formulario.on('submit', function (evento) {
+    formulario.querySelectorAll('input, select, textarea')
+        .forEach(function (elemento) {
+            ['input', 'change', 'blur'].forEach(function (evento) {
+                elemento.addEventListener(evento, validar);
+            });
+        });
+
+    formulario.addEventListener('submit', function (evento) {
         if (validar()) {
             return;
         }
 
         evento.preventDefault();
-        $formulario.find('.input-error').first().trigger('focus');
+        formulario.querySelector('.input-error')?.focus();
     });
 
-    if ($modal.data('reabrir') === true || $modal.data('reabrir') === 'true') {
+    if (modal.dataset.reabrir === 'true') {
         const datos = window.pasajeTrenConError;
-        $('#nombreViajeroPasaje').text(datos?.nombre || 'Viajero');
-        bootstrap.Modal.getOrCreateInstance($modal.get(0)).show();
+
+        document.getElementById('nombreViajeroPasaje').textContent =
+            datos?.nombre || 'Viajero';
+
+        bootstrap.Modal.getOrCreateInstance(modal).show();
         validar();
     }
 });

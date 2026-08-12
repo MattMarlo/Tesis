@@ -899,24 +899,6 @@
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    class="boton-consultar-paquete"
-                    id="consultarPaquete"
-                    data-enlace="{{ $enlaceTelegram }}"
-                    data-paquete="{{ $destino->nombre_paquete }}"
-                >
-                    <i class="fa fa-telegram"></i>
-
-                    <span>
-                        <small>
-                            Consulta disponibilidad
-                        </small>
-
-                        Solicitar información
-                    </span>
-                </button>
-
                 <p class="mensaje-reserva">
                     <i class="fa fa-shield"></i>
                     Te enviaremos a nuestro asistente de Telegram.

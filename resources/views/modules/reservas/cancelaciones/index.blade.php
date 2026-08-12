@@ -36,42 +36,6 @@
 
             <div class="cancelacion-encabezado-acciones">
                 <a
-                    href="{{ route('reservas.riesgo') }}"
-                    class="
-                        btn-cancelacion
-                        advertencia
-                    "
-                >
-                    <i
-                        class="
-                            bi
-                            bi-exclamation-triangle
-                        "
-                    ></i>
-
-                    Reservas en riesgo
-                </a>
-
-                <a
-                    href="{{ route(
-                        'gastos-cancelacion.index'
-                    ) }}"
-                    class="
-                        btn-cancelacion
-                        outline-primary
-                    "
-                >
-                    <i
-                        class="
-                            bi
-                            bi-receipt
-                        "
-                    ></i>
-
-                    Gastos
-                </a>
-
-                <a
                     href="{{ route('reservas') }}"
                     class="btn-cancelacion secundario"
                 >

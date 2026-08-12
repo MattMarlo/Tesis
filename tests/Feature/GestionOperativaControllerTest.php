@@ -283,7 +283,27 @@ class GestionOperativaControllerTest extends TestCase
                     && data_get(
                         $request->data(),
                         'data.actividad'
-                    ) === 'Recorrido histórico por Lima';
+                    ) === 'Recorrido histórico por Lima'
+                    && data_get(
+                        $request->data(),
+                        'data.descripcion_actividad'
+                    ) === 'Recepción y traslado de los viajeros.'
+                    && data_get(
+                        $request->data(),
+                        'data.fecha_viaje'
+                    ) === '2026-12-01'
+                    && data_get(
+                        $request->data(),
+                        'data.fecha_actividad'
+                    ) === '2026-12-01'
+                    && data_get(
+                        $request->data(),
+                        'data.fecha_hora_inicio_actividad'
+                    ) === '2026-12-01T08:30:00-05:00'
+                    && data_get(
+                        $request->data(),
+                        'data.ubicacion_actividad'
+                    ) === 'Aeropuerto de Lima';
             }
         );
 

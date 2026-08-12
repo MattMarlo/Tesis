@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Log;
 
 class NotificacionGuiaN8nService
 {
+    public function __construct(
+        private readonly ProgramacionTareaContextualService $programacionService
+    ) {}
+
     public function enviar(
         GuiaReserva $guia,
         ?TareaOperacionViaje $tarea = null
@@ -29,6 +33,12 @@ class NotificacionGuiaN8nService
 
             $reserva = $guia->operacion?->reserva;
             $cliente = $reserva?->cliente;
+            $programacion = $tarea && $reserva
+                ? $this->programacionService->resolver(
+                    $tarea,
+                    $reserva
+                )
+                : null;
 
             $respuesta = Http::acceptJson()
                 ->timeout(10)
@@ -47,6 +57,8 @@ class NotificacionGuiaN8nService
                             'telefono' => $cliente?->telefono,
                             'destino' => $reserva?->destino?->ciudad_destino,
                             'nombre_paquete' => $reserva?->destino?->nombre_paquete,
+                            'fecha_viaje' => $reserva?->fecha_viaje
+                                ?->toDateString(),
                             'nombre_guia' => $guia->nombre_completo,
                             'empresa_guia' => $guia->empresa,
                             'telefono_guia' => $guia->telefono,
@@ -62,9 +74,22 @@ class NotificacionGuiaN8nService
                             'estado_guia' => $guia->estado,
                             'tarea_id' => $tarea?->id,
                             'actividad' => $tarea?->nombre,
+                            'descripcion_actividad' => $tarea?->descripcion,
                             'dia_actividad' => $tarea?->dia,
+                            'fecha_actividad' => $programacion
+                                ? data_get($programacion, 'fecha')
+                                    ?->toDateString()
+                                : null,
                             'hora_inicio_actividad' => $tarea?->hora_inicio,
                             'hora_fin_actividad' => $tarea?->hora_fin,
+                            'fecha_hora_inicio_actividad' => $programacion
+                                ? data_get($programacion, 'inicio')
+                                    ?->toIso8601String()
+                                : null,
+                            'fecha_hora_fin_actividad' => $programacion
+                                ? data_get($programacion, 'fin')
+                                    ?->toIso8601String()
+                                : null,
                             'ubicacion_actividad' => $tarea?->ubicacion,
                         ],
                     ]

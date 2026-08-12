@@ -73,6 +73,7 @@ El cuerpo que recibe n8n tiene esta estructura:
     "telefono": "0999999999",
     "destino": "Lima",
     "nombre_paquete": "Lima cultural",
+    "fecha_viaje": "2026-12-01",
     "nombre_guia": "Nombre del guía",
     "empresa_guia": "Operador local",
     "telefono_guia": "+51999999999",
@@ -87,9 +88,13 @@ El cuerpo que recibe n8n tiene esta estructura:
     "estado_guia": "confirmado",
     "tarea_id": 80,
     "actividad": "Recorrido histórico por Lima",
+    "descripcion_actividad": "Caminata por las dunas y tiempo para fotografías.",
     "dia_actividad": 1,
+    "fecha_actividad": "2026-12-01",
     "hora_inicio_actividad": "08:30",
     "hora_fin_actividad": "09:30",
+    "fecha_hora_inicio_actividad": "2026-12-01T08:30:00-05:00",
+    "fecha_hora_fin_actividad": "2026-12-01T09:30:00-05:00",
     "ubicacion_actividad": "Centro histórico"
   }
 }
@@ -108,7 +113,47 @@ Expresiones útiles para el nodo de WhatsApp:
 {{$json.body.data.fecha_hora_encuentro}}
 {{$json.body.data.punto_encuentro}}
 {{$json.body.data.actividad}}
+{{$json.body.data.descripcion_actividad}}
+{{$json.body.data.fecha_actividad}}
+{{$json.body.data.fecha_hora_inicio_actividad}}
 ```
+
+## Configurar el nodo Edit Fields
+
+Después del Webhook, agrega un nodo **Edit Fields (Set)** y elige
+**Manual Mapping**. Crea estos campos; la columna de la derecha debe
+estar en modo **Expression**:
+
+| Campo de salida | Expresión |
+| --- | --- |
+| `numero_reserva` | `{{$json.body.data.codigo_reserva}}` |
+| `nombre_cliente` | `{{$json.body.data.cliente}}` |
+| `correo_cliente` | `{{$json.body.data.email}}` |
+| `telefono_cliente` | `{{$json.body.data.telefono}}` |
+| `nombre_paquete` | `{{$json.body.data.nombre_paquete}}` |
+| `destino` | `{{$json.body.data.destino}}` |
+| `fecha_viaje` | `{{$json.body.data.fecha_viaje}}` |
+| `nombre_guia` | `{{$json.body.data.nombre_guia}}` |
+| `empresa_guia` | `{{$json.body.data.empresa_guia}}` |
+| `telefono_guia` | `{{$json.body.data.telefono_guia}}` |
+| `correo_guia` | `{{$json.body.data.correo_guia}}` |
+| `idiomas_guia` | `{{$json.body.data.idiomas_guia}}` |
+| `estado_guia` | `{{$json.body.data.estado_guia}}` |
+| `ciudad_servicio` | `{{$json.body.data.ciudad_servicio}}` |
+| `punto_encuentro` | `{{$json.body.data.punto_encuentro}}` |
+| `fecha_hora_encuentro` | `{{$json.body.data.fecha_hora_encuentro}}` |
+| `actividad` | `{{$json.body.data.actividad}}` |
+| `descripcion_actividad` | `{{$json.body.data.descripcion_actividad}}` |
+| `fecha_actividad` | `{{$json.body.data.fecha_actividad}}` |
+| `hora_inicio_actividad` | `{{$json.body.data.hora_inicio_actividad}}` |
+| `hora_fin_actividad` | `{{$json.body.data.hora_fin_actividad}}` |
+| `ubicacion_actividad` | `{{$json.body.data.ubicacion_actividad}}` |
+
+Mantén activada la opción **Keep Only Set Fields** si quieres que el
+nodo siguiente reciba únicamente estos nombres simplificados. Después
+de Edit Fields, las expresiones del nodo de WhatsApp serán, por ejemplo,
+`{{$json.telefono_cliente}}`, `{{$json.nombre_guia}}` y
+`{{$json.descripcion_actividad}}`.
 
 ## Mensaje sugerido
 

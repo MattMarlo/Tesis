@@ -318,13 +318,21 @@
     font-size: 0.7rem;
 }
 
-.origen-whatsapp {
+.origen-whatsapp,
+.origen-landing-page {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    color: #128c4a;
     font-size: 0.75rem;
     font-weight: 700;
+}
+
+.origen-whatsapp {
+    color: #128c4a;
+}
+
+.origen-landing-page {
+    color: #0d5a95;
 }
 
 .estado-prerreserva {

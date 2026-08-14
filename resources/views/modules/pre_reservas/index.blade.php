@@ -249,6 +249,11 @@
                                         <i class="bi bi-whatsapp"></i>
                                         WhatsApp
                                     </span>
+                                @elseif ($pre->origen === 'landing_page')
+                                    <span class="origen-landing-page">
+                                        <i class="bi bi-globe2"></i>
+                                        Landing page
+                                    </span>
                                 @else
                                     <span class="origen-telegram">
                                         <i class="bi bi-telegram"></i>

@@ -545,7 +545,7 @@
                 </div>
 
                 <div class="valor-nosotros">
-                    <i class="fa fa-paper-plane"></i>
+                    <i class="fa fa-whatsapp"></i>
 
                     <div>
                         <strong>Comunicación directa</strong>

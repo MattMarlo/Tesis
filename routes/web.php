@@ -15,6 +15,7 @@ use App\Http\Controllers\HabitacionAlojamientoController;
 use App\Http\Controllers\OperacionViajeController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PreReservaController;
+use App\Http\Controllers\PrerreservaPublicaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReservaGrupalController;
@@ -93,6 +94,16 @@ Route::get(
         'detalle',
     ]
 )->name('paquetes.detalle');
+
+Route::post(
+    '/paquetes/{destino:slug}/prerreserva',
+    [
+        PrerreservaPublicaController::class,
+        'store',
+    ]
+)
+    ->middleware('throttle:10,1')
+    ->name('paquetes.prerreserva.store');
 
 /*
 |--------------------------------------------------------------------------

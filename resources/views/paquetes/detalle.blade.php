@@ -11,7 +11,7 @@
 @section('styles')
     <link
         rel="stylesheet"
-        href="{{ asset('css/paquete-detalle.css') }}"
+        href="{{ asset('css/paquete-detalle.css') }}?v={{ filemtime(public_path('css/paquete-detalle.css')) }}"
     >
 @endsection
 
@@ -29,6 +29,15 @@
     $enlaceTelegram =
         'https://t.me/AsistentePassionTravelVJBot?text='
         . urlencode($mensajeTelegram);
+
+    $cuposDisponibles = $destino->cupos_disponibles;
+
+    $prerreservaDisponible =
+        $cuposDisponibles > 0
+        && (
+            ! $destino->fecha_salida
+            || $destino->fecha_salida->gte(today())
+        );
 @endphp
 
 {{-- Navegación secundaria --}}
@@ -899,9 +908,38 @@
                     </div>
                 </div>
 
+                @if($prerreservaDisponible)
+                    <button
+                        type="button"
+                        class="boton-consultar-paquete"
+                        id="irFormularioPrerreserva"
+                    >
+                        <i class="fa fa-calendar-check-o"></i>
+
+                        <span>
+                            <small>Sin pago inmediato</small>
+                            Prerreservar ahora
+                        </span>
+                    </button>
+                @else
+                    <button
+                        type="button"
+                        class="boton-consultar-paquete boton-prerreserva-deshabilitado"
+                        disabled
+                    >
+                        <i class="fa fa-calendar-times-o"></i>
+
+                        <span>
+                            <small>No disponible</small>
+                            Prerreserva cerrada
+                        </span>
+                    </button>
+                @endif
+
                 <p class="mensaje-reserva">
                     <i class="fa fa-shield"></i>
-                    Te enviaremos a nuestro asistente de Telegram.
+                    Tus datos se utilizarán únicamente para gestionar
+                    tu solicitud.
                 </p>
 
             </div>
@@ -946,12 +984,18 @@
         </aside>
 
     </div>
+
+    @if($prerreservaDisponible)
+        @include(
+            'paquetes.partials.formulario-prerreserva'
+        )
+    @endif
 </section>
 
 @endsection
 
 @section('scripts')
     <script
-        src="{{ asset('js/paquete-detalle.js') }}"
+        src="{{ asset('js/paquete-detalle.js') }}?v={{ filemtime(public_path('js/paquete-detalle.js')) }}"
     ></script>
 @endsection

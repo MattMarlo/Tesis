@@ -863,6 +863,464 @@
     color: #31945c;
 }
 
+.boton-prerreserva-deshabilitado,
+.boton-prerreserva-deshabilitado:hover {
+    color: #8794a2;
+    background: #e8edf1;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* =========================================================
+   FORMULARIO PÚBLICO DE PRERRESERVA
+========================================================= */
+
+.contenedor-prerreserva-publica {
+    margin-top: 36px;
+}
+
+.prerreserva-publica {
+    display: grid;
+    grid-template-columns: minmax(290px, 0.82fr) minmax(0, 1.18fr);
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: 22px;
+    box-shadow: var(--sombra);
+    scroll-margin-top: 165px;
+    overflow: hidden;
+}
+
+.prerreserva-presentacion {
+    position: relative;
+    padding: 42px 38px;
+    color: var(--blanco);
+    background:
+        radial-gradient(
+            circle at 100% 0,
+            rgba(212, 163, 34, 0.26),
+            transparent 34%
+        ),
+        linear-gradient(
+            145deg,
+            var(--azul-principal),
+            var(--azul-secundario)
+        );
+}
+
+.prerreserva-etiqueta {
+    color: #f3c64f;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.prerreserva-presentacion h2 {
+    margin: 7px 0 13px;
+    color: var(--blanco);
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    line-height: 1.2;
+}
+
+.prerreserva-presentacion > p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 13px;
+    line-height: 1.75;
+}
+
+.prerreserva-paquete-resumen {
+    margin-top: 28px;
+    padding: 17px;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.17);
+    border-radius: 15px;
+}
+
+.prerreserva-resumen-icono {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--azul-principal);
+    background: #f3c64f;
+    border-radius: 11px;
+}
+
+.prerreserva-paquete-resumen > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.prerreserva-paquete-resumen small {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+.prerreserva-paquete-resumen strong {
+    margin: 2px 0 5px;
+    overflow: hidden;
+    color: var(--blanco);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.prerreserva-paquete-resumen div > span {
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 10px;
+}
+
+.prerreserva-paquete-resumen div > span i {
+    margin-right: 4px;
+    color: #f3c64f;
+}
+
+.prerreserva-beneficios {
+    margin: 25px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 11px;
+    list-style: none;
+}
+
+.prerreserva-beneficios li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.prerreserva-beneficios i {
+    width: 19px;
+    height: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--azul-principal);
+    background: #f3c64f;
+    border-radius: 50%;
+    font-size: 8px;
+}
+
+.prerreserva-formulario-contenedor {
+    min-width: 0;
+    padding: 38px 40px;
+}
+
+.campo-prerreserva {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.campo-prerreserva > label,
+.campo-prerreserva > legend {
+    margin-bottom: 8px;
+    display: block;
+    color: var(--texto);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.opciones-tipo-reserva {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.opcion-tipo-reserva {
+    position: relative;
+    min-width: 0;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    background: #f8fafb;
+    border: 1px solid var(--borde);
+    border-radius: 13px;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.opcion-tipo-reserva:hover,
+.opcion-tipo-reserva.seleccionada {
+    background: #edf5fa;
+    border-color: var(--azul-secundario);
+    box-shadow: 0 5px 15px rgba(5, 44, 83, 0.08);
+}
+
+.opcion-tipo-reserva input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.opcion-tipo-icono {
+    width: 37px;
+    height: 37px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--azul-principal);
+    background: #e5f0f6;
+    border-radius: 10px;
+}
+
+.opcion-tipo-reserva > span:last-child {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.opcion-tipo-reserva strong {
+    color: var(--azul-principal);
+    font-size: 12px;
+}
+
+.opcion-tipo-reserva small {
+    color: var(--texto-suave);
+    font-size: 9px;
+}
+
+.opcion-tipo-reserva.opcion-deshabilitada {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.campo-cantidad-grupo {
+    margin-top: 17px;
+}
+
+.rejilla-campos-prerreserva {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 17px 14px;
+}
+
+.campo-ancho-completo {
+    grid-column: 1 / -1;
+}
+
+.control-con-icono {
+    position: relative;
+}
+
+.control-con-icono > i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    color: #7890a4;
+    font-size: 13px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.control-con-icono input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px 0 39px;
+    color: var(--texto);
+    background: #f8fafb;
+    border: 1px solid var(--borde);
+    border-radius: 11px;
+    outline: none;
+    font-family: inherit;
+    font-size: 12px;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.control-con-icono input:focus {
+    background: var(--blanco);
+    border-color: var(--azul-secundario);
+    box-shadow: 0 0 0 3px rgba(13, 104, 160, 0.1);
+}
+
+.control-con-icono input::placeholder {
+    color: #a4afb9;
+}
+
+.campo-con-error .control-con-icono input,
+.campo-con-error .opciones-tipo-reserva {
+    border-color: #d94d4d;
+}
+
+.ayuda-campo {
+    margin-top: 5px;
+    display: block;
+    color: var(--texto-suave);
+    font-size: 9px;
+}
+
+.mensaje-error-campo {
+    min-height: 15px;
+    margin-top: 4px;
+    display: block;
+    color: #c43f3f;
+    font-size: 9px;
+    line-height: 1.35;
+}
+
+.campo-tipo-reserva > .mensaje-error-campo {
+    margin-bottom: -15px;
+}
+
+.aceptacion-prerreserva {
+    margin-top: 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: var(--texto-suave);
+    cursor: pointer;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.aceptacion-prerreserva input {
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+    accent-color: var(--azul-principal);
+}
+
+.aceptacion-prerreserva a {
+    color: var(--azul-secundario);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.error-aceptacion,
+.error-general-prerreserva {
+    min-height: 0;
+    margin-left: 25px;
+}
+
+.boton-enviar-prerreserva {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 8px;
+    padding: 9px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    color: var(--blanco);
+    background: var(--azul-principal);
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(5, 44, 83, 0.18);
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.boton-enviar-prerreserva:hover:not(:disabled) {
+    background: var(--azul-secundario);
+    transform: translateY(-2px);
+}
+
+.boton-enviar-prerreserva:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.boton-enviar-prerreserva > i {
+    font-size: 18px;
+}
+
+.boton-enviar-prerreserva > span {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.boton-enviar-prerreserva strong {
+    font-size: 12px;
+}
+
+.boton-enviar-prerreserva small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 8px;
+    text-transform: uppercase;
+}
+
+.prerreserva-confirmacion {
+    min-height: 100%;
+    padding: 35px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.prerreserva-confirmacion[hidden] {
+    display: none;
+}
+
+.prerreserva-confirmacion > span {
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blanco);
+    background: #2d9a5d;
+    border-radius: 50%;
+    box-shadow: 0 10px 25px rgba(45, 154, 93, 0.22);
+    font-size: 25px;
+}
+
+.prerreserva-confirmacion h3 {
+    margin: 18px 0 7px;
+    color: var(--azul-principal);
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+}
+
+.prerreserva-confirmacion p {
+    max-width: 430px;
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.prerreserva-confirmacion > small {
+    margin-top: 15px;
+    padding: 9px 13px;
+    color: var(--texto-suave);
+    background: #edf5f9;
+    border-radius: 9px;
+    font-size: 10px;
+}
+
+.prerreserva-confirmacion > small strong {
+    color: var(--azul-principal);
+}
+
 /* =========================================================
    AYUDA
 ========================================================= */
@@ -993,6 +1451,15 @@
         grid-column: 1 / -1;
         margin-top: 0;
     }
+
+    .prerreserva-publica {
+        grid-template-columns: 1fr;
+    }
+
+    .prerreserva-presentacion,
+    .prerreserva-formulario-contenedor {
+        padding: 32px;
+    }
 }
 
 @media (max-width: 650px) {
@@ -1084,6 +1551,32 @@
     }
 
     .volver-paquetes {
+        grid-column: auto;
+    }
+
+    .contenedor-prerreserva-publica {
+        margin-top: 24px;
+    }
+
+    .prerreserva-publica {
+        border-radius: 16px;
+    }
+
+    .prerreserva-presentacion,
+    .prerreserva-formulario-contenedor {
+        padding: 25px 20px;
+    }
+
+    .prerreserva-presentacion h2 {
+        font-size: 27px;
+    }
+
+    .opciones-tipo-reserva,
+    .rejilla-campos-prerreserva {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-ancho-completo {
         grid-column: auto;
     }
 }

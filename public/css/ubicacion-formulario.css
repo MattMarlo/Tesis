@@ -1,0 +1,346 @@
+.formulario-ubicacion {
+    max-width: 980px;
+    margin: 0 auto;
+    color: #25364a;
+}
+
+.encabezado-ubicacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 26px;
+}
+
+.encabezado-ubicacion > div > span {
+    display: block;
+    margin-bottom: 7px;
+    color: #0c5ca8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.encabezado-ubicacion h2,
+.titulo-tarjeta-ubicacion h3 {
+    margin: 0;
+    color: #172337;
+    font-weight: 700;
+}
+
+.encabezado-ubicacion h2 {
+    font-size: clamp(1.55rem, 3vw, 2rem);
+}
+
+.encabezado-ubicacion p,
+.titulo-tarjeta-ubicacion p {
+    margin: 7px 0 0;
+    color: #6a7b8e;
+    line-height: 1.6;
+}
+
+.icono-ubicacion {
+    display: inline-flex;
+    width: 62px;
+    height: 62px;
+    flex: 0 0 62px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    background: #e7f1fb;
+    color: #0c5ca8;
+    font-size: 1.65rem;
+}
+
+.tarjeta-ubicacion {
+    padding: clamp(22px, 4vw, 36px);
+    border: 1px solid #e3eaf1;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 12px 35px rgba(28, 54, 83, 0.07);
+}
+
+.titulo-tarjeta-ubicacion {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 23px;
+    border-bottom: 1px solid #e9eef3;
+}
+
+.titulo-tarjeta-ubicacion > span {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #0c5ca8;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.titulo-tarjeta-ubicacion h3 {
+    font-size: 1.1rem;
+}
+
+.titulo-tarjeta-ubicacion p {
+    font-size: 0.9rem;
+}
+
+.selector-mapa-ubicacion {
+    margin-top: 28px;
+    overflow: hidden;
+    border: 1px solid #dbe4ed;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.instruccion-mapa-ubicacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 15px 18px;
+}
+
+.instruccion-mapa-ubicacion > div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #65778b;
+    font-size: 0.84rem;
+}
+
+.instruccion-mapa-ubicacion i {
+    color: #0c5ca8;
+    font-size: 1.2rem;
+}
+
+.instruccion-mapa-ubicacion strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #26384c;
+    font-size: 0.9rem;
+}
+
+.coordenadas-ubicacion {
+    flex: 0 0 auto;
+    padding: 7px 11px;
+    border-radius: 9px;
+    background: #e9eef4;
+    color: #718196;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.coordenadas-ubicacion.seleccionadas {
+    background: #e4f3ea;
+    color: #247044;
+}
+
+#selectorMapaUbicacion {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    overflow: hidden;
+    border-top: 1px solid #dbe4ed;
+    background: #e7edf3;
+    cursor: crosshair;
+}
+
+/* Respaldo esencial si la hoja externa de Leaflet tarda en cargar. */
+#selectorMapaUbicacion .leaflet-pane,
+#selectorMapaUbicacion .leaflet-tile,
+#selectorMapaUbicacion .leaflet-marker-icon,
+#selectorMapaUbicacion .leaflet-marker-shadow,
+#selectorMapaUbicacion .leaflet-tile-container,
+#selectorMapaUbicacion .leaflet-pane > svg,
+#selectorMapaUbicacion .leaflet-pane > canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#selectorMapaUbicacion .leaflet-map-pane,
+#selectorMapaUbicacion .leaflet-tile-pane,
+#selectorMapaUbicacion .leaflet-marker-pane,
+#selectorMapaUbicacion .leaflet-shadow-pane {
+    width: 100%;
+    height: 100%;
+}
+
+#selectorMapaUbicacion .leaflet-tile {
+    max-width: none !important;
+    max-height: none !important;
+    user-select: none;
+}
+
+.estado-direccion-mapa {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 43px;
+    padding: 10px 16px;
+    border-top: 1px solid #dbe4ed;
+    color: #65778b;
+    font-size: 0.8rem;
+}
+
+.estado-direccion-mapa i {
+    color: #0c5ca8;
+}
+
+.estado-direccion-mapa.cargando {
+    color: #8a6611;
+    background: #fff9e8;
+}
+
+.estado-direccion-mapa.completado {
+    color: #247044;
+    background: #eff9f3;
+}
+
+.estado-direccion-mapa.error {
+    color: #a33b43;
+    background: #fff2f3;
+}
+
+.selector-mapa-ubicacion .error-mapa {
+    margin: 10px 18px;
+}
+
+.rejilla-ubicacion {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 28px;
+}
+
+.campo-ubicacion {
+    min-width: 0;
+}
+
+.campo-completo {
+    grid-column: 1 / -1;
+}
+
+.campo-ubicacion label {
+    display: block;
+    margin-bottom: 9px;
+    color: #26384c;
+    font-size: 0.91rem;
+    font-weight: 700;
+}
+
+.campo-ubicacion label span {
+    color: #d23b42;
+}
+
+.campo-ubicacion input {
+    width: 100%;
+    height: 50px;
+    padding: 0 15px;
+    border: 1px solid #cfdae5;
+    border-radius: 11px;
+    outline: none;
+    background: #fbfcfe;
+    color: #18283a;
+    font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo-ubicacion input:focus {
+    border-color: #0c5ca8;
+    box-shadow: 0 0 0 4px rgba(12, 92, 168, 0.1);
+}
+
+.campo-ubicacion small {
+    display: block;
+    margin-top: 8px;
+    color: #77879a;
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.campo-ubicacion .error-ubicacion {
+    margin: 7px 0 0;
+    color: #c92d39;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.acciones-ubicacion {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.boton-vista-publica,
+.boton-guardar-ubicacion {
+    display: inline-flex;
+    min-height: 47px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 11px 20px;
+    border-radius: 11px;
+    font-size: 0.91rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.boton-vista-publica {
+    border: 1px solid #cfdae5;
+    background: #fff;
+    color: #50657b;
+}
+
+.boton-guardar-ubicacion {
+    border: 0;
+    background: #0c5ca8;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(12, 92, 168, 0.2);
+}
+
+.boton-vista-publica:hover,
+.boton-guardar-ubicacion:hover {
+    transform: translateY(-1px);
+}
+
+.boton-vista-publica:hover {
+    color: #0c5ca8;
+}
+
+@media (max-width: 700px) {
+    .instruccion-mapa-ubicacion {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    #selectorMapaUbicacion {
+        height: 340px;
+    }
+
+    .rejilla-ubicacion {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-completo {
+        grid-column: auto;
+    }
+
+    .acciones-ubicacion {
+        flex-direction: column-reverse;
+    }
+
+    .boton-vista-publica,
+    .boton-guardar-ubicacion {
+        width: 100%;
+    }
+}

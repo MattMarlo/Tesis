@@ -249,6 +249,19 @@
             @auth
                 @if(auth()->user()->isAdmin())
                     <a
+                        href="{{ route('ubicacion.edit') }}"
+                        class="nav-link {{
+                            request()->routeIs('ubicacion.*')
+                                ? 'active'
+                                : ''
+                        }}"
+                        title="Ubicación"
+                    >
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>Ubicación</span>
+                    </a>
+
+                    <a
                         href="{{ route('usuarios') }}"
                         class="nav-link {{
                             request()->routeIs('usuarios*')

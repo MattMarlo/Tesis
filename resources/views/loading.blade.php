@@ -921,7 +921,7 @@
 
                 <span class="subtitulo-seccion">Visítanos</span>
 
-                <h2>Estamos ubicados en Salcedo</h2>
+                <h2>Estamos ubicados en {{ $ubicacion->localidad }}</h2>
 
                 <p>
                     Visita nuestra agencia o comunícate con nosotros para
@@ -934,7 +934,7 @@
 
                     <div>
                         <span>Dirección</span>
-                        <strong>Salcedo, Cotopaxi, Ecuador</strong>
+                        <strong>{{ $ubicacion->direccion }}</strong>
                     </div>
                 </div>
 
@@ -989,7 +989,7 @@
                 <div class="botones-ubicacion">
 
                     <a
-                        href="https://maps.app.goo.gl/BcySuXQbntDDHPZY8"
+                        href="{{ $ubicacion->urlMapa() }}"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="boton-secundario"
@@ -1007,8 +1007,8 @@
             <div class="mapa-contenedor">
 
                 <iframe
-                    src="https://www.google.com/maps?q=Passion+Travel,+Salcedo,+Cotopaxi,+Ecuador&output=embed"
-                    title="Ubicación de Passion Travel en Salcedo"
+                    src="{{ $ubicacion->urlMapaEmbebido() }}"
+                    title="Ubicación de Passion Travel en {{ $ubicacion->localidad }}"
                     loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade"
                     allowfullscreen

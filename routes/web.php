@@ -23,6 +23,7 @@ use App\Http\Controllers\ReservaIndividualController;
 use App\Http\Controllers\ReservaRiesgoController;
 use App\Http\Controllers\SolicitudCancelacionController;
 use App\Http\Controllers\TestimonioController;
+use App\Http\Controllers\UbicacionLandingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViajeroReservaController;
 use App\Http\Controllers\VueloReservaController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\GestionPasajesTrenController;
 use App\Models\Destino;
 use App\Models\Reserva;
 use App\Models\Testimonio;
+use App\Models\UbicacionLanding;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -70,13 +72,16 @@ Route::get('/', function () {
         Testimonio::publicados()
             ->get();
 
+    $ubicacion = UbicacionLanding::actual();
+
     return view(
         'loading',
         compact(
             'destinos',
             'destacados',
             'categorias',
-            'testimonios'
+            'testimonios',
+            'ubicacion'
         )
     );
 });
@@ -1110,6 +1115,28 @@ Route::middleware('auth')
                         'ingresosMensuales',
                     ]
                 )->name('ingresos');
+            });
+
+        /*
+         * Ubicación de la página pública.
+         */
+        Route::prefix('ubicacion')
+            ->group(function () {
+                Route::get(
+                    '/',
+                    [
+                        UbicacionLandingController::class,
+                        'edit',
+                    ]
+                )->name('ubicacion.edit');
+
+                Route::put(
+                    '/',
+                    [
+                        UbicacionLandingController::class,
+                        'update',
+                    ]
+                )->name('ubicacion.update');
             });
 
         /*
